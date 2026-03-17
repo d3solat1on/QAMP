@@ -3,6 +3,7 @@ using MusicPlayer_by_d3solat1on.Dialogs;
 using MusicPlayer_by_d3solat1on.Models;
 using MusicPlayer_by_d3solat1on.Services;
 using MusicPlayer_by_d3solat1on.ViewModels;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,8 +19,7 @@ namespace MusicPlayer_by_d3solat1on
 {
     public partial class MainWindow : Window
     {
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attr, ref int attrValue, int attrSize);
+
         private readonly DispatcherTimer _memoryCleanupTimer;
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => Instance;
@@ -30,48 +30,44 @@ namespace MusicPlayer_by_d3solat1on
         public MainWindow()
         {
             InitializeComponent();
-            var hWnd = new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
-            uint attribute = 20; // DWMWA_USE_IMMERSIVE_DARK_MODE
-            int useImmersiveDarkMode = 1;
-            DwmSetWindowAttribute(hWnd, attribute, ref useImmersiveDarkMode, sizeof(int));
+
+            // 1. Сначала загружаем данные (включая громкость)
+            StorageService.Instance.LoadLibrary();
+
+            // 2. Устанавливаем DataContext (теперь UI сам подхватит данные из MusicLibrary)
             DataContext = MusicLibrary.Instance;
-            TracksDataGrid.ItemsSource = Library.CurrentTracks;
-            PlaylistsListBox.ItemsSource = Library.Playlists;
-
-
+            // TracksDataGrid.ItemsSource = Library.CurrentTracks;
+            // PlaylistsListBox.ItemsSource = Library.Playlists;
+            // Подписки на события плеера
             Player.TrackChanged += OnTrackChanged;
             Player.PositionChanged += OnPositionChanged;
             Player.PlaybackPaused += OnPlaybackPaused;
             Player.VolumeChanged += OnVolumeChanged;
             Player.DurationChanged += OnDurationChanged;
 
-            VolumeSlider.Value = Player.Volume * 100;
+            // 3. Устанавливаем громкость СТРОГО после загрузки библиотеки
+            double savedVolume = StorageService.Instance.Volume * 100;
+            VolumeSlider.Value = savedVolume;
 
-            Library.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(MusicLibrary.CurrentTracks))
-                    TracksDataGrid.ItemsSource = Library.CurrentTracks;
-            };
             if (VolumePercentage != null)
             {
-                VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
+                VolumePercentage.Text = $"{savedVolume:F0}%";
             }
 
-            StorageService.Instance.LoadLibrary();
-
-
+            // Сохранение при закрытии
             Closed += (s, e) => StorageService.Instance.SaveLibrary();
-            VolumeSlider.Value = 50;
+
+            // Таймер очистки памяти (оставляем, раз он помогает держать 700МБ)
             _memoryCleanupTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMinutes(5)
             };
             _memoryCleanupTimer.Tick += (s, e) =>
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-                };
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            };
             _memoryCleanupTimer.Start();
         }
 
@@ -723,6 +719,13 @@ namespace MusicPlayer_by_d3solat1on
                 WindowState = WindowState.Maximized;
             }
         }
+
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            // Сохраняем всё при закрытии
+            StorageService.Instance.SaveLibrary();
+        }
+
 
     }
 }

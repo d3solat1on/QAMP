@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace MusicPlayer_by_d3solat1on.Models
 {
@@ -8,6 +9,8 @@ namespace MusicPlayer_by_d3solat1on.Models
     {
         private string? _name;
         private string? _description;
+        
+        [JsonIgnore]
         private byte[]? _coverImage;
 
         private ObservableCollection<Track> _tracks;

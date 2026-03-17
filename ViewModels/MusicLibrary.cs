@@ -20,20 +20,35 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
         public ObservableCollection<Playlist> Playlists { get; set; } = [];
         public const string FavoritesName = "Избранное";
 
+        // Сохраняем ID последнего выбранного плейлиста
+        private int _lastPlaylistId = -1;
+
         private MusicLibrary()
         {
             Playlists ??= [];
+
+            // Убеждаемся что "Избранное" существует
+            EnsureFavoritesPlaylist();
+
+            // Не выбираем плейлист здесь! Это будет сделано после загрузки
+            OnPropertyChanged(nameof(Playlists));
+        }
+
+        private void EnsureFavoritesPlaylist()
+        {
             if (!Playlists.Any(p => p.Name == FavoritesName))
             {
-                // Сначала получаем данные картинки из ресурсов
                 byte[]? defaultImageData = null;
                 try
                 {
                     var uri = new Uri("pack://application:,,,/Resources/favorites_cover.png");
                     var info = Application.GetResourceStream(uri);
-                    using var ms = new System.IO.MemoryStream();
-                    info.Stream.CopyTo(ms);
-                    defaultImageData = ms.ToArray();
+                    if (info != null)
+                    {
+                        using var ms = new System.IO.MemoryStream();
+                        info.Stream.CopyTo(ms);
+                        defaultImageData = ms.ToArray();
+                    }
                 }
                 catch { /* Если файл не найден, останется null */ }
 
@@ -47,45 +62,60 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
                     Tracks = []
                 });
             }
-            if (Playlists.Count > 0)
-            {
-                CurrentPlaylist = Playlists[0];
-            }
-            OnPropertyChanged(nameof(Playlists));
         }
 
         // Текущий выбранный плейлист
         private Playlist? _currentPlaylist;
-        public Playlist CurrentPlaylist
+        public Playlist? CurrentPlaylist
         {
             get => _currentPlaylist;
             set
             {
-                _currentPlaylist = value;
-                OnPropertyChanged(nameof(CurrentPlaylist));
-                OnPropertyChanged(nameof(CurrentTracks)); // обновляем список треков
+                if (_currentPlaylist != value)
+                {
+                    _currentPlaylist = value;
+
+                    // Сохраняем ID выбранного плейлиста
+                    if (value != null)
+                    {
+                        _lastPlaylistId = value.Id;
+                        // Можно сразу сохранять в StorageService
+                        StorageService.Instance.SaveLastPlaylistId(value.Id);
+                    }
+
+                    OnPropertyChanged(nameof(CurrentPlaylist));
+                    OnPropertyChanged(nameof(CurrentTracks));
+                }
             }
         }
 
-        // Треки текущего плейлиста (или все треки, если плейлист не выбран)
-        public ObservableCollection<Track> CurrentTracks =>
-            CurrentPlaylist != null ? CurrentPlaylist.Tracks : AllTracks;
+        // Треки текущего плейлиста
+        public ObservableCollection<Track> CurrentTracks
+        {
+            get => CurrentPlaylist?.Tracks ?? AllTracks;
+        }
 
         // Последний проигранный трек
         private Track? _lastPlayedTrack;
-        public Track LastPlayedTrack
+        public Track? LastPlayedTrack
         {
             get => _lastPlayedTrack;
             set
             {
                 _lastPlayedTrack = value;
                 OnPropertyChanged(nameof(LastPlayedTrack));
+
+                // Сохраняем путь последнего трека
+                if (value != null)
+                {
+                    StorageService.Instance.SaveLastTrackPath(value.Path);
+                }
             }
         }
 
         // Текущий проигрываемый трек
         private Track? _currentTrack;
-        public Track CurrentTrack
+        public Track? CurrentTrack
         {
             get => _currentTrack;
             set
@@ -95,44 +125,37 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
             }
         }
 
-        public void LoadPlaylists(IEnumerable<Playlist> loadedPlaylists)
+        public void LoadPlaylists(IEnumerable<Playlist> loadedPlaylists, int lastPlaylistId = -1, string? lastTrackPath = null)
+{
+    // Очищаем и заполняем
+    Playlists.Clear();
+    if (loadedPlaylists != null)
+    {
+        foreach (var playlist in loadedPlaylists)
         {
-            Playlists.Clear();
-            foreach (var playlist in loadedPlaylists)
-                Playlists.Add(playlist);
-
-            // Убедимся, что "Избранное" существует
-            if (!Playlists.Any(p => p.Name == "Избранное"))
-            {
-                byte[]? defaultImageData = null;
-                try
-                {
-                    var uri = new Uri("pack://application:,,,/Resources/favorites_cover.png");
-                    var info = Application.GetResourceStream(uri);
-                    using var ms = new System.IO.MemoryStream();
-                    info.Stream.CopyTo(ms);
-                    defaultImageData = ms.ToArray();
-                }
-                catch { /* Если файл не найден, останется null */ }
-                Playlists.Insert(0, new Playlist
-                {
-                    Id = 1,
-                    Name = "Избранное",
-                    Description = "Ваши любимые треки",
-                    CreatedDate = DateTime.Now,
-                    CoverImage = defaultImageData,
-                    Tracks = []
-                });
-            }
-            GC.Collect(2, GCCollectionMode.Forced, true);
-            GC.WaitForPendingFinalizers();
+            Playlists.Add(playlist);
         }
+    }
+
+    // Проверяем "Избранное"
+    EnsureFavoritesPlaylist();
+
+    // Восстанавливаем выбор
+    if (lastPlaylistId >= 0)
+        CurrentPlaylist = Playlists.FirstOrDefault(p => p.Id == lastPlaylistId);
+    
+    CurrentPlaylist ??= Playlists.FirstOrDefault(p => p.Name == FavoritesName);
+
+    // КРИТИЧНО: Уведомляем UI, что списки обновились
+    OnPropertyChanged(nameof(Playlists));
+    OnPropertyChanged(nameof(CurrentTracks));
+}
         public void AddTracks(string[] filePaths)
         {
             var tracks = TagReader.ReadTracksFromFiles(filePaths);
             foreach (var track in tracks)
             {
-                if (track != null)
+                if (track != null && !AllTracks.Any(t => t.Path == track.Path))
                     AllTracks.Add(track);
             }
         }
@@ -142,43 +165,29 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
             var tracks = TagReader.ReadTracksFromFolder(folderPath);
             foreach (var track in tracks)
             {
-                if (track != null)
+                if (track != null && !AllTracks.Any(t => t.Path == track.Path))
                     AllTracks.Add(track);
             }
         }
 
         public Playlist CreatePlaylist(string name, string description = "", byte[]? coverImage = null)
         {
+            // Генерируем уникальный ID
+            int newId = Playlists.Count > 0 ? Playlists.Max(p => p.Id) + 1 : 1;
+
             var playlist = new Playlist
             {
-                Id = Playlists.Count + 1,
+                Id = newId,
                 Name = name,
                 Description = description,
                 CoverImage = coverImage,
-                CreatedDate = DateTime.Now
+                CreatedDate = DateTime.Now,
+                Tracks = []
             };
 
             Playlists.Add(playlist);
             return playlist;
         }
-
-        public static void AddTrackToPlaylist(Playlist playlist, Track track)
-        {
-            if (!playlist.Tracks.Contains(track))
-                playlist.Tracks.Add(track);
-        }
-
-        public static void RemoveTrackFromPlaylist(Playlist playlist, Track track)
-        {
-            playlist.Tracks.Remove(track);
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
 
         public void AddTracksToCurrentPlaylist(string[] filePaths)
         {
@@ -199,12 +208,14 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
                     {
                         AllTracks.Add(track);
                     }
-                    // Добавляем в текущий плейлист
-                    CurrentPlaylist.Tracks.Add(track);
+                    // Добавляем в текущий плейлист (проверяем дубликаты)
+                    if (!CurrentPlaylist.Tracks.Any(t => t.Path == track.Path))
+                    {
+                        CurrentPlaylist.Tracks.Add(track);
+                    }
                 }
             }
 
-            // Обновляем отображение
             OnPropertyChanged(nameof(CurrentTracks));
         }
 
@@ -226,16 +237,26 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
                     {
                         AllTracks.Add(track);
                     }
-                    CurrentPlaylist.Tracks.Add(track);
+                    if (!CurrentPlaylist.Tracks.Any(t => t.Path == track.Path))
+                    {
+                        CurrentPlaylist.Tracks.Add(track);
+                    }
                 }
             }
 
             OnPropertyChanged(nameof(CurrentTracks));
         }
+
         public void UpdatePlaylistView()
         {
             OnPropertyChanged(nameof(CurrentPlaylist));
             OnPropertyChanged(nameof(CurrentTracks));
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

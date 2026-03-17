@@ -780,10 +780,11 @@
                                                          Foreground="White"
                                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                          SelectionChanged="PlaylistsListBox_SelectionChanged"
-                                                         Height="400">
+                                                         Height="400"
+                                                         ItemsSource="{Binding Playlists}">
                                                         <ListBox.ItemTemplate>
                                                                 <DataTemplate>
-
+                                                                
                                                                         <Border BorderBrush="#333333"
                                                                                 BorderThickness="0,0,0,1"
                                                                                 Padding="8"
@@ -952,7 +953,8 @@
                                                   IsReadOnly="True"
                                                   SelectionMode="Single"
                                                   MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
-                                                  GridLinesVisibility="None">
+                                                  GridLinesVisibility="None"
+                                                  >
                                                 <DataGrid.Resources>
                                                         <Style TargetType="{x:Type DataGridRowHeader}">
                                                                 <Setter Property="Background"
