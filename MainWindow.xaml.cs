@@ -218,13 +218,13 @@ namespace MusicPlayer_by_d3solat1on
             }
         }
 
-        private void StopButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.Stop();
-            PlayPauseButton.Content = "▶";
-            ProgressSlider.Value = 0;
-            CurrentTimeText.Text = "0:00";
-        }
+        // private void StopButton_Click(object sender, RoutedEventArgs e)
+        // {
+        //     Player.Stop();
+        //     PlayPauseButton.Content = "▶";
+        //     ProgressSlider.Value = 0;
+        //     CurrentTimeText.Text = "0:00";
+        // }
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
@@ -318,35 +318,6 @@ namespace MusicPlayer_by_d3solat1on
             }
         }
 
-        private static void AddFiles()
-        {
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "Выберите музыкальные файлы",
-                Filter = "Музыкальные файлы|*.mp3;*.wav;*.flac;*.m4a|Все файлы|*.*",
-                Multiselect = true
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                Library.AddTracks(openFileDialog.FileNames);
-            }
-        }
-
-        private static void AddFolder()
-        {
-            var folderDialog = new OpenFolderDialog
-            {
-                Title = "Выберите папку с музыкой"
-            };
-
-            if (folderDialog.ShowDialog() == true)
-            {
-                Library.AddTracksFromFolder(folderDialog.FolderName);
-            }
-        }
-
-
         private void CreatePlaylistButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new CreatePlaylistDialog
@@ -396,68 +367,45 @@ namespace MusicPlayer_by_d3solat1on
             MusicLibrary.Instance.UpdatePlaylistView();
         }
 
+        private void PlayTrackMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (TracksDataGrid.SelectedItem is Track selectedTrack)
+            {
+                Player.PlayTrack(selectedTrack);
+            }
+        }
         private void RemoveFromPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (Library.CurrentPlaylist == null)
+           if (Library.CurrentPlaylist == null)
             {
-                MessageBox.Show("Сначала выберите плейлист", "Информация",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                NotificationWindow.Show("Сначала выберите плейлист", Application.Current.MainWindow);
                 return;
             }
 
             if (TracksDataGrid.SelectedItem is Track selectedTrack)
             {
-                var result = MessageBox.Show(
+                 var result = NotificationWindow.Show(
                     $"Удалить трек \"{selectedTrack.Name}\" из плейлиста \"{Library.CurrentPlaylist.Name}\"?",
-                    "Подтверждение",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
+                    this,
+                    NotificationMode.Confirm);
 
-                if (result == MessageBoxResult.Yes)
+                if (result == true)
                 {
                     Library.CurrentPlaylist.Tracks.Remove(selectedTrack);
                 }
             }
         }
 
-        private void RemoveFromLibrary_Click(object sender, RoutedEventArgs e)
-        {
-            if (TracksDataGrid.SelectedItem is Track selectedTrack)
-            {
-                var result = MessageBox.Show(
-                    $"Удалить трек \"{selectedTrack.Name}\" из библиотеки?\n" +
-                    "Это удалит его из всех плейлистов!",
-                    "Подтверждение",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
-                {
-
-                    foreach (var playlist in Library.Playlists)
-                    {
-                        playlist.Tracks.Remove(selectedTrack);
-                    }
-
-
-                    Library.AllTracks.Remove(selectedTrack);
-                }
-            }
-        }
         private void RemovePlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
             {
-                // Вызываем твое кастомное окно
-                string message = $"Удалить плейлист \"{selectedPlaylist.Name}\"?\n" +
-                                 "Треки в плейлисте останутся в библиотеке.";
-
+                
                 if (NotificationWindow.Show($"Удалить плейлист \"{selectedPlaylist.Name}\"?", this, NotificationMode.Confirm) == true)
                 {
                     Library.Playlists.Remove(selectedPlaylist);
                     // Если нужно, вызываем обновление интерфейса
                     MusicLibrary.Instance.UpdatePlaylistView();
-
                 }
             }
         }
@@ -558,10 +506,7 @@ namespace MusicPlayer_by_d3solat1on
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
             {
-                // Вызываем твое кастомное окно
-                string message = $"Удалить плейлист \"{selectedPlaylist.Name}\"?\n" +
-                                 "Треки в плейлисте останутся в библиотеке.";
-
+                
                 if (NotificationWindow.Show($"Удалить плейлист \"{selectedPlaylist.Name}\"?", this, NotificationMode.Confirm) == true)
                 {
                     Library.Playlists.Remove(selectedPlaylist);

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using MusicPlayer_by_d3solat1on.Dialogs;
 using MusicPlayer_by_d3solat1on.Models;
 using MusicPlayer_by_d3solat1on.Services;
 
@@ -126,30 +127,30 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
         }
 
         public void LoadPlaylists(IEnumerable<Playlist> loadedPlaylists, int lastPlaylistId = -1, string? lastTrackPath = null)
-{
-    // Очищаем и заполняем
-    Playlists.Clear();
-    if (loadedPlaylists != null)
-    {
-        foreach (var playlist in loadedPlaylists)
         {
-            Playlists.Add(playlist);
+            // Очищаем и заполняем
+            Playlists.Clear();
+            if (loadedPlaylists != null)
+            {
+                foreach (var playlist in loadedPlaylists)
+                {
+                    Playlists.Add(playlist);
+                }
+            }
+
+            // Проверяем "Избранное"
+            EnsureFavoritesPlaylist();
+
+            // Восстанавливаем выбор
+            if (lastPlaylistId >= 0)
+                CurrentPlaylist = Playlists.FirstOrDefault(p => p.Id == lastPlaylistId);
+
+            CurrentPlaylist ??= Playlists.FirstOrDefault(p => p.Name == FavoritesName);
+
+            // КРИТИЧНО: Уведомляем UI, что списки обновились
+            OnPropertyChanged(nameof(Playlists));
+            OnPropertyChanged(nameof(CurrentTracks));
         }
-    }
-
-    // Проверяем "Избранное"
-    EnsureFavoritesPlaylist();
-
-    // Восстанавливаем выбор
-    if (lastPlaylistId >= 0)
-        CurrentPlaylist = Playlists.FirstOrDefault(p => p.Id == lastPlaylistId);
-    
-    CurrentPlaylist ??= Playlists.FirstOrDefault(p => p.Name == FavoritesName);
-
-    // КРИТИЧНО: Уведомляем UI, что списки обновились
-    OnPropertyChanged(nameof(Playlists));
-    OnPropertyChanged(nameof(CurrentTracks));
-}
         public void AddTracks(string[] filePaths)
         {
             var tracks = TagReader.ReadTracksFromFiles(filePaths);
@@ -193,8 +194,7 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
         {
             if (CurrentPlaylist == null)
             {
-                MessageBox.Show("Сначала выберите плейлист", "Информация",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                NotificationWindow.Show("Сначала выберите плейлист", Application.Current.MainWindow);
                 return;
             }
 
@@ -223,8 +223,7 @@ namespace MusicPlayer_by_d3solat1on.ViewModels
         {
             if (CurrentPlaylist == null)
             {
-                MessageBox.Show("Сначала выберите плейлист", "Информация",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                NotificationWindow.Show("Сначала выберите плейлист", Application.Current.MainWindow);
                 return;
             }
 

@@ -23,7 +23,7 @@ namespace MusicPlayer_by_d3solat1on.Services
         // NAudio компоненты
         private WaveStream _audioFileReader;
         private WaveOutEvent _waveOutEvent;
-        private DispatcherTimer _positionTimer;
+        private DispatcherTimer? _positionTimer;
 
         // События
         public event Action<Track> TrackChanged;
@@ -238,6 +238,7 @@ namespace MusicPlayer_by_d3solat1on.Services
             // Самый важный момент для очистки после тяжелых треков
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            
         }
         public void Seek(double seconds)
         {

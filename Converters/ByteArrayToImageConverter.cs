@@ -8,7 +8,7 @@ namespace MusicPlayer_by_d3solat1on.Converters
 {
     public class ByteArrayToImageConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is byte[] bytes && bytes.Length > 0)
             {
@@ -19,7 +19,7 @@ namespace MusicPlayer_by_d3solat1on.Converters
 
                 // ОГРАНИЧИВАЕМ РАЗМЕР ДЕКОДИРОВАНИЯ
                 // Это заставит WPF не грузить картинку целиком, а взять только 300 пикселей
-                image.DecodePixelWidth = 300;
+                image.DecodePixelWidth = 225;
 
                 image.StreamSource = ms;
                 image.EndInit();

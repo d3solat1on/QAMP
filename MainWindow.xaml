@@ -30,18 +30,19 @@
                 <converters:PercentOfConverter x:Key="PercentOfConverter"/>
 
 
+
                 <Style x:Key="TitleBarButtonStyle"
-                                TargetType="Button">
+                       TargetType="Button">
                         <Setter Property="Background"
-                                        Value="Transparent"/>
+                                Value="Transparent"/>
                         <Setter Property="BorderThickness"
-                                        Value="0"/>
+                                Value="0"/>
                         <Setter Property="Width"
-                                        Value="40"/>
+                                Value="40"/>
                         <Setter Property="Height"
-                                        Value="30"/>
+                                Value="30"/>
                         <Setter Property="Cursor"
-                                        Value="Hand"/>
+                                Value="Hand"/>
                         <Setter Property="Template">
                                 <Setter.Value>
                                         <ControlTemplate TargetType="Button">
@@ -51,14 +52,14 @@
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver"
-                                                                        Value="True">
+                                                                 Value="True">
                                                                 <Setter Property="Background"
-                                                                                Value="#333333"/>
+                                                                        Value="#333333"/>
                                                         </Trigger>
                                                         <Trigger Property="IsPressed"
-                                                                        Value="True">
+                                                                 Value="True">
                                                                 <Setter Property="Background"
-                                                                                Value="#404040"/>
+                                                                        Value="#404040"/>
                                                         </Trigger>
                                                 </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -67,13 +68,13 @@
                 </Style>
 
                 <Style x:Key="CloseButtonStyle"
-                                TargetType="Button"
-                                BasedOn="{StaticResource TitleBarButtonStyle}">
+                       TargetType="Button"
+                       BasedOn="{StaticResource TitleBarButtonStyle}">
                         <Style.Triggers>
                                 <Trigger Property="IsMouseOver"
-                                                Value="True">
+                                         Value="True">
                                         <Setter Property="Background"
-                                                        Value="#C42B1C"/>
+                                                Value="#C42B1C"/>
                                 </Trigger>
                         </Style.Triggers>
                 </Style>
@@ -454,6 +455,9 @@
                                 </Setter.Value>
                         </Setter>
                 </Style>
+
+
+
         </Window.Resources>
 
         <Grid>
@@ -486,25 +490,25 @@
                                         Style="{StaticResource TitleBarButtonStyle}"
                                         Click="Minimize_Click">
                                         <Image Source="/Resources/minimize.png"
-                                                        Width="12"/>
+                                               Width="12"/>
                                 </Button>
-                                
+
                                 <Button x:Name="BtnMaximize"
                                         Style="{StaticResource TitleBarButtonStyle}"
                                         Click="Maximize_Click">
                                         <Image Source="/Resources/maximize.png"
-                                                        Width="12"/>
+                                               Width="12"/>
                                 </Button>
                                 <Button x:Name="BtnClose"
                                         Style="{StaticResource CloseButtonStyle}"
                                         Click="Close_Click">
                                         <Image Source="/Resources/close.png"
-                                                        Width="12"/>
+                                               Width="12"/>
                                 </Button>
                         </StackPanel>
                 </Grid>
                 <DockPanel Grid.Row="1"
-                                LastChildFill="True">
+                           LastChildFill="True">
                         <!-- Нижняя панель с управлением -->
                         <Border DockPanel.Dock="Bottom"
                                 Height="100"
@@ -784,7 +788,7 @@
                                                          ItemsSource="{Binding Playlists}">
                                                         <ListBox.ItemTemplate>
                                                                 <DataTemplate>
-                                                                
+
                                                                         <Border BorderBrush="#333333"
                                                                                 BorderThickness="0,0,0,1"
                                                                                 Padding="8"
@@ -862,9 +866,34 @@
                                                                                                 Grid.Column="1"
                                                                                                 Margin="8,0,0,0"
                                                                                                 VerticalAlignment="Center">
+
                                                                                                 <StackPanel.ContextMenu>
                                                                                                         <ContextMenu Background="#282828"
-                                                                                                                     Foreground="White">
+                                                                                                                     Foreground="White"
+                                                                                                                     BorderBrush="#444">
+                                                                                                                <ContextMenu.Resources>
+                                                                                                                        <Style TargetType="MenuItem">
+                                                                                                                                <Setter Property="Template">
+                                                                                                                                        <Setter.Value>
+                                                                                                                                                <ControlTemplate TargetType="MenuItem">
+                                                                                                                                                        <Border x:Name="Border"
+                                                                                                                                                                Background="Transparent"
+                                                                                                                                                                Padding="15,7">
+                                                                                                                                                                <ContentPresenter ContentSource="Header"/>
+                                                                                                                                                        </Border>
+                                                                                                                                                        <ControlTemplate.Triggers>
+                                                                                                                                                                <Trigger Property="IsHighlighted"
+                                                                                                                                                                         Value="True">
+                                                                                                                                                                        <Setter TargetName="Border"
+                                                                                                                                                                                Property="Border.Background"
+                                                                                                                                                                                Value="#3E3E3E"/>
+                                                                                                                                                                </Trigger>
+                                                                                                                                                        </ControlTemplate.Triggers>
+                                                                                                                                                </ControlTemplate>
+                                                                                                                                        </Setter.Value>
+                                                                                                                                </Setter>
+                                                                                                                        </Style>
+                                                                                                                </ContextMenu.Resources>
                                                                                                                 <MenuItem Header="Редактировать"
                                                                                                                           Click="EditPlaylist_Click"/>
                                                                                                                 <Separator Background="#444"/>
@@ -873,15 +902,18 @@
                                                                                                                           Foreground="Red"/>
                                                                                                         </ContextMenu>
                                                                                                 </StackPanel.ContextMenu>
+
                                                                                                 <TextBlock Text="{Binding Name}"
                                                                                                            FontWeight="Bold"
                                                                                                            FontSize="14"
                                                                                                            Foreground="White"
                                                                                                            TextTrimming="CharacterEllipsis"/>
+
                                                                                                 <TextBlock Text="{Binding TrackCount, StringFormat='{}{0} треков'}"
                                                                                                            FontSize="10"
                                                                                                            Foreground="#999999"
                                                                                                            Margin="0,2,0,0"/>
+
                                                                                         </StackPanel>
                                                                                 </Grid>
                                                                         </Border>
@@ -905,6 +937,7 @@
                                                 BorderBrush="#333"
                                                 BorderThickness="0,0,0,1">
                                                 <StackPanel Orientation="Horizontal">
+
                                                         <Border Width="150"
                                                                 Height="150"
                                                                 CornerRadius="4"
@@ -953,8 +986,44 @@
                                                   IsReadOnly="True"
                                                   SelectionMode="Single"
                                                   MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
-                                                  GridLinesVisibility="None"
-                                                  >
+                                                  GridLinesVisibility="None">
+                                                <DataGrid.ContextMenu>
+                                                        <ContextMenu Background="#282828">
+                                                                <ContextMenu.Resources>
+                                                                        <!-- Этот стиль убирает резервирование места под иконку -->
+                                                                        <Style TargetType="{x:Type MenuItem}">
+                                                                                <Setter Property="Foreground"
+                                                                                        Value="White"/>
+                                                                                <Setter Property="Template">
+                                                                                        <Setter.Value>
+                                                                                                <ControlTemplate TargetType="{x:Type MenuItem}">
+                                                                                                        <Grid Background="{TemplateBinding Background}">
+                                                                                                                <!-- ContentPresenter выводит текст Header -->
+                                                                                                                <!-- Убираем Margin слева, чтобы текст не прижимался к краю -->
+                                                                                                                <ContentPresenter ContentSource="Header"
+                                                                                                                                  Margin="10,5,10,5"
+                                                                                                                                  HorizontalAlignment="Left"/>
+                                                                                                        </Grid>
+                                                                                                        <ControlTemplate.Triggers>
+                                                                                                                <!-- Цвет при наведении мыши -->
+                                                                                                                <Trigger Property="IsHighlighted"
+                                                                                                                         Value="True">
+                                                                                                                        <Setter Property="Background"
+                                                                                                                                Value="#3E3E3E"/>
+                                                                                                                </Trigger>
+                                                                                                        </ControlTemplate.Triggers>
+                                                                                                </ControlTemplate>
+                                                                                        </Setter.Value>
+                                                                                </Setter>
+                                                                        </Style>
+                                                                </ContextMenu.Resources>
+
+                                                                <MenuItem Header="Воспроизвести"
+                                                                          Click="PlayTrackMenuItem_Click"/>
+                                                                <MenuItem Header="Удалить из плейлиста"
+                                                                          Click="RemoveFromPlaylist_Click"/>
+                                                        </ContextMenu>
+                                                </DataGrid.ContextMenu>
                                                 <DataGrid.Resources>
                                                         <Style TargetType="{x:Type DataGridRowHeader}">
                                                                 <Setter Property="Background"
@@ -1034,6 +1103,7 @@
                                                         </Style>
                                                 </DataGrid.Resources>
                                                 <DataGrid.Columns>
+
                                                         <!-- В DataGrid.Columns, перед колонкой NAME -->
                                                         <DataGridTemplateColumn Header=""
                                                                                 Width="75">
