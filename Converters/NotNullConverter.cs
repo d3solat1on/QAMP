@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace MusicPlayer_by_d3solat1on.Converters
+namespace QAMP.Converters
 {
     public class NotNullConverter : IValueConverter
     {

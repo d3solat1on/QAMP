@@ -5,15 +5,15 @@ using System.Windows.Threading;
 using NAudio.Wave;
 using TagLib;
 using NAudio.Flac;
-using MusicPlayer_by_d3solat1on.Models;
-using MusicPlayer_by_d3solat1on.ViewModels;
-using MusicPlayer_by_d3solat1on.Dialogs;
+using QAMP.Models;
+using QAMP.ViewModels;
+using QAMP.Dialogs;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace MusicPlayer_by_d3solat1on.Services
+namespace QAMP.Services
 {
     public class PlayerService : IDisposable
     {

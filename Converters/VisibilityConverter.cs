@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows;
 
-namespace MusicPlayer_by_d3solat1on.Converters;
+namespace QAMP.Converters;
 public class UniversalVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

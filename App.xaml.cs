@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Threading;
 
-namespace MusicPlayer_by_d3solat1on
+namespace QAMP
 {
     public partial class App : Application
     {

@@ -1,10 +1,10 @@
 using System;
 using System.IO;
-using MusicPlayer_by_d3solat1on.Models;
+using QAMP.Models;
 using TagLib;
 using File = System.IO.File;
 
-namespace MusicPlayer_by_d3solat1on.Services
+namespace QAMP.Services
 {
     public class TagReader
     {

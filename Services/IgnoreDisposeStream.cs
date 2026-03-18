@@ -1,4 +1,4 @@
-namespace MusicPlayer_by_d3solat1on.Services
+namespace QAMP.Services
 {
     class IgnoreDisposeStream(System.IO.Stream innerStream) : System.IO.Stream
     {

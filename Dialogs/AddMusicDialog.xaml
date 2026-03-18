@@ -1,4 +1,4 @@
-<Window x:Class="MusicPlayer_by_d3solat1on.Dialogs.AddMusicDialog"
+<Window x:Class="QAMP.Dialogs.AddMusicDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="AddMusicDialog" Height="300" Width="400">

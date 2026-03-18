@@ -1,8 +1,8 @@
 using Microsoft.Win32;
-using MusicPlayer_by_d3solat1on.Dialogs;
-using MusicPlayer_by_d3solat1on.Models;
-using MusicPlayer_by_d3solat1on.Services;
-using MusicPlayer_by_d3solat1on.ViewModels;
+using QAMP.Dialogs;
+using QAMP.Models;
+using QAMP.Services;
+using QAMP.ViewModels;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -11,11 +11,11 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using static MusicPlayer_by_d3solat1on.Dialogs.NotificationWindow;
-using static MusicPlayer_by_d3solat1on.Services.PlayerService;
-using Track = MusicPlayer_by_d3solat1on.Models.Track;
+using static QAMP.Dialogs.NotificationWindow;
+using static QAMP.Services.PlayerService;
+using Track = QAMP.Models.Track;
 
-namespace MusicPlayer_by_d3solat1on
+namespace QAMP
 {
     public partial class MainWindow : Window
     {

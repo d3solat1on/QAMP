@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace MusicPlayer_by_d3solat1on.Converters
+namespace QAMP.Converters
 {
     public class LargeTrackImageConverter : IValueConverter
     {

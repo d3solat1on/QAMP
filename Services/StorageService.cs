@@ -3,10 +3,10 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using MusicPlayer_by_d3solat1on.Models;
-using MusicPlayer_by_d3solat1on.ViewModels;
+using QAMP.Models;
+using QAMP.ViewModels;
 
-namespace MusicPlayer_by_d3solat1on.Services
+namespace QAMP.Services
 {
     public class StorageService
     {
@@ -25,7 +25,7 @@ namespace MusicPlayer_by_d3solat1on.Services
         {
             _appDataPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "MusicPlayer_by_d3solat1on");
+                "QAMP");
 
             if (!Directory.Exists(_appDataPath))
                 Directory.CreateDirectory(_appDataPath);

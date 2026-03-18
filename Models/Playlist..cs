@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace MusicPlayer_by_d3solat1on.Models
+namespace QAMP.Models
 {
     public class Playlist : INotifyPropertyChanged
     {

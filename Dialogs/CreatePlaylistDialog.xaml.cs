@@ -4,9 +4,9 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using MusicPlayer_by_d3solat1on.Models;
+using QAMP.Models;
 
-namespace MusicPlayer_by_d3solat1on.Dialogs
+namespace QAMP.Dialogs
 {
     public partial class CreatePlaylistDialog : Window
     {

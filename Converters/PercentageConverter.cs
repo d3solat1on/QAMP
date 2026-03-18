@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace MusicPlayer_by_d3solat1on.Converters
+namespace QAMP.Converters
 {
     public class PercentageConverter : MarkupExtension, IValueConverter
     {

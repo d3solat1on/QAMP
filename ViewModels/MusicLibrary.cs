@@ -3,11 +3,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
-using MusicPlayer_by_d3solat1on.Dialogs;
-using MusicPlayer_by_d3solat1on.Models;
-using MusicPlayer_by_d3solat1on.Services;
+using QAMP.Dialogs;
+using QAMP.Models;
+using QAMP.Services;
 
-namespace MusicPlayer_by_d3solat1on.ViewModels
+namespace QAMP.ViewModels
 {
     public class MusicLibrary : INotifyPropertyChanged
     {

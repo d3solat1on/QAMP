@@ -1,5 +1,5 @@
 using System.Windows;
-namespace MusicPlayer_by_d3solat1on.Dialogs
+namespace QAMP.Dialogs
 {
     public partial class NotificationWindow : Window
     {

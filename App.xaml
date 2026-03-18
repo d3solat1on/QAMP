@@ -1,7 +1,7 @@
-﻿<Application x:Class="MusicPlayer_by_d3solat1on.App"
+﻿<Application x:Class="QAMP.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MusicPlayer_by_d3solat1on"
+             xmlns:local="clr-namespace:QAMP"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         

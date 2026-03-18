@@ -1,9 +1,9 @@
 using System.IO;
 using System.Windows;
 using Microsoft.Win32;
-using MusicPlayer_by_d3solat1on.Models;
-using MusicPlayer_by_d3solat1on.ViewModels;
-namespace MusicPlayer_by_d3solat1on.Dialogs
+using QAMP.Models;
+using QAMP.ViewModels;
+namespace QAMP.Dialogs
 {
 
     public partial class EditPlaylistDialog : Window

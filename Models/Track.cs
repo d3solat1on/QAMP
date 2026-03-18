@@ -4,7 +4,7 @@ using System.Data;
 using Newtonsoft.Json;
 using TagLib; // для INotifyPropertyChanged
 
-namespace MusicPlayer_by_d3solat1on.Models
+namespace QAMP.Models
 {
     public class Track : INotifyPropertyChanged
     {
