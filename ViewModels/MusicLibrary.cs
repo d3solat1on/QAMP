@@ -101,8 +101,7 @@ namespace QAMP.ViewModels
             if (PlayerService.Instance.IsShuffleEnabled)
             {
                 var remainingTracks = PlaybackQueue.Where(t => t != track).OrderBy(x => Guid.NewGuid()).ToList();
-                PlayerService.Instance.ShuffledQueue = new List<Track> { track };
-                PlayerService.Instance.ShuffledQueue.AddRange(remainingTracks);
+                PlayerService.Instance.ShuffledQueue = [track, .. remainingTracks];
                 System.Diagnostics.Debug.WriteLine($"ShuffledQueue обновлена, Count: {PlayerService.Instance.ShuffledQueue.Count}");
             }
 
@@ -127,8 +126,7 @@ namespace QAMP.ViewModels
                     .OrderBy(x => Guid.NewGuid())
                     .ToList();
 
-                PlayerService.Instance.ShuffledQueue = new List<Track> { currentTrack };
-                PlayerService.Instance.ShuffledQueue.AddRange(remainingTracks);
+                PlayerService.Instance.ShuffledQueue = [currentTrack, .. remainingTracks];
 
                 System.Diagnostics.Debug.WriteLine($"New ShuffledQueue count: {PlayerService.Instance.ShuffledQueue.Count}");
             }

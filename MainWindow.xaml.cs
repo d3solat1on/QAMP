@@ -282,8 +282,7 @@ namespace QAMP
                         .OrderBy(x => Guid.NewGuid())
                         .ToList();
 
-                    _playService.ShuffledQueue = new List<Track> { Player.CurrentTrack };
-                    _playService.ShuffledQueue.AddRange(remainingTracks);
+                    _playService.ShuffledQueue = [Player.CurrentTrack, .. remainingTracks];
 
                     // Нет предыдущего трека, так как текущий в начале
                     if (_playService.RepeatMode == RepeatMode.RepeatAll && _playService.ShuffledQueue.Count > 1)
@@ -353,8 +352,7 @@ namespace QAMP
                         .OrderBy(x => Guid.NewGuid())
                         .ToList();
 
-                    _playService.ShuffledQueue = new List<Track> { Player.CurrentTrack };
-                    _playService.ShuffledQueue.AddRange(remainingTracks);
+                    _playService.ShuffledQueue = [Player.CurrentTrack, .. remainingTracks];
 
                     // Если есть следующий трек
                     if (_playService.ShuffledQueue.Count > 1)
@@ -747,8 +745,7 @@ namespace QAMP
         {
             if (TracksDataGrid.SelectedItem is Track selectedTrack)
             {
-                var currentPlaylist = PlaylistsListBox.SelectedItem as Playlist;
-                if (currentPlaylist != null)
+                if (PlaylistsListBox.SelectedItem is Playlist currentPlaylist)
                 {
                     MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, currentPlaylist);
                     UpdateNextTrackUI();
@@ -908,6 +905,67 @@ namespace QAMP
             }
         }
 
+        private void PinPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.DataContext is Playlist selectedPlaylist)
+            {
+                // Переключаем состояние pin
+                bool newPinnedState = !selectedPlaylist.IsPinned;
+
+                // Сохраняем в БД
+                DatabaseService.UpdatePlaylistPinnedState(selectedPlaylist.Id, newPinnedState);
+
+                // Обновляем модель
+                selectedPlaylist.IsPinned = newPinnedState;
+
+                // Перезагружаем плейлисты для сортировки
+                MusicLibrary.Instance.RefreshPlaylists();
+
+                // Восстанавливаем выделение
+                PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists
+                    .FirstOrDefault(p => p.Id == selectedPlaylist.Id);
+
+                var message = newPinnedState ? "Плейлист закреплен" : "Плейлист откреплен";
+                System.Diagnostics.Debug.WriteLine($"=== {message} ===");
+                NotificationWindow.Show(message, this);
+            }
+        }
+
+        private void Playlist_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Проверяем, нажата ли левая кнопка мыши и не находимся ли мы уже в режиме перетаскивания
+            if (e.LeftButton == MouseButtonState.Pressed && sender is ListBoxItem item)
+            {
+                DragDrop.DoDragDrop(item, item.DataContext, DragDropEffects.Move);
+            }
+        }
+
+        private void Playlist_Drop(object sender, DragEventArgs e)
+        {
+            // Тот, кого тянем
+            var droppedPlaylist = e.Data.GetData(typeof(Playlist)) as Playlist;
+            // Тот, на кого бросили
+            var targetPlaylist = (sender as ListBoxItem)?.DataContext as Playlist;
+
+            if (droppedPlaylist != null && targetPlaylist != null && droppedPlaylist != targetPlaylist)
+            {
+                var playlists = MusicLibrary.Instance.Playlists;
+
+                int oldIndex = playlists.IndexOf(droppedPlaylist);
+                int newIndex = playlists.IndexOf(targetPlaylist);
+
+                if (oldIndex != -1 && newIndex != -1)
+                {
+                    // Перемещаем в ObservableCollection (UI обновится сам)
+                    playlists.Move(oldIndex, newIndex);
+
+                    // Сохраняем новый порядок в БД
+
+                    DatabaseService service = new();
+                    service.SavePlaylistsOrder();
+                }
+            }
+        }
         private void EditPlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem menuItem && menuItem.DataContext is Playlist selectedPlaylist)
@@ -939,12 +997,14 @@ namespace QAMP
                 {
                     var infoWindow = new Windows.ShowTrackInfo(fullInfo)
                     {
-                        Owner = this 
+                        Owner = this
                     };
                     infoWindow.ShowDialog();
                 }
             }
         }
+
+
 
         private void FavoriteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1073,6 +1133,230 @@ namespace QAMP
             System.Diagnostics.Debug.WriteLine("=== КОНЕЦ ЗАГРУЗКИ ПЛЕЙЛИСТОВ ===");
         }
 
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            PerformSearch();
+        }
+
+        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                PerformSearch();
+                e.Handled = true;
+            }
+        }
+
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            SearchBox.Clear();
+
+            // Восстанавливаем отображение текущего плейлиста
+            if (PlaylistsListBox.SelectedItem is Playlist currentPlaylist)
+            {
+                TracksDataGrid.ItemsSource = currentPlaylist.Tracks;
+                CurrentPlaylistNameText.Text = currentPlaylist.Name;
+                CurrentPlaylistDescriptionText.Text = currentPlaylist.Description;
+                CurrentTracksCountText.Text = $"{currentPlaylist.Tracks.Count} треков";
+            }
+        }
+
+        private void PerformSearch()
+        {
+            string searchQuery = SearchBox.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                NotificationWindow.Show("Введите текст для поиска", this);
+                return;
+            }
+
+            // Ищем во всех плейлистах
+            var searchResults = new List<Track>();
+            string searchLower = searchQuery.ToLower();
+
+            foreach (var playlist in MusicLibrary.Instance.Playlists)
+            {
+                foreach (var track in playlist.Tracks)
+                {
+                    // Ищем по названию трека, исполнителю, альбому и жанру
+                    if (track.Name.ToLower().Contains(searchLower) ||
+                        track.Executor.ToLower().Contains(searchLower) ||
+                        track.Album.ToLower().Contains(searchLower) ||
+                        track.Genre.ToLower().Contains(searchLower))
+                    {
+                        // Добавляем только если уникален (не дублируем)
+                        if (!searchResults.Any(t => t.Path == track.Path))
+                        {
+                            searchResults.Add(track);
+                        }
+                    }
+                }
+            }
+
+            // Отображаем результаты
+            ShowSearchResults(searchResults, searchQuery);
+        }
+
+        private void ShowSearchResults(List<Track> results, string searchQuery)
+        {
+            if (results.Count == 0)
+            {
+                NotificationWindow.Show($"По запросу \"{searchQuery}\" ничего не найдено", this);
+                return;
+            }
+
+            // Отображаем результаты поиска в центральной области
+            CurrentPlaylistNameText.Text = $"Результаты поиска";
+            CurrentPlaylistDescriptionText.Text = $"По запросу: \"{searchQuery}\" найдено {results.Count} треков";
+            CurrentTracksCountText.Text = $"{results.Count} треков";
+            CurrentPlaylistCover.Source = null;
+
+            // Создаем временную коллекцию для отображения
+            var tracksCollection = new ObservableCollection<Track>(results);
+            TracksDataGrid.ItemsSource = tracksCollection;
+
+            System.Diagnostics.Debug.WriteLine($"=== РЕЗУЛЬТАТЫ ПОИСКА ===");
+            System.Diagnostics.Debug.WriteLine($"Запрос: {searchQuery}");
+            System.Diagnostics.Debug.WriteLine($"Найдено: {results.Count} треков");
+        }
+
+        private void AddToPlaylistSubMenu_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("=== AddToPlaylistSubMenu_SubmenuOpened вызван ===");
+            if (sender is not MenuItem subMenu) return;
+
+            subMenu.Items.Clear();
+
+            // Если нет плейлистов, показываем сообщение
+            if (MusicLibrary.Instance.Playlists.Count == 0)
+            {
+                MenuItem emptyItem = new() { Header = "Нет плейлистов", IsEnabled = false };
+                subMenu.Items.Add(emptyItem);
+                return;
+            }
+
+            // Добавляем все плейлисты
+            foreach (var playlist in MusicLibrary.Instance.Playlists)
+            {
+                System.Diagnostics.Debug.WriteLine($"Добавляем плейлист: {playlist.Name}");
+                MenuItem item = new()
+                {
+                    Header = playlist.Name,
+                    DataContext = playlist,
+                    Tag = playlist.Id  // Дополнительно сохраняем ID для быстрого доступа
+                };
+                item.Click += AddToSpecificPlaylist_Click;
+                subMenu.Items.Add(item);
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Всего добавлено пункта: {subMenu.Items.Count}");
+        }
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            if (menu == null) return;
+
+            // Ищем пункт "Добавить в плейлист"
+            var subMenu = menu.Items.OfType<MenuItem>()
+                .FirstOrDefault(m => m.Header != null && m.Header.ToString().Contains("Добавить в плейлист"));
+
+            if (subMenu != null)
+            {
+                // 1. КРИТИЧЕСКИЙ ШАГ: Сбрасываем ItemsSource в null
+                // Это принудительно очищает любые старые привязки, которые могли блокировать меню
+                subMenu.ItemsSource = null;
+
+                // 2. Теперь очищаем сами элементы
+                subMenu.Items.Clear();
+
+                var playlists = MusicLibrary.Instance.Playlists;
+
+                if (playlists == null || playlists.Count == 0)
+                {
+                    subMenu.Items.Add(new MenuItem { Header = "Нет доступных плейлистов", IsEnabled = false });
+                }
+                else
+                {
+                    foreach (var p in playlists)
+                    {
+                        var item = new MenuItem
+                        {
+                            Header = p.Name,
+                            DataContext = p,
+                            // Добавим явно цвет, чтобы исключить проблемы с невидимым текстом
+                            Foreground = System.Windows.Media.Brushes.White
+                        };
+                        item.Click += AddToSpecificPlaylist_Click;
+                        subMenu.Items.Add(item);
+                    }
+                }
+
+                // 3. Гарантируем, что пункт включен и может раскрываться
+                subMenu.IsEnabled = true;
+
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] В подменю физически добавлено элементов: {subMenu.Items.Count}");
+            }
+        }
+        private void AddToSpecificPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Получаем выбранный плейлист из кликнутого пункта
+            if (sender is MenuItem menuItem && menuItem.DataContext is Playlist targetPlaylist)
+            {
+                // 2. Получаем трек, на котором было открыто контекстное меню
+                if (TracksDataGrid.SelectedItem is Track selectedTrack)
+                {
+                    // Проверяем, что путь к файлу не пустой
+                    if (string.IsNullOrEmpty(selectedTrack.Path))
+                    {
+                        NotificationWindow.Show("Ошибка: путь трека не определен", this);
+                        return;
+                    }
+
+                    // 3. Проверка: есть ли уже такой трек в целевом плейлисте?
+                    // Нам нужно заглянуть в базу данных
+                    if (IsTrackInPlaylist(targetPlaylist.Id, selectedTrack.Id))
+                    {
+                        NotificationWindow.Show($"Трек уже есть в плейлисте \"{targetPlaylist.Name}\"!", this);
+                        return;
+                    }
+
+                    // 4. Если нет — добавляем
+                    DatabaseService.AddTrackToPlaylist(targetPlaylist.Id, selectedTrack.Path);
+
+                    // Обновляем данные плейлиста в памяти (чтобы счетчик треков обновился)
+                    var tracksFromDb = DatabaseService.GetTracksForPlaylist(targetPlaylist.Id);
+
+                    // Превращаем List в ObservableCollection
+                    targetPlaylist.Tracks = new ObservableCollection<Track>(tracksFromDb);
+
+                    System.Diagnostics.Debug.WriteLine($"Трек добавлен в плейлист: {targetPlaylist.Name}");
+                    NotificationWindow.Show($"Добавлено в \"{targetPlaylist.Name}\"", this);
+                }
+            }
+        }
+        private static bool IsTrackInPlaylist(int playlistId, int trackId)
+        {
+            try
+            {
+                using var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={DatabaseService.DatabasePath}");
+                connection.Open();
+                var cmd = connection.CreateCommand();
+                cmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $pId AND TrackId = $tId";
+                cmd.Parameters.AddWithValue("$pId", playlistId);
+                cmd.Parameters.AddWithValue("$tId", trackId);
+
+                var result = cmd.ExecuteScalar();
+                long count = result != null ? (long)result : 0;
+                System.Diagnostics.Debug.WriteLine($"IsTrackInPlaylist: playlistId={playlistId}, trackId={trackId}, found={count > 0}");
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при проверке трека в плейлисте: {ex.Message}");
+                return false;
+            }
+        }
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
         private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void Maximize_Click(object sender, RoutedEventArgs e)

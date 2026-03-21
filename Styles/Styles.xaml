@@ -169,34 +169,79 @@
         </Setter>
     </Style>
 
-    <Style TargetType="MenuItem">
-        <Setter Property="Foreground"
-                Value="White"/>
-        <Setter Property="Padding"
-                Value="10,5"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="MenuItem">
-                    <Grid x:Name="RootGrid"
-                          Background="Transparent">
-                        <Border x:Name="BgBorder"
-                                CornerRadius="4"
-                                Margin="2"/>
-                        <ContentPresenter ContentSource="Header"
-                                          Margin="{TemplateBinding Padding}"/>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                            <Setter TargetName="BgBorder"
-                                    Property="Background"
-                                    Value="#333"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <Style TargetType="ContextMenu">
+    <Setter Property="Background" Value="#1E1E1E"/>
+    <Setter Property="BorderBrush" Value="#444"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="ContextMenu">
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4">
+                    <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                </Border>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
+
+<Style TargetType="MenuItem">
+    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="MenuItem">
+                <Grid x:Name="RootGrid">
+                    <Border x:Name="Bg" Background="Transparent" CornerRadius="3" Margin="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/> </Grid.ColumnDefinitions>
+
+                            <ContentPresenter ContentSource="Header"
+                                              Margin="15,7"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"/>
+
+                            <Path x:Name="Arrow" 
+                                  Grid.Column="1"
+                                  Data="M 0,0 L 4,3.5 L 0,7 Z" 
+                                  Fill="White" 
+                                  Margin="10,0,10,0" 
+                                  VerticalAlignment="Center" 
+                                  Visibility="Collapsed"/>
+
+                            <Popup x:Name="PART_Popup" 
+                                   AllowsTransparency="True" 
+                                   Focusable="False" 
+                                   IsOpen="{TemplateBinding IsSubmenuOpen}" 
+                                   Placement="Right" 
+                                   HorizontalOffset="-2" 
+                                   PopupAnimation="Fade">
+                                <Border Background="#1E1E1E" 
+                                        BorderBrush="#444" 
+                                        BorderThickness="1" 
+                                        CornerRadius="4"
+                                        Padding="1">
+                                    <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Border>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsHighlighted" Value="True">
+                        <Setter TargetName="Bg" Property="Background" Value="#3E3E3E"/>
+                    </Trigger>
+                    <Trigger Property="HasItems" Value="True">
+                        <Setter TargetName="Arrow" Property="Visibility" Value="Visible"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
     <Style x:Key="TimeTextStyle"
            TargetType="TextBlock">
         <Setter Property="Foreground"

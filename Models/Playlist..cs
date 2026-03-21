@@ -9,7 +9,7 @@ namespace QAMP.Models
     {
         private string? _name;
         private string? _description;
-        
+
         [JsonIgnore]
         private byte[]? _coverImage;
 
@@ -36,7 +36,14 @@ namespace QAMP.Models
                 OnPropertyChanged(nameof(Description));
             }
         }
+        private bool _isPinned;
+        public bool IsPinned
+        {
+            get => _isPinned;
+            set { _isPinned = value; OnPropertyChanged(nameof(IsPinned)); }
+        }
 
+        public int SortOrder { get; set; }
         public byte[] CoverImage
         {
             get => _coverImage;
@@ -65,7 +72,7 @@ namespace QAMP.Models
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public string TrackCountDisplay => $"Треков: {Tracks.Count}";
-        
+
         // Количество треков (для отображения)
         public int TrackCount => Tracks.Count;
 
@@ -94,7 +101,7 @@ namespace QAMP.Models
 
         public Playlist()
         {
-            Tracks = new ObservableCollection<Track>();
+            Tracks = [];
             Tracks.CollectionChanged += (s, e) =>
             {
                 OnPropertyChanged(nameof(TrackCount));

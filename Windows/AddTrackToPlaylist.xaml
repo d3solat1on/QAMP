@@ -1,0 +1,13 @@
+<Window x:Class="QAMP.Windows.AddTrackToPlaylist"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:QAMP.Windows"
+        xmlns:converters="clr-namespace:QAMP.Converters"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        Width="1000"
+        Height="800"
+        Title="Выбор плейлиста для добавления трека"
+        WindowStartupLocation="CenterOwner">
+</Window>        

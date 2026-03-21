@@ -1,6 +1,7 @@
 using System.IO;
 using Microsoft.Data.Sqlite;
 using QAMP.Models;
+using QAMP.ViewModels;
 
 namespace QAMP.Services;
 
@@ -34,6 +35,60 @@ public class DatabaseService
         else
         {
             System.Diagnostics.Debug.WriteLine($"База данных существует: {_dbPath}");
+            // Проверяем и добавляем недостающие колонки
+            MigrateDatabase();
+        }
+    }
+
+    /// <summary>
+    /// Проверяет наличие недостающих колонок и добавляет их при необходимости
+    /// </summary>
+    private static void MigrateDatabase()
+    {
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            // Получаем информацию о всех колонках в таблице Playlists
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "PRAGMA table_info(Playlists)";
+            
+            var existingColumns = new HashSet<string>();
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    existingColumns.Add(reader.GetString(1));
+                }
+            }
+
+            // Проверяем и добавляем недостающие колонки
+            var columnsToAdd = new Dictionary<string, string>
+            {
+                { "IsPinned", "INTEGER DEFAULT 0" },
+                { "SortOrder", "INTEGER DEFAULT 0" }
+            };
+
+            foreach (var column in columnsToAdd)
+            {
+                if (!existingColumns.Contains(column.Key))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Добавляем колонку {column.Key} в таблицу Playlists...");
+                    var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = $"ALTER TABLE Playlists ADD COLUMN {column.Key} {column.Value}";
+                    alterCmd.ExecuteNonQuery();
+                    System.Diagnostics.Debug.WriteLine($"Колонка {column.Key} успешно добавлена");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Колонка {column.Key} уже существует");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при миграции БД: {ex.Message}");
         }
     }
 
@@ -53,7 +108,9 @@ public class DatabaseService
             Name TEXT NOT NULL,
             Description TEXT,
             CoverImage BLOB, 
-            CreatedDate TEXT
+            CreatedDate TEXT,
+            IsPinned INTEGER DEFAULT 0,
+            SortOrder INTEGER DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS Tracks (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -178,29 +235,70 @@ public class DatabaseService
         {
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, Name, Description, CoverImage FROM Playlists";
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            
+            // Пытаемся использовать запрос с IsPinned, если колонка есть
+            try
             {
-                var playlist = new Playlist
+                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
                 {
-                    Id = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                    CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3)
-                };
+                    var playlist = new Playlist
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
+                        IsPinned = reader.IsDBNull(4) ? false : reader.GetInt32(4) != 0
+                    };
 
-                // КРИТИЧЕСКИ ВАЖНО: Загружаем треки для этого плейлиста
-                var tracks = GetTracksForPlaylist(playlist.Id);
-                System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков");
+                    // КРИТИЧЕСКИ ВАЖНО: Загружаем треки для этого плейлиста
+                    var tracks = GetTracksForPlaylist(playlist.Id);
+                    System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}");
 
-                foreach (var track in tracks)
-                {
-                    playlist.Tracks.Add(track);
+                    foreach (var track in tracks)
+                    {
+                        playlist.Tracks.Add(track);
+                    }
+
+                    playlists.Add(playlist);
                 }
+            }
+            catch (SqliteException ex) when (ex.Message.Contains("IsPinned"))
+            {
+                // Если колонки нет, используем старый запрос и добавляем миграцию
+                System.Diagnostics.Debug.WriteLine($"Колонка IsPinned не найдена, выполняем миграцию: {ex.Message}");
+                MigrateDatabase();
+                
+                // Повторяем запрос уже с колонкой
+                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    var playlist = new Playlist
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
+                        IsPinned = reader.IsDBNull(4) ? false : reader.GetInt32(4) != 0
+                    };
 
-                playlists.Add(playlist);
+                    var tracks = GetTracksForPlaylist(playlist.Id);
+                    System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}");
+
+                    foreach (var track in tracks)
+                    {
+                        playlist.Tracks.Add(track);
+                    }
+
+                    playlists.Add(playlist);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлистов: {ex.Message}");
+                throw;
             }
         }
 
@@ -364,6 +462,31 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("$id", playlistId);
         cmd.ExecuteNonQuery();
     }
+    public void SavePlaylistsOrder()
+{
+    var playlists = MusicLibrary.Instance.Playlists;
+    
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        connection.Open();
+        using (var transaction = connection.BeginTransaction())
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE Playlists SET SortOrder = @order WHERE Id = @id";
+            
+            var orderParam = command.Parameters.Add("@order", SqliteType.Integer);
+            var idParam = command.Parameters.Add("@id", SqliteType.Integer);
+
+            for (int i = 0; i < playlists.Count; i++)
+            {
+                orderParam.Value = i;
+                idParam.Value = playlists[i].Id;
+                command.ExecuteNonQuery();
+            }
+            transaction.Commit();
+        }
+    }
+}
 
     public static void SaveSetting(string key, string value)
     {
@@ -386,6 +509,30 @@ public class DatabaseService
         var result = cmd.ExecuteScalar();
         return result?.ToString() ?? defaultValue;
     }
+
+    /// <summary>
+    /// Обновляет состояние закрепления плейлиста
+    /// </summary>
+    public static void UpdatePlaylistPinnedState(int playlistId, bool isPinned)
+    {
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "UPDATE Playlists SET IsPinned = $pinned WHERE Id = $id";
+            cmd.Parameters.AddWithValue("$pinned", isPinned ? 1 : 0);
+            cmd.Parameters.AddWithValue("$id", playlistId);
+            cmd.ExecuteNonQuery();
+            string status = isPinned ? "закреплен" : "откреплен";
+            System.Diagnostics.Debug.WriteLine($"Плейлист {playlistId} {status}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при обновлении pin состояния: {ex.Message}");
+        }
+    }
+
     public static void DebugDirectDatabaseCheck()
     {
         System.Diagnostics.Debug.WriteLine("=== ПРЯМАЯ ПРОВЕРКА БД ===");

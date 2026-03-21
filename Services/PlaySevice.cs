@@ -361,8 +361,7 @@ namespace QAMP.Services
                             .OrderBy(x => Guid.NewGuid())
                             .ToList();
 
-                        ShuffledQueue = new List<Track> { CurrentTrack };
-                        ShuffledQueue.AddRange(remainingTracks);
+                        ShuffledQueue = [CurrentTrack, .. remainingTracks];
 
                         if (ShuffledQueue.Count > 1)
                         {
@@ -379,8 +378,7 @@ namespace QAMP.Services
                         .OrderBy(x => Guid.NewGuid())
                         .ToList();
 
-                    ShuffledQueue = new List<Track> { CurrentTrack };
-                    ShuffledQueue.AddRange(shuffledList);
+                    ShuffledQueue = [CurrentTrack, .. shuffledList];
 
                     if (ShuffledQueue.Count > 1)
                     {

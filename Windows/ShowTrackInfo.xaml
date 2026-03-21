@@ -215,6 +215,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0"
@@ -271,6 +272,17 @@
                                     Text="{Binding Description}"
                                     Foreground="White"
                                     Margin="0,3"/>
+                            <TextBlock Grid.Row="5"
+                                       Grid.Column="0"
+                                       Text="BPM:"
+                                       Foreground="Gray"
+                                       Margin="0,3"/>
+                            <TextBlock Grid.Row="5"
+                                    Grid.Column="1"
+                                    Text="{Binding BitsPerSample}"
+                                    Foreground="White"
+                                    Margin="0,3"/>           
+
                         </Grid>
 
                         <Separator Background="#333"

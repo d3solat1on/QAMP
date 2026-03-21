@@ -53,6 +53,46 @@
                                            FontWeight="Bold"/>
                         </StackPanel>
 
+                        <!-- Панель поиска в центре -->
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    WindowChrome.IsHitTestVisibleInChrome="True">
+                                <TextBox x:Name="SearchBox"
+                                         Width="300"
+                                         Height="24"
+                                         Padding="8,4"
+                                         Background="#2A2A2A"
+                                         Foreground="White"
+                                         BorderBrush="#444"
+                                         BorderThickness="1"
+                                         VerticalContentAlignment="Center"
+                                         Text=""
+                                         KeyDown="SearchBox_KeyDown"/>
+                                <Button x:Name="SearchButton"
+                                        Width="30"
+                                        Height="24"
+                                        Margin="5,0,0,0"
+                                        Background="#2A2A2A"
+                                        BorderBrush="#444"
+                                        BorderThickness="1"
+                                        Foreground="White"
+                                        Click="SearchButton_Click">
+                                        🔍
+                                </Button>
+                                <Button x:Name="ClearSearchButton"
+                                        Width="30"
+                                        Height="24"
+                                        Margin="5,0,0,0"
+                                        Background="#2A2A2A"
+                                        BorderBrush="#444"
+                                        BorderThickness="1"
+                                        Foreground="White"
+                                        Click="ClearSearchButton_Click">
+                                        ✕
+                                </Button>
+                        </StackPanel>
+
                         <!-- Кнопки управления справа -->
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
@@ -365,7 +405,20 @@
                                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                          SelectionChanged="PlaylistsListBox_SelectionChanged"
                                                          Height="Auto"
+                                                         AllowDrop="True"
                                                          ItemsSource="{Binding Playlists, Source={x:Static local:ViewModels.MusicLibrary.Instance}}">
+                                                        <ListBox.ItemContainerStyle>
+                                                                <Style TargetType="ListBoxItem">
+                                                                        <EventSetter Event="PreviewMouseMove"
+                                                                                        Handler="Playlist_MouseMove"/>
+                                                                        <EventSetter Event="Drop"
+                                                                                        Handler="Playlist_Drop"/>
+                                                                        <Setter Property="Background"
+                                                                                        Value="Transparent"/>
+                                                                        <Setter Property="BorderThickness"
+                                                                                        Value="0"/>
+                                                                </Style>
+                                                        </ListBox.ItemContainerStyle>
                                                         <ListBox.ItemTemplate>
                                                                 <DataTemplate>
 
@@ -499,17 +552,41 @@
                                                                                                                 </ContextMenu.Resources>
                                                                                                                 <MenuItem Header="Редактировать"
                                                                                                                           Click="EditPlaylist_Click"/>
+                                                                                                                <MenuItem Header="Закрепить"
+                                                                                                                          x:Name="PinPlaylistMenuItem"
+                                                                                                                          Click="PinPlaylist_Click"/>
                                                                                                                 <Separator Background="#444"/>
                                                                                                                 <MenuItem Header="Удалить"
                                                                                                                           Click="DeletePlaylist_Click"
                                                                                                                           Foreground="Red"/>
                                                                                                         </ContextMenu>
                                                                                                 </StackPanel.ContextMenu>
-                                                                                                <TextBlock Text="{Binding Name}"
-                                                                                                           FontWeight="Bold"
-                                                                                                           FontSize="14"
-                                                                                                           Foreground="White"
-                                                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                                                <StackPanel Orientation="Horizontal"
+                                                                                                            VerticalAlignment="Center">
+                                                                                                        <TextBlock Text="📌"
+                                                                                                                   FontSize="12"
+                                                                                                                   Margin="0,0,5,0"
+                                                                                                                   Foreground="Orange">
+                                                                                                                <TextBlock.Style>
+                                                                                                                        <Style TargetType="TextBlock">
+                                                                                                                                <Setter Property="Visibility"
+                                                                                                                                                Value="Collapsed"/>
+                                                                                                                                <Style.Triggers>
+                                                                                                                                        <DataTrigger Binding="{Binding IsPinned}"
+                                                                                                                                                        Value="True">
+                                                                                                                                                <Setter Property="Visibility"
+                                                                                                                                                                Value="Visible"/>
+                                                                                                                                        </DataTrigger>
+                                                                                                                                </Style.Triggers>
+                                                                                                                        </Style>
+                                                                                                                </TextBlock.Style>
+                                                                                                        </TextBlock>
+                                                                                                        <TextBlock Text="{Binding Name}"
+                                                                                                                   FontWeight="Bold"
+                                                                                                                   FontSize="14"
+                                                                                                                   Foreground="White"
+                                                                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                                                </StackPanel>
                                                                                                 <TextBlock Text="{Binding TrackCount, StringFormat='{}{0} треков'}"
                                                                                                            x:Name="CurrentTracksCountText"
                                                                                                            FontSize="10"
@@ -579,9 +656,10 @@
                                         <DataGrid x:Name="TracksDataGrid"
                                                   VirtualizingStackPanel.IsVirtualizing="True"
                                                   VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                                  ScrollViewer.IsDeferredScrollingEnabled="True"
+                                                  ScrollViewer.IsDeferredScrollingEnabled="False"
                                                   VirtualizingStackPanel.ScrollUnit="Pixel"
-                                                  VirtualizingStackPanel.CacheLength="15, 15"
+                                                  VirtualizingStackPanel.CacheLength="2,3"
+                                                  VirtualizingStackPanel.CacheLengthUnit="Page"
                                                   Grid.Row="1"
                                                   Background="Transparent"
                                                   RowBackground="#121212"
@@ -597,59 +675,19 @@
                                                   MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
                                                   GridLinesVisibility="None">
                                                 <DataGrid.ContextMenu>
-                                                        <ContextMenu Background="#282828">
-                                                                <ContextMenu.Resources>
-                                                                        <!-- 1. ГЛАВНОЕ: Убираем саму колонку в контейнере меню -->
-                                                                        <Style TargetType="ContextMenu">
-                                                                                <Setter Property="Template">
-                                                                                        <Setter.Value>
-                                                                                                <ControlTemplate TargetType="ContextMenu">
-                                                                                                        <Border Background="{TemplateBinding Background}"
-                                                                                                                BorderBrush="#444"
-                                                                                                                BorderThickness="1">
-                                                                                                                <!-- IsItemsHost="True" заставляет пункты просто идти друг за другом -->
-                                                                                                                <StackPanel IsItemsHost="True"
-                                                                                                                            KeyboardNavigation.DirectionalNavigation="Cycle"/>
-                                                                                                        </Border>
-                                                                                                </ControlTemplate>
-                                                                                        </Setter.Value>
-                                                                                </Setter>
-                                                                        </Style>
 
-                                                                        <!-- 2. Ваш стиль для MenuItem (оставляем как есть, он хороший) -->
-                                                                        <Style TargetType="{x:Type MenuItem}">
-                                                                                <Setter Property="Foreground"
-                                                                                        Value="White"/>
-                                                                                <Setter Property="Template">
-                                                                                        <Setter.Value>
-                                                                                                <ControlTemplate TargetType="{x:Type MenuItem}">
-                                                                                                        <!-- Добавил Border для более чистого управления фоном -->
-                                                                                                        <Border x:Name="Bg"
-                                                                                                                Background="Transparent">
-                                                                                                                <ContentPresenter ContentSource="Header"
-                                                                                                                                  Margin="15,7"
-                                                                                                                                  HorizontalAlignment="Left"/>
-                                                                                                        </Border>
-                                                                                                        <ControlTemplate.Triggers>
-                                                                                                                <Trigger Property="IsHighlighted"
-                                                                                                                         Value="True">
-                                                                                                                        <Setter TargetName="Bg"
-                                                                                                                                Property="Background"
-                                                                                                                                Value="#3E3E3E"/>
-                                                                                                                </Trigger>
-                                                                                                        </ControlTemplate.Triggers>
-                                                                                                </ControlTemplate>
-                                                                                        </Setter.Value>
-                                                                                </Setter>
-                                                                        </Style>
-                                                                </ContextMenu.Resources>
+                                                        <ContextMenu Background="#282828"
+                                                                     Opened="ContextMenu_Opened">
 
                                                                 <MenuItem Header="Воспроизвести"
                                                                           Click="PlayTrackMenuItem_Click"/>
+                                                                <MenuItem Header="Информация"
+                                                                          Click="ShowTrackInfo_Click"/>
+
+                                                                <MenuItem Header="Добавить в плейлист"/>
+
                                                                 <MenuItem Header="Удалить из плейлиста"
                                                                           Click="RemoveFromPlaylist_Click"/>
-                                                                <MenuItem Header="Информация"
-                                                                          Click="ShowTrackInfo_Click"/>        
                                                         </ContextMenu>
                                                 </DataGrid.ContextMenu>
                                                 <DataGrid.Resources>

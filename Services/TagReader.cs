@@ -41,7 +41,7 @@ namespace QAMP.Services
                 };
             }
         }
-        public static Track GetFullTrackInfo(string filePath)
+        public static Track? GetFullTrackInfo(string filePath)
         {
             try
             {
