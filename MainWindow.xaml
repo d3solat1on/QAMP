@@ -648,6 +648,8 @@
                                                                           Click="PlayTrackMenuItem_Click"/>
                                                                 <MenuItem Header="Удалить из плейлиста"
                                                                           Click="RemoveFromPlaylist_Click"/>
+                                                                <MenuItem Header="Информация"
+                                                                          Click="ShowTrackInfo_Click"/>        
                                                         </ContextMenu>
                                                 </DataGrid.ContextMenu>
                                                 <DataGrid.Resources>

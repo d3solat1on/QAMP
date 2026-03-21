@@ -929,6 +929,23 @@ namespace QAMP
             }
         }
 
+        private void ShowTrackInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (TracksDataGrid.SelectedItem is Track selectedTrack)
+            {
+                var fullInfo = TagReader.GetFullTrackInfo(selectedTrack.Path);
+
+                if (fullInfo != null)
+                {
+                    var infoWindow = new Windows.ShowTrackInfo(fullInfo)
+                    {
+                        Owner = this 
+                    };
+                    infoWindow.ShowDialog();
+                }
+            }
+        }
+
         private void FavoriteButton_Click(object sender, RoutedEventArgs e)
         {
             if (Player.CurrentTrack == null)

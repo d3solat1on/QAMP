@@ -41,7 +41,48 @@ namespace QAMP.Services
                 };
             }
         }
+        public static Track GetFullTrackInfo(string filePath)
+        {
+            try
+            {
+                using var file = TagLib.File.Create(filePath);
+                var track = new Track
+                {
+                    Path = filePath,
+                    Extension = Path.GetExtension(filePath).ToUpper(),
+                    Name = file.Tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
+                    Executor = file.Tag.FirstPerformer ?? "Неизвестен",
+                    Album = file.Tag.Album ?? "Нет альбома",
+                    Year = (int)file.Tag.Year,
+                    Genre = file.Tag.FirstGenre ?? "Неизвестно",
 
+                    Bitrate = file.Properties.AudioBitrate,
+                    SampleRate = file.Properties.AudioSampleRate,
+                    Duration = file.Properties.Duration.ToString(@"mm\:ss"),
+                    Channels = file.Properties.AudioChannels > 1 ? "Stereo" : "Mono",
+                    Description = file.Properties.Description, //кодек
+                    BitsPerSample = file.Properties.BitsPerSample,
+
+                    Comment = file.Tag.Comment ?? "",
+                    Lyrics = file.Tag.Lyrics ?? "Текст песни отсутствует",
+                    TrackNumber = (int)file.Tag.Track,
+                    Composer = file.Tag.FirstComposer ?? "Не указан",
+                    AlbumArtist = file.Tag.FirstAlbumArtist ?? ""
+                };
+
+                if (file.Tag.Pictures.Length > 0)
+                {
+                    track.CoverImage = file.Tag.Pictures[0].Data.Data;
+                }
+
+                return track;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка чтения тегов: {ex.Message}");
+                return null;
+            }
+        }
         public static Track[] ReadTracksFromFiles(string[] filePaths)
         {
             var tracks = new List<Track>();
@@ -68,6 +109,5 @@ namespace QAMP.Services
 
             return ReadTracksFromFiles(files);
         }
-
     }
 }

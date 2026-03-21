@@ -19,8 +19,14 @@ namespace QAMP.Models
         public int Bitrate { get; set; }
         public int SampleRate { get; set; }
         public int Year { get; set; }
-
-
+        public string Comment { get; set; }
+        public string Lyrics { get; set; }
+        public string Channels { get; set; }
+        public string Description { get; set; }
+        public int BitsPerSample { get; set; }
+        public int TrackNumber { get; set; }
+        public string Composer { get; set; }
+        public string AlbumArtist { get; set; }
         [JsonIgnore]
         private byte[]? _coverImage;
 
