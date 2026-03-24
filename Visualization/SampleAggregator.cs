@@ -18,7 +18,7 @@ namespace QAMP.Visualization
 
         public WaveFormat WaveFormat => source.WaveFormat;
 
-        public SampleAggregator(ISampleProvider source, int fftSize = 512)
+        public SampleAggregator(ISampleProvider source, int fftSize = 4096)
         {
             if (!IsPowerOfTwo(fftSize)) throw new ArgumentException("FFT size must be a power of two");
             this.source = source;

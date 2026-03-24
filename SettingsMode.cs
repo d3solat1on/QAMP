@@ -4,10 +4,13 @@ namespace QAMP;
 
 public class AppSettings
 {
+    public bool CloseToTray { get; set; } = true;
     public bool IsVisualizerEnabled { get; set; } = true;
+    public int VisualizerBarCount { get; set; } = 64; // Количество столбцов спектрограммы
     public string ColorScheme { get; set; } = "Dark"; // "Dark", "Light", "Custom"
     public string AccentColor { get; set; } = "#1db954"; // Главный цвет приложения
-    public double[] EqualizerGains { get; set; } = new double[10]; // Для будущего эквалайзера
+    public double[] EqualizerGains { get; set; } = new double[10]; // Значения эквалайзера
+    public string EqualizerPreset { get; set; } = "Пользовательский"; // Текущий выбранный режим
 }
 public class SettingsManager
 {

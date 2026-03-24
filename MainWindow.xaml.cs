@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -27,6 +28,7 @@ namespace QAMP
     {
         private readonly PlayerService _playService = Instance;
         private readonly DispatcherTimer _memoryCleanupTimer;
+        private System.Windows.Forms.NotifyIcon? _notifyIcon; 
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => Instance;
         private bool _isSliderDragging = false;
@@ -36,6 +38,8 @@ namespace QAMP
         public MainWindow()
         {
             InitializeComponent();
+
+            SetupTrayIcon();
 
             // Отладочная информация о пути к БД
             System.Diagnostics.Debug.WriteLine("=== ПУТЬ К БАЗЕ ДАННЫХ ===");
@@ -83,11 +87,11 @@ namespace QAMP
             }
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            DatabaseService.SaveSetting("Volume", _playService.Volume.ToString());
-            base.OnClosing(e);
-        }
+        // protected override void OnClosing(CancelEventArgs e)
+        // {
+        //     DatabaseService.SaveSetting("Volume", _playService.Volume.ToString());
+        //     base.OnClosing(e);
+        // }
 
         private void LoadApplicationSettings()
         {
@@ -225,13 +229,13 @@ namespace QAMP
                 : ts.ToString(@"m\:ss");
         }
 
-        private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
+        private void TogglePlayPause()
         {
             if (Player.CurrentTrack == null)
             {
                 if (MusicLibrary.Instance.PlaybackQueue.Count > 0)
                 {
-                    Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[0]); // Исправлено: PlaybackQueue вместо CurrentTracks
+                    Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[0]);
                     UpdateNextTrackUI();
                 }
             }
@@ -243,6 +247,11 @@ namespace QAMP
             {
                 Player.Resume();
             }
+            UpdateOSD();
+        }
+        private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            TogglePlayPause();
         }
 
         private void UpdatePlayPauseIcon(bool isPlaying)
@@ -1314,7 +1323,7 @@ namespace QAMP
                             Header = p.Name,
                             DataContext = p,
                             // Добавим явно цвет, чтобы исключить проблемы с невидимым текстом
-                            Foreground = System.Windows.Media.Brushes.White
+                            // Foreground = System.Windows.Media.Brushes.White
                         };
                         item.Click += AddToSpecificPlaylist_Click;
                         subMenu.Items.Add(item);
@@ -1393,6 +1402,120 @@ namespace QAMP
                 Owner = this
             };
             settingsWindow.ShowDialog();
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            var source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+            source.AddHook(new HwndSourceHook(HwndHook));
+            HotKeyManager.RegisterMediaKeys(this);
+        }
+
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            {
+                const int WM_HOTKEY = 0x0312;
+                if (msg == WM_HOTKEY)
+                {
+                    int id = wParam.ToInt32();
+                    switch (id)
+                    {
+                        case 9000:
+                            TogglePlayPause();
+                            break;
+                        case 9001: Instance.PlayNextTrack(); break;
+                        case 9002: Instance.PlayPreviousTrack(); break;
+                    }
+                    handled = true;
+                }
+                return IntPtr.Zero;
+            }
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space && FocusManager.GetFocusedElement(this) is not TextBox)
+            {
+                TogglePlayPause();
+                e.Handled = true;
+            }
+        }
+        private static readonly OSDWindow _osd = new();
+
+        public static void UpdateOSD()
+        {
+            if (Player.CurrentTrack != null)
+            {
+                string executor = Player.CurrentTrack.Executor ?? "Неизвестный исполнитель";
+                string name = Player.CurrentTrack.Name ?? "Без названия";
+                _osd.ShowOSD(executor, name);
+            }
+        }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+#pragma warning disable CA1416
+            var config = SettingsManager.Instance.Config; 
+
+            if (config.CloseToTray)
+            {
+                e.Cancel = true;
+                Hide();
+
+                SettingsManager.Instance.Save();
+
+                if (_notifyIcon != null)
+                {
+                    _notifyIcon.Visible = true;
+                }
+            }
+            else
+            {
+                if (_notifyIcon != null)
+                {
+                    _notifyIcon.Visible = false;
+                    _notifyIcon.Dispose();
+                }
+                SettingsManager.Instance.Save();
+                Application.Current.Shutdown();
+            }
+#pragma warning restore CA1416
+
+            base.OnClosing(e);
+
+        }
+        private void SetupTrayIcon()
+        {
+#pragma warning disable CA1416  
+            var iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/icon/QAMP_icon.ico")).Stream;
+            _notifyIcon = new System.Windows.Forms.NotifyIcon
+            {
+                Icon = new System.Drawing.Icon(iconStream),
+                Visible = false,
+                Text = "QAMP Player"
+            };
+
+            _notifyIcon.DoubleClick += (s, e) =>
+            {
+                Show();
+                WindowState = WindowState.Normal;
+                Activate();
+            };
+
+            _notifyIcon.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            _notifyIcon.ContextMenuStrip.Items.Add("Развернуть", null, (s, e) =>
+            {
+                Show();
+                WindowState = WindowState.Maximized;
+                Activate();
+            });
+            _notifyIcon.ContextMenuStrip.Items.Add("Играть/Пауза", null, (s, e) => TogglePlayPause());
+            _notifyIcon.ContextMenuStrip.Items.Add("-"); // Разделитель
+            _notifyIcon.ContextMenuStrip.Items.Add("Выход", null, (s, e) =>
+            {
+                SettingsManager.Instance.Save();
+                Application.Current.Shutdown();
+            });
+#pragma warning restore CA1416
         }
 
         private void Close_Click(object sender, RoutedEventArgs e) => Close();

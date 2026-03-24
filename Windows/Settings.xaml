@@ -10,8 +10,8 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Настройки QAMP"
-        Width="1000"
-        Height="800"
+        Width="1600"
+        Height="Auto"
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}"
         WindowStartupLocation="CenterOwner"
@@ -19,21 +19,49 @@
         AllowsTransparency="True"
         Loaded="Window_Loaded">
     <Window.Resources>
+        <Style x:Key="EqSliderThumbStyle"
+               TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Background="{DynamicResource AccentBrush}"
+                                Width="8"
+                                Height="16"
+                                CornerRadius="4"
+                                RenderOptions.EdgeMode="Aliased">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000"
+                                                  BlurRadius="6"
+                                                  ShadowDepth="1"
+                                                  Opacity="0.8"/>
+                            </Border.Effect>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="CustomSliderStyle"
                TargetType="Slider">
-            <Style.Resources>
-                <SolidColorBrush x:Key="SliderThumb.Static.Background"
-                                 Color="White"/>
-                                 </Style.Resources>
-                <Setter Property="Foreground"
-                        Value="{DynamicResource AccentBrush}"/>
-                <Setter Property="Background"
-                        Value="{DynamicResource TertiaryBackgroundBrush}"/>
-                <Setter Property="Width"
-                        Value="30"/>
-                <Setter Property="Margin"
-                        Value="5,0"/>
-            
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border x:Name="TrackBackground"
+                                    Background="{DynamicResource TertiaryBackgroundBrush}"
+                                    Width="4"
+                                    HorizontalAlignment="Center"
+                                    CornerRadius="2"
+                                    Opacity="0.6"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource EqSliderThumbStyle}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
     <WindowChrome.WindowChrome>
@@ -85,7 +113,9 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
@@ -143,52 +173,162 @@
                                Foreground="{DynamicResource ForegroundBrush}"/>
                 </StackPanel>
             </GroupBox>
-            <GroupBox Header="Эквалайзер"
+            <GroupBox Header="Спектрограмма"
                       Grid.Row="3"
                       Margin="0,0,0,20"
                       Foreground="{DynamicResource ForegroundBrush}">
-                    <Grid Height="220">  
-                <ItemsControl x:Name="EqItemsControl"
-                              Margin="10">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
+                <StackPanel Margin="10">
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="Включить/отключить:"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       Margin="0,0,0,5"/>
                             <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Gain, StringFormat={}{0:0}}"
-                                           FontSize="10"
-                                           HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           Opacity="0.5"/>
-
-                                <Slider Orientation="Vertical"
-                                        Height="150"
-                                        Minimum="-12"
-                                        Maximum="12"
-                                        Value="{Binding Gain, Mode=TwoWay}"
-                                        TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
-                                        ValueChanged="EqSlider_ValueChanged"
-                                        Style="{StaticResource CustomSliderStyle}"/>
-
-                                <TextBlock Text="{Binding Frequency}"
-                                           FontSize="11"
-                                           FontWeight="Bold"
-                                           Margin="0,5,0,0"
-                                           HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource ForegroundBrush}"/>
+                                        Margin="0,0,0,10">
+                                <RadioButton x:Name="VisualizerEnabled"
+                                             Content="Включено"
+                                             GroupName="Visualizer"
+                                             Margin="0,0,20,0"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="VisualizerToggle_Changed"/>
+                                <RadioButton x:Name="VisualizerDisabled"
+                                             Content="Отключено"
+                                             GroupName="Visualizer"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="VisualizerToggle_Changed"/>
                             </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Margin="30,0,0,0">
+                            <TextBlock Text="Количество столбцов:"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       Margin="0,0,0,5"/>
+                            <ComboBox x:Name="BarCountCombo"
+                                      Width="100"
+                                      
+                                      SelectionChanged="BarCountCombo_SelectionChanged">
+                                <ComboBoxItem Content="32"/>
+                                <ComboBoxItem Content="64"/>
+                                              <!-- IsSelected="True"/> -->
+                                <ComboBoxItem Content="128"/>
+                                <ComboBoxItem Content="256"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
             </GroupBox>
-            <StackPanel Grid.Row="4"
+
+            <GroupBox Header="Эквалайзер"
+                      Grid.Row="4"
+                      Margin="0,0,0,30"
+                      Foreground="{DynamicResource ForegroundBrush}">
+                <Grid Height="Auto">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- График АЧХ -->
+                    <Canvas x:Name="EqGraphCanvas"
+                            Grid.Row="0"
+                            Background="{DynamicResource TertiaryBackgroundBrush}"
+                            Margin="10"/>
+
+                    <StackPanel Grid.Row="1">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,5,0,10">
+                            <ComboBox x:Name="PresetComboBox"
+                                      Width="150"
+                                      Margin="0,0,10,0"
+                                      SelectionChanged="PresetComboBox_SelectionChanged"
+                                      Background="{DynamicResource TertiaryBackgroundBrush}"
+                                      BorderBrush="{DynamicResource BorderBrush}">
+                                <ComboBoxItem Content="Пользовательский"/>
+                                              <!-- IsSelected="True"/> -->
+                                <ComboBoxItem Content="Bass Boost"/>
+                                <ComboBoxItem Content="Rock"/>
+                                <ComboBoxItem Content="Classical"/>
+                                <ComboBoxItem Content="Pop"/>
+                            </ComboBox>
+
+                            <Button Content="Сбросить"
+                                    Padding="10,5"
+                                    Click="ResetEq_Click"
+                                    Background="{DynamicResource TertiaryBackgroundBrush}"
+                                    Foreground="{DynamicResource ForegroundBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"/>
+                        </StackPanel>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      Margin="10,0">
+                            <ItemsControl x:Name="EqItemsControl">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="Center"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Width="50"
+                                                    Margin="7,0">
+                                            <TextBlock Text="{Binding Gain, StringFormat={}{0:0}}"
+                                                       FontSize="11"
+                                                       FontWeight="Bold"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       Margin="0,0,0,3"/>
+
+                                            <Slider Orientation="Vertical"
+                                                    Height="160"
+                                                    Minimum="-12"
+                                                    Maximum="12"
+                                                    Value="{Binding Gain, Mode=TwoWay}"
+                                                    TickFrequency="1"
+                                                    IsSnapToTickEnabled="True"
+                                                    ValueChanged="EqSlider_ValueChanged"
+                                                    HorizontalAlignment="Center"/>
+                                                     <!-- Style="{StaticResource CustomSliderStyle}" -->
+
+                                            <TextBlock Text="{Binding Frequency}"
+                                                       FontSize="10"
+                                                       FontWeight="Bold"
+                                                       Margin="0,5,0,0"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource ForegroundBrush}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="5"
+                      Header="Системные настройки"
+                      Margin="0,0,0,20"
+                      Foreground="{DynamicResource ForegroundBrush}">
+                <StackPanel Margin="10">
+                    <RadioButton x:Name="CloseAppRadio"
+                                 Content="Закрывать приложение при закрытии"
+                                 GroupName="CloseAction"
+                                 Margin="0,0,0,10"
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Checked="CloseAction_Checked"/>
+                    <RadioButton x:Name="CloseToTrayRadio"
+                                 Content="Сворачивать в трей при закрытии"
+                                 GroupName="CloseAction"
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Checked="CloseAction_Checked"/>
+                </StackPanel>
+
+            </GroupBox>
+            <StackPanel Grid.Row="6"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <Button x:Name="CancelButton"

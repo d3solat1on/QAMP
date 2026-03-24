@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>icon\icon.ico</ApplicationIcon>
+    <ApplicationIcon>icon\QAMP_icon.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
@@ -33,6 +33,14 @@
   <ItemGroup>
     <Resource Include="Resources\**\*.png" />
     <Resource Include="Resources\**\*.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="icon\QAMP_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="icon\QAMP_icon.ico" />
   </ItemGroup>
 
 </Project>

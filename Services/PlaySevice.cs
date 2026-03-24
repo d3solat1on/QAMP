@@ -347,8 +347,9 @@ namespace QAMP.Services
             }
 
             PlayTrack(queue[prevIndex]);
+            MainWindow.UpdateOSD();
         }
-        private void PlayNextTrack()
+        public void PlayNextTrack()
         {
             if (CurrentTrack == null)
             {
@@ -458,6 +459,7 @@ namespace QAMP.Services
             {
                 System.Diagnostics.Debug.WriteLine("No next track available");
             }
+            MainWindow.UpdateOSD();
         }
         public void Dispose()
         {
