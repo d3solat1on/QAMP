@@ -1,6 +1,18 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Geometry x:Key="lyricsGeometry">M80-80v-720q0-33 23.5-56.5T160-880h440q33 0 56.5 23.5T680-800v17q-24 11-44 27t-36 36v-80H160v527l47-47h393v-160q16 20 36 36t44 27v97q0 33-23.5 56.5T600-240H240L80-80Zm160-320h160v-80H240v80Zm520-80q-50 0-85-35t-35-85q0-50 35-85t85-35q11 0 21 2t19 5v-207h160v80h-80v240q0 50-35 85t-85 35Zm-520-40h280v-80H240v80Zm0-120h280v-80H240v80Zm-80 320v-480 480Z</Geometry>
+    <DrawingGroup x:Key="lyricsDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource lyricsGeometry}"/>
+    </DrawingGroup>
+
+
     <Geometry x:Key="shuffle_OnGeometry">M120-40q-33 0-56.5-23.5T40-120v-720q0-33 23.5-56.5T120-920h720q33 0 56.5 23.5T920-840v720q0 33-23.5 56.5T840-40H120Zm440-120h240v-240h-80v102L594-424l-57 57 127 127H560v80Zm-344 0 504-504v104h80v-240H560v80h104L160-216l56 56Zm151-377 56-56-207-207-56 56 207 207Z</Geometry>
     <DrawingGroup x:Key="shuffle_OnDrawingGroup"
                   ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
@@ -9,10 +21,10 @@
                                 Y="960"/>
         </DrawingGroup.Transform>
         <GeometryDrawing Brush="#FFE3E3E3"
-                         Geometry="{StaticResource shuffleGeometry}"/>
+                         Geometry="{StaticResource shuffle_OnGeometry}"/>
     </DrawingGroup>
     <DrawingImage x:Key="shuffle_OnDrawingImage"
-                  Drawing="{StaticResource shuffleDrawingGroup}"/>
+                  Drawing="{StaticResource shuffle_OnDrawingGroup}"/>
 
 
     <Geometry x:Key="playlist_removeGeometry">m571-80-43-43 114-113-114-113 43-43 113 114 113-114 43 43-114 113 114 113-43 43-113-114L571-80ZM120-330v-60h300v60H120Zm0-165v-60h470v60H120Zm0-165v-60h470v60H120Z</Geometry>

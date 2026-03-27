@@ -300,6 +300,24 @@
                                                                                 VerticalAlignment="Center"/>
                                                                 </Button>
                                                         </Grid>
+                                                        <Grid Height="40">
+                                                                <Button x:Name="ViewLyrics"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Click="ViewLyricsButton_Click"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0">
+                                                                        <Path
+                                                                                Width="25"
+                                                                                Height="25"
+                                                                                Margin="5"
+                                                                                Data="{StaticResource lyricsGeometry}"
+                                                                                Fill="{DynamicResource AccentBrush}"
+                                                                                Stretch="Uniform"
+                                                                                HorizontalAlignment="Center"
+                                                                                VerticalAlignment="Center"/>
+                                                                </Button>
+                                                        </Grid>
                                                 </StackPanel>
 
                                                 <Grid Margin="20,5"
@@ -404,7 +422,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- Левая колонка - плейлисты -->
-                                <Border Grid.Column="0"
+                                <Border x:Name="LeftZona"
+                                        Grid.Column="0"
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="0,0,1,0"
                                         Margin="0,0,0,0"
@@ -703,6 +722,7 @@
                                 </Border>
 
 
+
                                 <Grid Grid.Column="1"
                                       Background="{DynamicResource TertiaryBackgroundBrush}">
                                         <Grid.RowDefinitions>
@@ -757,6 +777,7 @@
                                         </Border>
 
                                         <DataGrid x:Name="TracksDataGrid"
+                                                  Visibility="Visible"
                                                   VirtualizingStackPanel.IsVirtualizing="True"
                                                   VirtualizingStackPanel.VirtualizationMode="Recycling"
                                                   ScrollViewer.IsDeferredScrollingEnabled="False"
@@ -778,7 +799,10 @@
                                                   IsReadOnly="True"
                                                   SelectionMode="Single"
                                                   MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
-                                                  GridLinesVisibility="None">
+                                                  GridLinesVisibility="None"
+                                                  AllowDrop="True"
+                                                  DragOver="MainGrid_DragOver">
+                                                <!-- Drop="MainGrid_Drop"> -->
                                                 <DataGrid.ContextMenu>
 
                                                         <ContextMenu Background="{DynamicResource ContextMenuBackground}"
@@ -1004,8 +1028,32 @@
                                                         </DataGridTextColumn>
                                                 </DataGrid.Columns>
                                         </DataGrid>
-                                </Grid>
+                                        <Grid x:Name="LyricsOverlay"
+                                              Visibility="Collapsed"
+                                              Background="{DynamicResource TertiaryBackgroundBrush}">
+                                                <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <ScrollViewer x:Name="LyricsScrollViewer"
+                                                              Grid.Row="0"
+                                                              Margin="50,20"
+                                                              Background="Transparent"
+                                                              VerticalScrollBarVisibility="Auto"
+                                                              CanContentScroll="False"
+                                                              MaxHeight="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              Panel.ZIndex="1000">
+                                                        <TextBlock x:Name="BigLyricsText"
+                                                                   TextWrapping="Wrap"
+                                                                   TextAlignment="Center"
+                                                                   VerticalAlignment="Top"
+                                                                   FontSize="32"
+                                                                   Foreground="White"
+                                                                   Padding="0,100,0,100"
+                                                                   LineHeight="45"/>
+                                                </ScrollViewer>
+                                        </Grid>
 
+                                </Grid>
 
                                 <!-- Правая колонка - NOW PLAYING -->
                                 <Border Grid.Column="2"
@@ -1092,8 +1140,8 @@
                                                               Margin="10,0">
                                                         <ItemsControl.ItemsPanel>
                                                                 <ItemsPanelTemplate>
-                                                                        <UniformGrid Columns="{Binding PlayService.SpectrumViewModel.Bars.Count, 
-                           Source={x:Static services:PlayerService.Instance}}"
+                                                                        <UniformGrid Columns="{Binding SpectrumViewModel.Bars.Count, 
+                     Source={x:Static services:PlayerService.Instance}}"
                                                                                      Rows="1"/>
                                                                 </ItemsPanelTemplate>
                                                         </ItemsControl.ItemsPanel>

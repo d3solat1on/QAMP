@@ -190,6 +190,7 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
+                System.Diagnostics.Debug.WriteLine($"Ошибка в PlayTrack: {ex.Message}");
                 Stop();
             }
         }
@@ -384,6 +385,10 @@ namespace QAMP.Services
 
             PlayTrack(queue[prevIndex]);
             MainWindow.UpdateOSD();
+            if (Application.Current.MainWindow is MainWindow mainWin)
+            {
+                mainWin.UpdateLyricsView();
+            }
         }
         public void PlayNextTrack()
         {
@@ -496,6 +501,10 @@ namespace QAMP.Services
                 System.Diagnostics.Debug.WriteLine("No next track available");
             }
             MainWindow.UpdateOSD();
+            if (Application.Current.MainWindow is MainWindow mainWin)
+            {
+                mainWin.UpdateLyricsView();
+            }
         }
         public void Dispose()
         {

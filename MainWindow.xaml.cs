@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using QAMP.Audio;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
@@ -30,7 +31,8 @@ namespace QAMP
         private static PlayerService Player => Instance;
         private bool _isSliderDragging = false;
         private double _lastVolume = 0.5;
-        private Track? _lastTrackWithCover; // Исправлено: допускает null
+        private Track? _lastTrackWithCover;
+        private bool _isLyricsMode = false; // Исправлено: допускает null
 
         public MainWindow()
         {
@@ -316,6 +318,10 @@ namespace QAMP
                     NotificationWindow.Show("Это первый трек в плейлисте", this);
                 }
             }
+            if (_isLyricsMode)
+            {
+                UpdateLyricsView();
+            }
         }
 
         private void NextButton_Click(object sender, RoutedEventArgs e)
@@ -385,6 +391,10 @@ namespace QAMP
                 {
                     NotificationWindow.Show("Плейлист закончился", this);
                 }
+            }
+            if (_isLyricsMode)
+            {
+                UpdateLyricsView();
             }
         }
         private void UpdateNextTrackUI(Track? currentTrack = null)
@@ -744,9 +754,9 @@ namespace QAMP
                     MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, currentPlaylist);
                     UpdateNextTrackUI();
 
-                    if (PlayerService.Instance.IsShuffleEnabled)
+                    if (Instance.IsShuffleEnabled)
                     {
-                        PlayerService.Instance.ShuffledQueue = new List<Track>(
+                        Instance.ShuffledQueue = new List<Track>(
                             MusicLibrary.Instance.PlaybackQueue.OrderBy(x => Guid.NewGuid()));
                     }
                 }
@@ -1286,8 +1296,7 @@ namespace QAMP
         }
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
-            var menu = sender as ContextMenu;
-            if (menu == null) return;
+            if (sender is not ContextMenu menu) return;
 
             // Ищем пункт "Добавить в плейлист"
             var subMenu = menu.Items.OfType<MenuItem>()
@@ -1511,7 +1520,99 @@ namespace QAMP
             });
 #pragma warning restore CA1416
         }
+        private void ViewLyricsButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isLyricsMode = !_isLyricsMode;
+            UpdateInterfaceMode();
+        }
+        private void UpdateInterfaceMode()
+        {
+            if (_isLyricsMode)
+            {
+                var track = Player.CurrentTrack;
+                if (track != null)
+                {
+                    // ПРОВЕРКА: Если текста в памяти нет, пробуем прочитать из файла
+                    if (string.IsNullOrEmpty(track.Lyrics))
+                    {
+                        try
+                        {
+                            using var file = TagLib.File.Create(track.Path);
+                            track.Lyrics = file.Tag.Lyrics;
+                        }
+                        catch { /* файл занят или недоступен */ }
+                    }
 
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Путь: {track.Path}");
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Текст из памяти: {track.Lyrics?.Length} симв.");
+
+                    // Принудительно закидываем в UI
+                    BigLyricsText.Text = string.IsNullOrEmpty(track.Lyrics)
+                        ? "Текст для этого трека отсутствует или не загружен."
+                        : track.Lyrics;
+                }
+
+                TracksDataGrid.Visibility = Visibility.Collapsed;
+                PlaylistsListBox.Visibility = Visibility.Collapsed;
+                LeftZona.Visibility = Visibility.Collapsed;
+                LyricsOverlay.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                TracksDataGrid.Visibility = Visibility.Visible;
+                PlaylistsListBox.Visibility = Visibility.Visible;
+                LeftZona.Visibility = Visibility.Visible;
+                LyricsOverlay.Visibility = Visibility.Collapsed;
+            }
+        }
+        public void UpdateLyricsView()
+        {
+            var track = Player.CurrentTrack;
+            if (track == null) return;
+
+            // Пытаемся достать текст напрямую из файла, обходя блокировку плеера
+            string lyricsFromFile = "";
+            try
+            {
+                // Используем FileStream с разрешением на чтение другими процессами (ReadWrite)
+                using var stream = new System.IO.FileStream(track.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                var fileAbstraction = new StreamFileAbstraction(track.Path, stream, stream);
+                var tFile = TagLib.File.Create(fileAbstraction);
+                lyricsFromFile = tFile.Tag.Lyrics;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Ошибка доступа к файлу: " + ex.Message);
+            }
+
+            // Если в файле пусто, но в объекте track уже был текст (из памяти), берем его
+            string finalLyrics = !string.IsNullOrEmpty(lyricsFromFile) ? lyricsFromFile : track.Lyrics;
+
+            // Выводим в UI
+            if (string.IsNullOrEmpty(finalLyrics))
+            {
+                BigLyricsText.Text = "Текст не найден в тегах файла.";
+            }
+            else
+            {
+                BigLyricsText.Text = finalLyrics;
+                track.Lyrics = finalLyrics; // Синхронизируем объект
+            }
+
+            LyricsScrollViewer?.ScrollToHome();
+            UpdateNextTrackUI();
+        }
+        private void MainGrid_DragOver(object sender, DragEventArgs e)
+        {
+            // Проверяем, что перетаскиваются именно файлы
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effects = DragDropEffects.Copy;
+            else
+                e.Effects = DragDropEffects.None;
+
+            e.Handled = true;
+        }
+        
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
         private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void Maximize_Click(object sender, RoutedEventArgs e)
