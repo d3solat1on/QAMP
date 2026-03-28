@@ -53,7 +53,7 @@ public class DatabaseService
             // Получаем информацию о всех колонках в таблице Playlists
             var cmd = connection.CreateCommand();
             cmd.CommandText = "PRAGMA table_info(Playlists)";
-            
+
             var existingColumns = new HashSet<string>();
             using (var reader = cmd.ExecuteReader())
             {
@@ -235,11 +235,11 @@ public class DatabaseService
         {
             connection.Open();
             var command = connection.CreateCommand();
-            
-            // Пытаемся использовать запрос с IsPinned, если колонка есть
+
             try
             {
-                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+                // Правильный порядок колонок: Id, Name, Description, CoverImage, IsPinned, SortOrder
+                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
                 using var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
@@ -249,10 +249,41 @@ public class DatabaseService
                         Name = reader.GetString(1),
                         Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
                         CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
-                        IsPinned = reader.IsDBNull(4) ? false : reader.GetInt32(4) != 0
+                        IsPinned = !reader.IsDBNull(4) && reader.GetInt32(4) != 0
                     };
 
-                    // КРИТИЧЕСКИ ВАЖНО: Загружаем треки для этого плейлиста
+                    // Сортировка (SortOrder)
+                    if (!reader.IsDBNull(5))
+                    {
+                        playlist.SortOrder = reader.GetInt32(5);
+                    }
+
+                    // Дата создания (CreatedDate) - теперь правильно читаем из колонки 6
+                    if (!reader.IsDBNull(6))
+                    {
+                        string dateString = reader.GetString(6);
+                        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None,
+                            out DateTime parsedDate))
+                        {
+                            playlist.CreatedDate = parsedDate;
+                        }
+                        else if (DateTime.TryParse(dateString, out DateTime secondTry))
+                        {
+                            playlist.CreatedDate = secondTry;
+                        }
+                        else
+                        {
+                            playlist.CreatedDate = DateTime.Now;
+                        }
+                    }
+                    else
+                    {
+                        playlist.CreatedDate = DateTime.Now;
+                    }
+
+                    // Загружаем треки для этого плейлиста
                     var tracks = GetTracksForPlaylist(playlist.Id);
                     System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}");
 
@@ -266,12 +297,12 @@ public class DatabaseService
             }
             catch (SqliteException ex) when (ex.Message.Contains("IsPinned"))
             {
-                // Если колонки нет, используем старый запрос и добавляем миграцию
+                // Если колонки нет, используем старый запрос
                 System.Diagnostics.Debug.WriteLine($"Колонка IsPinned не найдена, выполняем миграцию: {ex.Message}");
                 MigrateDatabase();
-                
+
                 // Повторяем запрос уже с колонкой
-                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
                 using var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
@@ -281,12 +312,36 @@ public class DatabaseService
                         Name = reader.GetString(1),
                         Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
                         CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
-                        IsPinned = reader.IsDBNull(4) ? false : reader.GetInt32(4) != 0
+                        IsPinned = reader.IsDBNull(4) ? false : reader.GetInt32(4) != 0,
+                        SortOrder = reader.IsDBNull(5) ? 0 : reader.GetInt32(5)
                     };
 
-                    var tracks = GetTracksForPlaylist(playlist.Id);
-                    System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}");
+                    // Дата создания
+                    if (!reader.IsDBNull(6))
+                    {
+                        string dateString = reader.GetString(6);
+                        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None,
+                            out DateTime parsedDate))
+                        {
+                            playlist.CreatedDate = parsedDate;
+                        }
+                        else if (DateTime.TryParse(dateString, out DateTime secondTry))
+                        {
+                            playlist.CreatedDate = secondTry;
+                        }
+                        else
+                        {
+                            playlist.CreatedDate = DateTime.Now;
+                        }
+                    }
+                    else
+                    {
+                        playlist.CreatedDate = DateTime.Now;
+                    }
 
+                    var tracks = GetTracksForPlaylist(playlist.Id);
                     foreach (var track in tracks)
                     {
                         playlist.Tracks.Add(track);
@@ -511,30 +566,30 @@ public class DatabaseService
         cmd.ExecuteNonQuery();
     }
     public void SavePlaylistsOrder()
-{
-    var playlists = MusicLibrary.Instance.Playlists;
-    
-    using (var connection = new SqliteConnection(_connectionString))
     {
-        connection.Open();
-        using (var transaction = connection.BeginTransaction())
-        {
-            var command = connection.CreateCommand();
-            command.CommandText = "UPDATE Playlists SET SortOrder = @order WHERE Id = @id";
-            
-            var orderParam = command.Parameters.Add("@order", SqliteType.Integer);
-            var idParam = command.Parameters.Add("@id", SqliteType.Integer);
+        var playlists = MusicLibrary.Instance.Playlists;
 
-            for (int i = 0; i < playlists.Count; i++)
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            connection.Open();
+            using (var transaction = connection.BeginTransaction())
             {
-                orderParam.Value = i;
-                idParam.Value = playlists[i].Id;
-                command.ExecuteNonQuery();
+                var command = connection.CreateCommand();
+                command.CommandText = "UPDATE Playlists SET SortOrder = @order WHERE Id = @id";
+
+                var orderParam = command.Parameters.Add("@order", SqliteType.Integer);
+                var idParam = command.Parameters.Add("@id", SqliteType.Integer);
+
+                for (int i = 0; i < playlists.Count; i++)
+                {
+                    orderParam.Value = i;
+                    idParam.Value = playlists[i].Id;
+                    command.ExecuteNonQuery();
+                }
+                transaction.Commit();
             }
-            transaction.Commit();
         }
     }
-}
 
     public static void SaveSetting(string key, string value)
     {

@@ -108,6 +108,8 @@ namespace QAMP.Services
         private readonly Random _random = new();
 
         private string? _tempFilePath;
+        private double _lastGoodPosition;
+        private int _stuckCounter;
         private PlayerService()
         {
             _spectrumViewModel = new SpectrumViewModel();
@@ -250,16 +252,34 @@ namespace QAMP.Services
         {
             if (_audioFileReader != null && IsPlaying)
             {
-                Position = _audioFileReader.CurrentTime.TotalSeconds;
-                PositionChanged?.Invoke(Position);
-
-                // ПРОВЕРКА: Переключаем, только если трек играет больше 5 секунд 
-                // И до конца осталось меньше 0.5 сек.
-                if (Position > 5 && Position >= _audioFileReader.TotalTime.TotalSeconds - 0.5)
+                try
                 {
-                    _positionTimer.Stop(); // Сначала стопим таймер, чтобы не вызвало дважды
-                    PlayNextTrack();
+                    double newPosition = _audioFileReader.CurrentTime.TotalSeconds;
+
+                    if (Math.Abs(newPosition - _lastGoodPosition) < 0.01)
+                    {
+                        _stuckCounter++;
+                        if (_stuckCounter > 3)
+                        {
+                            newPosition = _lastGoodPosition + _positionTimer.Interval.TotalSeconds;
+                            _stuckCounter = 0;
+                        }
+                    }
+                    else
+                    {
+                        _stuckCounter = 0;
+                        _lastGoodPosition = newPosition;
+                    }
+
+                    Position = newPosition;
+
+                    if (Position >= _audioFileReader.TotalTime.TotalSeconds - 0.1)
+                    {
+                        _positionTimer.Stop();
+                        PlayNextTrack();
+                    }
                 }
+                catch { }
             }
         }
 

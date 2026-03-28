@@ -672,13 +672,18 @@ namespace QAMP
             if (PlaylistsListBox.SelectedItem is Playlist selected)
             {
                 System.Diagnostics.Debug.WriteLine($"=== ПРОСМОТР ПЛЕЙЛИСТА: {selected.Name} ===");
-
                 MusicLibrary.Instance.CurrentPlaylist = selected;
 
-                // Обновляем UI
                 CurrentPlaylistNameText.Text = selected.Name;
                 CurrentPlaylistDescriptionText.Text = selected.Description;
                 CurrentTracksCountText.Text = $"{selected.Tracks.Count} треков";
+                TimeSpan totalTime = selected.TotalDuration;
+                string timeString = totalTime.TotalHours >= 1
+                ? totalTime.ToString(@"hh\:mm\:ss")
+                : totalTime.ToString(@"mm\:ss");
+
+                CurrentTracksTimeText.Text = timeString;
+                CurrentTracksDateCreateText.Text = selected.CreatedDateDisplay;
 
                 if (selected.CoverImage != null && selected.CoverImage.Length > 0)
                 {
@@ -688,11 +693,7 @@ namespace QAMP
                 {
                     CurrentPlaylistCover.Source = null;
                 }
-
-                // Только обновляем отображение в DataGrid
                 TracksDataGrid.ItemsSource = selected.Tracks;
-
-                // НЕ трогаем PlaybackQueue!
             }
         }
 

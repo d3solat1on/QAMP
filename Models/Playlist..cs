@@ -69,7 +69,8 @@ namespace QAMP.Models
             }
         }
         // Дата создания
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } 
+        public string CreatedDateDisplay => $"Дата создания: {CreatedDate:dd.MM.yyyy}";
 
         public string TrackCountDisplay => $"Треков: {Tracks.Count}";
 
@@ -81,15 +82,22 @@ namespace QAMP.Models
         {
             get
             {
-                long totalSeconds = 0;
+                TimeSpan total = TimeSpan.Zero;
                 foreach (var track in Tracks)
                 {
-                    if (TimeSpan.TryParse(track.Duration, out TimeSpan duration))
+                    if (string.IsNullOrWhiteSpace(track.Duration)) continue;
+
+                    if (TimeSpan.TryParseExact(track.Duration, @"m\:s", null, out TimeSpan duration) ||
+                        TimeSpan.TryParseExact(track.Duration, @"mm\:ss", null, out duration))
                     {
-                        totalSeconds += (long)duration.TotalSeconds;
+                        total += duration;
+                    }
+                    else if (TimeSpan.TryParse(track.Duration, out duration))
+                    {
+                        total += duration;
                     }
                 }
-                return TimeSpan.FromSeconds(totalSeconds);
+                return total;
             }
         }
 
