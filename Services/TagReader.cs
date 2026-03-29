@@ -27,7 +27,8 @@ namespace QAMP.Services
                     SampleRate = file.Properties.AudioSampleRate,
                     Genre = file.Tag.FirstGenre ?? "Неизвестный жанр",
                     Extension = extension,
-                    Year = (int)file.Tag.Year
+                    Year = (int)file.Tag.Year,
+                    AddedDate = DateTime.Now
                 };
             }
             catch (Exception ex)
@@ -37,7 +38,8 @@ namespace QAMP.Services
                 {
                     Name = Path.GetFileNameWithoutExtension(filePath),
                     Path = filePath,
-                    Extension = extension
+                    Extension = extension,
+                    AddedDate = DateTime.Now
                 };
             }
         }
@@ -67,7 +69,8 @@ namespace QAMP.Services
                     Lyrics = file.Tag.Lyrics ?? "Текст песни отсутствует",
                     TrackNumber = (int)file.Tag.Track,
                     Composer = file.Tag.FirstComposer ?? "Не указан",
-                    AlbumArtist = file.Tag.FirstAlbumArtist ?? ""
+                    AlbumArtist = file.Tag.FirstAlbumArtist ?? "",
+                    AddedDate = DateTime.Now
                 };
 
                 if (file.Tag.Pictures.Length > 0)

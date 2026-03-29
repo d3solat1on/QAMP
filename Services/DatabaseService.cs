@@ -50,20 +50,20 @@ public class DatabaseService
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
 
-            // Получаем информацию о всех колонках в таблице Playlists
+            // Проверяем колонки в таблице Playlists
             var cmd = connection.CreateCommand();
             cmd.CommandText = "PRAGMA table_info(Playlists)";
 
-            var existingColumns = new HashSet<string>();
+            var playlistColumns = new HashSet<string>();
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    existingColumns.Add(reader.GetString(1));
+                    playlistColumns.Add(reader.GetString(1));
                 }
             }
 
-            // Проверяем и добавляем недостающие колонки
+            // Проверяем и добавляем недостающие колонки в Playlists
             var columnsToAdd = new Dictionary<string, string>
             {
                 { "IsPinned", "INTEGER DEFAULT 0" },
@@ -72,7 +72,7 @@ public class DatabaseService
 
             foreach (var column in columnsToAdd)
             {
-                if (!existingColumns.Contains(column.Key))
+                if (!playlistColumns.Contains(column.Key))
                 {
                     System.Diagnostics.Debug.WriteLine($"Добавляем колонку {column.Key} в таблицу Playlists...");
                     var alterCmd = connection.CreateCommand();
@@ -84,6 +84,33 @@ public class DatabaseService
                 {
                     System.Diagnostics.Debug.WriteLine($"Колонка {column.Key} уже существует");
                 }
+            }
+
+            // Проверяем колонки в таблице PlaylistTracks
+            var ptCmd = connection.CreateCommand();
+            ptCmd.CommandText = "PRAGMA table_info(PlaylistTracks)";
+
+            var playlistTracksColumns = new HashSet<string>();
+            using (var reader = ptCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    playlistTracksColumns.Add(reader.GetString(1));
+                }
+            }
+
+            // Проверяем и добавляем недостающие колонки в PlaylistTracks
+            if (!playlistTracksColumns.Contains("AddedDate"))
+            {
+                System.Diagnostics.Debug.WriteLine("Добавляем колонку AddedDate в таблицу PlaylistTracks...");
+                var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE PlaylistTracks ADD COLUMN AddedDate TEXT";
+                alterCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Колонка AddedDate успешно добавлена");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Колонка AddedDate уже существует в PlaylistTracks");
             }
         }
         catch (Exception ex)
@@ -127,6 +154,7 @@ public class DatabaseService
         CREATE TABLE IF NOT EXISTS PlaylistTracks (
             PlaylistId INTEGER,
             TrackId INTEGER,
+            AddedDate TEXT,
             FOREIGN KEY(PlaylistId) REFERENCES Playlists(Id) ON DELETE CASCADE,
             FOREIGN KEY(TrackId) REFERENCES Tracks(Id) ON DELETE CASCADE
         );";
@@ -454,13 +482,28 @@ public class DatabaseService
 
         System.Diagnostics.Debug.WriteLine($"Финальный ID трека в БД: {trackId}");
 
-        // Добавляем связь с плейлистом (INSERT OR IGNORE чтобы не дублировать)
-        var linkCmd = connection.CreateCommand();
-        linkCmd.CommandText = "INSERT OR IGNORE INTO PlaylistTracks (PlaylistId, TrackId) VALUES ($pId, $tId)";
-        linkCmd.Parameters.AddWithValue("$pId", playlistId);
-        linkCmd.Parameters.AddWithValue("$tId", trackId);
-        int linkResult = linkCmd.ExecuteNonQuery();
-        System.Diagnostics.Debug.WriteLine($"Связь добавлена, результат: {linkResult}");
+        // Добавляем связь с плейлистом
+        var checkLinkCmd = connection.CreateCommand();
+        checkLinkCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $pId AND TrackId = $tId";
+        checkLinkCmd.Parameters.AddWithValue("$pId", playlistId);
+        checkLinkCmd.Parameters.AddWithValue("$tId", trackId);
+        long existingLink = (long)checkLinkCmd.ExecuteScalar();
+
+        if (existingLink == 0)
+        {
+            // Новая связь - добавляем с текущей датой
+            var linkCmd = connection.CreateCommand();
+            linkCmd.CommandText = "INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate) VALUES ($pId, $tId, $date)";
+            linkCmd.Parameters.AddWithValue("$pId", playlistId);
+            linkCmd.Parameters.AddWithValue("$tId", trackId);
+            linkCmd.Parameters.AddWithValue("$date", track.AddedDate.ToString("o")); // ISO 8601 формат
+            int linkResult = linkCmd.ExecuteNonQuery();
+            System.Diagnostics.Debug.WriteLine($"Новая связь добавлена, результат: {linkResult}");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"Связь уже существует, пропускаем добавление");
+        }
 
         // Проверяем, сколько плейлистов содержат этот трек
         var countCmd = connection.CreateCommand();
@@ -510,7 +553,7 @@ public class DatabaseService
 
             var command = connection.CreateCommand();
             command.CommandText = @"
-            SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year 
+            SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, pt.AddedDate
             FROM Tracks t
             INNER JOIN PlaylistTracks pt ON t.Id = pt.TrackId
             WHERE pt.PlaylistId = $pId";
@@ -532,10 +575,11 @@ public class DatabaseService
                     Genre = reader.IsDBNull(6) ? "Неизвестно" : reader.GetString(6),
                     Bitrate = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
                     SampleRate = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
-                    Year = reader.IsDBNull(9) ? 0 : reader.GetInt16(9)
+                    Year = reader.IsDBNull(9) ? 0 : reader.GetInt16(9),
+                    AddedDate = reader.IsDBNull(10) ? DateTime.Now : DateTime.Parse(reader.GetString(10))
                 };
 
-                System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, Executor={track.Executor}");
+                System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, Executor={track.Executor}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                 tracks.Add(track);
             }
 

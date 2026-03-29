@@ -1,3 +1,4 @@
+#pragma warning disable SYSLIB1054
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;

@@ -6,6 +6,7 @@ namespace QAMP.Models
 {
     public class Track : INotifyPropertyChanged
     {
+        public DateTime AddedDate { get; set; }
         public int Id { get; set; }
         public string? Extension { get; set; }
         public string? Path { get; set; }

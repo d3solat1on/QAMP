@@ -32,8 +32,8 @@
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
                 <converters:PercentOfConverter x:Key="PercentOfConverter"/>
                 <BooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
-                <converters:BindingProxy x:Key="Proxy" 
-                        Data="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config}"/>
+                <converters:BindingProxy x:Key="Proxy"
+                                         Data="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config}"/>
         </Window.Resources>
 
         <Grid>
@@ -1041,9 +1041,22 @@
                                                         </DataGridTextColumn>
                                                         <DataGridTextColumn Header="GENRE"
                                                                             Binding="{Binding Genre}"
-                                                                       Visibility="{Binding Data.IsCompactMode, 
+                                                                            Visibility="{Binding Data.IsCompactMode, 
                  Source={StaticResource Proxy}, 
                  Converter={StaticResource InverseBoolToVisConverter}}"
+                                                                            Width="1*">
+                                                                <DataGridTextColumn.ElementStyle>
+                                                                        <Style TargetType="TextBlock">
+                                                                                <Setter Property="TextBlock.Foreground"
+                                                                                        Value="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                <Setter Property="TextBlock.Margin"
+                                                                                        Value="10,0,0,0"/>
+                                                                        </Style>
+                                                                </DataGridTextColumn.ElementStyle>
+                                                        </DataGridTextColumn>
+                                                        <DataGridTextColumn Header="DATE ADDED" 
+                    Binding="{Binding AddedDate, StringFormat=\{0:dd.MM.yyyy HH:mm\}}" 
+                    Visibility="{Binding Data.IsCompactMode, Source={StaticResource Proxy}, Converter={StaticResource InverseBoolToVisConverter}}"
                                                                             Width="1*">
                                                                 <DataGridTextColumn.ElementStyle>
                                                                         <Style TargetType="TextBlock">
