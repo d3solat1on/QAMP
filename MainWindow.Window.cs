@@ -59,21 +59,6 @@ namespace QAMP
                     e.Handled = true;
                     break;
 
-                // case Key.F1:
-                //     TogglePlayPause();
-                //     e.Handled = true;
-                //     break;
-
-                // case Key.F2:
-                //     _playService.PlayPreviousTrack();
-                //     e.Handled = true;
-                //     break;
-
-                // case Key.F3:
-                //     _playService.PlayNextTrack();
-                //     e.Handled = true;
-                //     break;
-
                 case Key.Right:
                     _playService.SeekRelative(5);
                     e.Handled = true;
