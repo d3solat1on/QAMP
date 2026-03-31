@@ -164,13 +164,14 @@ namespace QAMP
                     dialog.PlaylistDescription,
                     dialog.PlaylistCoverImage);
 
-                MusicLibrary.Instance.RefreshPlaylists();
-
-                var newPlaylist = MusicLibrary.Instance.Playlists
-                    .FirstOrDefault(p => p.Id == (int)newId);
-
+                // Вместо RefreshPlaylists() загружаем только новый плейлист
+                var newPlaylist = DatabaseService.GetPlaylistById((int)newId);
+                
                 if (newPlaylist != null)
                 {
+                    // Добавляем новый плейлист в коллекцию (оптимизировано)
+                    MusicLibrary.Instance.AddNewPlaylist(newPlaylist);
+
                     PlaylistsListBox.SelectedItem = newPlaylist;
 
                     CurrentPlaylistNameText.Text = newPlaylist.Name;
@@ -187,9 +188,9 @@ namespace QAMP
                     {
                         CurrentPlaylistCover.Source = null;
                     }
+                    
+                    NotificationWindow.Show($"Плейлист \"{dialog.PlaylistName}\" создан", this);
                 }
-
-                NotificationWindow.Show($"Плейлист \"{dialog.PlaylistName}\" создан", this);
             }
         }
 

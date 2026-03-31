@@ -68,7 +68,7 @@ namespace QAMP
 
             if (Player.CurrentTrack != null && Library.CurrentPlaylist.Tracks.Contains(Player.CurrentTrack))
             {
-                Player.Resume(); 
+                Player.Resume();
                 UpdatePlayPauseIcon(true);
                 UpdateOSD();
                 return;
@@ -96,7 +96,7 @@ namespace QAMP
                 }
                 _playService.ShuffledQueue = shuffledList;
             }
-            UpdatePlayPauseIcon(true); 
+            UpdatePlayPauseIcon(true);
             UpdateNextTrackUI();
             UpdateOSD();
         }
@@ -114,6 +114,13 @@ namespace QAMP
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
+            // Проверяем, что у нас есть текущий трек
+            if (Player.CurrentTrack == null)
+            {
+                NotificationWindow.Show("Нет текущего трека", this);
+                return;
+            }
+
             if (_playService.IsShuffleEnabled)
             {
                 int currentIndex = _playService.ShuffledQueue.IndexOf(Player.CurrentTrack);
@@ -148,22 +155,49 @@ namespace QAMP
             }
             else
             {
+                // Обычный режим (без shuffle)
+                if (MusicLibrary.Instance.PlaybackQueue.Count == 0)
+                {
+                    NotificationWindow.Show("Плейлист пуст", this);
+                    return;
+                }
+
                 var currentIndex = MusicLibrary.Instance.PlaybackQueue.IndexOf(Player.CurrentTrack);
+                
+                // КРИТИЧНАЯ ПРОВЕРКА: currentIndex должен быть валидным
                 if (currentIndex > 0)
                 {
                     Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[currentIndex - 1]);
                     UpdateNextTrackUI();
                 }
-                else if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                else if (currentIndex == -1)
                 {
-                    Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1]);
-                    UpdateNextTrackUI();
+                    // Трека нет в очереди
+                    if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                    {
+                        Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1]);
+                        UpdateNextTrackUI();
+                    }
+                    else
+                    {
+                        NotificationWindow.Show("Это первый трек в плейлисте", this);
+                    }
                 }
-                else
+                else if (currentIndex == 0)
                 {
-                    NotificationWindow.Show("Это первый трек в плейлисте", this);
+                    // Это первый трек
+                    if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                    {
+                        Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1]);
+                        UpdateNextTrackUI();
+                    }
+                    else
+                    {
+                        NotificationWindow.Show("Это первый трек в плейлисте", this);
+                    }
                 }
             }
+            
             if (_isLyricsMode)
             {
                 UpdateLyricsView();
@@ -172,6 +206,13 @@ namespace QAMP
 
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
+            // Проверяем, что у нас есть текущий трек
+            if (Player.CurrentTrack == null)
+            {
+                NotificationWindow.Show("Нет текущего трека", this);
+                return;
+            }
+
             if (_playService.IsShuffleEnabled)
             {
                 int currentIndex = _playService.ShuffledQueue.IndexOf(Player.CurrentTrack);
@@ -193,8 +234,9 @@ namespace QAMP
                         NotificationWindow.Show("Плейлист закончился", this);
                     }
                 }
-                else
+                else if (currentIndex == -1)
                 {
+                    // Трека нет в ShuffledQueue, пересчитываем очередь
                     var remainingTracks = MusicLibrary.Instance.PlaybackQueue
                         .Where(t => t != Player.CurrentTrack)
                         .OrderBy(x => Guid.NewGuid())
@@ -206,28 +248,59 @@ namespace QAMP
                         var nextTrack = _playService.ShuffledQueue[1];
                         Player.PlayTrack(nextTrack);
                     }
+                    else
+                    {
+                        NotificationWindow.Show("Плейлист закончился", this);
+                    }
                 }
 
                 UpdateNextTrackUI();
             }
             else
             {
+                // Обычный режим (без shuffle)
+                if (MusicLibrary.Instance.PlaybackQueue.Count == 0)
+                {
+                    NotificationWindow.Show("Плейлист пуст", this);
+                    return;
+                }
+
                 var currentIndex = MusicLibrary.Instance.PlaybackQueue.IndexOf(Player.CurrentTrack);
-                if (currentIndex < MusicLibrary.Instance.PlaybackQueue.Count - 1)
+                
+                // КРИТИЧНАЯ ПРОВЕРКА: currentIndex должен быть валидным
+                if (currentIndex != -1 && currentIndex < MusicLibrary.Instance.PlaybackQueue.Count - 1)
                 {
                     Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[currentIndex + 1]);
                     UpdateNextTrackUI();
                 }
-                else if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                else if (currentIndex == MusicLibrary.Instance.PlaybackQueue.Count - 1)
                 {
-                    Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[0]);
-                    UpdateNextTrackUI();
+                    // Конец плейлиста
+                    if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                    {
+                        Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[0]);
+                        UpdateNextTrackUI();
+                    }
+                    else
+                    {
+                        NotificationWindow.Show("Плейлист закончился", this);
+                    }
                 }
                 else
                 {
-                    NotificationWindow.Show("Плейлист закончился", this);
+                    // currentIndex = -1 — трека нет в очереди, попытаемся проиграть первый
+                    if (MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                    {
+                        Player.PlayTrack(MusicLibrary.Instance.PlaybackQueue[0]);
+                        UpdateNextTrackUI();
+                    }
+                    else
+                    {
+                        NotificationWindow.Show("Плейлист закончился", this);
+                    }
                 }
             }
+            
             if (_isLyricsMode)
             {
                 UpdateLyricsView();
@@ -236,17 +309,29 @@ namespace QAMP
 
         private void UpdateNextTrackUI(Track? currentTrack = null)
         {
-            var next = _playService.GetNextTrack();
-
-            if (next != null)
+            if (Player.RepeatMode == RepeatMode.RepeatOne)
             {
-                NextTrackName.Text = $"{next.Executor} - {next.Name}";
-                NextTrackName.Foreground = Brushes.White;
+                var current = Player.CurrentTrack;
+                if (current != null)
+                {
+                    NextTrackName.Text = "Повтор текущего трека";
+                    NextTrackName.Foreground = Brushes.White;
+                }
             }
             else
             {
-                NextTrackName.Text = "Плейлист закончился";
-                NextTrackName.Foreground = Brushes.DimGray;
+                var next = _playService.GetNextTrack();
+
+                if (next != null)
+                {
+                    NextTrackName.Text = $"{next.Executor} - {next.Name}";
+                    NextTrackName.Foreground = Brushes.White;
+                }
+                else
+                {
+                    NextTrackName.Text = "Плейлист закончился";
+                    NextTrackName.Foreground = Brushes.DimGray;
+                }
             }
         }
 

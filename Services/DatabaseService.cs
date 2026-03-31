@@ -448,6 +448,95 @@ public class DatabaseService
         return playlists;
     }
 
+    /// <summary>
+    /// Загружает только один плейлист по ID (оптимизация для частичного обновления)
+    /// </summary>
+    public static Playlist? GetPlaylistById(int playlistId)
+    {
+        System.Diagnostics.Debug.WriteLine($"=== ЗАГРУЗКА ПЛЕЙЛИСТА ПО ID: {playlistId} ===");
+
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+
+            try
+            {
+                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists WHERE Id = $id";
+                command.Parameters.AddWithValue("$id", playlistId);
+                
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    var playlist = new Playlist
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                        CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
+                        IsPinned = !reader.IsDBNull(4) && reader.GetInt32(4) != 0
+                    };
+
+                    // Сортировка (SortOrder)
+                    if (!reader.IsDBNull(5))
+                    {
+                        playlist.SortOrder = reader.GetInt32(5);
+                    }
+
+                    // Дата создания (CreatedDate)
+                    if (!reader.IsDBNull(6))
+                    {
+                        string dateString = reader.GetString(6);
+                        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None,
+                            out DateTime parsedDate))
+                        {
+                            playlist.CreatedDate = parsedDate;
+                        }
+                        else if (DateTime.TryParse(dateString, out DateTime secondTry))
+                        {
+                            playlist.CreatedDate = secondTry;
+                        }
+                        else
+                        {
+                            playlist.CreatedDate = DateTime.Now;
+                        }
+                    }
+                    else
+                    {
+                        playlist.CreatedDate = DateTime.Now;
+                    }
+
+                    // Тип сортировки (SortType)
+                    if (!reader.IsDBNull(7))
+                    {
+                        playlist.SortType = (TrackSortType)reader.GetInt32(7);
+                    }
+
+                    // Загружаем треки для этого плейлиста
+                    var tracks = GetTracksForPlaylist(playlist.Id);
+                    System.Diagnostics.Debug.WriteLine($"Загружен плейлист '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков");
+                    
+                    foreach (var track in tracks)
+                    {
+                        playlist.Tracks.Add(track);
+                    }
+
+                    return playlist;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Плейлист с ID={playlistId} не найден в БД");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлиста ID={playlistId}: {ex.Message}");
+                throw;
+            }
+        }
+    }
+
     public static void SaveTrackToPlaylist(int playlistId, Track track)
     {
         System.Diagnostics.Debug.WriteLine($"=== СОХРАНЕНИЕ ТРЕКА В ПЛЕЙЛИСТ {playlistId} ===");

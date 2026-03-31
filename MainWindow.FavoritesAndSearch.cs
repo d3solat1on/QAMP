@@ -72,19 +72,54 @@ namespace QAMP
 
                 if (NotificationWindow.Show($"Удалить плейлист \"{selectedPlaylist.Name}\"?", this, NotificationMode.Confirm) == true)
                 {
+                    // КРИТИЧНО: Сохраняем какой плейлист был выбран ДО удаления
+                    var previouslySelectedPlaylist = MusicLibrary.Instance.CurrentPlaylist;
+                    
                     DatabaseService.DeletePlaylist(selectedPlaylist.Id);
 
-                    if (MusicLibrary.Instance.CurrentPlaylist?.Id == selectedPlaylist.Id)
+                    // Удаляем плейлист из коллекции
+                    var playlistToRemove = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
+                    if (playlistToRemove != null)
                     {
-                        MusicLibrary.Instance.CurrentPlaylist = null;
+                        MusicLibrary.Instance.Playlists.Remove(playlistToRemove);
                     }
 
-                    MusicLibrary.Instance.RefreshPlaylists();
-                    PlaylistsListBox.SelectedItem = null;
-                    CurrentPlaylistNameText.Text = "";
-                    CurrentPlaylistDescriptionText.Text = "";
-                    CurrentPlaylistCover.Source = null;
-                    CurrentTracksCountText.Text = "0 треков";
+                    // ПОСЛЕ удаления: восстанавливаем правильный выбор в ListBox
+                    // Проверяем, существует ли плейлист, который был выбран ранее
+                    if (previouslySelectedPlaylist != null)
+                    {
+                        var stillExistsPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == previouslySelectedPlaylist.Id);
+                        if (stillExistsPlaylist != null)
+                        {
+                            // Ранее выбранный плейлист еще существует - восстанавливаем его
+                            PlaylistsListBox.SelectedItem = stillExistsPlaylist;
+                        }
+                        else
+                        {
+                            // Ранее выбранный был удален - выбираем первый доступный
+                            if (MusicLibrary.Instance.Playlists.Count > 0)
+                            {
+                                PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
+                            }
+                            else
+                            {
+                                // Нет других плейлистов, очищаем UI
+                                MusicLibrary.Instance.CurrentPlaylist = null;
+                                CurrentPlaylistNameText.Text = "";
+                                CurrentPlaylistDescriptionText.Text = "";
+                                CurrentPlaylistCover.Source = null;
+                                CurrentTracksCountText.Text = "0 треков";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Раньше ничего не было выбрано - выбираем первый доступный
+                        if (MusicLibrary.Instance.Playlists.Count > 0)
+                        {
+                            PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
+                        }
+                    }
 
                     NotificationWindow.Show("Плейлист удален", this);
                 }
@@ -99,7 +134,7 @@ namespace QAMP
                 {
                     double volume = VolumeSlider.Value / 100.0;
                     Player.Volume = volume;
-                    
+
                     string volumeStr = volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
                     DatabaseService.SaveSetting("Volume", volumeStr);
 
@@ -139,48 +174,30 @@ namespace QAMP
 
         private void RepeatButton_Click(object sender, RoutedEventArgs e)
         {
+            var resources = Application.Current.Resources;
+
             switch (Player.RepeatMode)
             {
                 case RepeatMode.NoRepeat:
                     Player.RepeatMode = RepeatMode.RepeatAll;
+                    RepeatIcon.Data = (Geometry)resources["repeat_onGeometry"];
                     break;
+
                 case RepeatMode.RepeatAll:
                     Player.RepeatMode = RepeatMode.RepeatOne;
+                    RepeatIcon.Data = (Geometry)resources["repeat_one_onGeometry"];
                     break;
+
                 case RepeatMode.RepeatOne:
                     Player.RepeatMode = RepeatMode.NoRepeat;
+                    RepeatIcon.Data = (Geometry)resources["repeatGeometry"];
                     break;
             }
             UpdateNextTrackUI();
         }
 
-        private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
-            {
-                if (selectedPlaylist.Name == MusicLibrary.FavoritesName)
-                {
-                    NotificationWindow.Show("Системный плейлист нельзя удалить", this);
-                    return;
-                }
-
-                if (NotificationWindow.Show($"Удалить плейлист \"{selectedPlaylist.Name}\"?", this, NotificationMode.Confirm) == true)
-                {
-                    DatabaseService.DeletePlaylist(selectedPlaylist.Id);
-
-                    if (MusicLibrary.Instance.CurrentPlaylist?.Id == selectedPlaylist.Id)
-                    {
-                        MusicLibrary.Instance.CurrentPlaylist = null;
-                        MusicLibrary.Instance.PlaybackQueue.Clear();
-                    }
-
-                    MusicLibrary.Instance.RefreshPlaylists();
-                    PlaylistsListBox.SelectedItem = null;
-
-                    NotificationWindow.Show("Плейлист удален", this);
-                }
-            }
-        }
+        private void DeletePlaylist_Click(object sender, RoutedEventArgs e) => RemovePlaylist_Click(sender, e);
+        
 
         private void PinPlaylist_Click(object sender, RoutedEventArgs e)
         {
@@ -189,7 +206,9 @@ namespace QAMP
                 bool newPinnedState = !selectedPlaylist.IsPinned;
                 DatabaseService.UpdatePlaylistPinnedState(selectedPlaylist.Id, newPinnedState);
                 selectedPlaylist.IsPinned = newPinnedState;
-                MusicLibrary.Instance.RefreshPlaylists();
+                
+                // Используем RefreshSinglePlaylist для оптимизации вместо RefreshPlaylists
+                MusicLibrary.Instance.RefreshSinglePlaylist(selectedPlaylist.Id);
                 PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
                 var message = newPinnedState ? "Плейлист закреплен" : "Плейлист откреплен";
                 NotificationWindow.Show(message, this);
@@ -232,7 +251,10 @@ namespace QAMP
 
                 if (dialog.ShowDialog() == true)
                 {
-                    MusicLibrary.Instance.RefreshPlaylists();
+                    // Вместо RefreshPlaylists() используем RefreshSinglePlaylist для оптимизации
+                    MusicLibrary.Instance.RefreshSinglePlaylist(selectedPlaylist.Id);
+                    
+                    // Восстанавливаем выбор плейлиста в списке
                     PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
                 }
             }

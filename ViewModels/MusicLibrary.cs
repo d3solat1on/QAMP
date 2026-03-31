@@ -235,14 +235,45 @@ namespace QAMP.ViewModels
                 Playlists.Add(updatedPlaylist);
             }
         }
+        
         public void RefreshSinglePlaylist(int playlistId)
         {
-            // Загружаем только один плейлист из базы
-            var freshPlaylist = DatabaseService.GetPlaylists().FirstOrDefault(p => p.Id == playlistId);
+            System.Diagnostics.Debug.WriteLine($"=== REFRESH SINGLE PLAYLIST ID={playlistId} ===");
+            
+            // Загружаем только один плейлист из базы (полностью свежий)
+            var freshPlaylist = DatabaseService.GetPlaylistById(playlistId);
             if (freshPlaylist != null)
             {
+                System.Diagnostics.Debug.WriteLine($"Обновляем плейлист '{freshPlaylist.Name}' в памяти");
                 UpdatePlaylist(freshPlaylist);
+                
+                // КРИТИЧНО: Если это текущий плейлист, обновляем UI
+                if (CurrentPlaylist?.Id == playlistId)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Это текущий плейлист, синхронизируем UI");
+                    // Переустанавливаем CurrentPlaylist чтобы вызвать обновление в UI
+                    var updatedPlaylist = Playlists.FirstOrDefault(p => p.Id == playlistId);
+                    if (updatedPlaylist != null)
+                    {
+                        CurrentPlaylist = updatedPlaylist;
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"=== КОНЕЦ REFRESH SINGLE PLAYLIST ===");
             }
+        }
+
+        /// <summary>
+        /// Добавляет новый плейлист в коллекцию (для оптимизации при создании нового)
+        /// </summary>
+        public void AddNewPlaylist(Playlist newPlaylist)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== ДОБАВЛЕНИЕ НОВОГО ПЛЕЙЛИСТА: '{newPlaylist.Name}' (ID={newPlaylist.Id}) ===");
+            
+            // Добавляем в коллекцию
+            Playlists.Add(newPlaylist);
+            
+            System.Diagnostics.Debug.WriteLine($"Плейлист добавлен. Всего плейлистов: {Playlists.Count}");
         }
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

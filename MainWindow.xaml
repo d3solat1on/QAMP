@@ -309,11 +309,11 @@
                                                                         Width="40"
                                                                         Height="40"
                                                                         Margin="5,0">
-                                                                        <Path
+                                                                        <Path x:Name="RepeatIcon"
                                                                                 Width="25"
                                                                                 Height="25"
                                                                                 Margin="5"
-                                                                                Data="{StaticResource loopGeometry}"
+                                                                                Data="{StaticResource repeatGeometry}"
                                                                                 Fill="{DynamicResource AccentBrush}"
                                                                                 Stretch="Uniform"
                                                                                 HorizontalAlignment="Center"
