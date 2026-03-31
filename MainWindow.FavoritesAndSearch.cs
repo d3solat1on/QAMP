@@ -20,26 +20,40 @@ namespace QAMP
     {
         private void RemoveFromPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (Library.CurrentPlaylist == null)
+            var selectedPlaylist = Library.CurrentPlaylist;
+            if (selectedPlaylist == null)
             {
                 NotificationWindow.Show("Сначала выберите плейлист", this);
                 return;
             }
 
-            if (TracksDataGrid.SelectedItem is Track selectedTrack &&
-                PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
+            var selectedTracks = TracksDataGrid.SelectedItems.Cast<Track>().ToList();
+
+            if (selectedTracks.Count > 0)
             {
+                string trackName = selectedTracks.Count == 1
+                    ? $"\"{selectedTracks[0].Name}\""
+                    : $"{selectedTracks.Count} треков";
+
                 var result = NotificationWindow.Show(
-                   $"Удалить трек \"{selectedTrack.Name}\" из плейлиста \"{Library.CurrentPlaylist.Name}\"?",
-                   this,
-                   NotificationMode.Confirm);
+                    $"Удалить {trackName} из плейлиста \"{selectedPlaylist.Name}\"?",
+                    this,
+                    NotificationMode.Confirm);
 
                 if (result == true)
                 {
-                    DatabaseService.RemoveTrackFromPlaylist(selectedPlaylist.Id, selectedTrack.Id);
-                    selectedPlaylist.Tracks.Remove(selectedTrack);
-                    TracksDataGrid.ItemsSource = null;
-                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
+                    foreach (var track in selectedTracks)
+                    {
+                        DatabaseService.RemoveTrackFromPlaylist(selectedPlaylist.Id, track.Id);
+                        selectedPlaylist.Tracks.Remove(track);
+                    }
+
+                    if (selectedPlaylist.Tracks is not System.Collections.Specialized.INotifyCollectionChanged)
+                    {
+                        TracksDataGrid.ItemsSource = null;
+                        TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
+                    }
+
                     CurrentTracksCountText.Text = $"{selectedPlaylist.Tracks.Count} треков";
                     UpdateNextTrackUI();
                 }
@@ -79,25 +93,34 @@ namespace QAMP
 
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (Player != null)
+            try
             {
-                double volume = VolumeSlider.Value / 100.0;
-                Player.Volume = volume;
-                DatabaseService.SaveSetting("Volume", volume.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                if (Player != null)
+                {
+                    double volume = VolumeSlider.Value / 100.0;
+                    Player.Volume = volume;
+                    
+                    string volumeStr = volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    DatabaseService.SaveSetting("Volume", volumeStr);
 
-                if (VolumeSlider.Value == 0)
-                {
-                    VolumeImage.Data = (Geometry)Application.Current.Resources["volume_offGeometry"];
-                }
-                else
-                {
-                    VolumeImage.Data = (Geometry)Application.Current.Resources["volumeGeometry"];
-                }
+                    if (VolumeSlider.Value == 0)
+                    {
+                        VolumeImage.Data = (Geometry)Application.Current.Resources["volume_offGeometry"];
+                    }
+                    else
+                    {
+                        VolumeImage.Data = (Geometry)Application.Current.Resources["volumeGeometry"];
+                    }
 
-                if (VolumePercentage != null)
-                {
-                    VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
+                    if (VolumePercentage != null)
+                    {
+                        VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR in VolumeSlider_ValueChanged: {ex.Message}");
             }
         }
 
@@ -328,7 +351,9 @@ namespace QAMP
             else if (track != null)
             {
                 var favoritePlaylist = Library.Playlists.FirstOrDefault(p => p.Name == MusicLibrary.FavoritesName);
-                isFavorite = favoritePlaylist?.Tracks.Contains(track) ?? false;
+                // Проверяем по ID вместо Contains(), так как Contains() сравнивает по ссылкам объектов
+                // Если трек загружен из разных источников - это разные объекты, хоть ID одинаковые
+                isFavorite = favoritePlaylist?.Tracks.Any(t => t.Id == track.Id) ?? false;
             }
             else
             {

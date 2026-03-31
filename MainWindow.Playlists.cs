@@ -245,6 +245,13 @@ namespace QAMP
                     System.Diagnostics.Debug.WriteLine("Устанавливаю ItemsSource для дефолтной сортировки");
                     TracksDataGrid.ItemsSource = selected.Tracks;
                 }
+
+                // Обновляем иконку избранного при переключении плейлиста
+                // в случае если текущий трек все еще воспроизводится
+                if (Player.CurrentTrack != null)
+                {
+                    UpdateFavoriteIcon(Player.CurrentTrack);
+                }
             }
         }
 

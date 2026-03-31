@@ -196,6 +196,73 @@ namespace QAMP.Services
                 Stop();
             }
         }
+
+        /// <summary>
+        /// Загружает трек без воспроизведения (для восстановления состояния при запуске)
+        /// </summary>
+        public void LoadTrack(Track track)
+        {
+            try
+            {
+                Stop();
+                CurrentTrack = track;
+
+                string extension = Path.GetExtension(track.Path).ToLowerInvariant();
+                ISampleProvider sampleProvider;
+
+                if (extension == ".flac")
+                {
+                    var flacReader = new FlacReader(track.Path);
+                    _audioFileReader = flacReader;
+                    sampleProvider = flacReader.ToSampleProvider();
+                }
+                else
+                {
+                    var reader = new AudioFileReader(track.Path);
+                    _audioFileReader = reader;
+                    sampleProvider = reader;
+                }
+
+                float[] frequencies = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+
+                // Создаем новый эквалайзер
+                CurrentEqualizer = new EqualizerFilter(sampleProvider, frequencies);
+
+                // ВАЖНО: Применяем сохраненные настройки к новому эквалайзеру
+                ApplySavedEqualizerSettings();
+
+                var aggregator = new SampleAggregator(CurrentEqualizer, 256);
+
+                aggregator.FftCalculated += (s, fftData) =>
+                {
+                    Application.Current.Dispatcher.BeginInvoke(
+                        new Action(() =>
+                        {
+                            SpectrumViewModel?.Update(fftData);
+                        }),
+                        DispatcherPriority.Background);
+                };
+
+                _waveOutEvent = new WaveOutEvent();
+                _waveOutEvent.Init(aggregator);
+                _waveOutEvent.Volume = (float)Volume;
+                // НЕ вызываем Play() - трек будет загружен, но на паузе
+
+                Duration = _audioFileReader.TotalTime.TotalSeconds;
+                IsPlaying = false;
+                _positionTimer.Stop();
+
+                _waveOutEvent.PlaybackStopped += OnPlaybackStopped;
+                TrackChanged?.Invoke(track);
+            }
+            catch (Exception ex)
+            {
+                NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
+                System.Diagnostics.Debug.WriteLine($"Ошибка в LoadTrack: {ex.Message}");
+                Stop();
+            }
+        }
+
         private void ApplySavedEqualizerSettings()
         {
             if (CurrentEqualizer == null) return;

@@ -8,9 +8,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using QAMP.Audio;
+using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
+using QAMP.ViewModels;
 using QAMP.Windows;
+using static QAMP.Dialogs.NotificationWindow;
 
 namespace QAMP
 {
@@ -88,10 +91,31 @@ namespace QAMP
                         _playService.PlayPreviousTrack();
                         e.Handled = true;
                     }
-                    break;    
+                    break;
             }
         }
 
+        protected void TracksDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                var currentPlaylist = Library.CurrentPlaylist;
+                if (currentPlaylist == null) return;
+
+                var tracksToDelete = TracksDataGrid.SelectedItems.Cast<Track>().ToList();
+
+                if (tracksToDelete.Count == 0) return;
+                var result = NotificationWindow.Show("Вы уверены, что хотите удалить выбранные треки?", this, NotificationMode.Confirm);
+                if (result == true)                {
+                    foreach (var track in tracksToDelete)
+                    {
+                        DatabaseService.RemoveTrackFromPlaylist(currentPlaylist.Id, track.Id);
+                        currentPlaylist.Tracks.Remove(track);
+                    }
+                }
+                e.Handled = true;
+            }
+        }
         private static readonly OSDWindow _osd = new();
 
         public static void UpdateOSD()
@@ -107,34 +131,57 @@ namespace QAMP
         protected override void OnClosing(CancelEventArgs e)
         {
 #pragma warning disable CA1416
-            var config = SettingsManager.Instance.Config;
-            string volumeStr = _playService.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            DatabaseService.SaveSetting("Volume", volumeStr);
-            if (config.CloseToTray)
+            try
             {
-                e.Cancel = true;
-                Hide();
-
-                SettingsManager.Instance.Save();
-
-                if (_notifyIcon != null)
+                // СНАЧАЛА - сохраняем ВСЕ данные ДО ВСЕГО
+                try
                 {
-                    _notifyIcon.Visible = true;
+                    var config = SettingsManager.Instance.Config;
+                    
+                    // Сохраняем громкость
+                    string volumeStr = _playService.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    DatabaseService.SaveSetting("Volume", volumeStr);
+                    System.Diagnostics.Debug.WriteLine($"=== OnClosing: Сохранена громкость: Player.Volume={_playService.Volume} -> БД='{volumeStr}'");
+                    
+                    // Сохраняем текущий трек и позицию воспроизведения
+                    if (_playService.CurrentTrack != null)
+                    {
+                        DatabaseService.SaveSetting("LastTrackPath", _playService.CurrentTrack.Path ?? "");
+                        string positionStr = _playService.Position.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        DatabaseService.SaveSetting("LastTrackPosition", positionStr);
+                    }
+                    
+                    SettingsManager.Instance.Save();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR: Ошибка при сохранении данных: {ex.Message}");
+                }
+                
+                // ПОТОМ - убираем иконку и закрываемся
+                try
+                {
+                    var config = SettingsManager.Instance.Config;
+                    
+                    if (!config.CloseToTray)
+                    {
+                        if (_notifyIcon != null)
+                        {
+                            _notifyIcon.Visible = false;
+                            _notifyIcon.Dispose();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"WARNING: Ошибка при очистке иконки: {ex.Message}");
                 }
             }
-            else
+            finally
             {
-                if (_notifyIcon != null)
-                {
-                    _notifyIcon.Visible = false;
-                    _notifyIcon.Dispose();
-                }
-                SettingsManager.Instance.Save();
-                Application.Current.Shutdown();
+                base.OnClosing(e);
             }
 #pragma warning restore CA1416
-
-            base.OnClosing(e);
         }
 
         private void SetupTrayIcon()

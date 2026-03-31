@@ -51,6 +51,7 @@ namespace QAMP
             _playService.TrackChanged += UpdateNextTrackUI;
             PlaylistsListBox.MouseDoubleClick += PlaylistsListBox_MouseDoubleClick;
             PreviewKeyDown += Window_KeyDown;
+            PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
 
             _memoryCleanupTimer = new DispatcherTimer
             {
@@ -69,32 +70,80 @@ namespace QAMP
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (VolumePercentage != null)
-            {
-                VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
-            }
-        }
-
-        private void LoadApplicationSettings()
-        {
-            ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);
-
+            // Загружаем громкость - устанавливаем в слайдер, это вызовет VolumeSlider_ValueChanged
             string savedVolume = DatabaseService.GetSetting("Volume", "0.5");
-            if (double.TryParse(savedVolume, out double vol))
+            
+            // ВАЖНО: парсим с InvariantCulture! В БД сохраняется с точкой (0.5), а не с запятой (0,5)
+            if (double.TryParse(savedVolume, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double vol))
             {
-                _playService.Volume = vol;
+                // Важно: устанавливаем сначала Value слайдера
+                // Это вызовет VolumeSlider_ValueChanged, который установит Player.Volume
                 VolumeSlider.Value = vol * 100;
+                
+                // На случай если ValueChanged не сработал (например, если новое значение = старому)
+                // Явно установим Player.Volume
+                if (Math.Abs(Player.Volume - vol) > 0.01)
+                {
+                    Player.Volume = vol;
+                }
             }
 
-            string lastPlaylistId = DatabaseService.GetSetting("LastPlaylistId", "-1");
-            if (int.TryParse(lastPlaylistId, out int id) && id != -1)
+            // Загружаем последний выбранный плейлист
+            string lastPlaylistIdStr = DatabaseService.GetSetting("LastPlaylistId", "-1");
+            
+            int lastPlaylistId = -1;
+            if (int.TryParse(lastPlaylistIdStr, out int id) && id != -1)
             {
                 var playlist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == id);
+                
                 if (playlist != null)
                 {
+                    lastPlaylistId = id;
                     PlaylistsListBox.SelectedItem = playlist;
                 }
             }
+
+            // Загружаем последний трек
+            string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
+            
+            if (!string.IsNullOrEmpty(lastTrackPath) && lastPlaylistId != -1)
+            {
+                var currentPlaylist = PlaylistsListBox.SelectedItem as Playlist 
+                    ?? MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == lastPlaylistId);
+                
+                if (currentPlaylist != null)
+                {
+                    var lastTrack = currentPlaylist.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
+                    
+                    if (lastTrack != null)
+                    {
+                        // Загружаем трек, но не воспроизводим его
+                        _playService.LoadTrack(lastTrack);
+                        
+                        // Восстанавливаем позицию проигрывания
+                        string positionStr = DatabaseService.GetSetting("LastTrackPosition", "0");
+                        // ВАЖНО: парсим с InvariantCulture! В БД сохраняется с точкой, а не с запятой
+                        if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
+                        {
+                            _playService.Seek(position);
+                        }
+                        
+                        System.Diagnostics.Debug.WriteLine($"DEBUG: Трек загружен на паузе. IsPlaying={_playService.IsPlaying}");
+                    }
+                }
+            }
+
+            // Обновляем UI элементы
+            if (VolumePercentage != null)
+            {
+                VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
+                System.Diagnostics.Debug.WriteLine($"DEBUG: VolumePercent обновлен: {VolumeSlider.Value:F0}%");
+            }
+        }
+
+        private static void LoadApplicationSettings()
+        {
+            ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);
         }
 
         private void OnDurationChanged()
@@ -117,7 +166,7 @@ namespace QAMP
             Dispatcher.Invoke(() =>
             {
                 UpdateNowPlayingInfo(track);
-                UpdatePlayPauseIcon(true);
+                UpdatePlayPauseIcon(Player.IsPlaying);
                 UpdateFavoriteIcon(track);
                 CurrentTrackName.Text = track.Name;
                 CurrentTrackExecutor.Text = track.Executor;
