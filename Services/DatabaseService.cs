@@ -141,13 +141,61 @@ public class DatabaseService
             {
                 System.Diagnostics.Debug.WriteLine("Колонка TrackNumber уже существует в Tracks");
             }
+            if (!tracksColumns.Contains("PlayCount"))
+            {
+                System.Diagnostics.Debug.WriteLine("Добавляем колонку PlayCount в таблицу Tracks...");
+                var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE Tracks ADD COLUMN PlayCount INTEGER DEFAULT 0";
+                alterCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Колонка PlayCount успешно добавлена");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Колонка PlayCount уже существует в Tracks");
+            }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Ошибка при миграции БД: {ex.Message}");
         }
     }
+    public static void IncrementTrackPlayCount(int trackId)
+    {
+        System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] BEFORE - Attempting to increment PlayCount for Track ID={trackId}");
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            
+            // Сначала читаем текущее значение
+            var readCmd = connection.CreateCommand();
+            readCmd.CommandText = "SELECT PlayCount FROM Tracks WHERE Id = $id";
+            readCmd.Parameters.AddWithValue("$id", trackId);
+            var currentCount = readCmd.ExecuteScalar();
+            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] Current PlayCount: {(currentCount != null ? currentCount.ToString() : "NULL")}");
+            
+            // Теперь инкрементируем
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "UPDATE Tracks SET PlayCount = PlayCount + 1 WHERE Id = $id";
+            cmd.Parameters.AddWithValue("$id", trackId);
+            int rowsAffected = cmd.ExecuteNonQuery();
+            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] Rows affected: {rowsAffected}");
+            
+            // Проверяем новое значение
+            var checkCmd = connection.CreateCommand();
+            checkCmd.CommandText = "SELECT PlayCount FROM Tracks WHERE Id = $id";
+            checkCmd.Parameters.AddWithValue("$id", trackId);
+            var newCount = checkCmd.ExecuteScalar();
+            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] AFTER - New PlayCount: {(newCount != null ? newCount.ToString() : "NULL")}");
 
+            App.LogInfo($"Statistics: Track ID {trackId} play count incremented.");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] ERROR: {ex.Message}");
+            App.LogException(ex, "IncrementPlayCount");
+        }
+    }
     public static void InitializeDatabase()
     {
         using var connection = new SqliteConnection(_connectionString);
@@ -180,7 +228,8 @@ public class DatabaseService
             Bitrate INTEGER,
             SampleRate INTEGER,
             Year INTEGER,
-            TrackNumber INTEGER DEFAULT 0
+            TrackNumber INTEGER DEFAULT 0,
+            PlayCount INTEGER DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS PlaylistTracks (
             PlaylistId INTEGER,
@@ -690,7 +739,7 @@ public class DatabaseService
             {
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, t.TrackNumber, pt.AddedDate
+                SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, t.TrackNumber, pt.AddedDate, COALESCE(t.PlayCount, 0) as PlayCount
                 FROM Tracks t
                 INNER JOIN PlaylistTracks pt ON t.Id = pt.TrackId
                 WHERE pt.PlaylistId = $pId";
@@ -714,10 +763,11 @@ public class DatabaseService
                         SampleRate = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
                         Year = reader.IsDBNull(9) ? 0 : reader.GetInt16(9),
                         TrackNumber = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
-                        AddedDate = reader.IsDBNull(11) ? DateTime.Now : DateTime.Parse(reader.GetString(11))
+                        AddedDate = reader.IsDBNull(11) ? DateTime.Now : DateTime.Parse(reader.GetString(11)),
+                        PlayCount = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
+                    System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                     tracks.Add(track);
                 }
 
@@ -732,7 +782,7 @@ public class DatabaseService
                 // Пытаемся еще раз с правильным SELECT
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, t.TrackNumber, pt.AddedDate
+                SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, t.TrackNumber, pt.AddedDate, COALESCE(t.PlayCount, 0) as PlayCount
                 FROM Tracks t
                 INNER JOIN PlaylistTracks pt ON t.Id = pt.TrackId
                 WHERE pt.PlaylistId = $pId";
@@ -756,10 +806,11 @@ public class DatabaseService
                         SampleRate = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
                         Year = reader.IsDBNull(9) ? 0 : reader.GetInt16(9),
                         TrackNumber = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
-                        AddedDate = reader.IsDBNull(11) ? DateTime.Now : DateTime.Parse(reader.GetString(11))
+                        AddedDate = reader.IsDBNull(11) ? DateTime.Now : DateTime.Parse(reader.GetString(11)),
+                        PlayCount = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
+                    System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                     tracks.Add(track);
                 }
 

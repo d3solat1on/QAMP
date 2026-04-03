@@ -155,7 +155,7 @@ namespace QAMP
                 _isClosing = true;
                 App.LogInfo("=== OnClosing FULL EXIT START ===");
 
-                _playService.Stop();
+                _playService.Dispose();
 
                 // Сохранение данных
                 var volumeStr = _playService.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture);

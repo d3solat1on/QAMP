@@ -18,6 +18,19 @@ namespace QAMP.Models
         public int Bitrate { get; set; }
         public int SampleRate { get; set; }
         public int Year { get; set; }
+        private int _playCount;
+        public int PlayCount
+        {
+            get => _playCount;
+            set
+            {
+                if (_playCount != value)
+                {
+                    _playCount = value;
+                    OnPropertyChanged(nameof(PlayCount));
+                }
+            }
+        }
         public string? Comment { get; set; }
         private string? _lyrics;
         public string Lyrics
@@ -84,5 +97,8 @@ namespace QAMP.Models
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        
+        // ✅ Публичный метод для уведомления об изменении свойства (используется из других классов)
+        public void NotifyPropertyChanged(string name) => OnPropertyChanged(name);
     }
 }

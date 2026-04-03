@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Threading;
+using System.Linq;
 using NAudio.Wave;
 using NAudio.Flac;
 using QAMP.Models;
@@ -21,6 +22,11 @@ namespace QAMP.Services
         public EqualizerFilter CurrentEqualizer { get; private set; }
         private readonly SpectrumViewModel _spectrumViewModel;
         public SpectrumViewModel SpectrumViewModel => _spectrumViewModel;
+        private bool _disposed = false;
+        private bool _isTrackEnding = false;
+        private double _trackDuration;
+        private DispatcherTimer _endCheckTimer;
+        private bool _playCountIncremented = false;
 
         // NAudio компоненты
         private WaveStream _audioFileReader;
@@ -34,6 +40,7 @@ namespace QAMP.Services
         public event Action<bool> PlaybackPaused;
         public event Action<double> VolumeChanged;
         public event Action DurationChanged;
+        public event Action<int> PlayCountUpdated;  // ✅ Новое событие: (trackId)
 
         // Свойства
         public Track CurrentTrack { get; set; }
@@ -116,7 +123,7 @@ namespace QAMP.Services
             _spectrumViewModel = new SpectrumViewModel();
             _positionTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(200)
+                Interval = TimeSpan.FromMilliseconds(100)
             };
             _positionTimer.Tick += PositionTimer_Tick;
 
@@ -141,7 +148,7 @@ namespace QAMP.Services
             {
                 Stop();
                 CurrentTrack = track;
-
+                _playCountIncremented = false;
                 string extension = Path.GetExtension(track.Path).ToLowerInvariant();
                 ISampleProvider sampleProvider;
 
@@ -187,7 +194,8 @@ namespace QAMP.Services
                 Duration = _audioFileReader.TotalTime.TotalSeconds;
                 IsPlaying = true;
                 _positionTimer.Start();
-
+                // ИСПРАВЛЕНИЕ: отписываемся перед подпиской, чтобы избежать дублирования обработчиков
+                _waveOutEvent.PlaybackStopped -= OnPlaybackStopped;
                 _waveOutEvent.PlaybackStopped += OnPlaybackStopped;
                 TrackChanged?.Invoke(track);
                 App.LogInfo($"Start track: {track.Name}");
@@ -255,6 +263,8 @@ namespace QAMP.Services
                 IsPlaying = false;
                 _positionTimer.Stop();
 
+                // ИСПРАВЛЕНИЕ: отписываемся перед подпиской, чтобы избежать дублирования обработчиков
+                _waveOutEvent.PlaybackStopped -= OnPlaybackStopped;
                 _waveOutEvent.PlaybackStopped += OnPlaybackStopped;
                 TrackChanged?.Invoke(track);
             }
@@ -301,20 +311,16 @@ namespace QAMP.Services
         }
         private void OnPlaybackStopped(object sender, StoppedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                // Если трек прервался раньше времени (например, на 3-й секунде), 
-                // это ошибка буфера, а не конец песни.
-                if (_audioFileReader != null && _audioFileReader.CurrentTime < _audioFileReader.TotalTime - TimeSpan.FromSeconds(1))
+                if (e.Exception != null)
                 {
-                    // Игнорируем «ложную» остановку
-                    System.Diagnostics.Debug.WriteLine("Ложная остановка проигнорирована.");
-                    return;
+                    System.Diagnostics.Debug.WriteLine($"[PlaybackStopped] Error: {e.Exception.Message}");
+                    App.LogException(e.Exception, "Playback Error");
                 }
-
-                if (e.Exception == null)
+                else
                 {
-                    PlayNextTrack();
+                    System.Diagnostics.Debug.WriteLine($"[PlaybackStopped] Stopped, but position timer should handle track switching");
                 }
             });
         }
@@ -325,31 +331,51 @@ namespace QAMP.Services
                 try
                 {
                     double newPosition = _audioFileReader.CurrentTime.TotalSeconds;
+                    double totalDuration = _audioFileReader.TotalTime.TotalSeconds;
 
-                    if (Math.Abs(newPosition - _lastGoodPosition) < 0.01)
+                    if (!double.IsNaN(newPosition) && !double.IsInfinity(newPosition))
                     {
-                        _stuckCounter++;
-                        if (_stuckCounter > 3)
+                        Position = newPosition;
+                        PositionChanged?.Invoke(Position);
+
+                        // ОПРЕДЕЛЯЕМ КОНЕЦ ТРЕКА ЗДЕСЬ
+                        // Если осталось меньше 0.3 секунды - считаем, что трек закончился
+                        if (totalDuration > 0 && (totalDuration - newPosition) < 0.3)
                         {
-                            newPosition = _lastGoodPosition + _positionTimer.Interval.TotalSeconds;
-                            _stuckCounter = 0;
+                            System.Diagnostics.Debug.WriteLine($"[PositionTimer] Track ending detected! Remaining: {totalDuration - newPosition:F2}s");
+
+                            if (!_playCountIncremented && CurrentTrack != null)
+                            {
+                                _playCountIncremented = true;
+
+                                // Увеличиваем счетчик прослушиваний
+                                int trackId = CurrentTrack.Id;
+                                System.Diagnostics.Debug.WriteLine($"[PlayCount] Incrementing for track: {CurrentTrack.Name}");
+
+                                Task.Run(() =>
+                                {
+                                    DatabaseService.IncrementTrackPlayCount(trackId);
+                                    Application.Current.Dispatcher.BeginInvoke(() =>
+                                    {
+                                        CurrentTrack.PlayCount++;
+                                        System.Diagnostics.Debug.WriteLine($"[PlayCount] PlayCount now: {CurrentTrack.PlayCount}");
+                                        
+                                        // ✅ Уведомляем об обновлении PlayCount (например, для ShowTrackInfo)
+                                        PlayCountUpdated?.Invoke(trackId);
+                                    });
+                                });
+                            }
+
+                            // Останавливаем таймер и переключаем трек
+                            _positionTimer.Stop();
+                            PlayNextTrack();
                         }
                     }
-                    else
-                    {
-                        _stuckCounter = 0;
-                        _lastGoodPosition = newPosition;
-                    }
-
-                    Position = newPosition;
-
-                    if (Position >= _audioFileReader.TotalTime.TotalSeconds - 0.1)
-                    {
-                        _positionTimer.Stop();
-                        PlayNextTrack();
-                    }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"PositionTimer error: {ex.Message}");
+                }
             }
         }
 
@@ -394,6 +420,32 @@ namespace QAMP.Services
 
         public void Stop()
         {
+            if (_audioFileReader != null && CurrentTrack != null && !_playCountIncremented)
+            {
+                double currentTime = _audioFileReader.CurrentTime.TotalSeconds;
+                double totalTime = _audioFileReader.TotalTime.TotalSeconds;
+
+                if (totalTime > 0)
+                {
+                    double percentPlayed = currentTime / totalTime;
+
+                    // Если прослушано больше 90% или осталось меньше 10 секунд
+                    if (percentPlayed > 0.9 || (totalTime - currentTime) < 10)
+                    {
+                        _playCountIncremented = true;
+
+                        int trackId = CurrentTrack.Id;
+                        Task.Run(() =>
+                        {
+                            DatabaseService.IncrementTrackPlayCount(trackId);
+                            Application.Current.Dispatcher.BeginInvoke(() =>
+                            {
+                                CurrentTrack.PlayCount++;
+                            });
+                        });
+                    }
+                }
+            }
             _positionTimer?.Stop();
 
             if (_waveOutEvent != null)
@@ -409,7 +461,7 @@ namespace QAMP.Services
             // Удаляем временный файл, если он создавался ранее
             if (!string.IsNullOrEmpty(_tempFilePath) && System.IO.File.Exists(_tempFilePath))
             {
-                try { System.IO.File.Delete(_tempFilePath); } catch { }
+                try { File.Delete(_tempFilePath); } catch { }
                 _tempFilePath = null;
             }
 
@@ -623,9 +675,21 @@ namespace QAMP.Services
         }
         public void Dispose()
         {
-            Stop();
-            _positionTimer?.Stop();
-            _positionTimer = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    Stop();
+                    _positionTimer?.Stop();
+                    _positionTimer = null;
+                }
+                _disposed = true;
+            }
         }
     }
 

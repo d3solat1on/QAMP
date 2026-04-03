@@ -919,7 +919,6 @@
                                                   DragOver="MainGrid_DragOver">
                                                 <!-- Drop="MainGrid_Drop"> -->
                                                 <DataGrid.ContextMenu>
-
                                                         <ContextMenu Background="{DynamicResource ContextMenuBackground}"
                                                                      BorderBrush="{DynamicResource ContextMenuBorderBrush}"
                                                                      Opened="ContextMenu_Opened">

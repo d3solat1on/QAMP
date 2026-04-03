@@ -433,6 +433,23 @@
                                                                 </TextBlock.Style>
                                                         </TextBlock>
                                                 </Border>
+                                                <TextBlock Text="Количество воспроизведений"
+                                                           FontWeight="Bold"
+                                                           Foreground="Gray"
+                                                           Margin="0,10,0,5"/>
+                                                <Border Background="#2D2D2D"
+                                                        CornerRadius="5"
+                                                        Padding="10">
+                                                        <!-- Cursor="Hand"> -->
+                                                        <TextBlock x:Name="PlayCountTextBlock"
+                                                                   Text="{Binding PlayCount}"
+                                                                   Foreground="#00CCFF"
+                                                                   Background="Transparent"
+                                                                   TextWrapping="Wrap"
+                                                                   FontSize="10"
+                                                                   FontFamily="Consolas"
+                                                                   TextDecorations="Underline"/>
+                                                </Border>
                                         </StackPanel>
                                 </Grid>
                         </ScrollViewer>

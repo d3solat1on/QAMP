@@ -10,6 +10,8 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using HtmlAgilityPack;
 using System.Net;
+using System.Windows.Data;
+using System.ComponentModel;
 
 
 namespace QAMP.Windows
@@ -24,12 +26,29 @@ namespace QAMP.Windows
             DataContext = track;
             Loaded += ShowTrackInfo_Loaded;
         }
-
         private void ShowTrackInfo_Loaded(object sender, RoutedEventArgs e)
         {
             if (FindName("PathTextBlock") is System.Windows.Controls.TextBlock pathTextBlock)
             {
                 pathTextBlock.MouseLeftButtonDown += PathTextBlock_MouseLeftButtonDown;
+            }
+            
+            var player = Services.PlayerService.Instance;
+            if (player != null)
+            {
+                player.PlayCountUpdated += Player_PlayCountUpdated;
+                
+                Closed += (s, e) => player.PlayCountUpdated -= Player_PlayCountUpdated;
+            }
+        }
+        
+        private void Player_PlayCountUpdated(int trackId)
+        {
+            if (_track != null && _track.Id == trackId)
+            {
+                Debug.WriteLine($"[ShowTrackInfo] Updating PlayCount for track {trackId}");
+
+                _track.NotifyPropertyChanged(nameof(Track.PlayCount));
             }
         }
 

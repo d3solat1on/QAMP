@@ -262,17 +262,29 @@ namespace QAMP
 
         private void ShowTrackInfo_Click(object sender, RoutedEventArgs e)
         {
-            if (TracksDataGrid.SelectedItem is Track selectedTrack)
+            var selectedTrack = TracksDataGrid.SelectedItem as Track;
+
+            if (selectedTrack == null)
+            {
+                var menuItem = sender as MenuItem;
+                var contextMenu = menuItem?.Parent as ContextMenu;
+                var grid = contextMenu?.PlacementTarget as DataGrid;
+                selectedTrack = grid?.SelectedItem as Track;
+            }
+
+            if (selectedTrack != null)
             {
                 var fullInfo = TagReader.GetFullTrackInfo(selectedTrack.Path);
                 if (fullInfo != null)
                 {
-                    var infoWindow = new Windows.ShowTrackInfo(fullInfo)
-                    {
-                        Owner = this
-                    };
+                    fullInfo.PlayCount = selectedTrack.PlayCount;
+                    var infoWindow = new ShowTrackInfo(fullInfo) { Owner = this };
                     infoWindow.ShowDialog();
                 }
+            }
+            else
+            {
+                NotificationWindow.Show("Пожалуйста, сначала выделите трек.", this);
             }
         }
 
@@ -501,7 +513,7 @@ namespace QAMP
                 Name = "Результаты поиска",
                 Description = $"По запросу: \"{searchQuery}\" найдено {results.Count} треков",
                 Tracks = new ObservableCollection<Track>(results),
-                CoverImage = null 
+                CoverImage = null
             };
 
             MusicLibrary.Instance.CurrentPlaylist = searchPlaylist;
