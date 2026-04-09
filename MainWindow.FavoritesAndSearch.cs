@@ -328,7 +328,7 @@ namespace QAMP
                     Id = (int)newId,
                     Name = MusicLibrary.FavoritesName,
                     Description = "Ваши любимые треки",
-                    CoverImage = favCover
+                    CoverImage = favCover ?? []
                 };
 
                 var tracks = DatabaseService.GetTracksForPlaylist((int)newId);
@@ -400,38 +400,6 @@ namespace QAMP
 
             FavoriteButton.ToolTip = isFavorite ? "Удалить из избранного" : "Добавить в избранное";
             FavoriteIcon.Fill = (Brush)Application.Current.Resources["AccentBrush"];
-        }
-
-        private void UpdateCurrentTrackCover(Track track)
-        {
-            try
-            {
-                if (track?.CoverImage != null && track.CoverImage.Length > 0)
-                {
-                    using var ms = new MemoryStream(track.CoverImage);
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.StreamSource = ms;
-                    bitmap.EndInit();
-                    bitmap.Freeze();
-                    CurrentTrackImage.Source = bitmap;
-                }
-                else
-                {
-                    var geometry = (Geometry)Application.Current.Resources["default_coverGeometry"];
-                    var accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
-                    var drawing = new GeometryDrawing(accentBrush, null, geometry);
-                    var drawingImage = new DrawingImage(drawing);
-                    drawingImage.Freeze();
-                    CurrentTrackImage.Source = drawingImage;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки обложки: {ex.Message}");
-                CurrentTrackImage.Source = null;
-            }
         }
 
         private static void LoadPlaylists()

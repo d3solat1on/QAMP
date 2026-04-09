@@ -108,6 +108,39 @@ namespace QAMP.Windows
             }
         }
 
+        private void ExtractCover_Click(object sender, RoutedEventArgs e)
+        {
+            string safeFileName = $"{_track.Executor} - {_track.Name} Cover";
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                safeFileName = safeFileName.Replace(c, '_');
+            }
+            if (_track.CoverImage == null || _track.CoverImage.Length == 0)
+            {
+                NotificationWindow.Show("В треке нет встроенной обложки.", this);
+                return;
+            }
+
+            SaveFileDialog sfd = new()
+            {
+                Filter = "JPEG Image|*.jpg|PNG Image|*.png",
+                FileName = safeFileName
+            };
+
+            if (sfd.ShowDialog() == true)
+            {
+                try
+                {
+                    System.IO.File.WriteAllBytes(sfd.FileName, _track.CoverImage);
+                    NotificationWindow.Show("Обложка извлечена!", this);
+                }
+                catch (Exception ex)
+                {
+                    NotificationWindow.Show($"Ошибка сохранения: {ex.Message}", this);
+                }
+            }
+        }
+
         private void ChangeCover_Click(object sender, MouseButtonEventArgs e)
         {
             if (EditModeButton.IsChecked != true) return;

@@ -209,7 +209,7 @@ namespace QAMP
                 string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Загрузка...";
                 if (Player.Duration <= 0) CheckDurationAsync();
 
-                UpdateCurrentTrackCover(track);
+                // UpdateCurrentTrackCover(track);
                 TotalTimeText.Text = totalTime;
             });
         }

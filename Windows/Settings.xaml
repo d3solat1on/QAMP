@@ -201,21 +201,21 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <StackPanel Margin="30,0,0,0">
-                            <TextBlock Text="Количество столбцов:"
-                                       Foreground="{DynamicResource ForegroundBrush}"
-                                       Margin="0,0,0,5"/>
-                            <ComboBox x:Name="BarCountCombo"
-                                      Width="100"
-                                      SelectionChanged="BarCountCombo_SelectionChanged">
-                                <ComboBoxItem Content="32"/>
-                                <ComboBoxItem Content="48"/>
-                                <ComboBoxItem Content="64"/>
-                                <!-- IsSelected="True"/> -->
-                                <ComboBoxItem Content="128"/>
-                                <ComboBoxItem Content="256"/>
-                            </ComboBox>
-                        </StackPanel>
+                        <!-- <StackPanel Margin="30,0,0,0"> -->
+                        <!-- <TextBlock Text="Количество столбцов:" -->
+                        <!-- Foreground="{DynamicResource ForegroundBrush}" -->
+                        <!-- Margin="0,0,0,5"/> -->
+                        <!-- <ComboBox x:Name="BarCountCombo" -->
+                        <!-- Width="100" -->
+                        <!-- SelectionChanged="BarCountCombo_SelectionChanged"> -->
+                        <!-- <ComboBoxItem Content="32"/> -->
+                        <!-- <ComboBoxItem Content="48"/> -->
+                        <!-- <ComboBoxItem Content="64"/> -->
+                        <!-- IsSelected="True"/> -->
+                        <!-- <ComboBoxItem Content="128"/> -->
+                        <!-- <ComboBoxItem Content="256"/> -->
+                        <!-- </ComboBox> -->
+                        <!-- </StackPanel> -->
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
@@ -367,7 +367,7 @@
                                  Content="Использовать статический цвет"
                                  GroupName="AdaptiveGradients"
                                  Foreground="{DynamicResource ForegroundBrush}"
-                                 Checked="AdaptiveGradients_Checked"/>             
+                                 Checked="AdaptiveGradients_Checked"/>
 
                 </StackPanel>
             </GroupBox>
@@ -375,6 +375,20 @@
             <StackPanel Grid.Row="8"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
+                <Button x:Name="HelpWindowButton"
+                        Content="Справка"
+                        Width="100"
+                        Height="30"
+                        Click="HelpWindowButton_Click"
+                        Background="{DynamicResource TertiaryBackgroundBrush}"
+                        Foreground="{DynamicResource ForegroundBrush}">
+                    <Button.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius"
+                                    Value="17"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
                 <Button x:Name="CancelButton"
                         Content="Отмена"
                         Width="100"
@@ -383,7 +397,7 @@
                         Background="{DynamicResource TertiaryBackgroundBrush}"
                         Foreground="{DynamicResource ForegroundBrush}">
                     <Button.Resources>
-                        <Style TargetType="Border">
+                        <Style TargetType="{x:Type Border}">
                             <Setter Property="CornerRadius"
                                     Value="17"/>
                         </Style>
@@ -398,13 +412,12 @@
                         Background="{DynamicResource TertiaryBackgroundBrush}"
                         Foreground="{DynamicResource ForegroundBrush}">
                     <Button.Resources>
-                        <Style TargetType="Border">
+                        <Style TargetType="{x:Type Border}">
                             <Setter Property="CornerRadius"
                                     Value="17"/>
                         </Style>
                     </Button.Resources>
                 </Button>
-
             </StackPanel>
         </Grid>
     </Grid>

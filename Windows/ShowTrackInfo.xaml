@@ -153,6 +153,12 @@
                                                            FontWeight="Bold"
                                                            Foreground="#00CCFF"
                                                            Margin="0,15,0,0"/>
+                                                <Button Content="Извлечь обложку"
+                                                        Click="ExtractCover_Click"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0,10,0,0"
+                                                        Background="{DynamicResource AccentBrush}"
+                                                        Visibility="{Binding HasEmbeddedCover, Converter={StaticResource BooleanToVisibilityConverter}}"/>           
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1"

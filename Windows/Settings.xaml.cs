@@ -204,7 +204,7 @@ namespace QAMP.Windows
             // Установить параметры спектрограммы
             VisualizerEnabled.IsChecked = config.IsVisualizerEnabled;
             VisualizerDisabled.IsChecked = !config.IsVisualizerEnabled;
-            SetBarCountComboValue(config.VisualizerBarCount);
+            // SetBarCountComboValue(config.VisualizerBarCount);
 
             // Установить выбранную тему
             switch (config.ColorScheme)
@@ -554,19 +554,19 @@ namespace QAMP.Windows
             }
         }
 
-        private void SetBarCountComboValue(int barCount)
-        {
-            for (int i = 0; i < BarCountCombo.Items.Count; i++)
-            {
-                if (BarCountCombo.Items[i] is ComboBoxItem item &&
-                    item.Content?.ToString() == barCount.ToString())
-                {
-                    BarCountCombo.SelectedIndex = i;
-                    return;
-                }
-            }
-            BarCountCombo.SelectedIndex = 1; // По умолчанию 64
-        }
+        // private void SetBarCountComboValue(int barCount)
+        // {
+        //     for (int i = 0; i < BarCountCombo.Items.Count; i++)
+        //     {
+        //         if (BarCountCombo.Items[i] is ComboBoxItem item &&
+        //             item.Content?.ToString() == barCount.ToString())
+        //         {
+        //             BarCountCombo.SelectedIndex = i;
+        //             return;
+        //         }
+        //     }
+        //     BarCountCombo.SelectedIndex = 1; // По умолчанию 64
+        // }
 
         private void VisualizerToggle_Changed(object sender, RoutedEventArgs e)
         {
@@ -581,20 +581,24 @@ namespace QAMP.Windows
             //     _player.SpectrumViewModel.Bars.Clear();
             // }
         }
-
-        private void BarCountCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void HelpWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            if (isInitializing || BarCountCombo.SelectedItem == null) return;
-            // if (_player?.SpectrumViewModel == null) return;
-
-            if (BarCountCombo.SelectedItem is ComboBoxItem item &&
-                item.Content != null &&
-                int.TryParse(item.Content.ToString(), out int barCount))
-            {
-                var config = SettingsManager.Instance.Config;
-                config.VisualizerBarCount = barCount;
-                // _player.SpectrumViewModel.BarCount = barCount;
-            }
+            var helpWindow = new HelpWindow();
+            helpWindow.ShowHelpWindow();
         }
+        // private void BarCountCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // {
+        //     if (isInitializing || BarCountCombo.SelectedItem == null) return;
+        //     // if (_player?.SpectrumViewModel == null) return;
+
+        //     if (BarCountCombo.SelectedItem is ComboBoxItem item &&
+        //         item.Content != null &&
+        //         int.TryParse(item.Content.ToString(), out int barCount))
+        //     {
+        //         var config = SettingsManager.Instance.Config;
+        //         config.VisualizerBarCount = barCount;
+        //         // _player.SpectrumViewModel.BarCount = barCount;
+        //     }
+        // }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using QAMP.Models;
 using ScottPlot;
 
 namespace QAMP.Visualization
@@ -46,6 +47,10 @@ namespace QAMP.Visualization
 
         private void SetupPlot()
         {
+            if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
+            {
+                return;
+            }
             try
             {
                 SpectrumPlot.Plot.Clear();
@@ -65,7 +70,7 @@ namespace QAMP.Visualization
                 for (int i = 0; i < BarCount; i++)
                 {
                     myBars.Bars[i].Position = i;
-                    myBars.Bars[i].ValueBase = 0; 
+                    myBars.Bars[i].ValueBase = 0;
 
                     _peakBars.Bars[i].Position = i;
                     _peakBars.Bars[i].ValueBase = 0;
@@ -119,7 +124,15 @@ namespace QAMP.Visualization
         public void UpdateSpectrum(double[] spectrumData)
         {
             if (myBars == null || _peakBars == null || spectrumData == null || spectrumData.Length == 0) return;
-
+            if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
+            {
+                if (myBars != null && myBars.Bars.Any(b => b.Value > 0))
+                {
+                    ResetPeaks();
+                    SpectrumPlot.Refresh(); 
+                }
+                return;
+            }
             Dispatcher.Invoke(() =>
             {
                 try
@@ -170,8 +183,8 @@ namespace QAMP.Visualization
         {
             for (int i = 0; i < BarCount; i++)
             {
-                _peakValues[i] = 0.02;
-                _smoothedValues[i] = 0.02;
+                _peakValues[i] = 0.01;
+                _smoothedValues[i] = 0.01;
             }
         }
     }

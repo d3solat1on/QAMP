@@ -20,6 +20,8 @@ namespace QAMP
 {
     public partial class MainWindow
     {
+        private bool _isClosing = false;
+        private static readonly OSDWindow _osd = new();
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
@@ -93,6 +95,10 @@ namespace QAMP
                         e.Handled = true;
                     }
                     break;
+                case Key.L when Keyboard.Modifiers == ModifierKeys.Control:
+                    ViewLyricsButton_Click(null, null);
+                    e.Handled = true;
+                    break;
             }
         }
 
@@ -118,8 +124,6 @@ namespace QAMP
                 e.Handled = true;
             }
         }
-        private static readonly OSDWindow _osd = new();
-
         public static void UpdateOSD()
         {
             if (Player.CurrentTrack != null)
@@ -129,8 +133,6 @@ namespace QAMP
                 _osd.ShowOSD(executor, name);
             }
         }
-
-        private bool _isClosing = false;
 
         protected override void OnClosing(CancelEventArgs e)
         {
