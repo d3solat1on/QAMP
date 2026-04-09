@@ -4,7 +4,6 @@ using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using QAMP.Models;
 using QAMP.Services;
-using QAMP.ViewModels;
 namespace QAMP.Dialogs
 {
 
@@ -76,9 +75,8 @@ namespace QAMP.Dialogs
         private void EditPlaylist_Click(object sender, RoutedEventArgs e)
         {
             string newName = PlaylistNameTextBox.Text.Trim();
-            var currentPlaylist = DataContext as Playlist;
 
-            if (currentPlaylist == null) return;
+            if (DataContext is not Playlist currentPlaylist) return;
 
             if (string.IsNullOrWhiteSpace(newName))
             {

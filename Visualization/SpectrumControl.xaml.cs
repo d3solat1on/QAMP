@@ -1,4 +1,3 @@
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using QAMP.Models;
@@ -10,11 +9,11 @@ namespace QAMP.Visualization
     {
         private ScottPlot.Plottables.BarPlot? myBars;
         private const int BarCount = 48;
-        private readonly SpectrumSettings _settings;
+        // private readonly SpectrumSettings _settings;
         // Буфер для сглаживания
         private readonly double[] _smoothedValues;
         private readonly double[] _peakValues;
-        private ScottPlot.Plottables.BarPlot? _peakBars;
+        private ScottPlot.Plottables.BarPlot _peakBars;
 
         public SpectrumControl()
         {
@@ -174,11 +173,11 @@ namespace QAMP.Visualization
                 }
             });
         }
-        public void SetSpectrumPreset(string presetName)
-        {
-            _settings.ApplyPreset(presetName);
-            System.Diagnostics.Debug.WriteLine($"Spectrum preset changed to: {presetName}");
-        }
+        // public void SetSpectrumPreset(string presetName)
+        // {
+        //     _settings.ApplyPreset(presetName);
+        //     System.Diagnostics.Debug.WriteLine($"Spectrum preset changed to: {presetName}");
+        // }
         public void ResetPeaks()
         {
             for (int i = 0; i < BarCount; i++)

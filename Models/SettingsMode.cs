@@ -39,14 +39,14 @@ public class SettingsManager
     public static SettingsManager Instance => _instance ??= new SettingsManager();
 
     private readonly string _path = "settings.json";
-    public AppSettings Config { get; private set; }
+    public AppSettings Config { get; set; } = new AppSettings();
 
     public SettingsManager()
     {
         if (File.Exists(_path))
         {
             string json = File.ReadAllText(_path);
-            Config = JsonSerializer.Deserialize<AppSettings>(json);
+            Config = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
         }
         else
         {

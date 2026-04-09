@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -32,14 +30,14 @@ namespace QAMP
                 {
                     var track = MusicLibrary.Instance.PlaybackQueue[0];
                     App.LogInfo($"PlayTrack (Toggle): {track.Executor} - {track.Name}");
-                    Player.PlayTrack(track);
+                    _ = Player.PlayTrack(track);
                     UpdateNextTrackUI();
                 }
             }
             else if (Player.IsPlaying)
             {
                 App.LogInfo($"Pause: {Player.CurrentTrack?.Executor} - {Player.CurrentTrack?.Name}");
-                Player.PauseAsync();
+                _ = Player.PauseAsync();
             }
             else
             {
@@ -58,13 +56,13 @@ namespace QAMP
         {
             if (Library.CurrentPlaylist == null || Library.CurrentPlaylist.Tracks.Count == 0)
             {
-                NotificationWindow.Show("Плейлист пуст!", this);
+                _ = NotificationWindow.Show("Плейлист пуст!", this);
                 return;
             }
 
             if (Player.IsPlaying)
             {
-                Player.PauseAsync();
+                _ = Player.PauseAsync();
                 UpdatePlayPauseIcon(false);
                 UpdateOSD();
                 return;
@@ -95,7 +93,7 @@ namespace QAMP
 
             var firstTrack = Library.CurrentPlaylist.Tracks[0];
             App.LogInfo($"PlayPlaylist: {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}");
-            Player.PlayTrack(firstTrack);
+            _ = Player.PlayTrack(firstTrack);
 
             Library.PlaybackQueue.Clear();
             foreach (var track in Library.CurrentPlaylist.Tracks)
@@ -107,7 +105,7 @@ namespace QAMP
                 var shuffledList = Library.PlaybackQueue.ToList();
                 if (firstTrack != null && shuffledList.Contains(firstTrack))
                 {
-                    shuffledList.Remove(firstTrack);
+                    _ = shuffledList.Remove(firstTrack);
                 }
                 shuffledList = [.. shuffledList.OrderBy(x => Guid.NewGuid())];
                 if (firstTrack != null)
@@ -137,7 +135,7 @@ namespace QAMP
             // Проверяем, что у нас есть текущий трек
             if (Player.CurrentTrack == null)
             {
-                NotificationWindow.Show("Нет текущего трека", this);
+                _ = NotificationWindow.Show("Нет текущего трека", this);
                 return;
             }
 
@@ -149,13 +147,13 @@ namespace QAMP
                 {
                     var prevTrack = _playService.ShuffledQueue[currentIndex - 1];
                     App.LogInfo($"PrevTrack (Shuffle): {prevTrack.Executor} - {prevTrack.Name}");
-                    Player.PlayTrack(prevTrack);
+                    _ = Player.PlayTrack(prevTrack);
                 }
                 else if (currentIndex == 0 && _playService.RepeatMode == RepeatMode.RepeatAll)
                 {
                     var prevTrack = _playService.ShuffledQueue[_playService.ShuffledQueue.Count - 1];
                     App.LogInfo($"PrevTrack (Shuffle, wrap): {prevTrack.Executor} - {prevTrack.Name}");
-                    Player.PlayTrack(prevTrack);
+                    _ = Player.PlayTrack(prevTrack);
                 }
                 else if (currentIndex == -1)
                 {
@@ -170,7 +168,7 @@ namespace QAMP
                     {
                         var prevTrack = _playService.ShuffledQueue[_playService.ShuffledQueue.Count - 1];
                         App.LogInfo($"PrevTrack (Shuffle, not in queue): {prevTrack.Executor} - {prevTrack.Name}");
-                        Player.PlayTrack(prevTrack);
+                        _ = Player.PlayTrack(prevTrack);
                     }
                 }
 
@@ -181,7 +179,7 @@ namespace QAMP
                 // Обычный режим (без shuffle)
                 if (MusicLibrary.Instance.PlaybackQueue.Count == 0)
                 {
-                    NotificationWindow.Show("Плейлист пуст", this);
+                    _ = NotificationWindow.Show("Плейлист пуст", this);
                     return;
                 }
 
@@ -192,7 +190,7 @@ namespace QAMP
                 {
                     var track = MusicLibrary.Instance.PlaybackQueue[currentIndex - 1];
                     App.LogInfo($"PrevTrack: {track.Executor} - {track.Name}");
-                    Player.PlayTrack(track);
+                    _ = Player.PlayTrack(track);
                     UpdateNextTrackUI();
                 }
                 else if (currentIndex == -1)
@@ -202,12 +200,12 @@ namespace QAMP
                     {
                         var track = MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1];
                         App.LogInfo($"PrevTrack (wrap): {track.Executor} - {track.Name}");
-                        Player.PlayTrack(track);
+                        _ = Player.PlayTrack(track);
                         UpdateNextTrackUI();
                     }
                     else
                     {
-                        NotificationWindow.Show("Это первый трек в плейлисте", this);
+                        _ = NotificationWindow.Show("Это первый трек в плейлисте", this);
                     }
                 }
                 else if (currentIndex == 0)
@@ -217,12 +215,12 @@ namespace QAMP
                     {
                         var track = MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1];
                         App.LogInfo($"PrevTrack (wrap, at first): {track.Executor} - {track.Name}");
-                        Player.PlayTrack(track);
+                        _ = Player.PlayTrack(track);
                         UpdateNextTrackUI();
                     }
                     else
                     {
-                        NotificationWindow.Show("Это первый трек в плейлисте", this);
+                        _ = NotificationWindow.Show("Это первый трек в плейлисте", this);
                     }
                 }
             }
@@ -238,7 +236,7 @@ namespace QAMP
             // Проверяем, что у нас есть текущий трек
             if (Player.CurrentTrack == null)
             {
-                NotificationWindow.Show("Нет текущего трека", this);
+                _ = NotificationWindow.Show("Нет текущего трека", this);
                 return;
             }
 
@@ -250,7 +248,7 @@ namespace QAMP
                 {
                     var nextTrack = _playService.ShuffledQueue[currentIndex + 1];
                     App.LogInfo($"NextTrack (Shuffle): {nextTrack.Executor} - {nextTrack.Name}");
-                    Player.PlayTrack(nextTrack);
+                    _ = Player.PlayTrack(nextTrack);
                 }
                 else if (currentIndex == _playService.ShuffledQueue.Count - 1)
                 {
@@ -258,11 +256,11 @@ namespace QAMP
                     {
                         var nextTrack = _playService.ShuffledQueue[0];
                         App.LogInfo($"NextTrack (Shuffle, wrap): {nextTrack.Executor} - {nextTrack.Name}");
-                        Player.PlayTrack(nextTrack);
+                        _ = Player.PlayTrack(nextTrack);
                     }
                     else
                     {
-                        NotificationWindow.Show("Плейлист закончился", this);
+                        _ = NotificationWindow.Show("Плейлист закончился", this);
                     }
                 }
                 else if (currentIndex == -1)
@@ -278,11 +276,11 @@ namespace QAMP
                     {
                         var nextTrack = _playService.ShuffledQueue[1];
                         App.LogInfo($"NextTrack (Shuffle, not in queue): {nextTrack.Executor} - {nextTrack.Name}");
-                        Player.PlayTrack(nextTrack);
+                        _ = Player.PlayTrack(nextTrack);
                     }
                     else
                     {
-                        NotificationWindow.Show("Плейлист закончился", this);
+                        _ = NotificationWindow.Show("Плейлист закончился", this);
                     }
                 }
 
@@ -293,7 +291,7 @@ namespace QAMP
                 // Обычный режим (без shuffle)
                 if (MusicLibrary.Instance.PlaybackQueue.Count == 0)
                 {
-                    NotificationWindow.Show("Плейлист пуст", this);
+                    _ = NotificationWindow.Show("Плейлист пуст", this);
                     return;
                 }
 
@@ -309,7 +307,7 @@ namespace QAMP
                 {
                     var nextTrack = MusicLibrary.Instance.PlaybackQueue[currentIndex + 1];
                     App.LogInfo($"NextTrack: {nextTrack.Executor} - {nextTrack.Name}");
-                    Player.PlayTrack(nextTrack);
+                    _ = Player.PlayTrack(nextTrack);
                     System.Diagnostics.Debug.WriteLine($"Проигываю трек: {nextTrack.Name}");
                     UpdateNextTrackUI();
                 }
@@ -321,12 +319,12 @@ namespace QAMP
                     {
                         var track = MusicLibrary.Instance.PlaybackQueue[0];
                         App.LogInfo($"NextTrack (wrap): {track.Executor} - {track.Name}");
-                        Player.PlayTrack(track);
+                        _ = Player.PlayTrack(track);
                         UpdateNextTrackUI();
                     }
                     else
                     {
-                        NotificationWindow.Show("Плейлист закончился", this);
+                        _ = NotificationWindow.Show("Плейлист закончился", this);
                     }
                 }
                 else
@@ -337,12 +335,12 @@ namespace QAMP
                     {
                         var track = MusicLibrary.Instance.PlaybackQueue[0];
                         App.LogInfo($"NextTrack (not in queue): {track.Executor} - {track.Name}");
-                        Player.PlayTrack(track);
+                        _ = Player.PlayTrack(track);
                         UpdateNextTrackUI();
                     }
                     else
                     {
-                        NotificationWindow.Show("Плейлист закончился", this);
+                        _ = NotificationWindow.Show("Плейлист закончился", this);
                     }
                 }
             }
@@ -392,7 +390,7 @@ namespace QAMP
                 Track? currentTrack = Player.CurrentTrack;
                 if (currentTrack != null && shuffledList.Contains(currentTrack))
                 {
-                    shuffledList.Remove(currentTrack);
+                    _ = shuffledList.Remove(currentTrack);
                 }
 
                 shuffledList = [.. shuffledList.OrderBy(x => Guid.NewGuid())];
@@ -464,7 +462,7 @@ namespace QAMP
         {
             if (Library.CurrentPlaylist == null)
             {
-                NotificationWindow.Show("Сначала выберите плейлист!", this);
+                _ = NotificationWindow.Show("Сначала выберите плейлист!", this);
                 return;
             }
             var contextMenu = new ContextMenu();
@@ -472,22 +470,22 @@ namespace QAMP
             // По дате добавления
             var menuItemDate = new MenuItem { Header = "По дате добавления" };
             menuItemDate.Click += (s, args) => ApplySort(TrackSortType.AddedDate);
-            contextMenu.Items.Add(menuItemDate);
+            _ = contextMenu.Items.Add(menuItemDate);
 
             // По альбому 
             var menuItemAlbum = new MenuItem { Header = "По альбому (A-Z)" };
             menuItemAlbum.Click += (s, args) => ApplySort(TrackSortType.AlbumAZ);
-            contextMenu.Items.Add(menuItemAlbum);
+            _ = contextMenu.Items.Add(menuItemAlbum);
 
             // По исполнителю 
             var menuItemExecutor = new MenuItem { Header = "По исполнителю (A-Z)" };
             menuItemExecutor.Click += (s, args) => ApplySort(TrackSortType.ExecutorAZ);
-            contextMenu.Items.Add(menuItemExecutor);
+            _ = contextMenu.Items.Add(menuItemExecutor);
 
             //По названию 
             var menuItemName = new MenuItem { Header = "По названию (A-Z)" };
             menuItemName.Click += (s, args) => ApplySort(TrackSortType.NameAZ);
-            contextMenu.Items.Add(menuItemName);
+            _ = contextMenu.Items.Add(menuItemName);
 
             if (sender is Button button)
             {
@@ -532,7 +530,7 @@ namespace QAMP
                 TrackSortType.NameAZ => "по названию (A-Z)",
                 _ => "неизвестно"
             };
-            NotificationWindow.Show($"Плейлист отсортирован {sortName}", this);
+            _ = NotificationWindow.Show($"Плейлист отсортирован {sortName}", this);
         }
 
         /// <summary>

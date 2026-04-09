@@ -1253,11 +1253,7 @@
                                                         BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
                                                         BorderThickness="1"
                                                         Margin="0,0,0,10">
-                                                        <Image x:Name="CurrentTrackImage"
-                                                               Stretch="Uniform"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Center"
-                                                               Source="{Binding ElementName=TracksDataGrid, Path=SelectedItem.CoverImage, Converter={StaticResource LargeTrackImageConverter}}"/>
+                                                        <Image x:Name="CurrentTrackImage"/>
                                                         <!-- XD moment  -->
                                                 </Border>
                                                 <TextBlock x:Name="CurrentTrackName"

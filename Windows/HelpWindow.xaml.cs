@@ -1,5 +1,3 @@
-using QAMP;
-using System;
 using System.Diagnostics;
 using System.Windows;
 namespace QAMP.Windows;

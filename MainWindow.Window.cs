@@ -1,18 +1,13 @@
-using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using QAMP.Audio;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
-using QAMP.ViewModels;
 using QAMP.Windows;
 using static QAMP.Dialogs.NotificationWindow;
 
@@ -22,6 +17,7 @@ namespace QAMP
     {
         private bool _isClosing = false;
         private static readonly OSDWindow _osd = new();
+        private List<LrcLine> _parsedLyrics = [];
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
@@ -197,7 +193,6 @@ namespace QAMP
 
         private void SetupTrayIcon()
         {
-#pragma warning disable CA1416
             var iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/icon/QAMP_icon.ico")).Stream;
             _notifyIcon = new System.Windows.Forms.NotifyIcon
             {
@@ -227,10 +222,9 @@ namespace QAMP
                 _isClosing = true;
                 this.Close();
             });
-#pragma warning restore CA1416
         }
 
-        private void ViewLyricsButton_Click(object sender, RoutedEventArgs e)
+        private void ViewLyricsButton_Click(object? sender, RoutedEventArgs? e)
         {
             _isLyricsMode = !_isLyricsMode;
             UpdateInterfaceMode();
@@ -289,7 +283,6 @@ namespace QAMP
                 LyricsOverlay.Visibility = Visibility.Collapsed;
             }
         }
-        private List<LrcLine> _parsedLyrics = [];
         private static List<LrcLine> ParseLrc(string lrcText)
         {
             var lines = new List<LrcLine>();

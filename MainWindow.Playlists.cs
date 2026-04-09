@@ -1,13 +1,10 @@
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using ColorThiefDotNet;
 using Microsoft.Win32;
 using QAMP.Converters;
 using QAMP.Dialogs;
@@ -139,7 +136,7 @@ namespace QAMP
             }
         }
 
-        private T FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
+        private T? FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
             {
@@ -221,8 +218,14 @@ namespace QAMP
                 App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
                 MusicLibrary.Instance.CurrentPlaylist = selected;
                 ApplySortToPlaylist(selected);
-                var bitmap = _imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) as BitmapSource;
-                UpdateUpperPanelGradient(bitmap);
+                if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
+                {
+                    UpdateUpperPanelGradient(bitmap);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Бу-ба-бэ, что-то пошло не так");
+                }
                 if (Player.CurrentTrack != null)
                 {
                     UpdateFavoriteIcon(Player.CurrentTrack);

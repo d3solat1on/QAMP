@@ -9,11 +9,11 @@ namespace QAMP.Models
         public DateTime AddedDate { get; set; }
         public int Id { get; set; }
         public string? Extension { get; set; }
-        public string? Path { get; set; }
-        public string? Name { get; set; }
-        public string? Executor { get; set; }
-        public string? Album { get; set; }
-        public string? Duration { get; set; }
+        public string Path { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Executor { get; set; } = string.Empty;
+        public string Album { get; set; } = string.Empty;
+        public string Duration { get; set; } = "0:00";
         public string Genre { get; set; } = "Неизвестно";
         public int Bitrate { get; set; }
         public int SampleRate { get; set; }
@@ -35,7 +35,7 @@ namespace QAMP.Models
         private string? _lyrics;
         public string Lyrics
         {
-            get => _lyrics;
+            get => _lyrics ?? string.Empty;
             set
             {
                 _lyrics = value;
@@ -94,7 +94,7 @@ namespace QAMP.Models
                 return "N/A";
             }
         }
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         

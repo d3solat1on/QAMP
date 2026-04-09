@@ -1,12 +1,8 @@
-using System;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
@@ -136,7 +132,7 @@ namespace QAMP
                     Player.Volume = volume;
 
                     string volumeStr = volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    DatabaseService.SaveSetting("Volume", volumeStr);
+                    _ = DatabaseService.SaveSetting("Volume", volumeStr);
 
                     if (VolumeSlider.Value == 0)
                     {
@@ -293,7 +289,7 @@ namespace QAMP
             if (TracksDataGrid.SelectedItem is Track selectedTrack)
             {
                 App.LogInfo($"PlayTrack (ContextMenu): {selectedTrack.Executor} - {selectedTrack.Name}");
-                Player.PlayTrack(selectedTrack);
+                _ = Player.PlayTrack(selectedTrack);
                 UpdateNextTrackUI();
             }
         }
@@ -451,10 +447,10 @@ namespace QAMP
             {
                 foreach (var track in playlist.Tracks)
                 {
-                    if (track.Name.ToLower().Contains(searchLower) ||
-                        track.Executor.ToLower().Contains(searchLower) ||
-                        track.Album.ToLower().Contains(searchLower) ||
-                        track.Genre.ToLower().Contains(searchLower))
+                    if (track.Name.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
+                        track.Executor.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
+                        track.Album.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
+                        track.Genre.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase))
                     {
                         if (!searchResults.Any(t => t.Path == track.Path))
                         {
@@ -509,7 +505,7 @@ namespace QAMP
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
             if (sender is not ContextMenu menu) return;
-            var subMenu = menu.Items.OfType<MenuItem>().FirstOrDefault(m => m.Header != null && m.Header.ToString().Contains("Добавить в плейлист"));
+            var subMenu = menu.Items.OfType<MenuItem>().FirstOrDefault(m => m.Header is string header && header.Contains("Добавить в плейлист"));
             if (subMenu == null) return;
 
             subMenu.ItemsSource = null;

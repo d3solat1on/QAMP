@@ -1,7 +1,5 @@
-using System;
 using System.IO;
 using QAMP.Models;
-using TagLib;
 using File = System.IO.File;
 
 namespace QAMP.Services

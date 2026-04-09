@@ -5,7 +5,7 @@ namespace QAMP.Models;
 public class LrcLine : INotifyPropertyChanged
 {
     public TimeSpan Time { get; set; }
-    public string? Text { get; set; }
+    public string Text { get; set; } = string.Empty;
 
     private bool _isActive;
     public bool IsActive
@@ -19,7 +19,7 @@ public class LrcLine : INotifyPropertyChanged
         }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

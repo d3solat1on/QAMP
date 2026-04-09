@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
@@ -8,7 +7,7 @@ namespace QAMP.Converters
 {
     public class LargeTrackImageConverter : IValueConverter
     {
-        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is not byte[] bytes || bytes.Length == 0) return null;
 

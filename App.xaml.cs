@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
-using System.Windows.Threading;
-using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
 

@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using System.Windows;
 using FftSharp;
@@ -13,7 +12,7 @@ namespace QAMP.Visualization
         private double currentMaxValue = 0.1;
         private readonly double[] previousValues;
 
-        public event EventHandler<(double[] Data, double MaxY)> SpectrumUpdated;
+        public event EventHandler<(double[] Data, double MaxY)>? SpectrumUpdated;
 
         public SpectrumAnalyzer(SpectrumSettings? settings = null)
         {

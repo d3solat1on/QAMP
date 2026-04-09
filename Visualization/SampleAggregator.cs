@@ -1,4 +1,3 @@
-using System;
 using System.Windows;
 using NAudio.Dsp;
 using NAudio.Wave;
@@ -16,7 +15,7 @@ namespace QAMP.Visualization
         private int fftPos;
         private readonly Lock _lockObject = new();
 
-        public event EventHandler<float[]> FftCalculated;
+        public event EventHandler<float[]>? FftCalculated;
 
         public WaveFormat WaveFormat => source.WaveFormat;
 

@@ -1,13 +1,7 @@
-using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using QAMP.Audio;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
@@ -27,7 +21,7 @@ namespace QAMP
         private double _lastVolume = 0.5;
         private Track? _lastTrackWithCover;
         private bool _isLyricsMode = false;
-        private StressTester _stressTester;
+        private StressTester? _stressTester;
 
         public MainWindow()
         {
@@ -69,7 +63,7 @@ namespace QAMP
 
             Closing += (s, e) => OnClosing(e);
         }
-        
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             // Загружаем громкость - устанавливаем в слайдер, это вызовет VolumeSlider_ValueChanged
@@ -149,7 +143,7 @@ namespace QAMP
                 playTrackByIndex: (index) =>
                 {
                     if (TracksDataGrid.Items[index] is Track track)
-                        Player.PlayTrack(track);
+                        _ = Player.PlayTrack(track);
                 },
                 showMessage: (text) => Task.Run(() =>
                 {
@@ -196,21 +190,39 @@ namespace QAMP
             if (track == null) return;
             Dispatcher.Invoke(() =>
             {
-                UpdateNowPlayingInfo(track);
-                UpdatePlayPauseIcon(Player.IsPlaying);
-                UpdateFavoriteIcon(track);
-                CurrentTrackName.Text = track.Name;
-                CurrentTrackExecutor.Text = track.Executor;
-                CurrentTrackAlbum.Text = track.Album;
-                CurrentTrackData.Text = $"{track.Genre} | {track.Duration} | {track.SampleRate} Hz | {track.Bitrate} kbps";
-                CurrentTrackExtension.Text = track.DisplayExtension;
-                CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Неизвестно";
+                try
+                {
+                    UpdateNowPlayingInfo(track);
+                    UpdatePlayPauseIcon(Player.IsPlaying);
+                    UpdateFavoriteIcon(track);
+                    CurrentTrackName.Text = track.Name;
+                    CurrentTrackExecutor.Text = track.Executor;
+                    CurrentTrackAlbum.Text = track.Album;
+                    CurrentTrackData.Text = $"{track.Genre} | {track.Duration} | {track.SampleRate} Hz | {track.Bitrate} kbps";
+                    CurrentTrackExtension.Text = track.DisplayExtension;
+                    CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Неизвестно";
 
-                string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Загрузка...";
-                if (Player.Duration <= 0) CheckDurationAsync();
-
-                // UpdateCurrentTrackCover(track);
-                TotalTimeText.Text = totalTime;
+                    string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Загрузка...";
+                    if (Player.Duration <= 0) CheckDurationAsync();
+                    TotalTimeText.Text = totalTime;
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged: {track.Name}");
+                    if (_imageConverter.Convert(track.CoverImage, typeof(System.Windows.Media.Imaging.BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is System.Windows.Media.ImageSource cover)
+                    {
+                        CurrentTrackImage.Source = cover;
+                        CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
+                    }
+                    else
+                    {
+                        CurrentTrackImage.Source = (System.Windows.Media.ImageSource)FindResource("default_coverDrawingImage");
+                        CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
+                        CurrentTrackImage.HorizontalAlignment = HorizontalAlignment.Center;
+                        CurrentTrackImage.VerticalAlignment = VerticalAlignment.Center;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Error in OnTrackChanged: {ex.Message}");
+                }
             });
         }
 

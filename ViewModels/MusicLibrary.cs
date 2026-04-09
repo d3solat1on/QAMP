@@ -1,8 +1,5 @@
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Windows;
 using QAMP.Models;
 using QAMP.Services;
 
@@ -42,7 +39,7 @@ namespace QAMP.ViewModels
                     _currentPlaylist = value;
                     if (value != null)
                     {
-                        DatabaseService.SaveSetting("LastPlaylistId", value.Id.ToString());
+                        _ = DatabaseService.SaveSetting("LastPlaylistId", value.Id.ToString());
                         // При смене плейлиста обновляем очередь воспроизведения
                         // UpdatePlaybackQueue();
                     }
@@ -99,7 +96,7 @@ namespace QAMP.ViewModels
             // Начинаем с первого трека
             if (PlaybackQueue.Count > 0)
             {
-                PlayerService.Instance.PlayTrack(PlaybackQueue[0]);
+                _ = PlayerService.Instance.PlayTrack(PlaybackQueue[0]);
             }
         }
 
@@ -144,7 +141,7 @@ namespace QAMP.ViewModels
             }
 
             // Начинаем с выбранного трека
-            PlayerService.Instance.PlayTrack(track);
+            _ = PlayerService.Instance.PlayTrack(track);
         }
 
         /// <summary>
@@ -196,7 +193,7 @@ namespace QAMP.ViewModels
             }
 
             // Начинаем с выбранного трека
-            PlayerService.Instance.PlayTrack(track);
+            _ = PlayerService.Instance.PlayTrack(track);
         }
 
         public void SyncShuffledQueueWithCurrentTrack()

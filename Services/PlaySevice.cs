@@ -1,7 +1,5 @@
 using System.Windows;
 using System.Windows.Threading;
-using System.Linq;
-using System.Timers;
 using NAudio.Wave;
 using NAudio.Flac;
 using QAMP.Models;
@@ -11,7 +9,6 @@ using System.IO;
 using System.Collections.ObjectModel;
 using QAMP.Visualization;
 using QAMP.Audio;
-using QAMP.Windows;
 
 namespace QAMP.Services
 {
@@ -21,31 +18,31 @@ namespace QAMP.Services
         public static PlayerService Instance => _instance ??= new PlayerService();
         DateTime _nextTime = DateTime.MinValue;
         public float[] EqGains { get; set; } = new float[10];
-        public EqualizerFilter CurrentEqualizer { get; private set; }
+        public EqualizerFilter CurrentEqualizer { get; private set; } = null!;
         private bool _disposed = false;
         private bool _playCountIncremented = false;
-        private SpectrumAnalyzer _spectrumAnalyzer;
-        public SpectrumControl SpectrumControl { get; set; }
+        private SpectrumAnalyzer _spectrumAnalyzer = null!;
+        public SpectrumControl SpectrumControl { get; set; } = null!;
 
         // НОВОЕ: Настройки спектра
-        private SpectrumSettings _spectrumSettings;
+        private SpectrumSettings _spectrumSettings = null!;
 
         // NAudio компоненты
-        private WaveStream _audioFileReader;
-        private WaveOutEvent _waveOutEvent;
-        private DispatcherTimer? _positionTimer;
-        private FadeInOutProvider _fadeProvider;
+        private WaveStream? _audioFileReader;
+        private WaveOutEvent? _waveOutEvent;
+        private readonly DispatcherTimer _positionTimer = new();
+        private FadeInOutProvider _fadeProvider = null!;
 
         // События
-        public event Action<Track> TrackChanged;
-        public event Action<double> PositionChanged;
-        public event Action<bool> PlaybackPaused;
-        public event Action<double> VolumeChanged;
-        public event Action DurationChanged;
-        public event Action<int> PlayCountUpdated;
+        public event Action<Track>? TrackChanged;
+        public event Action<double>? PositionChanged;
+        public event Action<bool>? PlaybackPaused;
+        public event Action<double>? VolumeChanged;
+        public event Action? DurationChanged;
+        public event Action<int>? PlayCountUpdated;
 
         // Свойства
-        public Track CurrentTrack { get; set; }
+        public Track CurrentTrack { get; set; } = null!;
         public bool IsPlaying { get; private set; }
         public bool IsShuffleEnabled { get; set; } = false;
         public List<Track> ShuffledQueue { get; set; } = [];
@@ -99,7 +96,7 @@ namespace QAMP.Services
                 RepeatModeChanged?.Invoke(value);
             }
         }
-        public event Action<RepeatMode> RepeatModeChanged;
+        public event Action<RepeatMode>? RepeatModeChanged;
 
         private bool _isShuffle = false;
         public bool IsShuffle
@@ -111,16 +108,13 @@ namespace QAMP.Services
                 ShuffleChanged?.Invoke(value);
             }
         }
-        public event Action<bool> ShuffleChanged;
+        public event Action<bool>? ShuffleChanged;
 
         private string? _tempFilePath;
 
         private PlayerService()
         {
-            _positionTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(100)
-            };
+            _positionTimer.Interval = TimeSpan.FromMilliseconds(100);
             _positionTimer.Tick += PositionTimer_Tick;
 
             // Инициализируем массив EqGains
@@ -155,7 +149,7 @@ namespace QAMP.Services
         {
             _spectrumSettings.ApplyPreset(presetName);
             _spectrumAnalyzer?.SetPreset(presetName);
-            SpectrumControl?.SetSpectrumPreset(presetName);
+            // SpectrumControl?.SetSpectrumPreset(presetName);
             App.LogInfo($"Spectrum preset changed to: {presetName}");
         }
         public void UpdateSpectrumSettings(double freqPower, double amplitudeGain, double amplitudePower,
@@ -245,7 +239,7 @@ namespace QAMP.Services
                 _waveOutEvent.Play();
                 _fadeProvider.BeginFadeIn(500);
 
-                Duration = _audioFileReader.TotalTime.TotalSeconds;
+                Duration = _audioFileReader!.TotalTime.TotalSeconds;
                 IsPlaying = true;
                 _positionTimer.Start();
 
@@ -256,7 +250,7 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
+                _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Ошибка в PlayTrack: {ex.Message}");
                 Stop();
             }
@@ -322,7 +316,7 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
+                _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Ошибка в LoadTrack: {ex.Message}");
                 Stop();
             }
@@ -361,9 +355,9 @@ namespace QAMP.Services
             }
             SettingsManager.Instance.Save();
         }
-        private void OnPlaybackStopped(object sender, StoppedEventArgs e)
+        private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
+            _ = Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 if (e.Exception != null)
                 {
@@ -376,7 +370,7 @@ namespace QAMP.Services
                 }
             });
         }
-        private void PositionTimer_Tick(object sender, EventArgs e)
+        private void PositionTimer_Tick(object? sender, EventArgs e)
         {
             if (_audioFileReader != null && IsPlaying)
             {
@@ -404,10 +398,10 @@ namespace QAMP.Services
                                 int trackId = CurrentTrack.Id;
                                 System.Diagnostics.Debug.WriteLine($"[PlayCount] Incrementing for track: {CurrentTrack.Name}");
 
-                                Task.Run(() =>
+                                _ = Task.Run(() =>
                                 {
                                     DatabaseService.IncrementTrackPlayCount(trackId);
-                                    Application.Current.Dispatcher.BeginInvoke(() =>
+                                    _ = Application.Current.Dispatcher.BeginInvoke(() =>
                                     {
                                         CurrentTrack.PlayCount++;
                                         System.Diagnostics.Debug.WriteLine($"[PlayCount] PlayCount now: {CurrentTrack.PlayCount}");
@@ -466,7 +460,7 @@ namespace QAMP.Services
             else if (CurrentTrack != null)
             {
                 // Если плеер пуст, но трек выбран — просто запускаем его нормально
-                PlayTrack(CurrentTrack);
+                _ = PlayTrack(CurrentTrack);
             }
         }
 
@@ -487,10 +481,10 @@ namespace QAMP.Services
                         _playCountIncremented = true;
 
                         int trackId = CurrentTrack.Id;
-                        Task.Run(() =>
+                        _ = Task.Run(() =>
                         {
                             DatabaseService.IncrementTrackPlayCount(trackId);
-                            Application.Current.Dispatcher.BeginInvoke(() =>
+                            _ = Application.Current.Dispatcher.BeginInvoke(() =>
                             {
                                 CurrentTrack.PlayCount++;
                             });
@@ -602,7 +596,7 @@ namespace QAMP.Services
                 return; // нет предыдущего трека
             }
 
-            PlayTrack(queue[prevIndex]);
+            _ = PlayTrack(queue[prevIndex]);
             MainWindow.UpdateOSD();
             if (Application.Current.MainWindow is MainWindow mainWin)
             {
@@ -713,7 +707,7 @@ namespace QAMP.Services
             if (nextTrack != null)
             {
                 System.Diagnostics.Debug.WriteLine($"Playing next track: {nextTrack.Name}");
-                PlayTrack(nextTrack);
+                _ = PlayTrack(nextTrack);
             }
             else
             {
@@ -737,8 +731,8 @@ namespace QAMP.Services
                 if (disposing)
                 {
                     Stop();
-                    _positionTimer?.Stop();
-                    _positionTimer = null;
+                    _positionTimer.Stop();
+                    _positionTimer.Tick -= PositionTimer_Tick;
                 }
                 _disposed = true;
             }

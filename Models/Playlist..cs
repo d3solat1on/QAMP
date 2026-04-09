@@ -1,4 +1,3 @@
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
@@ -21,11 +20,10 @@ namespace QAMP.Models
         [JsonIgnore]
         private byte[]? _coverImage;
 
-        private ObservableCollection<Track> _tracks;
-
+        private ObservableCollection<Track> _tracks = [];
         public int Id { get; set; }
 
-        public string Name
+        public string? Name
         {
             get => _name;
             set
@@ -35,7 +33,7 @@ namespace QAMP.Models
             }
         }
 
-        public string Description
+        public string? Description
         {
             get => _description;
             set
@@ -65,7 +63,7 @@ namespace QAMP.Models
             }
         }
 
-        public byte[] CoverImage
+        public byte[]? CoverImage
         {
             get => _coverImage;
             set
@@ -134,7 +132,7 @@ namespace QAMP.Models
     ? $"{(int)TotalDuration.TotalHours}:{TotalDuration.Minutes:D2}:{TotalDuration.Seconds:D2}"
     : TotalDuration.ToString(@"mm\:ss");
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

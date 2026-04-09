@@ -49,16 +49,16 @@ namespace QAMP.Windows
 
         private void PathTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (string.IsNullOrEmpty(_track?.Path)) return;
+            var currentTrack = _track;
 
+            if (string.IsNullOrEmpty(currentTrack?.Path)) return;
             try
             {
-                // Получаем директорию файла
-                string directory = Path.GetDirectoryName(_track.Path);
+                string? directory = Path.GetDirectoryName(currentTrack.Path);
 
                 if (!string.IsNullOrEmpty(directory) && Directory.Exists(directory))
                 {
-                    Process.Start("explorer.exe", $"/select,\"{_track.Path}\"");
+                    Process.Start("explorer.exe", $"/select,\"{currentTrack.Path}\"");
                 }
                 else
                 {
@@ -186,25 +186,42 @@ namespace QAMP.Windows
 
         private async void SearchLyrics_Click(object sender, RoutedEventArgs e)
         {
-            NotificationWindow.Show("Searching in LRCLIB...", this);
+            var track = _track;
+            if (track == null) return;
 
-            string lyrics = await FetchLrcFromLrcLib(_track.Executor, _track.Name);
+            bool isInvalidExecutor = string.IsNullOrWhiteSpace(track.Executor) ||
+                                     track.Executor.Equals("Неизвестный", StringComparison.OrdinalIgnoreCase) ||
+                                     track.Executor.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
+
+            bool isInvalidName = string.IsNullOrWhiteSpace(track.Name) ||
+                                 track.Name.Equals("Неизвестно", StringComparison.OrdinalIgnoreCase) ||
+                                 track.Name.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
+
+            if (isInvalidExecutor || isInvalidName)
+            {
+                NotificationWindow.Show("Недостаточно данных для поиска", this);
+                return;
+            }
+
+            NotificationWindow.Show("Поиск в LRCLIB...", this);
+
+            string? lyrics = await FetchLrcFromLrcLib(track.Executor, track.Name);
 
             if (!string.IsNullOrEmpty(lyrics))
             {
-                _track.Lyrics = lyrics;
+                track.Lyrics = lyrics;
                 if (FindName("LyricsTextBox") is System.Windows.Controls.TextBox tb)
                 {
                     tb.Text = lyrics;
                 }
                 try
                 {
-                    using (var file = TagLib.File.Create(_track.Path))
+                    using (var file = TagLib.File.Create(track.Path!))
                     {
                         file.Tag.Lyrics = lyrics;
                         file.Save();
                     }
-                    NotificationWindow.Show("Lyrics loaded and SAVED to file!", this);
+                    NotificationWindow.Show("Lyrics loaded and SAVED!", this);
                 }
                 catch (Exception ex)
                 {
@@ -213,7 +230,7 @@ namespace QAMP.Windows
             }
             else
             {
-                NotificationWindow.Show("Lyrics not found in LRCLIB database.", this);
+                NotificationWindow.Show("Lyrics not found.", this);
             }
         }
         private static async Task<string?> FetchLrcFromLrcLib(string artist, string title)

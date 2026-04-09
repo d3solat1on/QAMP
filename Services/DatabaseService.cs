@@ -166,21 +166,21 @@ public class DatabaseService
         {
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
-            
+
             // Сначала читаем текущее значение
             var readCmd = connection.CreateCommand();
             readCmd.CommandText = "SELECT PlayCount FROM Tracks WHERE Id = $id";
             readCmd.Parameters.AddWithValue("$id", trackId);
             var currentCount = readCmd.ExecuteScalar();
             System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] Current PlayCount: {(currentCount != null ? currentCount.ToString() : "NULL")}");
-            
+
             // Теперь инкрементируем
             var cmd = connection.CreateCommand();
             cmd.CommandText = "UPDATE Tracks SET PlayCount = PlayCount + 1 WHERE Id = $id";
             cmd.Parameters.AddWithValue("$id", trackId);
             int rowsAffected = cmd.ExecuteNonQuery();
             System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] Rows affected: {rowsAffected}");
-            
+
             // Проверяем новое значение
             var checkCmd = connection.CreateCommand();
             checkCmd.CommandText = "SELECT PlayCount FROM Tracks WHERE Id = $id";
@@ -296,7 +296,7 @@ public class DatabaseService
         var getIdCommand = connection.CreateCommand();
         getIdCommand.CommandText = "SELECT Id FROM Tracks WHERE Path = $path";
         getIdCommand.Parameters.AddWithValue("$path", filePath);
-        long trackId = (long)getIdCommand.ExecuteScalar();
+        long? trackId = (long?)getIdCommand.ExecuteScalar();
 
         var linkCommand = connection.CreateCommand();
         linkCommand.CommandText = "INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate) VALUES ($pId, $tId, $date)";
@@ -319,7 +319,7 @@ public class DatabaseService
         command.Parameters.AddWithValue("$playlistId", playlistId);
         command.Parameters.AddWithValue("$trackId", trackId);
 
-        long count = (long)command.ExecuteScalar();
+        long? count = (long?)command.ExecuteScalar();
         return count > 0;
     }
 
@@ -349,7 +349,7 @@ public class DatabaseService
         command.Parameters.AddWithValue("$name", name);
         command.Parameters.AddWithValue("$id", excludeId);
 
-        long count = (long)command.ExecuteScalar();
+        long? count = (long?)command.ExecuteScalar();
         return count > 0;
     }
 
@@ -662,7 +662,17 @@ public class DatabaseService
             var getIdCmd = connection.CreateCommand();
             getIdCmd.CommandText = "SELECT Id FROM Tracks WHERE Path = $path";
             getIdCmd.Parameters.AddWithValue("$path", track.Path);
-            trackId = (long)getIdCmd.ExecuteScalar();
+            var result = getIdCmd.ExecuteScalar();
+            if (result != null)
+            {
+                trackId = (long)result;
+                System.Diagnostics.Debug.WriteLine($"Новый трек ID: {trackId}");
+            }
+            else
+            {
+                throw new Exception("Не удалось получить ID для нового трека после вставки");
+            }
+
         }
 
         System.Diagnostics.Debug.WriteLine($"Финальный ID трека в БД: {trackId}");
@@ -672,7 +682,7 @@ public class DatabaseService
         checkLinkCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $pId AND TrackId = $tId";
         checkLinkCmd.Parameters.AddWithValue("$pId", playlistId);
         checkLinkCmd.Parameters.AddWithValue("$tId", trackId);
-        long existingLink = (long)checkLinkCmd.ExecuteScalar();
+        long? existingLink = (long?)checkLinkCmd.ExecuteScalar();
 
         if (existingLink == 0)
         {
@@ -694,7 +704,7 @@ public class DatabaseService
         var countCmd = connection.CreateCommand();
         countCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE TrackId = $trackId";
         countCmd.Parameters.AddWithValue("$trackId", trackId);
-        long playlistCount = (long)countCmd.ExecuteScalar();
+        long? playlistCount = (long?)countCmd.ExecuteScalar();
         System.Diagnostics.Debug.WriteLine($"ТРЕК СОДЕРЖИТСЯ В {playlistCount} ПЛЕЙЛИСТАХ");
     }
 
@@ -727,7 +737,7 @@ public class DatabaseService
             var checkCmd = connection.CreateCommand();
             checkCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $pId";
             checkCmd.Parameters.AddWithValue("$pId", playlistId);
-            long linksCount = (long)checkCmd.ExecuteScalar();
+            long? linksCount = (long?)checkCmd.ExecuteScalar();
             System.Diagnostics.Debug.WriteLine($"Связей в PlaylistTracks: {linksCount}");
 
             if (linksCount == 0)
@@ -841,7 +851,7 @@ public class DatabaseService
 
         try
         {
-            return (long)command.ExecuteScalar();
+            return (long?)command.ExecuteScalar() ?? 0;
         }
         catch (SqliteException ex)
         {
@@ -983,8 +993,8 @@ public class DatabaseService
         // Проверяем все треки в Tracks
         var cmd = connection.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM Tracks";
-        long totalTracks = (long)cmd.ExecuteScalar();
-        System.Diagnostics.Debug.WriteLine($"Всего треков в Tracks: {totalTracks}");
+        long? totalTracks = (long?)cmd.ExecuteScalar();
+        System.Diagnostics.Debug.WriteLine($"Всего треков в Tracks: {totalTracks ?? 0}");
 
         // Выводим первые 5 треков
         cmd.CommandText = "SELECT Id, Path, Name FROM Tracks LIMIT 5";
@@ -1008,9 +1018,9 @@ public class DatabaseService
             var linkCmd = connection.CreateCommand();
             linkCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $id";
             linkCmd.Parameters.AddWithValue("$id", playlistId);
-            long linkCount = (long)linkCmd.ExecuteScalar();
+            long? linkCount = (long?)linkCmd.ExecuteScalar();
 
-            System.Diagnostics.Debug.WriteLine($"  {playlistName} (ID={playlistId}): {linkCount} связей");
+            System.Diagnostics.Debug.WriteLine($"  {playlistName} (ID={playlistId}): {linkCount ?? 0} связей");
 
             // Выводим треки для этого плейлиста
             if (linkCount > 0)
