@@ -11,7 +11,7 @@ namespace QAMP.ViewModels
         public static MusicLibrary Instance => _instance ??= new MusicLibrary();
 
         // Доступ к PlayerService для привязок в UI
-        public PlayerService PlayService => PlayerService.Instance;
+        public static PlayerService PlayService => PlayerService.Instance;
 
         // Коллекция плейлистов
         private ObservableCollection<Playlist> _playlists = [];
@@ -47,18 +47,6 @@ namespace QAMP.ViewModels
                 }
             }
         }
-
-        private ObservableCollection<Track> _playbackQueue = [];
-        public ObservableCollection<Track> PlaybackQueue
-        {
-            get => _playbackQueue;
-            set
-            {
-                _playbackQueue = value;
-                OnPropertyChanged(nameof(PlaybackQueue));
-            }
-        }
-
         // Плейлист из которого воспроизводится музыка (отличается от CurrentPlaylist который для просмотра)
         private Playlist? _playingPlaylist;
         public Playlist? PlayingPlaylist
@@ -73,7 +61,16 @@ namespace QAMP.ViewModels
                 }
             }
         }
-
+        private ObservableCollection<Track> _playbackQueue = [];
+        public ObservableCollection<Track> PlaybackQueue
+        {
+            get => _playbackQueue;
+            set
+            {
+                _playbackQueue = value;
+                OnPropertyChanged(nameof(PlaybackQueue));
+            }
+        }
         public Track? CurrentTrack { get; set; }
 
         // НОВЫЙ МЕТОД: для воспроизведения плейлиста
@@ -106,7 +103,7 @@ namespace QAMP.ViewModels
 
             System.Diagnostics.Debug.WriteLine($"=== ВОСПРОИЗВЕДЕНИЕ ТРЕКА: {track.Name} из плейлиста: {playlist.Name} ===");
             System.Diagnostics.Debug.WriteLine($"Трек для воспроизведения находится на позиции в playlist.Tracks: {playlist.Tracks.IndexOf(track)}");
-            
+
 
             // Устанавливаем плейлист из которого воспроизводится музыка
             PlayingPlaylist = playlist;
@@ -162,7 +159,7 @@ namespace QAMP.ViewModels
 
             // Обновляем очередь воспроизведения: используем displayOrder если предоставлен, иначе playlist.Tracks
             var tracksForQueue = displayOrder ?? playlist.Tracks;
-            
+
             PlaybackQueue.Clear();
             foreach (var t in tracksForQueue)
             {
@@ -179,7 +176,7 @@ namespace QAMP.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"  ... еще {PlaybackQueue.Count - 5} треков");
             }
-            
+
             // Найдем позицию текущего трека в очереди
             int trackIndexInQueue = PlaybackQueue.IndexOf(track);
             System.Diagnostics.Debug.WriteLine($"Позиция трека '{track.Name}' в PlaybackQueue: {trackIndexInQueue}");
@@ -193,7 +190,7 @@ namespace QAMP.ViewModels
             }
 
             // Начинаем с выбранного трека
-            _ = PlayerService.Instance.PlayTrack(track);
+            _ = PlayerService.Instance.PlayTrack(track, true);
         }
 
         public void SyncShuffledQueueWithCurrentTrack()
@@ -320,31 +317,25 @@ namespace QAMP.ViewModels
                 Playlists.Add(updatedPlaylist);
             }
         }
-        
+
         public void RefreshSinglePlaylist(int playlistId)
         {
-            System.Diagnostics.Debug.WriteLine($"=== REFRESH SINGLE PLAYLIST ID={playlistId} ===");
-            
-            // Загружаем только один плейлист из базы (полностью свежий)
             var freshPlaylist = DatabaseService.GetPlaylistById(playlistId);
             if (freshPlaylist != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Обновляем плейлист '{freshPlaylist.Name}' в памяти");
-                UpdatePlaylist(freshPlaylist);
-                
-                // КРИТИЧНО: Если это текущий плейлист, обновляем UI
-                if (CurrentPlaylist?.Id == playlistId)
+                UpdatePlaylist(freshPlaylist); // Обновляем данные в общем списке
+
+                // Вместо жесткого CurrentPlaylist = updatedPlaylist, 
+                // просто уведомляем UI, что свойства изменились
+                var updatedPlaylist = Playlists.FirstOrDefault(p => p.Id == playlistId);
+                if (updatedPlaylist != null && CurrentPlaylist?.Id == playlistId)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Это текущий плейлист, синхронизируем UI");
-                    // Переустанавливаем CurrentPlaylist чтобы вызвать обновление в UI
-                    var updatedPlaylist = Playlists.FirstOrDefault(p => p.Id == playlistId);
-                    if (updatedPlaylist != null)
-                    {
-                        CurrentPlaylist = updatedPlaylist;
-                    }
+                    // Мы НЕ ПЕРЕПРИВЯЗЫВАЕМ объект, мы просто говорим UI обновиться
+                    OnPropertyChanged(nameof(CurrentPlaylist));
+
+                    // Если у тебя DataGrid привязан к Tracks, вызови и для него
+                    // OnPropertyChanged(nameof(CurrentPlaylist.Tracks));
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"=== КОНЕЦ REFRESH SINGLE PLAYLIST ===");
             }
         }
 
@@ -354,10 +345,10 @@ namespace QAMP.ViewModels
         public void AddNewPlaylist(Playlist newPlaylist)
         {
             System.Diagnostics.Debug.WriteLine($"=== ДОБАВЛЕНИЕ НОВОГО ПЛЕЙЛИСТА: '{newPlaylist.Name}' (ID={newPlaylist.Id}) ===");
-            
+
             // Добавляем в коллекцию
             Playlists.Add(newPlaylist);
-            
+
             System.Diagnostics.Debug.WriteLine($"Плейлист добавлен. Всего плейлистов: {Playlists.Count}");
         }
         public event PropertyChangedEventHandler? PropertyChanged;

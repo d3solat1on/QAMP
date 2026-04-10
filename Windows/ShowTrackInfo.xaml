@@ -157,8 +157,8 @@
                                                         Click="ExtractCover_Click"
                                                         HorizontalAlignment="Center"
                                                         Margin="0,10,0,0"
-                                                        Background="{DynamicResource AccentBrush}"
-                                                        Visibility="{Binding HasEmbeddedCover, Converter={StaticResource BooleanToVisibilityConverter}}"/>           
+                                                        Background="{DynamicResource AccentBrush}"/>
+                                                        <!-- Visibility="{Binding HasEmbeddedCover, Converter={StaticResource BooleanToVisibilityConverter}}"/>            -->
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1"

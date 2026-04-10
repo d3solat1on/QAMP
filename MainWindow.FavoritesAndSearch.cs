@@ -249,9 +249,11 @@ namespace QAMP
                 {
                     // Вместо RefreshPlaylists() используем RefreshSinglePlaylist для оптимизации
                     MusicLibrary.Instance.RefreshSinglePlaylist(selectedPlaylist.Id);
-
-                    // Восстанавливаем выбор плейлиста в списке
-                    PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
+                    PlaylistsListBox.SelectionChanged -= PlaylistsListBox_SelectionChanged;
+                    var updatedPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
+                    PlaylistsListBox.SelectedItem = updatedPlaylist;
+                    TracksDataGrid.ItemsSource = updatedPlaylist?.Tracks;
+                    PlaylistsListBox.SelectionChanged += PlaylistsListBox_SelectionChanged;
                 }
             }
         }

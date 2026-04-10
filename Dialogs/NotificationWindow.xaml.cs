@@ -3,6 +3,7 @@ namespace QAMP.Dialogs
 {
     public partial class NotificationWindow : Window
     {
+        private bool _isAnimating = false;
         public enum NotificationMode
         {
             Info,
@@ -31,20 +32,51 @@ namespace QAMP.Dialogs
             }
             return win.ShowDialog();
         }
+        public async Task StartDotAnimation(string baseMessage)
+        {
+            _isAnimating = true;
+            int dotCount = 0;
+            while (_isAnimating)
+            {
+                dotCount = (dotCount + 1) % 4;
+                // Генерируем строку вида: "Поиск в LRCLIB", "Поиск в LRCLIB.", "Поиск в LRCLIB.." и т.д.
+                MessageText.Text = baseMessage + new string('.', dotCount);
+                await Task.Delay(500); // Скорость мигания
+            }
+        }
+
+        public void StopDotAnimation()
+        {
+            _isAnimating = false;
+        }
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
-            this.Close();
+            try
+            {
+                DialogResult = true;
+            }
+            catch (InvalidOperationException)
+            {
+                // Если окно не было открыто как диалог, просто игнорируем
+            }
+            Close();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false; 
-            this.Close();
+            try
+            {
+                DialogResult = false;
+            }
+            catch (InvalidOperationException)
+            {
+                // Если окно не было открыто как диалог, просто игнорируем
+            }
+            Close();
         }
 
-        
-        public static async void ShowToast(string message, Window owner)
+
+        public static async void ShowToast(string message, Window owner) //Когда-нибудь сделаю
         {
             var win = new NotificationWindow
             {
@@ -69,10 +101,10 @@ namespace QAMP.Dialogs
 
             win.Close();
         }
-        private void OkButton_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-            this.Close();
-        }
+        // private void OkButton_Click(object sender, RoutedEventArgs e)
+        // {
+        //     DialogResult = true;
+        //     Close();
+        // }
     }
 }

@@ -111,7 +111,7 @@ namespace QAMP.Services
         public event Action<bool>? ShuffleChanged;
 
         private string? _tempFilePath;
-
+        private List<Track> _actualPlayingQueue = [];
         private PlayerService()
         {
             _positionTimer.Interval = TimeSpan.FromMilliseconds(100);
@@ -170,9 +170,16 @@ namespace QAMP.Services
             SettingsManager.Instance.Save();
         }
 
-        public async Task PlayTrack(Track track)
+        public async Task PlayTrack(Track track, bool isNewQueue = false)
         {
-            MusicLibrary.Instance.PlaybackQueue = new ObservableCollection<Track>(MusicLibrary.Instance.PlaybackQueue);
+            if (isNewQueue || _actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
+            {
+                if (MusicLibrary.Instance.CurrentPlaylist != null)
+                {
+                    _actualPlayingQueue = [.. MusicLibrary.Instance.CurrentPlaylist.Tracks];
+                    System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь инициализирована: {_actualPlayingQueue.Count} треков");
+                }
+            }
             try
             {
                 Stop();
@@ -183,17 +190,20 @@ namespace QAMP.Services
 
                 await Task.Run(() =>
                 {
+                    byte[] fileData = File.ReadAllBytes(track.Path);
+                    var memStream = new MemoryStream(fileData);
+
                     if (extension == ".flac")
                     {
-                        var flacReader = new FlacReader(track.Path);
+                        var flacReader = new FlacReader(memStream);
                         _audioFileReader = flacReader;
                         sampleProvider = flacReader.ToSampleProvider();
                     }
                     else
                     {
-                        var reader = new AudioFileReader(track.Path);
+                        var reader = new StreamMediaFoundationReader(memStream);
                         _audioFileReader = reader;
-                        sampleProvider = reader;
+                        sampleProvider = reader.ToSampleProvider();
                     }
 
                     float[] frequencies = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
@@ -248,14 +258,15 @@ namespace QAMP.Services
                 TrackChanged?.Invoke(track);
                 App.LogInfo($"Start track: {track.Name}");
             }
+
             catch (Exception ex)
             {
                 _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Ошибка в PlayTrack: {ex.Message}");
                 Stop();
             }
-        }
 
+        }
         /// <summary>
         /// Загружает трек без воспроизведения (для восстановления состояния при запуске)
         /// </summary>
@@ -536,6 +547,7 @@ namespace QAMP.Services
 
         public Track? GetNextTrack()
         {
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] GetNextTrack called. Queue count: {MusicLibrary.Instance.PlaybackQueue.Count}");
             // Если включен Shuffle
             if (IsShuffleEnabled)
             {
@@ -611,112 +623,71 @@ namespace QAMP.Services
                 return;
             }
 
+            // РАБОТАЕМ ТОЛЬКО С ЭТОЙ ОЧЕРЕДЬЮ
+            var queue = _actualPlayingQueue;
+            if (queue == null || queue.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("PlayNextTrack: Queue is empty");
+                return;
+            }
+
             Track? nextTrack = null;
 
-            // Режим перемешивания
-            if (IsShuffleEnabled)
-            {
-                System.Diagnostics.Debug.WriteLine($"PlayNextTrack: Shuffle mode, ShuffledQueue.Count = {ShuffledQueue.Count}");
-
-                if (ShuffledQueue.Count > 0)
-                {
-                    // Находим индекс текущего трека в перемешанной очереди
-                    int currentIndex = ShuffledQueue.IndexOf(CurrentTrack);
-                    System.Diagnostics.Debug.WriteLine($"CurrentTrack index in ShuffledQueue: {currentIndex}");
-
-                    if (currentIndex != -1 && currentIndex < ShuffledQueue.Count - 1)
-                    {
-                        nextTrack = ShuffledQueue[currentIndex + 1];
-                        System.Diagnostics.Debug.WriteLine($"Next track: {nextTrack?.Name}");
-                    }
-                    else if (currentIndex == ShuffledQueue.Count - 1)
-                    {
-                        // Если мы в конце очереди
-                        if (RepeatMode == RepeatMode.RepeatAll)
-                        {
-                            // Начинаем сначала
-                            nextTrack = ShuffledQueue[0];
-                            System.Diagnostics.Debug.WriteLine($"RepeatAll: starting from beginning: {nextTrack?.Name}");
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine("End of shuffled queue, no repeat");
-                        }
-                    }
-                    else if (currentIndex == -1)
-                    {
-                        // Если текущий трек не найден в ShuffledQueue (например, после ручного выбора)
-                        // Создаем новую очередь, начиная с текущего трека
-                        System.Diagnostics.Debug.WriteLine("Current track not in ShuffledQueue, recreating...");
-
-                        var remainingTracks = MusicLibrary.Instance.PlaybackQueue
-                            .Where(t => t != CurrentTrack)
-                            .OrderBy(x => Guid.NewGuid())
-                            .ToList();
-
-                        ShuffledQueue = [CurrentTrack, .. remainingTracks];
-
-                        if (ShuffledQueue.Count > 1)
-                        {
-                            nextTrack = ShuffledQueue[1];
-                        }
-                    }
-                }
-                else if (RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
-                {
-                    // Создаем новую перемешанную очередь
-                    System.Diagnostics.Debug.WriteLine("ShuffledQueue empty, creating new...");
-                    var shuffledList = MusicLibrary.Instance.PlaybackQueue
-                        .Where(t => t != CurrentTrack)
-                        .OrderBy(x => Guid.NewGuid())
-                        .ToList();
-
-                    ShuffledQueue = [CurrentTrack, .. shuffledList];
-
-                    if (ShuffledQueue.Count > 1)
-                    {
-                        nextTrack = ShuffledQueue[1];
-                    }
-                }
-            }
-            // Режим повтора одного трека
-            else if (RepeatMode == RepeatMode.RepeatOne)
+            // 1. РЕЖИМ ПОВТОРА ОДНОГО ТРЕКА (самый высокий приоритет)
+            if (RepeatMode == RepeatMode.RepeatOne)
             {
                 nextTrack = CurrentTrack;
                 System.Diagnostics.Debug.WriteLine("RepeatOne: playing same track");
             }
-            // Обычный режим
+            // 2. РЕЖИМ ПЕРЕМЕШИВАНИЯ
+            else if (IsShuffleEnabled)
+            {
+                // Ищем индекс в ShuffledQueue по Path
+                int currentIndex = ShuffledQueue.FindIndex(t => t.Path == CurrentTrack.Path);
+
+                if (currentIndex != -1 && currentIndex < ShuffledQueue.Count - 1)
+                {
+                    nextTrack = ShuffledQueue[currentIndex + 1];
+                }
+                else if (RepeatMode == RepeatMode.RepeatAll && ShuffledQueue.Count > 0)
+                {
+                    nextTrack = ShuffledQueue[0];
+                }
+            }
+            // 3. ОБЫЧНЫЙ РЕЖИМ
             else
             {
-                var currentIndex = MusicLibrary.Instance.PlaybackQueue.IndexOf(CurrentTrack);
-                System.Diagnostics.Debug.WriteLine($"Normal mode, currentIndex: {currentIndex}, PlaybackQueue.Count: {MusicLibrary.Instance.PlaybackQueue.Count}");
+                // Ищем индекс в нашей "замороженной" очереди по Path
+                int currentIndex = queue.FindIndex(t => t.Path == CurrentTrack.Path);
 
-                if (currentIndex >= 0 && currentIndex < MusicLibrary.Instance.PlaybackQueue.Count - 1)
+                if (currentIndex != -1 && currentIndex < queue.Count - 1)
                 {
-                    nextTrack = MusicLibrary.Instance.PlaybackQueue[currentIndex + 1];
-                    System.Diagnostics.Debug.WriteLine($"Next track: {nextTrack?.Name}");
+                    nextTrack = queue[currentIndex + 1];
                 }
-                else if (RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0 &&
-                         currentIndex == MusicLibrary.Instance.PlaybackQueue.Count - 1)
+                else if (RepeatMode == RepeatMode.RepeatAll && queue.Count > 0)
                 {
-                    nextTrack = MusicLibrary.Instance.PlaybackQueue[0];
-                    System.Diagnostics.Debug.WriteLine($"RepeatAll: starting from beginning: {nextTrack?.Name}");
+                    nextTrack = queue[0];
                 }
             }
 
+            // ЗАПУСК ТРЕКА
             if (nextTrack != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Playing next track: {nextTrack.Name}");
-                _ = PlayTrack(nextTrack);
+                System.Diagnostics.Debug.WriteLine($"Playing next: {nextTrack.Name}");
+                // false — чтобы НЕ перезаписывать _actualPlayingQueue при автопереходе
+                _ = PlayTrack(nextTrack, false);
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("No next track available");
+                System.Diagnostics.Debug.WriteLine("No next track available (End of playlist)");
             }
+
+            // Обновление UI
             MainWindow.UpdateOSD();
             if (Application.Current.MainWindow is MainWindow mainWin)
             {
                 mainWin.UpdateLyricsView();
+                mainWin.UpdateNextTrackUI();
             }
         }
         public void Dispose()

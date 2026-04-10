@@ -203,34 +203,53 @@ namespace QAMP.Windows
                 return;
             }
 
-            NotificationWindow.Show("Поиск в LRCLIB...", this);
+            var loader = new NotificationWindow { Owner = this };
+            loader.SingleOkButton.Visibility = Visibility.Collapsed;
+            loader.Show();
 
-            string? lyrics = await FetchLrcFromLrcLib(track.Executor, track.Name);
+            var animationTask = loader.StartDotAnimation("Поиск в LRCLIB");
 
-            if (!string.IsNullOrEmpty(lyrics))
+            try
             {
-                track.Lyrics = lyrics;
-                if (FindName("LyricsTextBox") is System.Windows.Controls.TextBox tb)
+                string? lyrics = await FetchLrcFromLrcLib(track.Executor, track.Name);
+
+                loader.StopDotAnimation();
+
+                if (!string.IsNullOrEmpty(lyrics))
                 {
-                    tb.Text = lyrics;
-                }
-                try
-                {
-                    using (var file = TagLib.File.Create(track.Path!))
+                    track.Lyrics = lyrics;
+                    if (FindName("LyricsTextBox") is System.Windows.Controls.TextBox tb)
                     {
-                        file.Tag.Lyrics = lyrics;
-                        file.Save();
+                        tb.Text = lyrics;
                     }
-                    NotificationWindow.Show("Lyrics loaded and SAVED!", this);
+
+                    try
+                    {
+                        using (var file = TagLib.File.Create(track.Path!))
+                        {
+                            file.Tag.Lyrics = lyrics;
+                            file.Save();
+                        }
+                        loader.MessageText.Text = "Текст найден и сохранен!";
+                    }
+                    catch (Exception ex)
+                    {
+                        loader.MessageText.Text = $"Найдено, но не сохранено: {ex.Message}";
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    NotificationWindow.Show($"Loaded, but save failed: {ex.Message}", this);
+                    loader.MessageText.Text = "Текст не найден.";
                 }
             }
-            else
+            catch (Exception ex)
             {
-                NotificationWindow.Show("Lyrics not found.", this);
+                loader.StopDotAnimation();
+                loader.MessageText.Text = $"Ошибка: {ex.Message}";
+            }
+            finally
+            {
+                loader.SingleOkButton.Visibility = Visibility.Visible;
             }
         }
         private static async Task<string?> FetchLrcFromLrcLib(string artist, string title)

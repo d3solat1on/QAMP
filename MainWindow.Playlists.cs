@@ -78,9 +78,9 @@ namespace QAMP
                         }
                     }
                 }
-
-                TracksDataGrid.ItemsSource = null;
-                TracksDataGrid.ItemsSource = MusicLibrary.Instance.CurrentPlaylist.Tracks;
+                UpdateNextTrackUI();
+                // TracksDataGrid.ItemsSource = null;
+                // TracksDataGrid.ItemsSource = MusicLibrary.Instance.CurrentPlaylist.Tracks;
                 // CurrentTracksCountText.Text = $"{MusicLibrary.Instance.CurrentPlaylist.Tracks.Count} треков";
 
                 NotificationWindow.Show($"Добавлено {addedCount} треков", this);
@@ -116,21 +116,23 @@ namespace QAMP
 
                 if (MusicLibrary.Instance.CurrentPlaylist?.Id == selectedPlaylist.Id)
                 {
-                    TracksDataGrid.ItemsSource = null;
-                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
+                    // TracksDataGrid.ItemsSource = null;
+                    // TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     // CurrentTracksCountText.Text = $"{selectedPlaylist.Tracks.Count} треков";
+                    // Player.UpdateQueue(selectedPlaylist.Tracks);
+                    UpdateNextTrackUI();
                 }
-                else
-                {
-                    if (PlaylistsListBox.ItemContainerGenerator.ContainerFromItem(selectedPlaylist) is ListBoxItem listBoxItem)
-                    {
-                        var trackCountText = FindVisualChild<TextBlock>(listBoxItem, "CurrentTracksCountText");
-                        if (trackCountText != null)
-                        {
-                            trackCountText.Text = $"{selectedPlaylist.Tracks.Count} треков";
-                        }
-                    }
-                }
+                // else
+                // {
+                //     if (PlaylistsListBox.ItemContainerGenerator.ContainerFromItem(selectedPlaylist) is ListBoxItem listBoxItem)
+                //     {
+                //         var trackCountText = FindVisualChild<TextBlock>(listBoxItem, "CurrentTracksCountText");
+                //         if (trackCountText != null)
+                //         {
+                //             trackCountText.Text = $"{selectedPlaylist.Tracks.Count} треков";
+                //         }
+                //     }
+                // }
 
                 NotificationWindow.Show($"Добавлено {addedCount} треков", this);
             }
@@ -213,10 +215,10 @@ namespace QAMP
         {
             if (PlaylistsListBox.SelectedItem is Playlist selected)
             {
+                MusicLibrary.Instance.CurrentPlaylist = selected;
                 System.Diagnostics.Debug.WriteLine($"=== ПРОСМОТР ПЛЕЙЛИСТА: {selected.Name} ===");
                 System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
                 App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
-                MusicLibrary.Instance.CurrentPlaylist = selected;
                 ApplySortToPlaylist(selected);
                 if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
                 {

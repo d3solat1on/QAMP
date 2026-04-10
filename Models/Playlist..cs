@@ -146,6 +146,7 @@ namespace QAMP.Models
             {
                 OnPropertyChanged(nameof(TrackCount));
                 OnPropertyChanged(nameof(TrackCountDisplay));
+                OnPropertyChanged(nameof(TotalDurationDisplay));
             };
         }
 
