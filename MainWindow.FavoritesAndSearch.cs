@@ -168,7 +168,7 @@ namespace QAMP
             }
         }
 
-        private void RepeatButton_Click(object sender, RoutedEventArgs e)
+        private void RepeatButton_Click(object? sender, RoutedEventArgs? e)
         {
             var resources = Application.Current.Resources;
 
@@ -296,7 +296,7 @@ namespace QAMP
             }
         }
 
-        private void FavoriteButton_Click(object sender, RoutedEventArgs e)
+        private void FavoriteButton_Click(object? sender, RoutedEventArgs? e)
         {
             if (Player.CurrentTrack == null)
             {

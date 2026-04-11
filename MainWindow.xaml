@@ -916,8 +916,9 @@
                                                           MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
                                                           GridLinesVisibility="None"
                                                           AllowDrop="True"
-                                                          SelectionMode="Extended"
                                                           SelectionUnit="FullRow"
+                                                          SelectionMode="Single"
+                                                          Focusable="True"
                                                           DragOver="MainGrid_DragOver">
                                                         <!-- Drop="MainGrid_Drop"> -->
                                                         <DataGrid.ContextMenu>

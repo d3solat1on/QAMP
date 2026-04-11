@@ -264,7 +264,7 @@ namespace QAMP
             }
         }
 
-        private void ShuffleButton_Click(object sender, RoutedEventArgs e)
+        private void ShuffleButton_Click(object? sender, RoutedEventArgs? e)
         {
             _playService.IsShuffleEnabled = !_playService.IsShuffleEnabled;
 

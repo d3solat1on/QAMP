@@ -53,48 +53,93 @@ namespace QAMP
         {
             var focused = FocusManager.GetFocusedElement(this);
             bool isTextInput = focused is TextBox || focused is PasswordBox || focused is RichTextBox;
-
-            switch (e.Key)
+            if (Keyboard.Modifiers == ModifierKeys.Control)
             {
-                case Key.Space when !isTextInput:
-                    TogglePlayPause();
-                    e.Handled = true;
-                    break;
+                switch (e.Key)
+                {
+                    case Key.Space when !isTextInput:
+                        TogglePlayPause();
+                        e.Handled = true;
+                        break;
+                    case Key.Right:
+                        _playService.SeekRelative(5);
+                        e.Handled = true;
+                        break;
+                    case Key.Left:
+                        _playService.SeekRelative(-5);
+                        e.Handled = true;
+                        break;
+                    case Key.Up:
+                        _playService.Volume += 0.05;
+                        e.Handled = true;
+                        break;
+                    case Key.Down:
+                        _playService.Volume -= 0.05;
+                        e.Handled = true;
+                        break;
+                    case Key.N:
+                            _playService.PlayNextTrack();
+                            e.Handled = true;
+                        break;
+                    case Key.B:
+                            _playService.PlayPreviousTrack();
+                            e.Handled = true;
+                        break;
+                    case Key.L:
+                        ViewLyricsButton_Click(null, null);
+                        e.Handled = true;
+                        break;
+                    case Key.I:
+                        if (Player.CurrentTrack != null)
+                        {
+                            var infoWindow = new ShowTrackInfo(Player.CurrentTrack)
+                            {
+                                Owner = this
+                            };
+                            infoWindow.ShowDialog();
+                            e.Handled = true;
+                        }
+                        break;
+                    case Key.R:
+                        if (Player.CurrentTrack != null)
+                        {
+                            RepeatButton_Click(null, null);
+                            e.Handled = true;
+                        }
+                        break;
+                    case Key.S:
+                        if (Player.CurrentTrack != null)
+                        {
+                            ShuffleButton_Click(null, null);
+                            e.Handled = true;
+                        }
+                        break;
+                    case Key.Tab:
+                        if (PlaylistsListBox.IsFocused || PlaylistsListBox.IsKeyboardFocusWithin)
+                        {
+                            TracksDataGrid.Focus();
 
-                case Key.Right:
-                    _playService.SeekRelative(5);
-                    e.Handled = true;
-                    break;
-                case Key.Left:
-                    _playService.SeekRelative(-5);
-                    e.Handled = true;
-                    break;
-                case Key.Up:
-                    _playService.Volume += 0.05;
-                    e.Handled = true;
-                    break;
-                case Key.Down:
-                    _playService.Volume -= 0.05;
-                    e.Handled = true;
-                    break;
-                case Key.N:
-                    if (Keyboard.Modifiers == ModifierKeys.Control)
-                    {
-                        _playService.PlayNextTrack();
+                            if (TracksDataGrid.SelectedItem == null && TracksDataGrid.Items.Count > 0)
+                            {
+                                TracksDataGrid.SelectedIndex = 0;
+                            }
+                        }
+                        else
+                        {
+                            PlaylistsListBox.Focus();
+
+                            if (PlaylistsListBox.SelectedItem == null && PlaylistsListBox.Items.Count > 0)
+                            {
+                                PlaylistsListBox.SelectedIndex = 0;
+                            }
+                        }
                         e.Handled = true;
-                    }
-                    break;
-                case Key.B:
-                    if (Keyboard.Modifiers == ModifierKeys.Control)
-                    {
-                        _playService.PlayPreviousTrack();
+                        break;
+                    case Key.F:
+                        FavoriteButton_Click(null, null);
                         e.Handled = true;
-                    }
-                    break;
-                case Key.L when Keyboard.Modifiers == ModifierKeys.Control:
-                    ViewLyricsButton_Click(null, null);
-                    e.Handled = true;
-                    break;
+                        break;
+                }
             }
         }
 
