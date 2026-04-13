@@ -227,7 +227,10 @@ namespace QAMP.Windows
                     track.Lyrics = lyrics;
                     if (FindName("LyricsTextBox") is System.Windows.Controls.TextBox tb)
                     {
-                        tb.Text = lyrics;
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            tb.Text = lyrics;
+                        });
                     }
 
                     try

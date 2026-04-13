@@ -49,18 +49,22 @@ namespace QAMP
             return IntPtr.Zero;
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            var focused = FocusManager.GetFocusedElement(this);
-            bool isTextInput = focused is TextBox || focused is PasswordBox || focused is RichTextBox;
+            if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                var focusedElement = FocusManager.GetFocusedElement(this);
+                bool isTextInput = focusedElement is TextBox || focusedElement is PasswordBox || focusedElement is RichTextBox;
+                if (!isTextInput)
+                {
+                    TogglePlayPause();
+                    e.Handled = true;
+                }
+            }
             if (Keyboard.Modifiers == ModifierKeys.Control)
             {
                 switch (e.Key)
                 {
-                    case Key.Space when !isTextInput:
-                        TogglePlayPause();
-                        e.Handled = true;
-                        break;
                     case Key.Right:
                         _playService.SeekRelative(5);
                         e.Handled = true;
@@ -92,11 +96,16 @@ namespace QAMP
                     case Key.I:
                         if (Player.CurrentTrack != null)
                         {
-                            var infoWindow = new ShowTrackInfo(Player.CurrentTrack)
+                            var fullInfo = TagReader.GetFullTrackInfo(Player.CurrentTrack.Path);
+                            if (fullInfo != null)
                             {
-                                Owner = this
-                            };
-                            infoWindow.ShowDialog();
+                                fullInfo.PlayCount = Player.CurrentTrack.PlayCount;
+                                var infoWindow = new ShowTrackInfo(fullInfo)
+                                {
+                                    Owner = this
+                                };
+                                infoWindow.ShowDialog();
+                            }
                             e.Handled = true;
                         }
                         break;

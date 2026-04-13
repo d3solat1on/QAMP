@@ -10,9 +10,9 @@ namespace QAMP.Models
         public int Id { get; set; }
         public string? Extension { get; set; }
         public string Path { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Executor { get; set; } = string.Empty;
-        public string Album { get; set; } = string.Empty;
+        public string Name { get; set; } = "Без названия";
+        public string Executor { get; set; } = "Неизвестный исполнитель";
+        public string Album { get; set; } = "Без альбома";
         public string Duration { get; set; } = "0:00";
         public string Genre { get; set; } = "Неизвестно";
         public int Bitrate { get; set; }

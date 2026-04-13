@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Diagnostics;
 using System.Windows;
 namespace QAMP.Windows;
@@ -7,11 +8,18 @@ partial class HelpWindow : Window
     public HelpWindow()
     {
         InitializeComponent();
-        this.MouseLeftButtonDown += (s, e) =>
+        ShowVersion();
+        MouseLeftButtonDown += (s, e) =>
         {
             if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
-                this.DragMove(); 
+                DragMove(); 
         };
+    }
+    public void ShowVersion()
+    {
+        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
+        CurrentVersion.Text = $"Версия {version}";
+        CurrentVersion.IsReadOnly = true;
     }
     public void ShowHelpWindow()
     {

@@ -143,6 +143,10 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,15,0,0">
+            <TextBox x:Name="CurrentVersion"
+                     Width="80"
+                     Margin="5"
+                     Background="{DynamicResource AccentBrush}"/>
             <Button Content="Закрыть"
                     Click="CloseButton_Click"
                     Width="80"

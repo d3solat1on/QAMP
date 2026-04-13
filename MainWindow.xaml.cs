@@ -46,7 +46,7 @@ namespace QAMP
             Player.DurationChanged += OnDurationChanged;
             _playService.TrackChanged += UpdateNextTrackUI;
             PlaylistsListBox.MouseDoubleClick += PlaylistsListBox_MouseDoubleClick;
-            PreviewKeyDown += Window_KeyDown;
+            PreviewKeyDown += Window_PreviewKeyDown;
             PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
             PlayerService.Instance.SpectrumControl = SpectrumViewer;
             _memoryCleanupTimer = new DispatcherTimer

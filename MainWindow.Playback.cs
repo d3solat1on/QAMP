@@ -135,95 +135,10 @@ namespace QAMP
             // Проверяем, что у нас есть текущий трек
             if (Player.CurrentTrack == null)
             {
-                _ = NotificationWindow.Show("Нет текущего трека", this);
+                _ = NotificationWindow.Show("Нет трека для воспроизведения!", this);
                 return;
             }
-
-            if (_playService.IsShuffleEnabled)
-            {
-                int currentIndex = _playService.ShuffledQueue.IndexOf(Player.CurrentTrack);
-
-                if (currentIndex > 0)
-                {
-                    var prevTrack = _playService.ShuffledQueue[currentIndex - 1];
-                    App.LogInfo($"PrevTrack (Shuffle): {prevTrack.Executor} - {prevTrack.Name}");
-                    _ = Player.PlayTrack(prevTrack);
-                }
-                else if (currentIndex == 0 && _playService.RepeatMode == RepeatMode.RepeatAll)
-                {
-                    var prevTrack = _playService.ShuffledQueue[_playService.ShuffledQueue.Count - 1];
-                    App.LogInfo($"PrevTrack (Shuffle, wrap): {prevTrack.Executor} - {prevTrack.Name}");
-                    _ = Player.PlayTrack(prevTrack);
-                }
-                else if (currentIndex == -1)
-                {
-                    var remainingTracks = MusicLibrary.Instance.PlaybackQueue
-                        .Where(t => t != Player.CurrentTrack)
-                        .OrderBy(x => Guid.NewGuid())
-                        .ToList();
-
-                    _playService.ShuffledQueue = [Player.CurrentTrack, .. remainingTracks];
-
-                    if (_playService.RepeatMode == RepeatMode.RepeatAll && _playService.ShuffledQueue.Count > 1)
-                    {
-                        var prevTrack = _playService.ShuffledQueue[_playService.ShuffledQueue.Count - 1];
-                        App.LogInfo($"PrevTrack (Shuffle, not in queue): {prevTrack.Executor} - {prevTrack.Name}");
-                        _ = Player.PlayTrack(prevTrack);
-                    }
-                }
-
-                UpdateNextTrackUI();
-            }
-            else
-            {
-                // Обычный режим (без shuffle)
-                if (MusicLibrary.Instance.PlaybackQueue.Count == 0)
-                {
-                    _ = NotificationWindow.Show("Плейлист пуст", this);
-                    return;
-                }
-
-                var currentIndex = MusicLibrary.Instance.PlaybackQueue.IndexOf(Player.CurrentTrack);
-
-                // КРИТИЧНАЯ ПРОВЕРКА: currentIndex должен быть валидным
-                if (currentIndex > 0)
-                {
-                    var track = MusicLibrary.Instance.PlaybackQueue[currentIndex - 1];
-                    App.LogInfo($"PrevTrack: {track.Executor} - {track.Name}");
-                    _ = Player.PlayTrack(track);
-                    UpdateNextTrackUI();
-                }
-                else if (currentIndex == -1)
-                {
-                    // Трека нет в очереди
-                    if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
-                    {
-                        var track = MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1];
-                        App.LogInfo($"PrevTrack (wrap): {track.Executor} - {track.Name}");
-                        _ = Player.PlayTrack(track);
-                        UpdateNextTrackUI();
-                    }
-                    else
-                    {
-                        _ = NotificationWindow.Show("Это первый трек в плейлисте", this);
-                    }
-                }
-                else if (currentIndex == 0)
-                {
-                    // Это первый трек
-                    if (_playService.RepeatMode == RepeatMode.RepeatAll && MusicLibrary.Instance.PlaybackQueue.Count > 0)
-                    {
-                        var track = MusicLibrary.Instance.PlaybackQueue[MusicLibrary.Instance.PlaybackQueue.Count - 1];
-                        App.LogInfo($"PrevTrack (wrap, at first): {track.Executor} - {track.Name}");
-                        _ = Player.PlayTrack(track);
-                        UpdateNextTrackUI();
-                    }
-                    else
-                    {
-                        _ = NotificationWindow.Show("Это первый трек в плейлисте", this);
-                    }
-                }
-            }
+            Player.PlayPreviousTrack();
 
             if (_isLyricsMode)
             {

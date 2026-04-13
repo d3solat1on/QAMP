@@ -700,6 +700,8 @@
                                                                                                                 <MenuItem Header="Закрепить"
                                                                                                                           x:Name="PinPlaylistMenuItem"
                                                                                                                           Click="PinPlaylist_Click"/>
+                                                                                                                <MenuItem Header="Обновить плейлист"
+                                                                                                                          Click="RefreshPlaylist_Click"/>
                                                                                                                 <Separator Background="{DynamicResource BorderBrush}"/>
                                                                                                                 <MenuItem Header="Удалить"
                                                                                                                           Click="DeletePlaylist_Click"

@@ -242,57 +242,57 @@ namespace QAMP
         /// <summary>
         /// Применяет сохраненный тип сортировки к плейлисту
         /// </summary>
-        private void ApplySortToPlaylist(Playlist playlist)
-        {
-            System.Diagnostics.Debug.WriteLine($"=== ApplySortToPlaylist ===");
-            System.Diagnostics.Debug.WriteLine($"Плейлист: {playlist.Name}");
-            System.Diagnostics.Debug.WriteLine($"SortType: {playlist.SortType}");
-            System.Diagnostics.Debug.WriteLine($"Треков в коллекции: {playlist.Tracks.Count}");
+        // private void ApplySortToPlaylist(Playlist playlist)
+        // {
+        //     System.Diagnostics.Debug.WriteLine($"=== ApplySortToPlaylist ===");
+        //     System.Diagnostics.Debug.WriteLine($"Плейлист: {playlist.Name}");
+        //     System.Diagnostics.Debug.WriteLine($"SortType: {playlist.SortType}");
+        //     System.Diagnostics.Debug.WriteLine($"Треков в коллекции: {playlist.Tracks.Count}");
 
-            // Выводим исходный порядок треков
-            System.Diagnostics.Debug.WriteLine($"ИСХОДНЫЙ ПОРЯДОК в playlist.Tracks:");
-            for (int i = 0; i < Math.Min(15, playlist.Tracks.Count); i++)
-            {
-                System.Diagnostics.Debug.WriteLine($"  {i}: {playlist.Tracks[i].Name} (Album: {playlist.Tracks[i].Album})");
-            }
+        //     // Выводим исходный порядок треков
+        //     System.Diagnostics.Debug.WriteLine($"ИСХОДНЫЙ ПОРЯДОК в playlist.Tracks:");
+        //     for (int i = 0; i < Math.Min(15, playlist.Tracks.Count); i++)
+        //     {
+        //         System.Diagnostics.Debug.WriteLine($"  {i}: {playlist.Tracks[i].Name} (Album: {playlist.Tracks[i].Album})");
+        //     }
 
-            if (playlist.SortType != TrackSortType.AddedDate)
-            {
-                System.Diagnostics.Debug.WriteLine($"Применяю сортировку: {playlist.SortType}");
-                var sortedTracks = SortTracks([.. playlist.Tracks], playlist.SortType);
+        //     if (playlist.SortType != TrackSortType.AddedDate)
+        //     {
+        //         System.Diagnostics.Debug.WriteLine($"Применяю сортировку: {playlist.SortType}");
+        //         var sortedTracks = SortTracks([.. playlist.Tracks], playlist.SortType);
 
-                // Выводим первые 3 трека до и после сортировки
-                System.Diagnostics.Debug.WriteLine("ОТСОРТИРОВАННЫЙ ПОРЯДОК:");
-                for (int i = 0; i < Math.Min(15, sortedTracks.Count); i++)
-                {
-                    System.Diagnostics.Debug.WriteLine($"  {i}: {sortedTracks[i].Name} (Album: {sortedTracks[i].Album})");
-                }
+        //         // Выводим первые 3 трека до и после сортировки
+        //         System.Diagnostics.Debug.WriteLine("ОТСОРТИРОВАННЫЙ ПОРЯДОК:");
+        //         for (int i = 0; i < Math.Min(15, sortedTracks.Count); i++)
+        //         {
+        //             System.Diagnostics.Debug.WriteLine($"  {i}: {sortedTracks[i].Name} (Album: {sortedTracks[i].Album})");
+        //         }
 
-                // ВАЖНО: НЕ изменяем саму коллекцию Tracks!
-                // Вместо этого отображаем отсортированные треки в DataGrid
-                System.Diagnostics.Debug.WriteLine("Переустанавливаю ItemsSource для DataGrid");
-                TracksDataGrid.ItemsSource = null;
-                TracksDataGrid.ItemsSource = new ObservableCollection<Track>(sortedTracks);
+        //         // ВАЖНО: НЕ изменяем саму коллекцию Tracks!
+        //         // Вместо этого отображаем отсортированные треки в DataGrid
+        //         System.Diagnostics.Debug.WriteLine("Переустанавливаю ItemsSource для DataGrid");
+        //         TracksDataGrid.ItemsSource = null;
+        //         TracksDataGrid.ItemsSource = new ObservableCollection<Track>(sortedTracks);
 
-                // Обновляем иконку сортировки (светит при активной сортировке)
-                if (sortImage1 != null)
-                {
-                    sortImage1.Fill = (Brush)Application.Current.Resources["AccentBrush"];
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("Сортировка по умолчанию (AddedDate), не применяю");
-                // Иконка тусклая при дефолтной сортировке
-                if (sortImage1 != null)
-                {
-                    sortImage1.Fill = (Brush)Application.Current.Resources["DisabledBrush"] ??
-                                     (Brush)Application.Current.Resources["AccentBrush"];
-                }
-                // Отображаем исходный порядок треков
-                TracksDataGrid.ItemsSource = playlist.Tracks;
-            }
-        }
+        //         // Обновляем иконку сортировки (светит при активной сортировке)
+        //         if (sortImage1 != null)
+        //         {
+        //             sortImage1.Fill = (Brush)Application.Current.Resources["AccentBrush"];
+        //         }
+        //     }
+        //     else
+        //     {
+        //         System.Diagnostics.Debug.WriteLine("Сортировка по умолчанию (AddedDate), не применяю");
+        //         // Иконка тусклая при дефолтной сортировке
+        //         if (sortImage1 != null)
+        //         {
+        //             sortImage1.Fill = (Brush)Application.Current.Resources["DisabledBrush"] ??
+        //                              (Brush)Application.Current.Resources["AccentBrush"];
+        //         }
+        //         // Отображаем исходный порядок треков
+        //         TracksDataGrid.ItemsSource = playlist.Tracks;
+        //     }
+        // }
 
         private void TracksDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -361,6 +361,24 @@ namespace QAMP
 
             var bitmap = _imageConverter.Convert(currentPlaylist.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) as BitmapSource;
             UpdateUpperPanelGradient(bitmap!);
+        }
+        public void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
+            {
+                var updatedPlaylist = DatabaseService.GetPlaylistById(selectedPlaylist.Id);
+                if (updatedPlaylist != null)
+                {
+                    MusicLibrary.Instance.UpdatePlaylist(updatedPlaylist);
+                    if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
+                    {
+                        Player.UpdateQueueOrder([.. updatedPlaylist.Tracks]);
+                    }
+                    ApplySort(updatedPlaylist.SortType);
+                    UpdateNextTrackUI();
+                    NotificationWindow.Show($"Плейлист \"{updatedPlaylist.Name}\" обновлен", this);
+                }
+            }
         }
     }
 }

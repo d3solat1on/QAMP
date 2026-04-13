@@ -339,19 +339,13 @@ namespace QAMP
             bool isAlreadyFavorite = favoritePlaylist.Tracks.Any(t => t.Path == Player.CurrentTrack.Path);
             if (!isAlreadyFavorite)
             {
-                var trackCopy = new Track
-                {
-                    Id = Player.CurrentTrack.Id, // ID тот же, чтобы база понимала, что за файл
-                    Path = Player.CurrentTrack.Path,
-                    Name = Player.CurrentTrack.Name,
-                    Executor = Player.CurrentTrack.Executor,
-                    Duration = Player.CurrentTrack.Duration,
-                    AddedDate = DateTime.Now
-                };
+                var trackToSave = TagReader.GetFullTrackInfo(Player.CurrentTrack.Path) ?? Player.CurrentTrack;
 
-                DatabaseService.SaveTrackToPlaylist(favoritePlaylist.Id, trackCopy);
-                favoritePlaylist.Tracks.Add(trackCopy);
+                trackToSave.AddedDate = DateTime.Now;
+                trackToSave.PlayCount = Player.CurrentTrack.PlayCount;
 
+                DatabaseService.SaveTrackToPlaylist(favoritePlaylist.Id, trackToSave);
+                favoritePlaylist.Tracks.Add(trackToSave);
                 UpdateFavoriteIcon(Player.CurrentTrack, true);
                 NotificationWindow.Show("Добавлено в Избранное", this);
             }
@@ -373,7 +367,7 @@ namespace QAMP
                 TracksDataGrid.ItemsSource = favoritePlaylist.Tracks;
             }
 
-            UpdateFavoriteIcon(Player.CurrentTrack);
+            // UpdateFavoriteIcon(Player.CurrentTrack, null);
         }
 
         private void UpdateFavoriteIcon(Track track, bool? forceState = null)
@@ -390,7 +384,7 @@ namespace QAMP
                 var favoritePlaylist = Library.Playlists.FirstOrDefault(p => p.Name == MusicLibrary.FavoritesName);
                 // Проверяем по ID вместо Contains(), так как Contains() сравнивает по ссылкам объектов
                 // Если трек загружен из разных источников - это разные объекты, хоть ID одинаковые
-                isFavorite = favoritePlaylist?.Tracks.Any(t => t.Id == track.Id) ?? false;
+                isFavorite = favoritePlaylist?.Tracks.Any(t => t.Path == track.Path) ?? false;
             }
             else
             {
