@@ -583,7 +583,11 @@ namespace QAMP.Windows
         }
         private void HelpWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            var helpWindow = new HelpWindow();
+            var helpWindow = new HelpWindow()
+            {
+                Owner = this
+            };
+            
             helpWindow.ShowHelpWindow();
         }
         // private void BarCountCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
