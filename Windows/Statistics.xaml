@@ -81,6 +81,14 @@
                                        Text="Самая прослушиваемая композиция: "
                                        Margin="0,0,0,10"
                                        Foreground="{DynamicResource ForegroundBrush}"/>
+                            <TextBlock x:Name="MostListenedArtistText"
+                                       Text="Самый прослушиваемый исполнитель: "
+                                       Margin="0,0,0,10"
+                                       Foreground="{DynamicResource ForegroundBrush}"/>
+                            <TextBlock x:Name="TracksWithoutListening"
+                                       Text="Треки без прослушивания"
+                                       Margin="0,0,0,10"
+                                       Foreground="{DynamicResource ForegroundBrush}"/>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Grid.Row="2"
@@ -150,7 +158,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>    
+                            </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
                                        Text="Количество плейлистов:"

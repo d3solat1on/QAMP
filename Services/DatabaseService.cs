@@ -1251,5 +1251,56 @@ public class DatabaseService
         long? count = (long?)cmd.ExecuteScalar();
         return (int)(count ?? 0);
     }
+    public static string GetMostListenedArtist()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Executor, SUM(PlayCount) as TotalPlays 
+            FROM Tracks 
+            WHERE Executor IS NOT NULL AND PlayCount IS NOT NULL AND PlayCount > 0
+            GROUP BY Executor 
+            ORDER BY TotalPlays DESC 
+            LIMIT 1";
+        using var reader = cmd.ExecuteReader();
+
+        if (reader.Read())
+        {
+            string executor = reader.IsDBNull(0) ? "Неизвестен" : reader.GetString(0);
+            int totalPlays = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+            return $"{executor} - Всего прослушиваний: {totalPlays}";
+        }
+        else
+        {
+            return "Нет данных о наиболее прослушиваемых исполнителях.";
+        }
+
+    }
+    public static string GetTracksWithoutListnenig()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Name, Executor 
+            FROM Tracks 
+            WHERE PlayCount IS NULL OR PlayCount = 0
+            GROUP BY Name, Executor
+            ORDER BY RANDOM()
+            LIMIT 10";
+        using var reader = cmd.ExecuteReader();
+
+        var tracks = new List<string>();
+        while (reader.Read())
+        {
+            string name = reader.IsDBNull(0) ? "Неизвестно" : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? "Неизвестен" : reader.GetString(1);
+            tracks.Add($"{name} - {executor}");
+        }
+
+        return string.Join("\n", tracks);
+
+    }
     
 }

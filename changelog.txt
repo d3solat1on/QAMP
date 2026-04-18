@@ -1,0 +1,1 @@
+V: 1.6.0 - The "Statistics" window has been improved. It now displays the most-listened-to artist and the top 10 unlistened tracks.
