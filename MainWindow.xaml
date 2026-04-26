@@ -34,6 +34,9 @@
                 <BooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
                 <converters:BindingProxy x:Key="Proxy"
                                          Data="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config}"/>
+                <ObjectDataProvider x:Key="HeartProvider"
+                                    ObjectType="{x:Type converters:FavoriteIconGenerate}"
+                                    MethodName="GetHeartGeometry"/>
         </Window.Resources>
 
         <Grid>
@@ -452,10 +455,10 @@
                                         <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto"/>
-                                                         <RowDefinition Height="*"/>
-                                                         </Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
                                                 <DockPanel Grid.Row="0"
-                                                        Margin="0,0,0,10">
+                                                           Margin="0,0,0,10">
                                                         <TextBlock Text="ПЛЕЙЛИСТЫ"
                                                                    FontSize="24"
                                                                    FontWeight="Bold"
@@ -547,8 +550,8 @@
                                                         </StackPanel>
                                                 </DockPanel>
 
-                                                <ListBox Grid.Row="1" 
-                                                        x:Name="PlaylistsListBox"
+                                                <ListBox Grid.Row="1"
+                                                         x:Name="PlaylistsListBox"
                                                          Background="Transparent"
                                                          BorderThickness="0"
                                                          Foreground="White"
@@ -784,9 +787,45 @@
                                                                 Background="{DynamicResource CentralPanelCardBackground}"
                                                                 BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
                                                                 BorderThickness="1"
-                                                                Margin="0,0,20,0">
-                                                                <Image Source="{Binding CurrentPlaylist.CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
-                                                                       Stretch="UniformToFill"/>
+                                                                Margin="0,0,20,0"
+                                                                ClipToBounds="True">
+                                                                <ContentControl>
+                                                                        <ContentControl.Style>
+                                                                                <Style TargetType="ContentControl">
+                                                                                        <Setter Property="Content">
+                                                                                                <Setter.Value>
+                                                                                                        <Image Source="{Binding CurrentPlaylist.CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
+                                                                                                               Stretch="UniformToFill"/>
+                                                                                                </Setter.Value>
+                                                                                        </Setter>
+
+                                                                                        <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding CurrentPlaylist.Name}"
+                                                                                                             Value="Избранное">
+                                                                                                        <Setter Property="Content">
+                                                                                                                <Setter.Value>
+                                                                                                                        <Grid Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                                                <Path Data="{Binding Source={StaticResource HeartProvider}}"
+                                                                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                                                                      Stretch="Uniform"
+                                                                                                                                      Margin="25"
+                                                                                                                                      VerticalAlignment="Center"
+                                                                                                                                      HorizontalAlignment="Center">
+                                                                                                                                        <Path.Effect>
+                                                                                                                                                <DropShadowEffect Color="{Binding Source={StaticResource AccentBrush}, Path=Color}"
+                                                                                                                                                                  BlurRadius="15"
+                                                                                                                                                                  ShadowDepth="0"
+                                                                                                                                                                  Opacity="0.5"/>
+                                                                                                                                        </Path.Effect>
+                                                                                                                                </Path>
+                                                                                                                        </Grid>
+                                                                                                                </Setter.Value>
+                                                                                                        </Setter>
+                                                                                                </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                </Style>
+                                                                        </ContentControl.Style>
+                                                                </ContentControl>
                                                         </Border>
 
                                                         <Grid Grid.Column="1">

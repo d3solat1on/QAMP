@@ -44,6 +44,7 @@ namespace QAMP
                 App.LogInfo($"Resume: {Player.CurrentTrack?.Executor} - {Player.CurrentTrack?.Name}");
                 Player.Resume();
             }
+            UpdatePlayPauseIconState();
             UpdateOSD();
         }
 
@@ -60,39 +61,47 @@ namespace QAMP
                 return;
             }
 
-            if (Player.IsPlaying)
-            {
-                _ = Player.PauseAsync();
-                UpdatePlayPauseIcon(false);
-                UpdateOSD();
-                return;
-            }
-
-            // Проверяем, если музыка воспроизводится из другого плейлиста, 
-            // не переключаемся - просто воспроизводим паузированную музыку
+            // Приоритет 1: Если музыка воспроизводится из ДРУГОГО плейлиста,
+            // начинаем воспроизводить выбранный плейлист
             if (Player.CurrentTrack != null && Library.PlayingPlaylist != null &&
                 Library.PlayingPlaylist.Id != Library.CurrentPlaylist.Id)
             {
-                // Воспроизводим текущий трек из другого плейлиста
-                Player.Resume();
-                UpdatePlayPauseIcon(true);
+                StartPlayingPlaylist("from different");
+                return;
+            }
+
+            // Приоритет 2: Если что-то воспроизводится из ТЕКУЩЕГО плейлиста, паузируем
+            if (Player.IsPlaying)
+            {
+                _ = Player.PauseAsync();
+                UpdatePlayPauseIconState();
                 UpdateOSD();
                 return;
             }
 
+            // Приоритет 3: Если текущий трек есть в текущем плейлисте, возобновляем
             if (Player.CurrentTrack != null && Library.CurrentPlaylist.Tracks.Contains(Player.CurrentTrack))
             {
                 Player.Resume();
-                UpdatePlayPauseIcon(true);
+                UpdatePlayPauseIconState();
                 UpdateOSD();
                 return;
             }
 
+            // Приоритет 4: Начинаем воспроизведение плейлиста с начала
+            StartPlayingPlaylist("");
+        }
+
+        private void StartPlayingPlaylist(string logSuffix)
+        {
             // Устанавливаем текущий плейлист как плейлист для воспроизведения
             Library.PlayingPlaylist = Library.CurrentPlaylist;
 
             var firstTrack = Library.CurrentPlaylist.Tracks[0];
-            App.LogInfo($"PlayPlaylist: {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}");
+            var logMsg = string.IsNullOrEmpty(logSuffix)
+                ? $"PlayPlaylist: {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}"
+                : $"PlayPlaylist ({logSuffix}): {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}";
+            App.LogInfo(logMsg);
             _ = Player.PlayTrack(firstTrack, true);
 
             Library.PlaybackQueue.Clear();
@@ -114,20 +123,62 @@ namespace QAMP
                 }
                 _playService.ShuffledQueue = shuffledList;
             }
-            UpdatePlayPauseIcon(true);
+            UpdatePlayPauseIconState();
             UpdateNextTrackUI();
             UpdateOSD();
         }
 
         private void UpdatePlayPauseIcon(bool isPlaying)
         {
-            var geometry = isPlaying
-        ? (Geometry)Application.Current.Resources["pauseGeometry"]
-        : (Geometry)Application.Current.Resources["playGeometry"];
+            // 1. Получаем контекст плейлистов
+            var playingPlaylist = MusicLibrary.Instance.PlayingPlaylist;
 
-            PlayPauseIcon.Data = geometry;
+            // 2. Логика для ГЛОБАЛЬНОЙ кнопки (нижняя панель)
+            // Она зависит только от того, играет ли музыка в принципе
+            var globalGeometry = isPlaying
+                ? (Geometry)Application.Current.Resources["pauseGeometry"]
+                : (Geometry)Application.Current.Resources["playGeometry"];
 
-            PlayPauseIcon1.Data = geometry;
+            // 3. Логика для КОНТЕКСТНОЙ кнопки (вверху плейлиста)
+            // Она зависит и от состояния, и от того, тот ли это плейлист
+            bool isCurrentPlaylistPlaying = isPlaying &&
+                                            PlaylistsListBox.SelectedItem is Playlist displayedPlaylist &&
+                                            playingPlaylist != null &&
+                                            displayedPlaylist.Id == playingPlaylist.Id;
+
+            var contextGeometry = isCurrentPlaylistPlaying
+                ? (Geometry)Application.Current.Resources["pauseGeometry"]
+                : (Geometry)Application.Current.Resources["playGeometry"];
+
+            // 4. Распределяем иконки
+            // Предположим, PlayPauseIcon1 — это нижняя панель, а PlayPauseIcon — верхняя
+            PlayPauseIcon1.Data = contextGeometry; // Верхняя (контекстная)
+            PlayPauseIcon.Data = globalGeometry; // Нижняя (глобальная)
+
+            // Принудительное обновление
+            PlayPauseIcon.InvalidateVisual();
+            PlayPauseIcon1.InvalidateVisual();
+        }
+
+        /// <summary>
+        /// Обновляет иконку Play/Pause в зависимости от текущего состояния
+        /// Показывает Pause только если текущий трек воспроизводится ИЗ выбранного плейлиста
+        /// </summary>
+        private void UpdatePlayPauseIconState()
+        {
+            bool hasTrack = Player.CurrentTrack != null;
+            bool hasPlayingPlaylist = Library.PlayingPlaylist != null;
+            // bool playlistMatches = hasPlayingPlaylist && Library.CurrentPlaylist != null && 
+            //                       Library.PlayingPlaylist.Id == Library.CurrentPlaylist.Id;
+            bool isPlaying = Player.IsPlaying;
+
+            bool shouldShowPlaying = hasTrack && hasPlayingPlaylist && isPlaying;
+
+            // System.Diagnostics.Debug.WriteLine($"[UpdatePlayPauseIconState] HasTrack={hasTrack}, HasPlaylist={hasPlayingPlaylist}, " +
+            //     $"Match={playlistMatches} (Playing:{Library.PlayingPlaylist?.Name}={Library.CurrentPlaylist?.Name}), " +
+            //     $"IsPlaying={isPlaying}, ShowPause={shouldShowPlaying}");
+
+            UpdatePlayPauseIcon(shouldShowPlaying);
         }
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)

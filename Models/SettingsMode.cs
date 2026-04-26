@@ -17,6 +17,7 @@ public class AppSettings : INotifyPropertyChanged
     public string EqualizerPreset { get; set; } = "Пользовательский"; // Текущий выбранный режим
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
+    public bool IsAutoLaunchEnabled { get; set; } = false; // Автозапуск приложения
     public bool IsCompactMode
     {
         get => _isCompactMode;

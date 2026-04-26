@@ -43,7 +43,7 @@ namespace QAMP
         private void AddFilesToPlaylist_Click(object sender, RoutedEventArgs e) => AddFilesToCurrentPlaylist();
         private void AddFolderToPlaylist_Click(object sender, RoutedEventArgs e) => AddFolderToCurrentPlaylist();
 
-        private void AddFolderToCurrentPlaylist() //Вроде норм
+        private void AddFolderToCurrentPlaylist() //Вроде норм (не, не норм xd)
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
@@ -226,7 +226,13 @@ namespace QAMP
                 System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
                 App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
                 ApplySort(selected.SortType);
-                if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
+                
+                // Для плейлиста "Избранное" используем цвет приложения
+                if (selected.IsSystemPlaylist)
+                {
+                    UpdateUpperPanelGradientForFavorites();
+                }
+                else if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
                 {
                     UpdateUpperPanelGradient(bitmap);
                 }
@@ -239,18 +245,8 @@ namespace QAMP
                     UpdateFavoriteIcon(Player.CurrentTrack);
                 }
 
-                // Обновляем иконку Play/Pause в зависимости от того, 
-                // воспроизводится ли текущий плейлист
-                if (selected.Id == Library.PlayingPlaylist?.Id)
-                {
-                    // Текущий плейлист воспроизводится - показываем его реальное состояние
-                    UpdatePlayPauseIcon(Player.IsPlaying);
-                }
-                else
-                {
-                    // Другой плейлист воспроизводится - показываем Play иконку
-                    UpdatePlayPauseIcon(false);
-                }
+                // Обновляем иконку Play/Pause в зависимости от текущего состояния
+                UpdatePlayPauseIconState();
             }
         }
 
@@ -366,6 +362,39 @@ namespace QAMP
         }
 
         /// <summary>
+        /// Обновляет градиент верхней панели для плейлиста "Избранное" на основе главного цвета приложения
+        /// </summary>
+        private void UpdateUpperPanelGradientForFavorites()
+        {
+            try
+            {
+                // Получаем цвет Accent из ресурсов приложения
+                if (Application.Current.Resources["AccentBrush"] is SolidColorBrush accentBrush)
+                {
+                    var brush = new LinearGradientBrush
+                    {
+                        StartPoint = new Point(0, 0),
+                        EndPoint = new Point(0, 1)
+                    };
+
+                    brush.GradientStops.Add(new GradientStop(accentBrush.Color, 0));
+                    brush.GradientStops.Add(new GradientStop(System.Windows.Media.Color.FromRgb(25, 25, 25), 1));
+
+                    UpperPanel.Background = brush;
+                }
+                else
+                {
+                    UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+                }
+            }
+            catch (Exception ex)
+            {
+                App.LogException(ex, "FavoritesGradientUpdate");
+                UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+            }
+        }
+
+        /// <summary>
         /// Обновляет градиент верхней панели при изменении настроек адаптивных градиентов
         /// </summary>
         public void RefreshAdaptiveGradients()
@@ -374,8 +403,15 @@ namespace QAMP
             if (currentPlaylist == null)
                 return;
 
-            var bitmap = _imageConverter.Convert(currentPlaylist.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) as BitmapSource;
-            UpdateUpperPanelGradient(bitmap!);
+            if (currentPlaylist.IsSystemPlaylist)
+            {
+                UpdateUpperPanelGradientForFavorites();
+            }
+            else
+            {
+                var bitmap = _imageConverter.Convert(currentPlaylist.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) as BitmapSource;
+                UpdateUpperPanelGradient(bitmap!);
+            }
         }
         public void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
         {

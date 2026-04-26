@@ -63,7 +63,8 @@ public class DatabaseService
                 { "IsPinned", "INTEGER DEFAULT 0" },
                 { "SortOrder", "INTEGER DEFAULT 0" },
                 { "SortType", "INTEGER DEFAULT 0" },  // 0 = AddedDate, 1 = AlbumAZ, 2 = ExecutorAZ, 3 = NameAZ
-                { "CreatedDate", "TEXT" }  // Дата создания плейлиста
+                { "CreatedDate", "TEXT" },  // Дата создания плейлиста
+                { "IsSystemPlaylist", "INTEGER DEFAULT 0" }
             };
 
             foreach (var column in columnsToAdd)
@@ -212,7 +213,8 @@ public class DatabaseService
             CreatedDate TEXT,
             IsPinned INTEGER DEFAULT 0,
             SortOrder INTEGER DEFAULT 0,
-            SortType INTEGER DEFAULT 0
+            SortType INTEGER DEFAULT 0,
+            IsSystemPlaylist INTEGER DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS Tracks (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -238,6 +240,69 @@ public class DatabaseService
         cmd.ExecuteNonQuery();
 
         System.Diagnostics.Debug.WriteLine($"База данных инициализирована: {AppDataManager.DatabasePath}");
+
+        // Проверяем и добавляем недостающие колонки (миграция)
+        PerformDatabaseMigration();
+    }
+
+    private static void PerformDatabaseMigration()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        // Проверяем, существует ли колонка IsSystemPlaylist в таблице Playlists
+        try
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "PRAGMA table_info(Playlists)";
+            using var reader = cmd.ExecuteReader();
+            bool hasIsSystemPlaylist = false;
+            
+            while (reader.Read())
+            {
+                string columnName = reader.GetString(1);
+                if (columnName == "IsSystemPlaylist")
+                {
+                    hasIsSystemPlaylist = true;
+                    break;
+                }
+            }
+
+            if (!hasIsSystemPlaylist)
+            {
+                System.Diagnostics.Debug.WriteLine("Колонка IsSystemPlaylist не найдена, добавляем...");
+                var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE Playlists ADD COLUMN IsSystemPlaylist INTEGER DEFAULT 0";
+                alterCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Колонка IsSystemPlaylist успешно добавлена");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при миграции: {ex.Message}");
+        }
+    }
+
+    private static bool ColumnExists(SqliteConnection connection, string tableName, string columnName)
+    {
+        try
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = $"PRAGMA table_info({tableName})";
+            using var reader = cmd.ExecuteReader();
+            
+            while (reader.Read())
+            {
+                string name = reader.GetString(1);
+                if (name == columnName)
+                    return true;
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public static void AddPlaylist(string name, string description, byte[]? cover)
@@ -361,8 +426,14 @@ public class DatabaseService
 
             try
             {
-                // Правильный порядок колонок: Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType
-                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+                // Проверяем наличие колонки IsSystemPlaylist
+                bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+                
+                string selectQuery = hasIsSystemPlaylist
+                    ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC"
+                    : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+
+                command.CommandText = selectQuery;
                 using var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
@@ -412,9 +483,15 @@ public class DatabaseService
                         playlist.SortType = (TrackSortType)reader.GetInt32(7);
                     }
 
+                    // Флаг системного плейлиста (IsSystemPlaylist) - только если колонка есть
+                    if (hasIsSystemPlaylist && !reader.IsDBNull(8))
+                    {
+                        playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
+                    }
+
                     // Загружаем треки для этого плейлиста
                     var tracks = GetTracksForPlaylist(playlist.Id);
-                    System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}");
+                    System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}, isSystem={playlist.IsSystemPlaylist}");
 
                     foreach (var track in tracks)
                     {
@@ -424,71 +501,9 @@ public class DatabaseService
                     playlists.Add(playlist);
                 }
             }
-            catch (SqliteException ex) when (ex.Message.Contains("IsPinned"))
-            {
-                // Если колонки нет, используем старый запрос
-                System.Diagnostics.Debug.WriteLine($"Колонка IsPinned не найдена, выполняем миграцию: {ex.Message}");
-                MigrateDatabase();
-
-                // Повторяем запрос уже с колонкой
-                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
-                using var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    var playlist = new Playlist
-                    {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                        CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
-                        IsPinned = reader.IsDBNull(4) ? false : reader.GetInt32(4) != 0,
-                        SortOrder = reader.IsDBNull(5) ? 0 : reader.GetInt32(5)
-                    };
-
-                    // Дата создания
-                    if (!reader.IsDBNull(6))
-                    {
-                        string dateString = reader.GetString(6);
-                        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None,
-                            out DateTime parsedDate))
-                        {
-                            playlist.CreatedDate = parsedDate;
-                        }
-                        else if (DateTime.TryParse(dateString, out DateTime secondTry))
-                        {
-                            playlist.CreatedDate = secondTry;
-                        }
-                        else
-                        {
-                            playlist.CreatedDate = DateTime.Now;
-                        }
-                    }
-                    else
-                    {
-                        playlist.CreatedDate = DateTime.Now;
-                    }
-
-                    // Тип сортировки (SortType)
-                    if (!reader.IsDBNull(7))
-                    {
-                        playlist.SortType = (TrackSortType)reader.GetInt32(7);
-                    }
-
-                    var tracks = GetTracksForPlaylist(playlist.Id);
-                    foreach (var track in tracks)
-                    {
-                        playlist.Tracks.Add(track);
-                    }
-
-                    playlists.Add(playlist);
-                }
-            }
-            catch (Exception ex)
+            catch (SqliteException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлистов: {ex.Message}");
-                throw;
             }
         }
 
@@ -510,7 +525,14 @@ public class DatabaseService
 
             try
             {
-                command.CommandText = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists WHERE Id = $id";
+                // Проверяем наличие колонки IsSystemPlaylist
+                bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+
+                string selectQuery = hasIsSystemPlaylist
+                    ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists WHERE Id = $id"
+                    : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists WHERE Id = $id";
+
+                command.CommandText = selectQuery;
                 command.Parameters.AddWithValue("$id", playlistId);
 
                 using var reader = command.ExecuteReader();
@@ -554,6 +576,18 @@ public class DatabaseService
                     else
                     {
                         playlist.CreatedDate = DateTime.Now;
+                    }
+
+                    // Тип сортировки (SortType)
+                    if (!reader.IsDBNull(7))
+                    {
+                        playlist.SortType = (TrackSortType)reader.GetInt32(7);
+                    }
+
+                    // Флаг системного плейлиста (IsSystemPlaylist) - только если колонка есть
+                    if (hasIsSystemPlaylist && !reader.IsDBNull(8))
+                    {
+                        playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
                     }
 
                     // Тип сортировки (SortType)
@@ -828,15 +862,15 @@ public class DatabaseService
         return tracks;
     }
 
-    public static long CreatePlaylist(string name, string description = "", byte[]? coverImage = null)
+    public static long CreatePlaylist(string name, string description = "", byte[]? coverImage = null, bool isSystemPlaylist = false)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
         command.CommandText = @"
-        INSERT INTO Playlists (Name, Description, CoverImage, CreatedDate)
-        VALUES ($name, $desc, $cover, $date);
+        INSERT INTO Playlists (Name, Description, CoverImage, CreatedDate, IsSystemPlaylist)
+        VALUES ($name, $desc, $cover, $date, $isSystem);
         SELECT last_insert_rowid();";
 
         command.Parameters.AddWithValue("$name", name ?? "");
@@ -845,10 +879,11 @@ public class DatabaseService
         command.Parameters.AddWithValue("$cover",
             coverImage ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("$date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        command.Parameters.AddWithValue("$isSystem", isSystemPlaylist ? 1 : 0);
 
         try
         {
-            return (long?)command.ExecuteScalar() ?? 0;
+            return (long?)command.ExecuteScalar() ?? 0; //?
         }
         catch (SqliteException ex)
         {

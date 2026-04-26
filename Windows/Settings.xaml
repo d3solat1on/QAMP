@@ -124,6 +124,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="Настройки"
@@ -398,7 +399,28 @@
                                 Foreground="{DynamicResource AccentBrush}"
                                 Click="OpenAppLocation_Click">
                         </Button>
-
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Grid.Row="9"
+                          Header="Автозагрузка"
+                          Margin="0,0,0,20"
+                          Foreground="{DynamicResource ForegroundBrush}">
+                    <StackPanel Margin="10"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <RadioButton x:Name="AutoLaunchEnabled"
+                                     Content="Включить автозапуск"
+                                     GroupName="AutoLaunch"
+                                     Margin="0,0,20,0"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Checked="CheckAutoLaunch"/>
+                        <RadioButton x:Name="AutoLaunchDisabled"
+                                     Content="Отключить автозапуск"
+                                     GroupName="AutoLaunch"
+                                     Margin="0,0,20,0"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Checked="CheckAutoLaunch"/>
+                        <!-- Checked="AutoLaunch_Checked"/>  -->
                     </StackPanel>
                 </GroupBox>
             </Grid>

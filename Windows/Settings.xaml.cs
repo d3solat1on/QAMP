@@ -21,6 +21,7 @@ namespace QAMP.Windows
         private int originalBarCount;
         private bool originalCloseToTray;
         private bool originalUseAdaptiveGradients;
+        private bool originalIsAutoLaunchEnabled;
         private readonly PlayerService _player;
         private DispatcherTimer? _memoryTimer;
         public Settings(PlayerService player)
@@ -203,6 +204,7 @@ namespace QAMP.Windows
             originalBarCount = config.VisualizerBarCount;
             originalCloseToTray = config.CloseToTray;
             originalUseAdaptiveGradients = config.UseAdaptiveGradients;
+            originalIsAutoLaunchEnabled = config.IsAutoLaunchEnabled;
 
             // Установить параметры спектрограммы
             VisualizerEnabled.IsChecked = config.IsVisualizerEnabled;
@@ -235,6 +237,10 @@ namespace QAMP.Windows
             AdaptiveGradientsRadio.IsChecked = config.UseAdaptiveGradients;
             StaticGradientsRadio.IsChecked = !config.UseAdaptiveGradients;
 
+            // Загружаем состояние автозапуска
+            AutoLaunchEnabled.IsChecked = config.IsAutoLaunchEnabled;
+            AutoLaunchDisabled.IsChecked = !config.IsAutoLaunchEnabled;
+
             isInitializing = false;
 
             // Синхронизируем эквалайзер с плеером
@@ -253,6 +259,7 @@ namespace QAMP.Windows
                 CompactModeRadio.IsChecked = true;
             else
                 DefaultModeRadio.IsChecked = true;
+            CheckAutoLaunch(null, null);
         }
 
         private void AdaptiveGradients_Checked(object sender, RoutedEventArgs e)
@@ -387,6 +394,9 @@ namespace QAMP.Windows
             // Восстановить оригинальное значение адаптивных градиентов
             config.UseAdaptiveGradients = originalUseAdaptiveGradients;
 
+            // Восстановить оригинальное значение автозапуска
+            config.IsAutoLaunchEnabled = originalIsAutoLaunchEnabled;
+
             // Обновляем RadioButton при восстановлении
             if (originalCloseToTray)
             {
@@ -405,6 +415,16 @@ namespace QAMP.Windows
             else
             {
                 StaticGradientsRadio.IsChecked = true;
+            }
+
+            // Обновляем RadioButton автозапуска при восстановлении
+            if (originalIsAutoLaunchEnabled)
+            {
+                AutoLaunchEnabled.IsChecked = true;
+            }
+            else
+            {
+                AutoLaunchDisabled.IsChecked = true;
             }
 
             // if (_player?.SpectrumViewModel != null)
@@ -632,6 +652,49 @@ namespace QAMP.Windows
         {
             var memoryUsage = Process.GetCurrentProcess().WorkingSet64;
             usingRAM.Text = $"Используемая память: {memoryUsage / (1024 * 1024):F2} MB";
+        }
+        private void CheckAutoLaunch(object? sender, RoutedEventArgs? e)
+        {
+            if (isInitializing) return;
+
+            bool isEnabled = AutoLaunchEnabled.IsChecked == true;
+            var config = SettingsManager.Instance.Config;
+            config.IsAutoLaunchEnabled = isEnabled;
+            SettingsManager.Instance.Save();
+
+            string keyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
+            string appName = "QAMP";
+            string appPath = AppContext.BaseDirectory;
+            if (isEnabled)
+            {
+                try
+                {
+                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyName, true);
+                    key?.SetValue(appName, $"\"{appPath}QAMP.exe\"");
+                }
+                catch
+                {
+                    MessageBox.Show("Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    AutoLaunchEnabled.IsChecked = false;
+                    config.IsAutoLaunchEnabled = false;
+                    SettingsManager.Instance.Save();
+                }
+            }
+            else
+            {
+                try
+                {
+                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyName, true);
+                    key?.DeleteValue(appName, false);
+                }
+                catch
+                {
+                    MessageBox.Show("Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    AutoLaunchEnabled.IsChecked = true;
+                    config.IsAutoLaunchEnabled = true;
+                    SettingsManager.Instance.Save();
+                }
+            }
         }
     }
 }

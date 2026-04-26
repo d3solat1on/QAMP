@@ -3,6 +3,7 @@ using System.Windows;
 using QAMP.Models;
 using QAMP.Services;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace QAMP
 {
@@ -60,12 +61,41 @@ namespace QAMP
 
             ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);
 
+            // Применяем автозапуск из конфига
+            ApplyAutoLaunchFromConfig();
+
             DispatcherUnhandledException += (s, ex) => LogException(ex.Exception, "UI Dispatcher");
 
             TaskScheduler.UnobservedTaskException += (s, ex) => LogException(ex.Exception, "Task Scheduler");
 
             AppDomain.CurrentDomain.UnhandledException += (s, ex) => LogException(ex.ExceptionObject as Exception, "AppDomain");
         }
+
+        private void ApplyAutoLaunchFromConfig()
+        {
+            var config = SettingsManager.Instance.Config;
+            string keyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
+            string appName = "QAMP";
+            string appPath = AppContext.BaseDirectory;
+
+            try
+            {
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyName, true);
+                if (config.IsAutoLaunchEnabled)
+                {
+                    key?.SetValue(appName, $"\"{appPath}QAMP.exe\"");
+                }
+                else
+                {
+                    key?.DeleteValue(appName, false);
+                }
+            }
+            catch
+            {
+                // Игнорируем ошибки при запуске
+            }
+        }
+
         public static void LogException(Exception? ex, string source)
         {
             if (ex == null) return;

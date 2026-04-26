@@ -14,6 +14,7 @@ namespace QAMP.Models
 
     public class Playlist : INotifyPropertyChanged
     {
+        public bool IsSystemPlaylist {get; set;} //True dlya Favorite
         private string? _name;
         private string? _description;
 

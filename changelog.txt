@@ -1,3 +1,7 @@
+(26.04.2026)V: 1.6.3
+    -The cover of the "Favorites" playlist now adapts to the main color of the app.
+    -Fixed some UI bugs
+    -Added automatic startup function with the system
 (20.04.2026)V: 1.6.2
     -Fixed a bug with updating colors in the spectrum.
     -Fixed a bug with updating icons in Control Panel.

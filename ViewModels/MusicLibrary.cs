@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
+using System.Windows.Media;
+using QAMP.Converters;
 using QAMP.Models;
 using QAMP.Services;
 
@@ -254,6 +257,54 @@ namespace QAMP.ViewModels
             foreach (var p in list)
             {
                 System.Diagnostics.Debug.WriteLine($"  - {p.Name} (ID={p.Id}): {p.Tracks.Count} треков");
+            }
+
+            // Проверяем, существует ли плейлист "Избранное"
+            var favoritesPlaylist = list.FirstOrDefault(p => p.Name == FavoritesName);
+            if (favoritesPlaylist == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' не найден, создаем его...");
+                
+                // Создаем обложку для плейлиста "Избранное"
+                byte[]? favCover = null;
+                try
+                {
+                    var geometry = Application.Current.Resources["favoriteGeometry"] as Geometry;
+                    var accentBrush = Application.Current.Resources["AccentBrush"] as Brush;
+                    if (geometry != null && accentBrush != null)
+                    {
+                        favCover = Converters.RenderGeometryToPngConverter.RenderGeometryToPng(geometry, accentBrush);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ошибка создания обложки для '{FavoritesName}': {ex.Message}");
+                }
+
+                long newId = DatabaseService.CreatePlaylist(FavoritesName, "Ваши любимые треки", favCover, isSystemPlaylist: true);
+                favoritesPlaylist = new Playlist
+                {
+                    Id = (int)newId,
+                    Name = FavoritesName,
+                    Description = "Ваши любимые треки",
+                    CoverImage = favCover ?? [],
+                    IsSystemPlaylist = true,
+                    CreatedDate = DateTime.Now
+                };
+
+                var tracks = DatabaseService.GetTracksForPlaylist((int)newId);
+                foreach (var track in tracks)
+                {
+                    favoritesPlaylist.Tracks.Add(track);
+                }
+
+                list.Add(favoritesPlaylist);
+                System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' успешно создан (ID={newId})");
+            }
+            else
+            {
+                // Если плейлист найден, убеждаемся что флаг установлен правильно
+                favoritesPlaylist.IsSystemPlaylist = true;
             }
 
             var previousPlaylistId = CurrentPlaylist?.Id;

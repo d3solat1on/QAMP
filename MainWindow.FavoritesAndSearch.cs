@@ -303,39 +303,9 @@ namespace QAMP
             var favoritePlaylist = Library.Playlists.FirstOrDefault(p => p.Name == MusicLibrary.FavoritesName);
             if (favoritePlaylist == null)
             {
-                byte[]? favCover = null;
-                try
-                {
-                    var geometry = (Geometry)Application.Current.Resources["favoriteGeometry"];
-                    var accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
-                    var drawing = new GeometryDrawing(accentBrush, null, geometry);
-                    favCover = RenderGeometryToPngConverter.RenderGeometryToPng(geometry, accentBrush);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Ошибка создания обложки для избранного: {ex.Message}");
-                }
-
-                long newId = DatabaseService.CreatePlaylist(MusicLibrary.FavoritesName, "Ваши любимые треки", favCover);
-                var newPlaylist = new Playlist
-                {
-                    Id = (int)newId,
-                    Name = MusicLibrary.FavoritesName,
-                    Description = "Ваши любимые треки",
-                    CoverImage = favCover ?? []
-                };
-
-                var tracks = DatabaseService.GetTracksForPlaylist((int)newId);
-                foreach (var track in tracks)
-                {
-                    newPlaylist.Tracks.Add(track);
-                }
-
-                Library.Playlists.Add(newPlaylist);
-                favoritePlaylist = newPlaylist;
+                NotificationWindow.Show("Ошибка: плейлист 'Избранное' не найден", this);
+                return;
             }
-
-            if (favoritePlaylist == null) return;
 
             bool isAlreadyFavorite = favoritePlaylist.Tracks.Any(t => t.Path == Player.CurrentTrack.Path);
             if (!isAlreadyFavorite)
@@ -367,8 +337,6 @@ namespace QAMP
                 TracksDataGrid.ItemsSource = null;
                 TracksDataGrid.ItemsSource = favoritePlaylist.Tracks;
             }
-
-            // UpdateFavoriteIcon(Player.CurrentTrack, null);
         }
 
         private void UpdateFavoriteIcon(Track track, bool? forceState = null)

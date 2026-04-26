@@ -193,7 +193,7 @@ namespace QAMP
                 try
                 {
                     UpdateNowPlayingInfo(track);
-                    UpdatePlayPauseIcon(Player.IsPlaying);
+                    UpdatePlayPauseIconState();
                     UpdateFavoriteIcon(track);
                     CurrentTrackName.Text = track.Name;
                     CurrentTrackExecutor.Text = track.Executor;
@@ -267,7 +267,7 @@ namespace QAMP
 
         private void OnPlaybackPaused(bool isPaused)
         {
-            Dispatcher.Invoke(() => { UpdatePlayPauseIcon(!isPaused); });
+            Dispatcher.Invoke(() => { UpdatePlayPauseIconState(); });
         }
     }
 }
