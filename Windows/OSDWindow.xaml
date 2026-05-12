@@ -14,7 +14,7 @@
         IsHitTestVisible="False">
     <Border x:Name="MainBorder"
             Background="#E6111111"
-            CornerRadius="8"
+            CornerRadius="5"
             BorderBrush="{DynamicResource AccentBrush}"
             BorderThickness="1.5"
             HorizontalAlignment="Left"

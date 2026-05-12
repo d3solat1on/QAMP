@@ -1,3 +1,5 @@
+(13.05.2026)V: 1.6.4
+    -Now all buttons are made in a single style (wow......)
 (26.04.2026)V: 1.6.3
     -The cover of the "Favorites" playlist now adapts to the main color of the app.
     -Fixed some UI bugs

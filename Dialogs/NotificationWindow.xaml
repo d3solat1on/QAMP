@@ -32,14 +32,14 @@
                         Content="Отмена"
                         Click="Cancel_Click"
                         Width="100"
-                        Height="32"
+                        Height="35"
                         Margin="0,0,10,0"
                         Background="#333"
                         Foreground="White">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius"
-                                    Value="16"/>
+                                    Value="5"/>
                         </Style>
                     </Button.Resources>
                 </Button>
@@ -47,14 +47,14 @@
                         Content="Да, удалить"
                         Click="Ok_Click"
                         Width="100"
-                        Height="32"
+                        Height="35"
                         Background="#E81123"
                         Foreground="White"
                         FontWeight="Bold">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius"
-                                    Value="16"/>
+                                    Value="5"/>
                         </Style>
                     </Button.Resources>
                 </Button>
@@ -65,13 +65,13 @@
                     Click="Ok_Click"
                     Visibility="Visible"
                     Width="100"
-                    Height="32"
+                    Height="35"
                     Background="{DynamicResource AccentBrush}"
                     FontWeight="Bold">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius"
-                                Value="16"/>
+                                Value="5"/>
                     </Style>
                 </Button.Resources>
             </Button>

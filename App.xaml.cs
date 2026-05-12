@@ -80,7 +80,7 @@ namespace QAMP
 
             try
             {
-                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyName, true);
+                using var key = Registry.CurrentUser.OpenSubKey(keyName, true);
                 if (config.IsAutoLaunchEnabled)
                 {
                     key?.SetValue(appName, $"\"{appPath}QAMP.exe\"");

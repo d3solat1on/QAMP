@@ -18,3 +18,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "type", Target = "~T:QAMP.Services.DarkContextMenuRenderer")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Visualization.SpectrumControl.RefreshColors")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Windows.Settings.CheckAutoLaunch(System.Object,System.Windows.RoutedEventArgs)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.App.ApplyAutoLaunchFromConfig")]

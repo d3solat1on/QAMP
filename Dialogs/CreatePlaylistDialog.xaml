@@ -103,7 +103,7 @@
                                         <Button.Resources>
                                                 <Style TargetType="Border">
                                                         <Setter Property="CornerRadius"
-                                                                Value="17"/>
+                                                                Value="5"/>
                                                 </Style>
                                         </Button.Resources>
                                 </Button>
@@ -117,7 +117,7 @@
                                         <Button.Resources>
                                                 <Style TargetType="Border">
                                                         <Setter Property="CornerRadius"
-                                                                Value="17"/>
+                                                                Value="5"/>
                                                 </Style>
                                         </Button.Resources>
                                 </Button>

@@ -65,6 +65,22 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="DarkComboBox"
+               TargetType="ComboBox">
+            <Setter Property="Background"
+                    Value="Black"/>
+            <Setter Property="Foreground"
+                    Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel Background="Black"/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
@@ -207,22 +223,6 @@
                                                  Checked="VisualizerToggle_Changed"/>
                                 </StackPanel>
                             </StackPanel>
-
-                            <!-- <StackPanel Margin="30,0,0,0"> -->
-                            <!-- <TextBlock Text="Количество столбцов:" -->
-                            <!-- Foreground="{DynamicResource ForegroundBrush}" -->
-                            <!-- Margin="0,0,0,5"/> -->
-                            <!-- <ComboBox x:Name="BarCountCombo" -->
-                            <!-- Width="100" -->
-                            <!-- SelectionChanged="BarCountCombo_SelectionChanged"> -->
-                            <!-- <ComboBoxItem Content="32"/> -->
-                            <!-- <ComboBoxItem Content="48"/> -->
-                            <!-- <ComboBoxItem Content="64"/> -->
-                            <!-- IsSelected="True"/> -->
-                            <!-- <ComboBoxItem Content="128"/> -->
-                            <!-- <ComboBoxItem Content="256"/> -->
-                            <!-- </ComboBox> -->
-                            <!-- </StackPanel> -->
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
@@ -250,11 +250,68 @@
                                 <ComboBox x:Name="PresetComboBox"
                                           Width="150"
                                           Margin="0,0,10,0"
-                                          SelectionChanged="PresetComboBox_SelectionChanged"
-                                          Background="{DynamicResource TertiaryBackgroundBrush}"
-                                          BorderBrush="{DynamicResource BorderBrush}">
+                                          SelectionChanged="PresetComboBox_SelectionChanged">
+                                    <!-- Style="{DynamicResource DarkComboBox}"> -->
+                                    <ComboBox.Style>
+                                        <Style TargetType="{x:Type ComboBox}">
+                                            <Setter Property="Background"
+                                                    Value="Black"/>
+                                            <Setter Property="Foreground"
+                                                    Value="{DynamicResource AccentBrush}"/>
+                                            <Setter Property="BorderBrush"
+                                                    Value="{DynamicResource AccentBrush}"/>
+
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                                                        <Grid>
+                                                            <ToggleButton x:Name="ToggleButton"
+                                                                          Background="{TemplateBinding Background}"
+                                                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                                                          Foreground="{TemplateBinding Foreground}"
+                                                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                                                          Focusable="false"
+                                                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                          ClickMode="Press"/>
+
+                                                            <ContentPresenter x:Name="ContentSite"
+                                                                              IsHitTestVisible="False"
+                                                                              Content="{TemplateBinding SelectionBoxItem}"
+                                                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                                              Margin="3,3,23,3"
+                                                                              VerticalAlignment="Center"
+                                                                              HorizontalAlignment="Left">
+                                                            </ContentPresenter>
+
+                                                            <Popup x:Name="Popup"
+                                                                    Placement="Bottom"
+                                                                    IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                                    AllowsTransparency="True"
+                                                                    Focusable="False"
+                                                                    PopupAnimation="Slide">
+                                                                <Grid x:Name="DropDown"
+                                                                        SnapsToDevicePixels="True"
+                                                                        MinWidth="{TemplateBinding ActualWidth}"
+                                                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                                                    <Border x:Name="DropDownBorder"
+                                                                            Background="Black"
+                                                                            BorderBrush="{DynamicResource AccentBrush}"
+                                                                            BorderThickness="1"/>
+                                                                    <ScrollViewer Margin="4,6,4,6"
+                                                                            SnapsToDevicePixels="True">
+                                                                        <StackPanel IsItemsHost="True"
+                                                                                KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                                                    </ScrollViewer>
+                                                                </Grid>
+                                                            </Popup>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ComboBox.Style>
                                     <ComboBoxItem Content="Пользовательский"/>
-                                    <!-- IsSelected="True"/> -->
                                     <ComboBoxItem Content="Bass Boost"/>
                                     <ComboBoxItem Content="Rock"/>
                                     <ComboBoxItem Content="Classical"/>
@@ -269,9 +326,10 @@
                                 <Button Content="Сбросить"
                                         Padding="10,5"
                                         Click="ResetEq_Click"
-                                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                                        Foreground="{DynamicResource AccentBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"/>
+                                        Background="{DynamicResource AccentBrush}"
+                                        Foreground="Black"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        FontWeight="Bold"/>
                             </StackPanel>
 
                             <ScrollViewer VerticalScrollBarVisibility="Hidden"
@@ -388,15 +446,17 @@
                         <Button x:Name="DatabaseLocation"
                                 Margin="5"
                                 Content="Открыть папку с базой данных"
-                                Background="{DynamicResource TertiaryBackgroundBrush}"
-                                Foreground="{DynamicResource AccentBrush}"
+                                Background="{DynamicResource AccentBrush}"
+                                Foreground="Black"
+                                FontWeight="Bold"
                                 Click="OpenDatabaseLocation_Click">
                         </Button>
                         <Button x:Name="AppLocation"
                                 Margin="5"
                                 Content="Открыть папку с приложением"
-                                Background="{DynamicResource TertiaryBackgroundBrush}"
-                                Foreground="{DynamicResource AccentBrush}"
+                                Background="{DynamicResource AccentBrush}"
+                                Foreground="Black"
+                                FontWeight="Bold"
                                 Click="OpenAppLocation_Click">
                         </Button>
                     </StackPanel>
@@ -439,62 +499,68 @@
                            Foreground="{DynamicResource ForegroundBrush}"/>
                 <Button x:Name="Statistics"
                         Content="Статистика"
-                        Width="100"
-                        Height="30"
                         Click="StatisticsButton_Click"
-                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                        Foreground="{DynamicResource AccentBrush}">
+                        Width="100"
+                        Height="35"
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="Black"
+                        FontWeight="Bold">
                     <Button.Resources>
                         <Style TargetType="{x:Type Border}">
                             <Setter Property="CornerRadius"
-                                    Value="17"/>
+                                    Value="5"/>
                         </Style>
                     </Button.Resources>
                 </Button>
                 <Button x:Name="HelpWindowButton"
                         Content="Справка"
-                        Width="100"
-                        Height="30"
+                        Margin="5,0,0,0"
                         Click="HelpWindowButton_Click"
-                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                        Foreground="{DynamicResource AccentBrush}">
+                        Width="100"
+                        Height="35"
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="Black"
+                        FontWeight="Bold">
                     <!-- Style="{StaticResource IconButton}" -->
 
                     <Button.Resources>
                         <Style TargetType="{x:Type Border}">
                             <Setter Property="CornerRadius"
-                                    Value="17"/>
+                                    Value="5"/>
                         </Style>
                     </Button.Resources>
                 </Button>
                 <Button x:Name="CancelButton"
                         Content="Отмена"
-                        Width="100"
-                        Height="30"
                         Click="CancelButton_Click"
-                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                        Foreground="{DynamicResource AccentBrush}">
+                        Margin="5,0,0,0"
+                        Width="100"
+                        Height="35"
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="Black"
+                        FontWeight="Bold">
                     <!-- Style="{StaticResource IconButton}" -->
                     <Button.Resources>
                         <Style TargetType="{x:Type Border}">
                             <Setter Property="CornerRadius"
-                                    Value="17"/>
+                                    Value="5"/>
                         </Style>
                     </Button.Resources>
                 </Button>
                 <Button x:Name="SaveButton"
                         Content="Сохранить"
                         Width="100"
-                        Height="30"
+                        Height="35"
                         Margin="0,0,10,0"
                         Click="SaveButton_Click"
-                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                        Foreground="{DynamicResource AccentBrush}">
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="Black"
+                        FontWeight="Bold">
                     <!-- Style="{StaticResource IconButton}" -->
                     <Button.Resources>
                         <Style TargetType="{x:Type Border}">
                             <Setter Property="CornerRadius"
-                                    Value="17"/>
+                                    Value="5"/>
                         </Style>
                     </Button.Resources>
                 </Button>

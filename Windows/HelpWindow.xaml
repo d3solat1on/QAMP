@@ -144,19 +144,49 @@
                     HorizontalAlignment="Right"
                     Margin="0,15,0,0">
             <TextBox x:Name="CurrentVersion"
-                     Width="80"
-                     Margin="5"
-                     Background="{DynamicResource AccentBrush}"/>
-            <Button Content="Закрыть"
-                    Click="CloseButton_Click"
-                    Width="80"
-                    Margin="5"
-                    Background="{DynamicResource AccentBrush}"/>
-            <Button Content="GitHub"
-                    Click="GitHubButton_Click"
-                    Width="80"
-                    Margin="5"
-                    Background="{DynamicResource AccentBrush}"/>
+                     Width="100"
+                     Height="35"
+                     Background="{DynamicResource AccentBrush}"
+                     Foreground="Black"
+                     FontWeight="Bold">
+                     <TextBox.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius"
+                                    Value="5"/>
+                        </Style>
+                    </TextBox.Resources>
+            </TextBox>         
+               
+                <Button Content="Закрыть"
+                        Margin="5,0,0,0"
+                        Click="CloseButton_Click"
+                        Width="100"
+                        Height="35"
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="Black"
+                        FontWeight="Bold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius"
+                                    Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+                <Button Content="GitHub"
+                        Margin="5,0,0,0"
+                        Click="GitHubButton_Click"
+                        Width="100"
+                        Height="35"
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="Black"
+                        FontWeight="Bold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius"
+                                    Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
         </StackPanel>
     </Grid>
 </Window>
