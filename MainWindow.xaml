@@ -708,6 +708,8 @@
                                                                                                                 <MenuItem Header="Закрепить"
                                                                                                                           x:Name="PinPlaylistMenuItem"
                                                                                                                           Click="PinPlaylist_Click"/>
+                                                                                                                <MenuItem Header="Информация"
+                                                                                                                          Click="ShowPlaylistInfo_Click"/>
                                                                                                                 <MenuItem Header="Обновить плейлист"
                                                                                                                           ToolTip="Пересканировать папки плейлиста и обновить его содержимое(Если это не произошло автоматически)"
                                                                                                                           Click="RefreshPlaylist_Click"/>

@@ -542,5 +542,20 @@ namespace QAMP
             };
             settingsWindow.ShowDialog();
         }
+        private void ShowPlaylistInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
+            {
+                var infoWindow = new ShowInfoPlaylist(selectedPlaylist)
+                {
+                    Owner = this
+                };
+                infoWindow.ShowDialog();
+            }
+            else
+            {
+                NotificationWindow.Show("Сначала выберите плейлист", this);
+            }
+        }
     }
 }

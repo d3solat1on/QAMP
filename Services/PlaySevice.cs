@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using NAudio.Wave;
@@ -5,8 +6,6 @@ using NAudio.Flac;
 using QAMP.Models;
 using QAMP.ViewModels;
 using QAMP.Dialogs;
-using System.IO;
-using System.Collections.ObjectModel;
 using QAMP.Visualization;
 using QAMP.Audio;
 
@@ -22,7 +21,31 @@ namespace QAMP.Services
         private bool _disposed = false;
         private bool _playCountIncremented = false;
         private SpectrumAnalyzer _spectrumAnalyzer = null!;
-        public SpectrumControl SpectrumControl { get; set; } = null!;
+        public List<SpectrumControl> SpectrumControls { get; } = [];
+        public SpectrumControl? SpectrumControl => SpectrumControls.FirstOrDefault();
+
+        public void AddSpectrumControl(SpectrumControl control)
+        {
+            if (control == null) return;
+            if (!SpectrumControls.Contains(control))
+            {
+                SpectrumControls.Add(control);
+            }
+        }
+
+        public void RemoveSpectrumControl(SpectrumControl control)
+        {
+            if (control == null) return;
+            SpectrumControls.Remove(control);
+        }
+
+        public void RefreshSpectrumControls()
+        {
+            foreach (var control in SpectrumControls)
+            {
+                control.RefreshColors();
+            }
+        }
 
         // НОВОЕ: Настройки спектра
         private SpectrumSettings _spectrumSettings = null!;
@@ -214,8 +237,10 @@ namespace QAMP.Services
                     _spectrumAnalyzer = new SpectrumAnalyzer(_spectrumSettings);
                     _spectrumAnalyzer.SpectrumUpdated += (s, result) =>
                     {
-
-                        SpectrumControl?.UpdateSpectrum(result.Data);
+                        foreach (var control in SpectrumControls)
+                        {
+                            control.UpdateSpectrum(result.Data);
+                        }
                     };
 
                     aggregator.FftCalculated += (s, fftData) =>

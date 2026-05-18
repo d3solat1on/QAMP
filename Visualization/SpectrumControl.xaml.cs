@@ -8,19 +8,22 @@ namespace QAMP.Visualization
     public partial class SpectrumControl : UserControl
     {
         private ScottPlot.Plottables.BarPlot? myBars;
-        private const int BarCount = 48;
+        private int _barCount;
         // private readonly SpectrumSettings _settings;
         // Буфер для сглаживания
-        private readonly double[] _smoothedValues;
-        private readonly double[] _peakValues;
+        private double[] _smoothedValues;
+        private double[] _peakValues;
         private ScottPlot.Plottables.BarPlot _peakBars;
+
+        public int BarCount => _barCount;
 
         public SpectrumControl()
         {
             InitializeComponent();
-            _smoothedValues = new double[BarCount];
-            _peakValues = new double[BarCount];
-            for (int i = 0; i < BarCount; i++)
+            _barCount = SettingsManager.Instance.Config.VisualizerBarCount;
+            _smoothedValues = new double[_barCount];
+            _peakValues = new double[_barCount];
+            for (int i = 0; i < _barCount; i++)
             {
                 _smoothedValues[i] = 0.02;
                 _peakValues[i] = 0.02;
@@ -197,6 +200,24 @@ namespace QAMP.Visualization
                 _peakValues[i] = 0.01;
                 _smoothedValues[i] = 0.01;
             }
+        }
+
+        public void SetBarCount(int count)
+        {
+            if (count <= 0 || count == _barCount)
+                return;
+
+            _barCount = count;
+            _smoothedValues = new double[_barCount];
+            _peakValues = new double[_barCount];
+
+            for (int i = 0; i < _barCount; i++)
+            {
+                _smoothedValues[i] = 0.02;
+                _peakValues[i] = 0.02;
+            }
+
+            SetupPlot();
         }
     }
 }

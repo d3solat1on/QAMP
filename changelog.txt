@@ -1,13 +1,19 @@
+(18.05.2026)V: 1.6.5
+    - Added a "Detailed Playlist Information" window
+    - Buttons have been improved
+    - Full-screen spectrum mode has been added (Beta). Opens and closes with the keyboard shortcut ctrl + w
+    - The GOST_TYPE_A font has been added to the program resources (for those who don't have the font installed on their system)
+    - The mini window has been fixed so that it does not steal focus from the active window.
 (13.05.2026)V: 1.6.4
-    -Now all buttons are made in a single style (wow......)
+    - Now all buttons are made in a single style (wow......)
 (26.04.2026)V: 1.6.3
-    -The cover of the "Favorites" playlist now adapts to the main color of the app.
-    -Fixed some UI bugs
-    -Added automatic startup function with the system
+    - The cover of the "Favorites" playlist now adapts to the main color of the app.
+    - Fixed some UI bugs
+    - Added automatic startup function with the system
 (20.04.2026)V: 1.6.2
-    -Fixed a bug with updating colors in the spectrum.
-    -Fixed a bug with updating icons in Control Panel.
-    -The statistics window is now updated without re-opening the player.
+    - Fixed a bug with updating colors in the spectrum.
+    - Fixed a bug with updating icons in Control Panel.
+    - The statistics window is now updated without re-opening the player.
 (19.04.2026)V: 1.6.1
     - The logic for adding a folder to a playlist has been fixed (probably, maybe not). 
     - Added information about memory consumption to the Settings window.

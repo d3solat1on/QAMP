@@ -285,23 +285,23 @@
                                                             </ContentPresenter>
 
                                                             <Popup x:Name="Popup"
-                                                                    Placement="Bottom"
-                                                                    IsOpen="{TemplateBinding IsDropDownOpen}"
-                                                                    AllowsTransparency="True"
-                                                                    Focusable="False"
-                                                                    PopupAnimation="Slide">
+                                                                   Placement="Bottom"
+                                                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                                   AllowsTransparency="True"
+                                                                   Focusable="False"
+                                                                   PopupAnimation="Slide">
                                                                 <Grid x:Name="DropDown"
-                                                                        SnapsToDevicePixels="True"
-                                                                        MinWidth="{TemplateBinding ActualWidth}"
-                                                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                                                      SnapsToDevicePixels="True"
+                                                                      MinWidth="{TemplateBinding ActualWidth}"
+                                                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                                                     <Border x:Name="DropDownBorder"
                                                                             Background="Black"
                                                                             BorderBrush="{DynamicResource AccentBrush}"
                                                                             BorderThickness="1"/>
                                                                     <ScrollViewer Margin="4,6,4,6"
-                                                                            SnapsToDevicePixels="True">
+                                                                                  SnapsToDevicePixels="True">
                                                                         <StackPanel IsItemsHost="True"
-                                                                                KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                                                                    KeyboardNavigation.DirectionalNavigation="Contained"/>
                                                                     </ScrollViewer>
                                                                 </Grid>
                                                             </Popup>
@@ -496,9 +496,12 @@
                            Margin="0,0,10,0"
                            VerticalAlignment="Center"
                            Background="Transparent"
-                           Foreground="{DynamicResource ForegroundBrush}"/>
+                           Foreground="{DynamicResource ForegroundBrush}"
+                           FontWeight="Bold"
+                           Visibility="Collapsed"/>
                 <Button x:Name="Statistics"
                         Content="Статистика"
+                        Margin="5,0,0,0"
                         Click="StatisticsButton_Click"
                         Width="100"
                         Height="35"

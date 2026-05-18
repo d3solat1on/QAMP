@@ -14,7 +14,7 @@ namespace QAMP.Models
 
     public class Playlist : INotifyPropertyChanged
     {
-        public bool IsSystemPlaylist {get; set;} //True dlya Favorite
+        public bool IsSystemPlaylist { get; set; } //True dlya Favorite
         private string? _name;
         private string? _description;
 
@@ -47,7 +47,12 @@ namespace QAMP.Models
         public bool IsPinned
         {
             get => _isPinned;
-            set { _isPinned = value; OnPropertyChanged(nameof(IsPinned)); }
+            set
+            {
+                _isPinned = value;
+                OnPropertyChanged(nameof(IsPinned));
+                OnPropertyChanged(nameof(PinnedDisplay));
+            }
         }
 
         public int SortOrder { get; set; }
@@ -61,6 +66,7 @@ namespace QAMP.Models
             {
                 _sortType = value;
                 OnPropertyChanged(nameof(SortType));
+                OnPropertyChanged(nameof(SortTypeDisplay));
             }
         }
 
@@ -85,6 +91,7 @@ namespace QAMP.Models
                 {
                     OnPropertyChanged(nameof(TrackCount));
                     OnPropertyChanged(nameof(TrackCountDisplay));
+                    OnPropertyChanged(nameof(TotalDurationDisplay));
                 };
             }
         }
@@ -97,6 +104,7 @@ namespace QAMP.Models
             {
                 _createdDate = value;
                 OnPropertyChanged(nameof(CreatedDate));
+                OnPropertyChanged(nameof(CreatedDateDisplay));
             }
         }
         public string CreatedDateDisplay => $"Дата создания: {CreatedDate:dd.MM.yyyy}";
@@ -130,8 +138,19 @@ namespace QAMP.Models
             }
         }
         public string TotalDurationDisplay => TotalDuration.TotalHours >= 1
-    ? $"{(int)TotalDuration.TotalHours}:{TotalDuration.Minutes:D2}:{TotalDuration.Seconds:D2}"
-    : TotalDuration.ToString(@"mm\:ss");
+            ? $"{(int)TotalDuration.TotalHours}:{TotalDuration.Minutes:D2}:{TotalDuration.Seconds:D2}"
+            : TotalDuration.ToString(@"mm\:ss");
+
+        public string PinnedDisplay => IsPinned ? "Да" : "Нет";
+        public string SystemPlaylistDisplay => IsSystemPlaylist ? "Да" : "Нет";
+        public string SortTypeDisplay => SortType switch
+        {
+            TrackSortType.AddedDate => "По дате добавления",
+            TrackSortType.AlbumAZ => "Альбом A-Z",
+            TrackSortType.ExecutorAZ => "Исполнитель A-Z",
+            TrackSortType.NameAZ => "Название A-Z",
+            _ => SortType.ToString()
+        };
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

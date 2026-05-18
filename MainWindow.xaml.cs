@@ -48,7 +48,7 @@ namespace QAMP
             PlaylistsListBox.MouseDoubleClick += PlaylistsListBox_MouseDoubleClick;
             PreviewKeyDown += Window_PreviewKeyDown;
             PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
-            PlayerService.Instance.SpectrumControl = SpectrumViewer;
+            PlayerService.Instance.AddSpectrumControl(SpectrumViewer);
             _memoryCleanupTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMinutes(5)

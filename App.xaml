@@ -11,6 +11,25 @@
                 <ResourceDictionary Source="Resources/Icons.xaml"/>
                 <ResourceDictionary Source="Themes/DarkTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <FontFamily x:Key="MainFont">pack://application:,,,/Resources/Fonts/GOST_TYPE_A.ttf#GOST type A</FontFamily>
+
+            <Style TargetType="Window">
+                <Setter Property="FontFamily" Value="{StaticResource MainFont}"/>
+            </Style>
+
+            <!-- <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource MainFont}"/>
+            </Style>
+            
+            <Style TargetType="TextBox">
+                <Setter Property="FontFamily" Value="{StaticResource MainFont}"/>
+            </Style>
+
+            <Style TargetType="ContentControl">
+                <Setter Property="FontFamily" Value="{StaticResource MainFont}"/>
+            </Style> -->
+            
         </ResourceDictionary>
     </Application.Resources>
 </Application>

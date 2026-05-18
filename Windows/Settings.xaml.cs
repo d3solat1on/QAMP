@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
@@ -296,13 +297,13 @@ namespace QAMP.Windows
                 // Просто оставляем текущую тему и применяем оттенок
                 ThemeManager.UpdateAccentColor(SettingsManager.Instance.Config.AccentColor);
                 // Обновляем цвета спектра
-                PlayerService.Instance.SpectrumControl?.RefreshColors();
+                PlayerService.Instance.RefreshSpectrumControls();
                 return;
             }
 
             ThemeManager.ApplyTheme(theme);
             // Обновляем цвета спектра после смены темы
-            PlayerService.Instance.SpectrumControl?.RefreshColors();
+            PlayerService.Instance.RefreshSpectrumControls();
         }
         private void Format_Checked(object sender, RoutedEventArgs e)
         {
@@ -330,7 +331,7 @@ namespace QAMP.Windows
             config.AccentColor = AccentColorTextBox.Text;
             ThemeManager.UpdateAccentColor(config.AccentColor);
             // Обновляем цвета спектра при смене цвета акцента
-            PlayerService.Instance.SpectrumControl?.RefreshColors();
+            PlayerService.Instance.RefreshSpectrumControls();
             UpdateColorPreview();
         }
 
@@ -438,7 +439,7 @@ namespace QAMP.Windows
                 ThemeManager.UpdateAccentColor(originalAccentColor);
 
             // Обновляем цвета спектра при отмене настроек
-            PlayerService.Instance.SpectrumControl?.RefreshColors();
+            PlayerService.Instance.RefreshSpectrumControls();
 
             ApplySavedGains();
 
@@ -650,8 +651,16 @@ namespace QAMP.Windows
         }
         private void UsingRam()
         {
-            var memoryUsage = Process.GetCurrentProcess().WorkingSet64;
-            usingRAM.Text = $"Используемая память: {memoryUsage / (1024 * 1024):F2} MB";
+            if (Keyboard.IsKeyDown(Key.I) && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                var memoryUsage = Process.GetCurrentProcess().WorkingSet64;
+                usingRAM.Text = $"Используемая память: {memoryUsage / (1024 * 1024):F2} MB";
+                usingRAM.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                usingRAM.Visibility = Visibility.Collapsed;
+            }
         }
         private void CheckAutoLaunch(object? sender, RoutedEventArgs? e)
         {

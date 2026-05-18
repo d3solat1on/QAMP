@@ -1,10 +1,16 @@
 using System.Windows;
 using System.Windows.Media.Animation;
+using System.Windows.Interop;
 
 namespace QAMP.Windows;
 
 public partial class OSDWindow : Window
 {
+    private const int GWL_EXSTYLE = -20;
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
     private readonly System.Windows.Threading.DispatcherTimer _timer;
 
     public OSDWindow()
@@ -12,6 +18,8 @@ public partial class OSDWindow : Window
         InitializeComponent();
         Left = 5;
         Top = 5;
+
+        ShowActivated = false;
 
         _timer = new System.Windows.Threading.DispatcherTimer
         {
@@ -24,7 +32,7 @@ public partial class OSDWindow : Window
     {
         ExecutorText.Text = executor;
         NameText.Text = name;
-        
+
         Opacity = 0;
         Show();
 
@@ -41,5 +49,15 @@ public partial class OSDWindow : Window
         fadeOut.Completed += (s, e) => Hide();
         BeginAnimation(OpacityProperty, fadeOut);
         _timer.Stop();
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        var helper = new WindowInteropHelper(this);
+        var val = GetWindowLong(helper.Handle, GWL_EXSTYLE);
+
+        _ = SetWindowLong(helper.Handle, GWL_EXSTYLE, val | 0x08000000);
     }
 }

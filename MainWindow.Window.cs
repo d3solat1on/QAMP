@@ -8,6 +8,7 @@ using QAMP.Audio;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
+using QAMP.Visualization;
 using QAMP.Windows;
 using static QAMP.Dialogs.NotificationWindow;
 
@@ -17,6 +18,7 @@ namespace QAMP
     {
         private bool _isClosing = false;
         private static readonly OSDWindow _osd = new();
+        private SpectrumFullWindow? _spectrumFullWindow;
         private List<LrcLine> _parsedLyrics = [];
         protected override void OnSourceInitialized(EventArgs e)
         {
@@ -123,6 +125,10 @@ namespace QAMP
                             e.Handled = true;
                         }
                         break;
+                    case Key.W:
+                        OpenSpectrumFullScreen();
+                        e.Handled = true;
+                        break;
                     case Key.Tab:
                         if (PlaylistsListBox.IsFocused || PlaylistsListBox.IsKeyboardFocusWithin)
                         {
@@ -150,6 +156,25 @@ namespace QAMP
                         break;
                 }
             }
+        }
+
+        private void OpenSpectrumFullScreen()
+        {
+            if (_spectrumFullWindow != null)
+            {
+                _spectrumFullWindow.Activate();
+                return;
+            }
+
+            _spectrumFullWindow = new SpectrumFullWindow
+            {
+                Owner = this
+            };
+            _spectrumFullWindow.Closed += (sender, args) =>
+            {
+                _spectrumFullWindow = null;
+            };
+            _spectrumFullWindow.Show();
         }
 
         protected void TracksDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
