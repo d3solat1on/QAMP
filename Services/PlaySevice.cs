@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using NAudio.Wave;
@@ -55,6 +56,8 @@ namespace QAMP.Services
         private WaveOutEvent? _waveOutEvent;
         private readonly DispatcherTimer _positionTimer = new();
         private FadeInOutProvider _fadeProvider = null!;
+        private SampleAggregator? _aggregator;
+
 
         // События
         public event Action<Track>? TrackChanged;
@@ -69,6 +72,7 @@ namespace QAMP.Services
         public bool IsPlaying { get; private set; }
         public bool IsShuffleEnabled { get; set; } = false;
         public List<Track> ShuffledQueue { get; set; } = [];
+        private double _lastNotifiedPosition = -1;
         private double _position;
         public double Position
         {
@@ -76,7 +80,11 @@ namespace QAMP.Services
             private set
             {
                 _position = value;
-                PositionChanged?.Invoke(_position);
+                if (Math.Abs(_position - _lastNotifiedPosition) >= 0.1)
+                {
+                    _lastNotifiedPosition = _position;
+                    PositionChanged?.Invoke(_position);
+                }
             }
         }
 
@@ -131,7 +139,7 @@ namespace QAMP.Services
         public event Action<bool>? ShuffleChanged;
 
         private string? _tempFilePath;
-        public List<Track> _actualPlayingQueue = [];
+        public List<Track> _actualPlayingQueue = new List<Track>();
         private PlayerService()
         {
             _positionTimer.Interval = TimeSpan.FromMilliseconds(100);
@@ -196,7 +204,7 @@ namespace QAMP.Services
             {
                 if (MusicLibrary.Instance.CurrentPlaylist != null)
                 {
-                    _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
+                    _actualPlayingQueue = new List<Track>(MusicLibrary.Instance.PlaybackQueue);
                     System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь инициализирована: {_actualPlayingQueue.Count} треков");
                 }
             }
@@ -211,8 +219,6 @@ namespace QAMP.Services
                 await Task.Run(() =>
                 {
                     var fileStream = new FileStream(track.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
-                    // byte[] fileData = File.ReadAllBytes(track.Path);
-                    // var memStream = new MemoryStream(fileData);
 
                     if (extension == ".flac")
                     {
@@ -235,35 +241,12 @@ namespace QAMP.Services
                     var aggregator = new SampleAggregator(CurrentEqualizer, 256);
 
                     _spectrumAnalyzer = new SpectrumAnalyzer(_spectrumSettings);
-                    _spectrumAnalyzer.SpectrumUpdated += (s, result) =>
-                    {
-                        foreach (var control in SpectrumControls)
-                        {
-                            control.UpdateSpectrum(result.Data);
-                        }
-                    };
+                    _spectrumAnalyzer.SpectrumUpdated += OnSpectrumUpdated;
 
-                    aggregator.FftCalculated += (s, fftData) =>
-                    {
-                        if (fftData != null && fftData.Length > 0)
-                        {
-                            float maxVal = 0;
-                            for (int i = 0; i < fftData.Length; i++)
-                            {
-                                if (fftData[i] > maxVal) maxVal = fftData[i];
-                            }
+                    _aggregator = aggregator;
+                    _aggregator.FftCalculated += OnFftCalculated;
 
-                            if (DateTime.Now >= _nextTime)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"FFT Max Value: {maxVal:F6}");
-                                _nextTime = DateTime.Now.AddSeconds(2);
-                            }
-
-                            _spectrumAnalyzer?.ProcessSamples(fftData, fftData.Length);
-                        }
-                    };
-
-                    _fadeProvider = new FadeInOutProvider(aggregator);
+                    _fadeProvider = new FadeInOutProvider(_aggregator);
                 });
 
                 _waveOutEvent = new WaveOutEvent { DesiredLatency = 250 };
@@ -290,6 +273,23 @@ namespace QAMP.Services
             }
 
         }
+
+        private void OnFftCalculated(object? sender, float[] fftData)
+        {
+            if (fftData != null && fftData.Length > 0)
+            {
+                _spectrumAnalyzer?.ProcessSamples(fftData, fftData.Length);
+            }
+        }
+
+        private void OnSpectrumUpdated(object? sender, (double[] Data, double MaxY) result)
+        {
+            foreach (var control in SpectrumControls)
+            {
+                control.UpdateSpectrum(result.Data);
+            }
+        }
+
         public void UpdateQueueOrder(List<Track> newOrder)
         {
             _actualPlayingQueue = newOrder;
@@ -342,23 +342,44 @@ namespace QAMP.Services
                 ApplySavedEqualizerSettings();
 
                 var aggregator = new SampleAggregator(CurrentEqualizer, 4096);
+                _aggregator = aggregator;
 
-                aggregator.FftCalculated += (s, fftData) =>
+                _aggregator.FftCalculated += (s, fftData) =>
+                {
+                    if (fftData != null && fftData.Length > 0)
                     {
-                        if (fftData != null && fftData.Length > 0)
-                        {
-                            _spectrumAnalyzer?.ProcessSamples(fftData, fftData.Length);
-                        }
-                    };
+                        _spectrumAnalyzer?.ProcessSamples(fftData, fftData.Length);
+                    }
+                };
+
+                _spectrumAnalyzer = new SpectrumAnalyzer(_spectrumSettings);
+                _spectrumAnalyzer.SpectrumUpdated += (s, result) =>
+                {
+                    foreach (var control in SpectrumControls)
+                    {
+                        control.UpdateSpectrum(result.Data);
+                    }
+                };
 
                 _waveOutEvent = new WaveOutEvent { DesiredLatency = 250 };  // ОПТИМИЗАЦИЯ: увеличено с 250 мс
-                _waveOutEvent.Init(aggregator);
+                _waveOutEvent.Init(_aggregator);
                 _waveOutEvent.Volume = (float)Volume;
                 // НЕ вызываем Play() - трек будет загружен, но на паузе
 
                 Duration = _audioFileReader.TotalTime.TotalSeconds;
                 IsPlaying = false;
                 _positionTimer.Stop();
+
+                if ((_actualPlayingQueue == null || _actualPlayingQueue.Count == 0) && MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                {
+                    _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
+                    System.Diagnostics.Debug.WriteLine($"[QUEUE] Восстановлена очередь из PlaybackQueue: {_actualPlayingQueue.Count} треков");
+                }
+                else if (_actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
+                {
+                    _actualPlayingQueue = [track];
+                    System.Diagnostics.Debug.WriteLine("[QUEUE] Установлен текущий трек как единственная запись очереди");
+                }
 
                 // ИСПРАВЛЕНИЕ: отписываемся перед подпиской, чтобы избежать дублирования обработчиков
                 _waveOutEvent.PlaybackStopped -= OnPlaybackStopped;
@@ -555,6 +576,17 @@ namespace QAMP.Services
             _audioFileReader?.Dispose(); // Освобождает файл и память FLAC-ридера
             _audioFileReader = null;
 
+            if (_spectrumAnalyzer != null)
+            {
+                _spectrumAnalyzer.SpectrumUpdated -= OnSpectrumUpdated;
+                _spectrumAnalyzer = null!;
+            }
+            if (_aggregator != null)
+            {
+                _aggregator.FftCalculated -= OnFftCalculated;
+                _aggregator = null;
+            }
+
             // Удаляем временный файл, если он создавался ранее
             if (!string.IsNullOrEmpty(_tempFilePath) && System.IO.File.Exists(_tempFilePath))
             {
@@ -736,5 +768,17 @@ namespace QAMP.Services
         RepeatAll,
         RepeatOne
     }
+}
 
+namespace QAMP.Visualization
+{
+    public sealed class SpectrumEventArgs
+    {
+        public float[] Data { get; }
+
+        public SpectrumEventArgs(float[] data)
+        {
+            Data = data ?? Array.Empty<float>();
+        }
+    }
 }

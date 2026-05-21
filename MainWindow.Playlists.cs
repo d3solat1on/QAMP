@@ -226,7 +226,7 @@ namespace QAMP
                 System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
                 App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
                 ApplySort(selected.SortType);
-                
+
                 // Для плейлиста "Избранное" используем цвет приложения
                 if (selected.IsSystemPlaylist)
                 {
@@ -243,6 +243,40 @@ namespace QAMP
                 if (Player.CurrentTrack != null)
                 {
                     UpdateFavoriteIcon(Player.CurrentTrack);
+                }
+
+                // Загружаем последний трек этого плейлиста, если он был сохранен
+                string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
+                System.Diagnostics.Debug.WriteLine($"DEBUG: Поиск последнего трека: {lastTrackPath}");
+                if (!string.IsNullOrEmpty(lastTrackPath))
+                {
+                    var lastTrack = selected.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
+                    if (lastTrack != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"DEBUG: Найден трек для загрузки: {lastTrack.Name}");
+                        // Загружаем трек, но не воспроизводим его
+                        _playService.LoadTrack(lastTrack);
+
+                        // Восстанавливаем позицию проигрывания
+                        string positionStr = DatabaseService.GetSetting("LastTrackPosition", "0");
+                        if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
+                        {
+                            _playService.Seek(position);
+                            System.Diagnostics.Debug.WriteLine($"DEBUG: Последний трек загружен: {lastTrack.Name} | Позиция: {position}s");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"DEBUG: Не удалось распарсить позицию: {positionStr}");
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"DEBUG: Трек не найден в плейлисте: {lastTrackPath}");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"DEBUG: LastTrackPath пуст");
                 }
 
                 // Обновляем иконку Play/Pause в зависимости от текущего состояния
@@ -325,9 +359,18 @@ namespace QAMP
             {
                 _lastTrackWithCover.UnloadCover();
             }
-            LastTrackName.Text = track.Name;
-            LastTrackExecutor.Text = track.Executor;
-
+            if (track == null)
+            {
+                LastTrackName.Text = string.Empty;
+                LastTrackExecutor.Text = string.Empty;
+                UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+                return;
+            }
+            else
+            {
+                LastTrackName.Text = track.Name;
+                LastTrackExecutor.Text = track.Executor;
+            }
             Library.CurrentTrack = track;
             _lastTrackWithCover = track;
         }

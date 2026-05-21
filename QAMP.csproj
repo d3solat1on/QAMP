@@ -9,6 +9,8 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon\QAMP_icon.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <GarbageCollectionAdaptation>1</GarbageCollectionAdaptation>
   </PropertyGroup>
 
   <ItemGroup>

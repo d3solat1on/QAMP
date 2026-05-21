@@ -18,6 +18,7 @@ namespace QAMP
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => PlayerService.Instance;
         private bool _isSliderDragging = false;
+        private double _lastFormattedSeconds = -1;
         private double _lastVolume = 0.5;
         private Track? _lastTrackWithCover;
         private bool _isLyricsMode = false;
@@ -96,37 +97,58 @@ namespace QAMP
                 {
                     lastPlaylistId = id;
                     PlaylistsListBox.SelectedItem = playlist;
-                }
-            }
-
-            // Загружаем последний трек
-            string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
-
-            if (!string.IsNullOrEmpty(lastTrackPath) && lastPlaylistId != -1)
-            {
-                var currentPlaylist = PlaylistsListBox.SelectedItem as Playlist
-                    ?? MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == lastPlaylistId);
-
-                if (currentPlaylist != null)
-                {
-                    var lastTrack = currentPlaylist.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
-
-                    if (lastTrack != null)
+                    MusicLibrary.Instance.PlayingPlaylist = playlist;
+                    MusicLibrary.Instance.PlaybackQueue.Clear();
+                    foreach (var t in playlist.Tracks)
                     {
-                        // Загружаем трек, но не воспроизводим его
-                        _playService.LoadTrack(lastTrack);
+                        MusicLibrary.Instance.PlaybackQueue.Add(t);
+                    }
+                    Player.UpdateQueueOrder([.. MusicLibrary.Instance.PlaybackQueue]);
 
-                        // Восстанавливаем позицию проигрывания
-                        string positionStr = DatabaseService.GetSetting("LastTrackPosition", "0");
-                        // ВАЖНО: парсим с InvariantCulture! В БД сохраняется с точкой, а не с запятой
-                        if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
+                    // Явно загружаем последний трек этого плейлиста
+                    string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
+                    System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: LastTrackPath={lastTrackPath}");
+
+                    if (!string.IsNullOrEmpty(lastTrackPath))
+                    {
+                        var lastTrack = playlist.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
+                        if (lastTrack != null)
                         {
-                            _playService.Seek(position);
-                        }
+                            System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Загружаю трек {lastTrack.Name}");
+                            _playService.LoadTrack(lastTrack);
 
-                        System.Diagnostics.Debug.WriteLine($"DEBUG: Трек загружен на паузе. IsPlaying={_playService.IsPlaying}");
+                            // Восстанавливаем позицию проигрывания
+                            string positionStr = DatabaseService.GetSetting("LastTrackPosition", "0");
+                            if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
+                            {
+                                _playService.Seek(position);
+                                System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Позиция установлена на {position}s");
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Трек не найден, инициализирую пустое состояние");
+                            OnTrackChanged(null);
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: LastTrackPath пуст, инициализирую пустое состояние");
+                        OnTrackChanged(null);
                     }
                 }
+                else
+                {
+                    // Плейлист не найден - инициализируем UI для пустого состояния
+                    System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Плейлист не найден");
+                    OnTrackChanged(null);
+                }
+            }
+            else
+            {
+                // Нет последнего плейлиста (первый запуск или БД пуста) - инициализируем UI для пустого состояния
+                System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Нет последнего плейлиста");
+                OnTrackChanged(null);
             }
 
             // Обновляем UI элементы
@@ -187,21 +209,30 @@ namespace QAMP
 
         private void OnTrackChanged(Track? track)
         {
-            if (track == null) return;
+            if (track == null)
+            {
+                CurrentTrackImage.Source = null;
+                FavoriteButton1Grid.Visibility = Visibility.Collapsed;
+                return;
+            }
             Dispatcher.Invoke(() =>
             {
                 try
                 {
+                    DatabaseService.SaveSettingSync("LastTrackPath", track.Path ?? "");
                     UpdateNowPlayingInfo(track);
                     UpdatePlayPauseIconState();
                     UpdateFavoriteIcon(track);
+                    FavoriteButton1Grid.Visibility = Visibility.Visible;
                     CurrentTrackName.Text = track.Name;
                     CurrentTrackExecutor.Text = track.Executor;
                     CurrentTrackAlbum.Text = track.Album;
                     CurrentTrackData.Text = $"{track.Genre} | {track.Duration} | {track.SampleRate} Hz | {track.Bitrate} kbps";
                     CurrentTrackExtension.Text = track.DisplayExtension;
-                    CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Неизвестно";
-                    this.Title = $"{track.Name} - {track.Executor} | QAMP";
+                    CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Неизвестный год";
+                    NextTrack.Text = "Следующий трек";
+                    NowPlaying.Text = "NOW PLAYING";
+                    Title = $"{track.Name} - {track.Executor} | QAMP";
 
                     string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Загрузка...";
                     if (Player.Duration <= 0) CheckDurationAsync();
@@ -244,7 +275,7 @@ namespace QAMP
         {
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => OnPositionChanged(position));
+                Dispatcher.BeginInvoke(new Action<double>(OnPositionChanged), position);
                 return;
             }
 
@@ -258,7 +289,13 @@ namespace QAMP
                         ProgressSlider.Value = sliderValue;
                     }
                 }
-                CurrentTimeText.Text = FormatTime(position);
+
+                double currentWholeSecond = Math.Floor(position);
+                if (currentWholeSecond != _lastFormattedSeconds)
+                {
+                    _lastFormattedSeconds = currentWholeSecond;
+                    CurrentTimeText.Text = FormatTime(position);
+                }
             }
             if (_isLyricsMode)
             {
@@ -268,7 +305,7 @@ namespace QAMP
 
         private void OnPlaybackPaused(bool isPaused)
         {
-            Dispatcher.Invoke(() => { UpdatePlayPauseIconState(); });
+            Dispatcher.Invoke(UpdatePlayPauseIconState);
         }
     }
 }

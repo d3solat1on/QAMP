@@ -97,7 +97,7 @@ namespace QAMP
             // Устанавливаем текущий плейлист как плейлист для воспроизведения
             Library.PlayingPlaylist = Library.CurrentPlaylist;
 
-            var firstTrack = Library.CurrentPlaylist.Tracks[0];
+            var firstTrack = Library.CurrentPlaylist!.Tracks[0];
             var logMsg = string.IsNullOrEmpty(logSuffix)
                 ? $"PlayPlaylist: {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}"
                 : $"PlayPlaylist ({logSuffix}): {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}";

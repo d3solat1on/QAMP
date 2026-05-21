@@ -29,6 +29,7 @@
         <Grid Margin="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0"
@@ -56,224 +57,356 @@
                     </Button.Resources>
                 </Button>
             </Grid>
-            <ScrollViewer Grid.Row="1"
-                    Margin="20">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="340"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1"
+                  Margin="20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="340"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0"
-                                Width="320"
-                                Height="320"
-                                CornerRadius="10"
-                                Background="#2E2E2D"
-                                Padding="8"
-                                ClipToBounds="True">
-                            <Grid>
-                                <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
-                                       Stretch="UniformToFill"
+                    <Border Grid.Column="0"
+                            Width="320"
+                            Height="320"
+                            CornerRadius="10"
+                            Background="#2E2E2D"
+                            Padding="8"
+                            ClipToBounds="True">
+                        <Grid>
+                            <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
+                                   Stretch="UniformToFill"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Visibility"
+                                                Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CoverImage}"
+                                                         Value="{x:Null}">
+                                                <Setter Property="Visibility"
+                                                        Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding CoverImage.Length}"
+                                                         Value="0">
+                                                <Setter Property="Visibility"
+                                                        Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <TextBlock Text="Обложка отсутствует"
+                                       Foreground="#888"
                                        HorizontalAlignment="Center"
-                                       VerticalAlignment="Center">
-                                    <Image.Style>
-                                        <Style TargetType="Image">
-                                            <Setter Property="Visibility"
-                                                    Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CoverImage}"
-                                                        Value="{x:Null}">
-                                                    <Setter Property="Visibility"
-                                                            Value="Collapsed"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding CoverImage.Length}"
-                                                        Value="0">
-                                                    <Setter Property="Visibility"
-                                                            Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Image.Style>
-                                </Image>
-                                <TextBlock Text="Обложка отсутствует"
-                                           Foreground="#888"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           Visibility="Collapsed">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility"
-                                                    Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CoverImage}"
-                                                        Value="{x:Null}">
-                                                    <Setter Property="Visibility"
-                                                            Value="Visible"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding CoverImage.Length}"
-                                                        Value="0">
-                                                    <Setter Property="Visibility"
-                                                            Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </Border>
-
-                        <StackPanel Grid.Column="1"
-                                Margin="25,0,0,0">
-                            <TextBlock Text="{Binding Name}"
-                                       FontSize="28"
-                                       FontWeight="Bold"
-                                       Foreground="White"
-                                       TextWrapping="Wrap"/>
-                            <TextBlock Text="{Binding Description}"
-                                       FontSize="14"
-                                       Foreground="#AAA"
-                                       Margin="0,12,0,20"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"
                                        TextWrapping="Wrap"
-                                       MaxHeight="120"/>
+                                       Visibility="Collapsed">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CoverImage}"
+                                                         Value="{x:Null}">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding CoverImage.Length}"
+                                                         Value="0">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="1"
+                                Margin="25,0,0,0">
+                        <TextBlock Text="{Binding Name}"
+                                   FontSize="28"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="14"
+                                   Foreground="#AAA"
+                                   Margin="0,12,0,20"
+                                   TextWrapping="Wrap"
+                                   MaxHeight="120"/>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0"
-                                        Grid.Column="0"
-                                        Text="ID:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="0"
-                                        Grid.Column="1"
-                                        Text="{Binding Id}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="ID:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding Id}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
 
-                                <TextBlock Grid.Row="1"
-                                        Grid.Column="0"
-                                        Text="Треков:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="1"
-                                        Grid.Column="1"
-                                        Text="{Binding TrackCountDisplay}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       Text="Треков:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="1"
+                                       Text="{Binding TrackCountDisplay}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
 
-                                <TextBlock Grid.Row="2"
-                                        Grid.Column="0"
-                                        Text="Длительность:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="2"
-                                        Grid.Column="1"
-                                        Text="{Binding TotalDurationDisplay}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="0"
+                                       Text="Длительность:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="1"
+                                       Text="{Binding TotalDurationDisplay}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
 
-                                <TextBlock Grid.Row="3"
-                                        Grid.Column="0"
-                                        Text="Создано:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="3"
-                                        Grid.Column="1"
-                                        Text="{Binding CreatedDateDisplay}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       Text="Создано:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="1"
+                                       Text="{Binding CreatedDateDisplay}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
 
-                                <TextBlock Grid.Row="4"
-                                        Grid.Column="0"
-                                        Text="Закреплен:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="4"
-                                        Grid.Column="1"
-                                        Text="{Binding PinnedDisplay}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="4"
+                                       Grid.Column="0"
+                                       Text="Закреплен:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="4"
+                                       Grid.Column="1"
+                                       Text="{Binding PinnedDisplay}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
 
-                                <TextBlock Grid.Row="5"
-                                        Grid.Column="0"
-                                        Text="Системный:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="5"
-                                        Grid.Column="1"
-                                        Text="{Binding SystemPlaylistDisplay}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="5"
+                                       Grid.Column="0"
+                                       Text="Системный:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="5"
+                                       Grid.Column="1"
+                                       Text="{Binding SystemPlaylistDisplay}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
 
-                                <TextBlock Grid.Row="6"
-                                        Grid.Column="0"
-                                        Text="Сортировка:"
-                                        Foreground="#888"
-                                        Margin="0,4,12,4"/>
-                                <TextBlock Grid.Row="6"
-                                        Grid.Column="1"
-                                        Text="{Binding SortTypeDisplay}"
-                                        Foreground="White"
-                                        Margin="0,4,0,4"/>
-                            </Grid>
-                        </StackPanel>
-                    </Grid>
-
-                    <TextBlock Text="Треки в плейлисте"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Foreground="White"
-                               Margin="0,24,0,12"/>
-
-                    <ListView ItemsSource="{Binding Tracks}"
-                              Background="#2E2E2E"
+                            <TextBlock Grid.Row="6"
+                                       Grid.Column="0"
+                                       Text="Сортировка:"
+                                       Foreground="#888"
+                                       Margin="0,4,12,4"/>
+                            <TextBlock Grid.Row="6"
+                                       Grid.Column="1"
+                                       Text="{Binding SortTypeDisplay}"
+                                       Foreground="White"
+                                       Margin="0,4,0,4"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="2"
+                      Margin="25,0,0,0">
+                    <DataGrid x:Name="TracksInPlaylist"
+                              ItemsSource="{Binding Tracks}"
+                              Visibility="Visible"
+                              Background="Transparent"
+                              RowBackground="{DynamicResource DataGridRowBackground}"
+                              AlternatingRowBackground="{DynamicResource DataGridRowAltBackground}"
+                              Foreground="{DynamicResource DataGridCellForeground}"
+                              BorderBrush="{DynamicResource DataGridBorderBrush}"
                               BorderThickness="0"
-                              Foreground="White"
-                              MinHeight="220">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="225"/>
-                                        <ColumnDefinition Width="225"/>
-                                        <ColumnDefinition Width="225"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}"
-                                               FontSize="14"
-                                               FontWeight="Bold"
-                                               Foreground="White"
-                                               TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding Executor}"
-                                               Grid.Column="1"
-                                               FontSize="12"
-                                               Foreground="#AAA"
-                                               TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding Duration}"
-                                               Grid.Column="2"
-                                               FontSize="12"
-                                               Foreground="#AAA"
-                                               HorizontalAlignment="Right"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </StackPanel>
-            </ScrollViewer>
+                              AutoGenerateColumns="False"
+                              CanUserResizeRows="False"
+                              CanUserAddRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="None"
+                              AllowDrop="True"
+                              SelectionUnit="FullRow"
+                              SelectionMode="Single"
+                              Focusable="False">
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type DataGridRowHeader}">
+                                <Setter Property="Background"
+                                        Value="Transparent"/>
+                                <Setter Property="BorderThickness"
+                                        Value="0"/>
+                                <Setter Property="Width"
+                                        Value="0"/>
+                            </Style>
+                            <!-- Стиль для заголовков колонок -->
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background"
+                                        Value="{DynamicResource DataGridHeaderBackground}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource DataGridHeaderForeground}"/>
+                                <Setter Property="FontWeight"
+                                        Value="Bold"/>
+                                <Setter Property="FontSize"
+                                        Value="14"/>
+                                <Setter Property="Height"
+                                        Value="40"/>
+                                <Setter Property="BorderBrush"
+                                        Value="{DynamicResource GridHeaderSeperatorBrush}"/>
+                                <Setter Property="BorderThickness"
+                                        Value="0,0,1,1"/>
+                                <Setter Property="HorizontalContentAlignment"
+                                        Value="Left"/>
+                                <Setter Property="Padding"
+                                        Value="10,0,0,0"/>
+                            </Style>
+
+                            <!-- Стиль для ячеек -->
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Background"
+                                        Value="{DynamicResource DataGridCellBackground}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource DataGridCellForeground}"/>
+                                <Setter Property="BorderBrush"
+                                        Value="Transparent"/>
+                                <Setter Property="VerticalAlignment"
+                                        Value="Center"/>
+                                <Setter Property="Padding"
+                                        Value="10,5,0,5"/>
+                                <Setter Property="FontSize"
+                                        Value="14"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected"
+                                             Value="True">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource DataGridRowSelectedBackground}"/>
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource DataGridCellSelectedForeground}"/>
+                                        <Setter Property="BorderBrush"
+                                                Value="{DynamicResource DataGridSelectionBorderBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+
+                            <!-- Стиль для строк -->
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background"
+                                        Value="{DynamicResource DataGridRowBackground}"/>
+                                <Setter Property="MinHeight"
+                                        Value="20"/>
+                                <Style.Triggers>
+                                    <Trigger Property="AlternationIndex"
+                                             Value="1">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource DataGridRowAltBackground}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected"
+                                             Value="True">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource DataGridRowSelectedBackground}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Title"
+                                                Binding="{Binding Name}"
+                                                Width="2*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextBlock.Foreground"
+                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                        <Setter Property="TextBlock.Margin"
+                                                Value="10,0,0,0"/>
+                                        <Setter Property="TextBlock.VerticalAlignment"
+                                                Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Artist"
+                                                Binding="{Binding Executor}"
+                                                Width="2*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextBlock.Foreground"
+                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                        <Setter Property="TextBlock.Margin"
+                                                Value="10,0,0,0"/>
+                                        <Setter Property="TextBlock.VerticalAlignment"
+                                                Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Duration"
+                                                Binding="{Binding Duration}"
+                                                Width="2*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextBlock.Foreground"
+                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                        <Setter Property="TextBlock.Margin"
+                                                Value="10,0,0,0"/>
+                                        <Setter Property="TextBlock.VerticalAlignment"
+                                                Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="ID"
+                                                Binding="{Binding Id}"
+                                                Width="2*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextBlock.Foreground"
+                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                        <Setter Property="TextBlock.Margin"
+                                                Value="10,0,0,0"/>
+                                        <Setter Property="TextBlock.VerticalAlignment"
+                                                Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Date Added"
+                                                Binding="{Binding AddedDateDisplay}"
+                                                Width="2*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextBlock.Foreground"
+                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                        <Setter Property="TextBlock.Margin"
+                                                Value="10,0,0,0"/>
+                                        <Setter Property="TextBlock.VerticalAlignment"
+                                                Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
         </Grid>
     </Border>
 </Window>

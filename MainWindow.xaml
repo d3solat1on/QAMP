@@ -186,7 +186,8 @@
                                                     VerticalAlignment="Center">
 
                                                 <!-- Кнопка избранного -->
-                                                <Grid Height="40">
+                                                <Grid  x:Name="FavoriteButton1Grid"
+                                                        Height="40">
                                                         <Button x:Name="FavoriteButton"
                                                                 Style="{StaticResource IconButton}"
                                                                 Click="FavoriteButton_Click"
@@ -208,12 +209,12 @@
                                                 <!-- Информация о треке -->
                                                 <StackPanel>
                                                         <TextBlock x:Name="LastTrackName"
-                                                                   Text="Track Name"
+                                                                   Text=""
                                                                    Foreground="{DynamicResource ForegroundBrush}"
                                                                    FontSize="14"
                                                                    FontWeight="Bold"/>
                                                         <TextBlock x:Name="LastTrackExecutor"
-                                                                   Text="Artist"
+                                                                   Text=""
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    FontSize="12"/>
                                                 </StackPanel>
@@ -1121,7 +1122,7 @@
                                                                         </DataGridTemplateColumn.CellTemplate>
 
                                                                 </DataGridTemplateColumn>
-                                                                <DataGridTextColumn Header="NAME"
+                                                                <DataGridTextColumn Header="TITLE"
                                                                                     Binding="{Binding Name}"
                                                                                     Width="3*">
                                                                         <DataGridTextColumn.ElementStyle>
@@ -1136,7 +1137,7 @@
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
 
-                                                                <DataGridTextColumn Header="EXECUTOR"
+                                                                <DataGridTextColumn Header="ARTIST"
                                                                                     Binding="{Binding Executor}"
                                                                                     Width="2*">
                                                                         <DataGridTextColumn.ElementStyle>
@@ -1296,13 +1297,15 @@
                                         BorderThickness="1,0,0,0"
                                         BorderBrush="{DynamicResource BorderBrush}">
                                         <StackPanel VerticalAlignment="Top">
-                                                <TextBlock Text="NOW PLAYING"
+                                                <TextBlock x:Name="NowPlaying"
+                                                           Text=""
                                                            Foreground="{DynamicResource ForegroundBrush}"
                                                            FontSize="20"
                                                            FontWeight="Bold"
                                                            Margin="0,0,0,20"/>
 
-                                                <Border CornerRadius="8"
+                                                <Border x:Name="CurrentTrackImage1"
+                                                        CornerRadius="8"
                                                         ClipToBounds="True"
                                                         Height="275"
                                                         Width="275"
@@ -1314,42 +1317,43 @@
                                                         <!-- XD moment  -->
                                                 </Border>
                                                 <TextBlock x:Name="CurrentTrackName"
-                                                           Text="NAME"
+                                                           Text=""
                                                            FontSize="22"
                                                            FontWeight="Bold"
                                                            Foreground="{DynamicResource CentralPanelHighlightForeground}"
                                                            TextWrapping="Wrap"/>
                                                 <TextBlock x:Name="CurrentTrackExecutor"
-                                                           Text="EXECUTOR"
+                                                           Text=""
                                                            FontSize="20"
                                                            Foreground="{DynamicResource CentralPanelSecondaryForeground}"
                                                            Margin="0,5"/>
                                                 <TextBlock x:Name="CurrentTrackAlbum"
-                                                           Text="ALBUM"
+                                                           Text=""
                                                            FontSize="20"
                                                            Foreground="{DynamicResource CentralPanelSecondaryForeground}"/>
 
                                                 <TextBlock x:Name="CurrentTrackData"
-                                                           Text="Genre | 00:00"
+                                                           Text=""
                                                            FontSize="16"
                                                            Foreground="{DynamicResource CentralPanelMutedForeground}"
                                                            Margin="0,20,0,0"/>
                                                 <TextBlock x:Name="CurrentTrackExtension"
-                                                           Text="EXTENSION"
+                                                           Text=""
                                                            FontSize="16"
                                                            Foreground="{DynamicResource CentralPanelMutedForeground}"/>
                                                 <TextBlock x:Name="CurrentTrackYear"
-                                                           Text="YEAR"
+                                                           Text=""
                                                            FontSize="16"
                                                            Foreground="{DynamicResource CentralPanelMutedForeground}"/>
                                                 <StackPanel x:Name="NextTrackPanel"
                                                             Margin="0,20,0,0">
-                                                        <TextBlock Text="СЛЕДУЮЩИЙ ТРЕК:"
+                                                        <TextBlock x:Name="NextTrack"
+                                                                   Text=""
                                                                    FontSize="12"
                                                                    Foreground="{DynamicResource CentralPanelSecondaryForeground}"
                                                                    FontWeight="Bold"/>
                                                         <TextBlock x:Name="NextTrackName"
-                                                                   Text="Название трека..."
+                                                                   Text=""
                                                                    FontSize="14"
                                                                    Foreground="{DynamicResource ForegroundBrush}"
                                                                    TextWrapping="Wrap"/>

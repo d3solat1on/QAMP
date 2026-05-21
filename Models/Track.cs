@@ -8,6 +8,7 @@ namespace QAMP.Models
     public class Track : INotifyPropertyChanged
     {
         public DateTime AddedDate { get; set; }
+        public string AddedDateDisplay => AddedDate.ToString("dd.MM.yyyy HH:mm:ss");
         public int Id { get; set; }
         public string? Extension { get; set; }
         public string Path { get; set; } = string.Empty;

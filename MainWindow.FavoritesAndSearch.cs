@@ -43,14 +43,8 @@ namespace QAMP
                         DatabaseService.RemoveTrackFromPlaylist(selectedPlaylist.Id, track.Id);
                         selectedPlaylist.Tracks.Remove(track);
                     }
-
-                    // if (selectedPlaylist.Tracks is not System.Collections.Specialized.INotifyCollectionChanged)
-                    // {
-                        TracksDataGrid.ItemsSource = null;
-                        TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
-                        
-                    // }
-
+                    TracksDataGrid.ItemsSource = null;
+                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     UpdateNextTrackUI();
                 }
             }
@@ -139,10 +133,7 @@ namespace QAMP
                         VolumeImage.Data = (Geometry)Application.Current.Resources["volumeGeometry"];
                     }
 
-                    if (VolumePercentage != null)
-                    {
-                        VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
-                    }
+                    VolumePercentage?.Text = $"{VolumeSlider.Value:F0}%";
                 }
             }
             catch (Exception ex)
