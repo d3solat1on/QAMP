@@ -63,7 +63,7 @@ namespace QAMP
             try
             {
                 //Here we register BASS.NET with the email and registration key. You should replace these with your own if you have a license.
-                BassNet.Registration("email@example.com", "key");
+                BassNet.Registration("susik2017ruslan@gmail.com", "2X2881425152222");
                 if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, nint.Zero))
                 {
                     NotificationWindow.Show($"Ошибка инициализации BASS: {Bass.BASS_ErrorGetCode()}", null);
