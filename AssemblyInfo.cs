@@ -6,5 +6,5 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("QAMP Team")]
 
-[assembly: AssemblyVersion("1.6.7.0")]
-[assembly: AssemblyFileVersion("1.6.7.0")]
+[assembly: AssemblyVersion("1.6.8.0")]
+[assembly: AssemblyFileVersion("1.6.8.0")]

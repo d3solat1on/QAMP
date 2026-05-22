@@ -10,7 +10,7 @@
     Язык: C#  
     Платформа: .NET 10.0  
     Интерфейс: WPF  
-    Звуковой движок: NAudio  
+    Звуковой движок: BASS Audio Library (Bass.Net)  
     Спектр: ScottPlot  
     БД: SQLite  
     Работа с тегами: TagLibSharp
@@ -19,8 +19,10 @@
 Запустите установщик  
 Готово.  
 ## Если ж вы хотите собрать проект самостоятельно, то:
+`Получите ключ на оффициальном сайте библиотеки Bass`
 `git clone https://github.com/d3solat1on/QAMP.git`  
 `cd QAMP`  
+`В файле App.xaml.cs нужно указать данные (ключ и почту) в методе OnStartup`
 `dotnet restore`  
 `dotnet build`  
 ### Скриншоты:

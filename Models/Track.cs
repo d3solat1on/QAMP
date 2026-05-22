@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
-using TagLib; // для INotifyPropertyChanged
 
 namespace QAMP.Models
 {

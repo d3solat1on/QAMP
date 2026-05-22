@@ -32,8 +32,9 @@
     <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ScottPlot" Version="5.1.58" />
-    <PackageReference Include="ScottPlot.WPF" Version="5.1.58" NoWarn="NU1701"/>
+    <PackageReference Include="ScottPlot.WPF" Version="5.1.58" NoWarn="NU1701" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
+    <PackageReference Include="Un4seen.Bass" Version="2.4.18.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +49,15 @@
 
   <ItemGroup>
     <Resource Include="icon\QAMP_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassflac.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

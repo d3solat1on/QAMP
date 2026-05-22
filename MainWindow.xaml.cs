@@ -1,12 +1,9 @@
 using System.IO;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Threading;
-using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
 using QAMP.ViewModels;
-using static QAMP.Dialogs.NotificationWindow;
 
 namespace QAMP
 {
@@ -22,7 +19,7 @@ namespace QAMP
         private double _lastVolume = 0.5;
         private Track? _lastTrackWithCover;
         private bool _isLyricsMode = false;
-        private StressTester? _stressTester;
+        // private StressTester? _stressTester;
 
         public MainWindow()
         {
@@ -157,35 +154,35 @@ namespace QAMP
                 VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
                 System.Diagnostics.Debug.WriteLine($"DEBUG: VolumePercent обновлен: {VolumeSlider.Value:F0}%");
             }
-            _stressTester = new StressTester(
-                togglePlayPause: TogglePlayPause,
-                setPlaylistIndex: (index) => PlaylistsListBox.SelectedIndex = index,
-                getPlaylistsCount: () => PlaylistsListBox.Items.Count,
-                getTracksCount: () => TracksDataGrid.Items.Count,
-                playTrackByIndex: (index) =>
-                {
-                    if (TracksDataGrid.Items[index] is Track track)
-                        _ = Player.PlayTrack(track);
-                },
-                showMessage: (text) => Task.Run(() =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        NotificationWindow.Show(text, this, NotificationMode.Info);
-                    });
-                })
-            );
+            // _stressTester = new StressTester(
+            //     togglePlayPause: TogglePlayPause,
+            //     setPlaylistIndex: (index) => PlaylistsListBox.SelectedIndex = index,
+            //     getPlaylistsCount: () => PlaylistsListBox.Items.Count,
+            //     getTracksCount: () => TracksDataGrid.Items.Count,
+            //     playTrackByIndex: (index) =>
+            //     {
+            //         if (TracksDataGrid.Items[index] is Track track)
+            //             _ = Player.PlayTrack(track);
+            //     },
+            //     showMessage: (text) => Task.Run(() =>
+            //     {
+            //         Application.Current.Dispatcher.Invoke(() =>
+            //         {
+            //             NotificationWindow.Show(text, this, NotificationMode.Info);
+            //         });
+            //     })
+            // );
 
-            KeyDown += async (s, e) =>
-            {
-                if (e.Key == Key.T && Keyboard.Modifiers == ModifierKeys.Control)
-                {
-                    if (_stressTester.IsRunning)
-                        _stressTester.Stop();
-                    else
-                        await _stressTester.Run(TimeSpan.FromMinutes(5));
-                }
-            };
+            // KeyDown += async (s, e) =>
+            // {
+            //     if (e.Key == Key.T && Keyboard.Modifiers == ModifierKeys.Control)
+            //     {
+            //         if (_stressTester.IsRunning)
+            //             _stressTester.Stop();
+            //         else
+            //             await _stressTester.Run(TimeSpan.FromMinutes(5));
+            //     }
+            // };
         }
 
         private static void LoadApplicationSettings()

@@ -1,3 +1,7 @@
+(22.05.2026)V: 1.6.8:
+    - The audio engine has changed from NAudio to Bass.net. Unlike NAudio, which ran within a managed .NET environment, BASS is compiled in pure C/Assembly. Audio decoding now occurs natively, with virtually zero latency and minimal CPU load.
+    - This has improved the performance of the spectrogram.
+    - The equalizer is currently not working correctly.
 (22.05.2026)V: 1.6.7
     - Now the right panel is empty if there is no track, like the bottom left part (for example, if the database is empty).
     - The "Detailed Playlist Information" window now shows more data (track ID, as well as the time it was added to the playlist, down to the second).

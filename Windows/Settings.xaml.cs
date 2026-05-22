@@ -68,8 +68,8 @@ namespace QAMP.Windows
                 // Обновляем эквалайзер в плеере
                 if (_player != null)
                 {
-                    _player.CurrentEqualizer?.SetGain(band.Index, newValue);
                     _player.EqGains[band.Index] = newValue;
+                    _player.ApplyCurrentEqGains();
                 }
 
                 // Сохраняем в конфиг
@@ -134,10 +134,7 @@ namespace QAMP.Windows
                 }
 
                 // Применяем к плееру
-                if (_player != null)
-                {
-                    _player.UpdateEqualizerGains(gains);
-                }
+                _player?.UpdateEqualizerGains(gains);
 
                 // Сохраняем в конфиг
                 var config = SettingsManager.Instance.Config;
@@ -169,14 +166,14 @@ namespace QAMP.Windows
 
         private void ApplySavedGains()
         {
-            if (_player?.CurrentEqualizer == null) return;
+            if (_player == null) return;
 
             var config = SettingsManager.Instance.Config;
             for (int i = 0; i < config.EqualizerGains.Length; i++)
             {
-                _player.CurrentEqualizer.SetGain(i, (float)config.EqualizerGains[i]);
                 _player.EqGains[i] = (float)config.EqualizerGains[i];
             }
+            _player.ApplyCurrentEqGains();
         }
 
         private void SetPresetComboBoxValue(string presetName)
@@ -245,13 +242,13 @@ namespace QAMP.Windows
             isInitializing = false;
 
             // Синхронизируем эквалайзер с плеером
-            if (_player != null && _player.CurrentEqualizer != null)
+            if (_player != null)
             {
                 for (int i = 0; i < config.EqualizerGains.Length; i++)
                 {
-                    _player.CurrentEqualizer.SetGain(i, (float)config.EqualizerGains[i]);
                     _player.EqGains[i] = (float)config.EqualizerGains[i];
                 }
+                _player.ApplyCurrentEqGains();
             }
 
             // Рисуем график АЧХ

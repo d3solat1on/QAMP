@@ -4,6 +4,8 @@ using QAMP.Models;
 using QAMP.Services;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using Un4seen.Bass;
+using QAMP.Dialogs;
 
 namespace QAMP
 {
@@ -58,7 +60,20 @@ namespace QAMP
             }
 
             base.OnStartup(e);
-
+            try
+            {
+                //Here we register BASS.NET with the email and registration key. You should replace these with your own if you have a license.
+                BassNet.Registration("email@example.com", "key");
+                if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, nint.Zero))
+                {
+                    NotificationWindow.Show($"Ошибка инициализации BASS: {Bass.BASS_ErrorGetCode()}", null);
+                    LogException(new Exception($"BASS_Init failed with error code: {Bass.BASS_ErrorGetCode()}"), "BASS Initialization");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(ex, "App Startup");
+            }
             ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);
 
             // Применяем автозапуск из конфига

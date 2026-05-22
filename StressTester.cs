@@ -1,31 +1,21 @@
 namespace QAMP;
 
-public class StressTester
+public class StressTester(
+    Action togglePlayPause,
+    Action<int> setPlaylistIndex,
+    Func<int> getPlaylistsCount,
+    Func<int> getTracksCount,
+    Action<int> playTrackByIndex,
+    Action<string> showMessage)
 {
     private CancellationTokenSource? _cts;
     // Делегаты для управления плеером извне
-    private readonly Action _togglePlayPause;
-    private readonly Action<int> _setPlaylistIndex;
-    private readonly Func<int> _getPlaylistsCount;
-    private readonly Func<int> _getTracksCount;
-    private readonly Action<int> _playTrackByIndex;
-    private readonly Action<string> _showMessage;
-
-    public StressTester(
-        Action togglePlayPause,
-        Action<int> setPlaylistIndex,
-        Func<int> getPlaylistsCount,
-        Func<int> getTracksCount,
-        Action<int> playTrackByIndex,
-        Action<string> showMessage)
-    {
-        _togglePlayPause = togglePlayPause;
-        _setPlaylistIndex = setPlaylistIndex;
-        _getPlaylistsCount = getPlaylistsCount;
-        _getTracksCount = getTracksCount;
-        _playTrackByIndex = playTrackByIndex;
-        _showMessage = showMessage;
-    }
+    private readonly Action _togglePlayPause = togglePlayPause;
+    private readonly Action<int> _setPlaylistIndex = setPlaylistIndex;
+    private readonly Func<int> _getPlaylistsCount = getPlaylistsCount;
+    private readonly Func<int> _getTracksCount = getTracksCount;
+    private readonly Action<int> _playTrackByIndex = playTrackByIndex;
+    private readonly Action<string> _showMessage = showMessage;
 
     public bool IsRunning => _cts != null;
 
