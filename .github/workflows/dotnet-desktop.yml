@@ -3,6 +3,12 @@ name: Build QAMP
 on:
   push:
     branches: [ "main" ] # Запускать при каждом пуше в ветку main
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - 'README.md'
+      - 'changelog.txt'
+      - '.gitignore'
+      - 'LICENSE'
   pull_request:
     branches: [ "main" ]
 
