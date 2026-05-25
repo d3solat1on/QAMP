@@ -272,13 +272,6 @@ namespace QAMP
                 }
                 SettingsManager.Instance.Save();
 
-                // Чистим иконку, раз уж выходим совсем
-                if (_notifyIcon != null)
-                {
-                    _notifyIcon.Visible = false;
-                    _notifyIcon.Dispose();
-                }
-
                 App.LogInfo("=== OnClosing FULL EXIT END ===");
             }
             catch (Exception ex)
@@ -295,49 +288,6 @@ namespace QAMP
                     Environment.Exit(0);
                 }
             }
-        }
-
-        private void SetupTrayIcon()
-        {
-            var menu = new System.Windows.Forms.ContextMenuStrip
-            {
-                RenderMode = System.Windows.Forms.ToolStripRenderMode.System,
-                Renderer = new DarkContextMenuRenderer(),
-                ShowImageMargin = false,
-                ShowCheckMargin = false,
-                BackColor = System.Drawing.Color.FromArgb(30, 30, 30),
-                ForeColor = System.Drawing.Color.White,
-            };
-
-            menu.Items.Add("Развернуть", null, (s, e) =>
-            {
-                Show();
-                WindowState = WindowState.Normal;
-                Activate();
-            });
-            menu.Items.Add("Играть/Пауза", null, (s, e) => TogglePlayPause());
-            menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
-            menu.Items.Add("Выход", null, (s, e) =>
-            {
-                _isClosing = true;
-                Close();
-            });
-
-            var iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/icon/QAMP_icon.ico")).Stream;
-            _notifyIcon = new System.Windows.Forms.NotifyIcon
-            {
-                Icon = new System.Drawing.Icon(iconStream),
-                Visible = true,
-                Text = "QAMP Player",
-                ContextMenuStrip = menu
-            };
-
-            _notifyIcon.DoubleClick += (s, e) =>
-            {
-                Show();
-                WindowState = WindowState.Normal;
-                Activate();
-            };
         }
 
         private void ViewLyricsButton_Click(object? sender, RoutedEventArgs? e)
@@ -493,7 +443,7 @@ namespace QAMP
         private void UpdateLyricsHighlight(TimeSpan currentTime)
         {
             // Проверяем как _parsedLyrics, так и LyricsListBox.Items для поддержки обоих режимов
-            if ((LyricsListBox.Items.Count == 0) || (_parsedLyrics == null || _parsedLyrics.Count == 0))
+            if ((LyricsListBox.Items.Count == 0) || _parsedLyrics == null || _parsedLyrics.Count == 0)
                 return;
 
             // Проверяем, есть ли таймкоды (если все строки имеют Time == 0, это обычный текст без таймкодов)

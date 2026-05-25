@@ -153,7 +153,7 @@
                 <TextBox.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius"
-                                Value="5"/>
+                                Value="3"/>
                     </Style>
                 </TextBox.Resources>
             </TextBox>
@@ -163,30 +163,14 @@
                     Click="CloseButton_Click"
                     Width="100"
                     Height="35"
-                    Background="{DynamicResource AccentBrush}"
-                    Foreground="Black"
-                    FontWeight="Bold">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius"
-                                Value="5"/>
-                    </Style>
-                </Button.Resources>
+                    Style="{StaticResource ModernPlayerButton}">
             </Button>
             <Button Content="GitHub"
                     Margin="5,0,0,0"
                     Click="GitHubButton_Click"
                     Width="100"
                     Height="35"
-                    Background="{DynamicResource AccentBrush}"
-                    Foreground="Black"
-                    FontWeight="Bold">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius"
-                                Value="5"/>
-                    </Style>
-                </Button.Resources>
+                    Style="{StaticResource ModernPlayerButton}">
             </Button>
         </StackPanel>
     </Grid>

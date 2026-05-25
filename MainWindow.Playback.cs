@@ -22,7 +22,7 @@ namespace QAMP
                 : ts.ToString(@"m\:ss");
         }
 
-        private void TogglePlayPause()
+        public void TogglePlayPause()
         {
             if (Player.CurrentTrack == null)
             {
@@ -158,6 +158,7 @@ namespace QAMP
             // Принудительное обновление
             PlayPauseIcon.InvalidateVisual();
             PlayPauseIcon1.InvalidateVisual();
+            _mediaManager?.UpdatePlaybackStatus(isPlaying);
         }
 
         /// <summary>

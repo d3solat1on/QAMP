@@ -43,4 +43,18 @@ public static class AppDataManager
     public static string SettingsPath => GetFilePath("settings.json");
     public static string CrashLogPath => GetFilePath("crash_log.txt");
     public static string AppInfoLogPath => GetFilePath("app_info.log");
+    public static string SmtcLogPath => GetFilePath("QAMP_SMTC.log");
+
+    public static void AppendSmtcLog(string text)
+    {
+        try
+        {
+            EnsureAppDataFolderExists();
+            File.AppendAllText(SmtcLogPath, text + Environment.NewLine);
+        }
+        catch
+        {
+            // ignore
+        }
+    }
 }

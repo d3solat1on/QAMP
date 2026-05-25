@@ -401,6 +401,131 @@ namespace QAMP.ViewModels
 
             System.Diagnostics.Debug.WriteLine($"Плейлист добавлен. Всего плейлистов: {Playlists.Count}");
         }
+
+        /// <summary>
+        /// Асинхронно загружает плейлисты БЕЗ треков
+        /// </summary>
+        public async Task RefreshPlaylistsAsync()
+        {
+            System.Diagnostics.Debug.WriteLine("=== АСИНХРОННАЯ ЗАГРУЗКА ПЛЕЙЛИСТОВ (БЕЗ ТРЕКОВ) ===");
+            
+            var list = await DatabaseService.GetPlaylistsAsync();
+            System.Diagnostics.Debug.WriteLine($"Загружено плейлистов из БД: {list.Count}");
+            foreach (var p in list)
+            {
+                System.Diagnostics.Debug.WriteLine($"  - {p.Name} (ID={p.Id})");
+            }
+
+            // Проверяем, существует ли плейлист "Избранное"
+            var favoritesPlaylist = list.FirstOrDefault(p => p.Name == FavoritesName);
+            if (favoritesPlaylist == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' не найден, создаем его...");
+                
+                byte[]? favCover = null;
+                try
+                {
+                    if (Application.Current.Resources["favoriteGeometry"] is Geometry geometry && Application.Current.Resources["AccentBrush"] is Brush accentBrush)
+                    {
+                        favCover = Converters.RenderGeometryToPngConverter.RenderGeometryToPng(geometry, accentBrush);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ошибка создания обложки для '{FavoritesName}': {ex.Message}");
+                }
+
+                long newId = DatabaseService.CreatePlaylist(FavoritesName, "Ваши любимые треки", favCover, isSystemPlaylist: true);
+                favoritesPlaylist = new Playlist
+                {
+                    Id = (int)newId,
+                    Name = FavoritesName,
+                    Description = "Ваши любимые треки",
+                    CoverImage = favCover ?? [],
+                    IsSystemPlaylist = true,
+                    CreatedDate = DateTime.Now
+                };
+
+                list.Add(favoritesPlaylist);
+                System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' успешно создан (ID={newId})");
+            }
+            else
+            {
+                favoritesPlaylist.IsSystemPlaylist = true;
+            }
+
+            var previousPlaylistId = CurrentPlaylist?.Id;
+            System.Diagnostics.Debug.WriteLine($"Текущий плейлист ПЕРЕД очисткой: ID={previousPlaylistId}");
+
+            Playlists.Clear();
+
+            foreach (var p in list)
+            {
+                System.Diagnostics.Debug.WriteLine($"Добавляем плейлист: '{p.Name}'");
+                Playlists.Add(p);
+            }
+
+            // Восстанавливаем текущий плейлист, если он был выбран
+            if (CurrentPlaylist != null)
+            {
+                var restoredPlaylist = Playlists.FirstOrDefault(p => p.Id == CurrentPlaylist.Id);
+                if (restoredPlaylist != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Восстанавливаем плейлист: '{restoredPlaylist.Name}' (ID={restoredPlaylist.Id})");
+                    CurrentPlaylist = restoredPlaylist;
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"=== КОНЕЦ АСИНХРОННОЙ ЗАГРУЗКИ ПЛЕЙЛИСТОВ ===");
+            OnPropertyChanged(nameof(Playlists));
+        }
+
+        /// <summary>
+        /// Асинхронно загружает треки для плейлиста
+        /// </summary>
+        public async Task LoadPlaylistTracksAsync(Playlist playlist)
+        {
+            if (playlist == null) return;
+            
+            System.Diagnostics.Debug.WriteLine($"=== АСИНХРОННАЯ ЗАГРУЗКА ТРЕКОВ ДЛЯ ПЛЕЙЛИСТА: {playlist.Name} ===");
+            
+            var tracks = await DatabaseService.GetTracksForPlaylistAsync(playlist.Id);
+            
+            // Очищаем старые треки
+            playlist.Tracks.Clear();
+            
+            // Добавляем новые треки
+            foreach (var track in tracks)
+            {
+                playlist.Tracks.Add(track);
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Загружено {tracks.Count} треков для плейлиста '{playlist.Name}'");
+            
+            // Уведомляем об изменении
+            OnPropertyChanged(nameof(Playlists));
+        }
+
+        /// <summary>
+        /// Асинхронно загружает все плейлисты с треками постепенно
+        /// </summary>
+        public async Task LoadAllPlaylistsTracksAsync(Action<int, int>? onProgress = null)
+        {
+            System.Diagnostics.Debug.WriteLine("=== АСИНХРОННАЯ ЗАГРУЗКА ВСЕХ ТРЕКОВ ===");
+            
+            int totalPlaylists = Playlists.Count;
+            for (int i = 0; i < totalPlaylists; i++)
+            {
+                var playlist = Playlists[i];
+                await LoadPlaylistTracksAsync(playlist);
+                
+                System.Diagnostics.Debug.WriteLine($"Прогресс: {i + 1}/{totalPlaylists}");
+                onProgress?.Invoke(i + 1, totalPlaylists);
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"=== КОНЕЦ АСИНХРОННОЙ ЗАГРУЗКИ ВСЕХ ТРЕКОВ ===");
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {

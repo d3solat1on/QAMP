@@ -187,7 +187,7 @@
 
                                                 <!-- Кнопка избранного -->
                                                 <Grid  x:Name="FavoriteButton1Grid"
-                                                        Height="40">
+                                                       Height="40">
                                                         <Button x:Name="FavoriteButton"
                                                                 Style="{StaticResource IconButton}"
                                                                 Click="FavoriteButton_Click"
@@ -241,22 +241,6 @@
                                                                               Stretch="Uniform"/>
                                                                 </Button>
                                                         </Grid>
-                                                        <!-- <Grid Height="40">
-                                                                <Button x:Name="Sort_button"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Click="SortButton_Click"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0">
-                                                                        <Path x:Name="sortImage"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource sortGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"/>
-                                                                </Button>
-                                                        </Grid> -->
                                                         <Grid Height="40">
                                                                 <Button Style="{StaticResource IconButton}"
                                                                         Width="40"
@@ -550,6 +534,40 @@
                                                                 </Button>
                                                         </StackPanel>
                                                 </DockPanel>
+
+                                                <!-- Placeholder для загрузки плейлистов -->
+                                                <Grid Grid.Row="1"
+                                                      x:Name="PlaylistsLoadingPlaceholder"
+                                                      Visibility="Collapsed">
+                                                        <StackPanel VerticalAlignment="Top"
+                                                                    Margin="8">
+                                                                <Border Height="45"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="45"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="45"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="45"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="45"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                        </StackPanel>
+                                                </Grid>
 
                                                 <ListBox Grid.Row="1"
                                                          x:Name="PlaylistsListBox"
@@ -948,46 +966,65 @@
                                         </Border>
 
                                         <Grid Grid.Row="2">
+                                                <!-- Placeholder для загрузки треков -->
+                                                <Grid x:Name="TracksLoadingPlaceholder"
+                                                      Visibility="Collapsed"
+                                                      Background="{DynamicResource TertiaryBackgroundBrush}">
+                                                        <StackPanel VerticalAlignment="Top"
+                                                                    Margin="20">
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                                <Border Height="35"
+                                                                        Margin="0,5"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"/>
+                                                        </StackPanel>
+                                                </Grid>
+
                                                 <DataGrid x:Name="TracksDataGrid"
-                                                          Visibility="Visible"
-                                                          VirtualizingStackPanel.IsVirtualizing="True"
-                                                          VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                                          ScrollViewer.IsDeferredScrollingEnabled="False"
-                                                          VirtualizingStackPanel.ScrollUnit="Pixel"
-                                                          VirtualizingStackPanel.CacheLength="2,3"
-                                                          VirtualizingStackPanel.CacheLengthUnit="Page"
-                                                          Background="Transparent"
-                                                          RowBackground="{DynamicResource DataGridRowBackground}"
-                                                          AlternatingRowBackground="{DynamicResource DataGridRowAltBackground}"
-                                                          Foreground="{DynamicResource DataGridCellForeground}"
-                                                          BorderBrush="{DynamicResource DataGridBorderBrush}"
-                                                          BorderThickness="0"
-                                                          AutoGenerateColumns="False"
-                                                          CanUserResizeRows="False"
-                                                          CanUserAddRows="False"
-                                                          CanUserReorderColumns="False"
-                                                          CanUserResizeColumns="False"
-                                                          IsReadOnly="True"
-                                                          MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
-                                                          GridLinesVisibility="None"
+                                                          AlternationCount="2"
                                                           AllowDrop="True"
-                                                          SelectionUnit="FullRow"
-                                                          SelectionMode="Single"
-                                                          Focusable="True"
+                                                          MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
                                                           DragOver="MainGrid_DragOver">
                                                         <!-- Drop="MainGrid_Drop"> -->
                                                         <DataGrid.ContextMenu>
                                                                 <ContextMenu Background="{DynamicResource ContextMenuBackground}"
                                                                              BorderBrush="{DynamicResource ContextMenuBorderBrush}"
                                                                              Opened="ContextMenu_Opened">
-
                                                                         <MenuItem Header="Воспроизвести"
                                                                                   Click="PlayTrackMenuItem_Click"/>
                                                                         <MenuItem Header="Информация"
                                                                                   Click="ShowTrackInfo_Click"/>
-
                                                                         <MenuItem Header="Добавить в плейлист"/>
-
                                                                         <MenuItem Header="Удалить из плейлиста"
                                                                                   Click="RemoveFromPlaylist_Click"/>
                                                                 </ContextMenu>
@@ -1070,6 +1107,7 @@
                                                                         </Style.Triggers>
                                                                 </Style>
                                                         </DataGrid.Resources>
+                                                        <!-- Hz, ne rabotaet chet -->
                                                         <DataGrid.Columns>
 
                                                                 <!-- В DataGrid.Columns, перед колонкой NAME -->
@@ -1090,7 +1128,7 @@
                                                                                                         <Path Data="{DynamicResource default_coverGeometry}"
                                                                                                               Fill="{DynamicResource AccentBrush}"
                                                                                                               Stretch="Uniform"
-                                                                                                              Margin="15"
+                                                                                                              Margin="5"
                                                                                                               HorizontalAlignment="Center"
                                                                                                               VerticalAlignment="Center"/>
                                                                                                         <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
@@ -1185,8 +1223,8 @@
                                                                 <DataGridTextColumn Header="BITRATE"
                                                                                     Binding="{Binding Bitrate}"
                                                                                     Visibility="{Binding Data.IsCompactMode, 
-                 Source={StaticResource Proxy}, 
-                 Converter={StaticResource InverseBoolToVisConverter}}"
+                                                                                        Source={StaticResource Proxy}, 
+                                                                                        Converter={StaticResource InverseBoolToVisConverter}}"
                                                                                     Width="1*">
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
@@ -1202,8 +1240,8 @@
                                                                 <DataGridTextColumn Header="GENRE"
                                                                                     Binding="{Binding Genre}"
                                                                                     Visibility="{Binding Data.IsCompactMode, 
-                 Source={StaticResource Proxy}, 
-                 Converter={StaticResource InverseBoolToVisConverter}}"
+                                                                                                Source={StaticResource Proxy}, 
+                                                                                                Converter={StaticResource InverseBoolToVisConverter}}"
                                                                                     Width="1*">
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
@@ -1296,76 +1334,117 @@
                                         Background="{DynamicResource TertiaryBackgroundBrush}"
                                         BorderThickness="1,0,0,0"
                                         BorderBrush="{DynamicResource BorderBrush}">
-                                        <StackPanel VerticalAlignment="Top">
-                                                <TextBlock x:Name="NowPlaying"
-                                                           Text=""
-                                                           Foreground="{DynamicResource ForegroundBrush}"
-                                                           FontSize="20"
-                                                           FontWeight="Bold"
-                                                           Margin="0,0,0,20"/>
 
-                                                <Border x:Name="CurrentTrackImage1"
-                                                        CornerRadius="8"
-                                                        ClipToBounds="True"
-                                                        Height="275"
-                                                        Width="275"
-                                                        Background="{DynamicResource CentralPanelCardBackground}"
-                                                        BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
-                                                        BorderThickness="1"
-                                                        Margin="0,0,0,10">
-                                                        <Image x:Name="CurrentTrackImage"/>
-                                                        <!-- XD moment  -->
-                                                </Border>
-                                                <TextBlock x:Name="CurrentTrackName"
-                                                           Text=""
-                                                           FontSize="22"
-                                                           FontWeight="Bold"
-                                                           Foreground="{DynamicResource CentralPanelHighlightForeground}"
-                                                           TextWrapping="Wrap"/>
-                                                <TextBlock x:Name="CurrentTrackExecutor"
-                                                           Text=""
-                                                           FontSize="20"
-                                                           Foreground="{DynamicResource CentralPanelSecondaryForeground}"
-                                                           Margin="0,5"/>
-                                                <TextBlock x:Name="CurrentTrackAlbum"
-                                                           Text=""
-                                                           FontSize="20"
-                                                           Foreground="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                        <Grid>
 
-                                                <TextBlock x:Name="CurrentTrackData"
-                                                           Text=""
-                                                           FontSize="16"
-                                                           Foreground="{DynamicResource CentralPanelMutedForeground}"
-                                                           Margin="0,20,0,0"/>
-                                                <TextBlock x:Name="CurrentTrackExtension"
-                                                           Text=""
-                                                           FontSize="16"
-                                                           Foreground="{DynamicResource CentralPanelMutedForeground}"/>
-                                                <TextBlock x:Name="CurrentTrackYear"
-                                                           Text=""
-                                                           FontSize="16"
-                                                           Foreground="{DynamicResource CentralPanelMutedForeground}"/>
-                                                <StackPanel x:Name="NextTrackPanel"
-                                                            Margin="0,20,0,0">
-                                                        <TextBlock x:Name="NextTrack"
-                                                                   Text=""
-                                                                   FontSize="12"
-                                                                   Foreground="{DynamicResource CentralPanelSecondaryForeground}"
-                                                                   FontWeight="Bold"/>
-                                                        <TextBlock x:Name="NextTrackName"
-                                                                   Text=""
-                                                                   FontSize="14"
-                                                                   Foreground="{DynamicResource ForegroundBrush}"
-                                                                   TextWrapping="Wrap"/>
-                                                </StackPanel>
-                                                <Grid>
-                                                        <vis:SpectrumControl x:Name="SpectrumViewer"
-                                                                             Height="150"
-                                                                             VerticalAlignment="Bottom"
-                                                                             HorizontalAlignment="Stretch"
-                                                                             BorderThickness="2"/>
+                                                <Grid x:Name="NowPlayingLoadingPlaceholder"
+                                                      Visibility="Collapsed"
+                                                      Margin="20">
+                                                        <StackPanel VerticalAlignment="Top">
+                                                                <Border Height="275"
+                                                                        Width="275"
+                                                                        CornerRadius="8"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"
+                                                                        Margin="0,15"
+                                                                        HorizontalAlignment="Center"/>
+                                                                <Border Height="30"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"
+                                                                        Margin="0,15"/>
+                                                                <Border Height="25"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"
+                                                                        Margin="0,15"/>
+                                                                <Border Height="20"
+                                                                        CornerRadius="4"
+                                                                        Background="#333333"
+                                                                        Opacity="0.5"
+                                                                        Margin="0,15"/>
+                                                        </StackPanel>
                                                 </Grid>
-                                        </StackPanel>
+
+                                                <StackPanel VerticalAlignment="Top"
+                                                            x:Name="NowPlayingPanel">
+                                                        <TextBlock x:Name="NowPlaying"
+                                                                   Text=""
+                                                                   Foreground="{DynamicResource ForegroundBrush}"
+                                                                   FontSize="20"
+                                                                   FontWeight="Bold"
+                                                                   Margin="0,0,0,20"/>
+
+                                                        <Border x:Name="CurrentTrackImage1"
+                                                                CornerRadius="8"
+                                                                ClipToBounds="True"
+                                                                Height="275"
+                                                                Width="275"
+                                                                Background="{DynamicResource CentralPanelCardBackground}"
+                                                                BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
+                                                                BorderThickness="1"
+                                                                Margin="0,0,0,10">
+                                                                <Image x:Name="CurrentTrackImage"/>
+                                                        </Border>
+
+                                                        <TextBlock x:Name="CurrentTrackName"
+                                                                   Text=""
+                                                                   FontSize="22"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource CentralPanelHighlightForeground}"
+                                                                   TextWrapping="Wrap"/>
+
+                                                        <TextBlock x:Name="CurrentTrackExecutor"
+                                                                   Text=""
+                                                                   FontSize="20"
+                                                                   Foreground="{DynamicResource CentralPanelSecondaryForeground}"
+                                                                   Margin="0,5"/>
+
+                                                        <TextBlock x:Name="CurrentTrackAlbum"
+                                                                   Text=""
+                                                                   FontSize="20"
+                                                                   Foreground="{DynamicResource CentralPanelSecondaryForeground}"/>
+
+                                                        <TextBlock x:Name="CurrentTrackData"
+                                                                   Text=""
+                                                                   FontSize="16"
+                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                   Margin="0,20,0,0"/>
+
+                                                        <TextBlock x:Name="CurrentTrackExtension"
+                                                                   Text=""
+                                                                   FontSize="16"
+                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"/>
+
+                                                        <TextBlock x:Name="CurrentTrackYear"
+                                                                   Text=""
+                                                                   FontSize="16"
+                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"/>
+
+                                                        <StackPanel x:Name="NextTrackPanel"
+                                                                    Margin="0,20,0,0">
+                                                                <TextBlock x:Name="NextTrack"
+                                                                           Text=""
+                                                                           FontSize="12"
+                                                                           Foreground="{DynamicResource CentralPanelSecondaryForeground}"
+                                                                           FontWeight="Bold"/>
+                                                                <TextBlock x:Name="NextTrackName"
+                                                                           Text=""
+                                                                           FontSize="14"
+                                                                           Foreground="{DynamicResource ForegroundBrush}"
+                                                                           TextWrapping="Wrap"/>
+                                                        </StackPanel>
+
+                                                        <Grid>
+                                                                <vis:SpectrumControl x:Name="SpectrumViewer"
+                                                                                     Height="150"
+                                                                                     VerticalAlignment="Bottom"
+                                                                                     HorizontalAlignment="Stretch"
+                                                                                     BorderThickness="2"/>
+                                                        </Grid>
+                                                </StackPanel>
+
+                                        </Grid>
                                 </Border>
                         </Grid>
                 </DockPanel>

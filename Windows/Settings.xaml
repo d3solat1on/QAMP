@@ -251,7 +251,6 @@
                                           Width="150"
                                           Margin="0,0,10,0"
                                           SelectionChanged="PresetComboBox_SelectionChanged">
-                                    <!-- Style="{DynamicResource DarkComboBox}"> -->
                                     <ComboBox.Style>
                                         <Style TargetType="{x:Type ComboBox}">
                                             <Setter Property="Background"
@@ -323,19 +322,11 @@
                                     <ComboBoxItem Content="808"/>
                                 </ComboBox>
 
-                                <Button Content="Сбросить"
+                                <Button Style="{StaticResource ModernPlayerButton}"
+                                        Content="Сбросить"
                                         Padding="10,5"
                                         Click="ResetEq_Click"
-                                        Background="{DynamicResource AccentBrush}"
-                                        Foreground="Black"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        FontWeight="Bold">
-                                    <Button.Resources>
-                                        <Style TargetType="{x:Type Border}">
-                                            <Setter Property="CornerRadius"
-                                                    Value="2"/>
-                                        </Style>
-                                    </Button.Resources>
+                                        BorderBrush="{DynamicResource BorderBrush}">
                                 </Button>
                             </StackPanel>
 
@@ -370,7 +361,6 @@
                                                         IsSnapToTickEnabled="True"
                                                         ValueChanged="EqSlider_ValueChanged"
                                                         HorizontalAlignment="Center"/>
-                                                <!-- Style="{StaticResource CustomSliderStyle}" -->
 
                                                 <TextBlock Text="{Binding Frequency}"
                                                            FontSize="10"
@@ -450,20 +440,16 @@
                     <StackPanel Margin="10"
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Left">
-                        <Button x:Name="DatabaseLocation"
+                        <Button Style="{StaticResource ModernPlayerButton}"
+                                x:Name="DatabaseLocation"
                                 Margin="5"
                                 Content="Открыть папку с базой данных"
-                                Background="{DynamicResource AccentBrush}"
-                                Foreground="Black"
-                                FontWeight="Bold"
                                 Click="OpenDatabaseLocation_Click">
                         </Button>
-                        <Button x:Name="AppLocation"
+                        <Button Style="{StaticResource ModernPlayerButton}"
+                                x:Name="AppLocation"
                                 Margin="5"
                                 Content="Открыть папку с приложением"
-                                Background="{DynamicResource AccentBrush}"
-                                Foreground="Black"
-                                FontWeight="Bold"
                                 Click="OpenAppLocation_Click">
                         </Button>
                     </StackPanel>
@@ -506,73 +492,40 @@
                            Foreground="{DynamicResource ForegroundBrush}"
                            FontWeight="Bold"
                            Visibility="Collapsed"/>
-                <Button x:Name="Statistics"
+                <Button Style="{StaticResource ModernPlayerButton}"
+                        x:Name="Statistics"
                         Content="Статистика"
                         Margin="5,0,0,0"
                         Click="StatisticsButton_Click"
                         Width="100"
-                        Height="35"
-                        Background="{DynamicResource AccentBrush}"
-                        Foreground="Black"
-                        FontWeight="Bold">
-                    <Button.Resources>
-                        <Style TargetType="{x:Type Border}">
-                            <Setter Property="CornerRadius"
-                                    Value="5"/>
-                        </Style>
-                    </Button.Resources>
+                        Height="35">
                 </Button>
-                <Button x:Name="HelpWindowButton"
+                <Button Style="{StaticResource ModernPlayerButton}"
+                        x:Name="HelpWindowButton"
                         Content="Справка"
                         Margin="5,0,0,0"
                         Click="HelpWindowButton_Click"
                         Width="100"
-                        Height="35"
-                        Background="{DynamicResource AccentBrush}"
-                        Foreground="Black"
-                        FontWeight="Bold">
-                    <!-- Style="{StaticResource IconButton}" -->
+                        Height="35">
 
-                    <Button.Resources>
-                        <Style TargetType="{x:Type Border}">
-                            <Setter Property="CornerRadius"
-                                    Value="5"/>
-                        </Style>
-                    </Button.Resources>
                 </Button>
-                <Button x:Name="CancelButton"
+                <Button Style="{StaticResource ModernPlayerButton}"
+                        x:Name="CancelButton"
                         Content="Отмена"
                         Click="CancelButton_Click"
                         Margin="5,0,0,0"
                         Width="100"
-                        Height="35"
-                        Background="{DynamicResource AccentBrush}"
-                        Foreground="Black"
-                        FontWeight="Bold">
-                    <!-- Style="{StaticResource IconButton}" -->
-                    <Button.Resources>
-                        <Style TargetType="{x:Type Border}">
-                            <Setter Property="CornerRadius"
-                                    Value="5"/>
-                        </Style>
-                    </Button.Resources>
+                        Height="35">
+
                 </Button>
-                <Button x:Name="SaveButton"
+                <Button Style="{StaticResource ModernPlayerButton}"
+                        x:Name="SaveButton"
                         Content="Сохранить"
                         Width="100"
                         Height="35"
                         Margin="5,0,0,0"
-                        Click="SaveButton_Click"
-                        Background="{DynamicResource AccentBrush}"
-                        Foreground="Black"
-                        FontWeight="Bold">
-                    <!-- Style="{StaticResource IconButton}" -->
-                    <Button.Resources>
-                        <Style TargetType="{x:Type Border}">
-                            <Setter Property="CornerRadius"
-                                    Value="5"/>
-                        </Style>
-                    </Button.Resources>
+                        Click="SaveButton_Click">
+
                 </Button>
             </StackPanel>
         </Grid>

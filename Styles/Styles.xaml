@@ -388,4 +388,61 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="ModernPlayerButton"
+           TargetType="Button">
+        <Setter Property="Background"
+                Value="{DynamicResource AccentBrush}"/>
+        <Setter Property="Foreground"
+                Value="Black"/>
+        <Setter Property="FontWeight"
+                Value="Bold"/>
+        <Style.Resources>
+            <Style TargetType="Border">
+                <Setter Property="CornerRadius"
+                        Value="3"/>
+            </Style>
+        </Style.Resources>
+    </Style>
+    <Style TargetType="DataGrid">
+        <Setter Property="AutoGenerateColumns"
+                Value="False"/>
+        <Setter Property="GridLinesVisibility"
+                Value="None"/>
+        <Setter Property="IsReadOnly"
+                Value="True"/>
+        <Setter Property="BorderThickness"
+                Value="0"/>
+        <Setter Property="Background"
+                Value="Transparent"/>
+        <Setter Property="CanUserResizeRows"
+                Value="False"/>
+        <Setter Property="CanUserAddRows"
+                Value="False"/>
+        <Setter Property="CanUserReorderColumns"
+                Value="False"/>
+        <Setter Property="CanUserResizeColumns"
+                Value="False"/>
+        <Setter Property="SelectionUnit"
+                Value="FullRow"/>
+        <Setter Property="SelectionMode"
+                Value="Single"/>
+        <Setter Property="Focusable"
+                Value="True"/>
+        <Setter Property="HeadersVisibility"
+                Value="Column"/>
+        <Setter Property="VirtualizingStackPanel.IsVirtualizing"
+                Value="True"/>
+        <Setter Property="VirtualizingStackPanel.VirtualizationMode"
+                Value="Recycling"/>
+        <Setter Property="VirtualizingStackPanel.ScrollUnit"
+                Value="Pixel"/>
+        <Setter Property="VirtualizingStackPanel.CacheLength"
+                Value="1,2"/>
+        <Setter Property="VirtualizingStackPanel.CacheLengthUnit"
+                Value="Page"/>
+        <Setter Property="VirtualizingStackPanel.IsVirtualizingWhenGrouping"
+                Value="True"/>
+        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled"
+                Value="False"/>
+    </Style>
 </ResourceDictionary>

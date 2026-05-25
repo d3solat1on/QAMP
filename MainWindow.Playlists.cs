@@ -52,18 +52,18 @@ namespace QAMP
                 return;
             }
 
-            using var folderDialog = new System.Windows.Forms.FolderBrowserDialog
+            var folderDialog = new OpenFolderDialog
             {
-                Description = "Выберите папку с музыкой (включая подпапки)",
-                ShowNewFolderButton = true
+                Title = "Выберите папку с музыкой (включая подпапки)",
+                Multiselect = true 
             };
 
-            if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (folderDialog.ShowDialog() == true)
             {
                 Cursor = Cursors.Wait;
                 try
                 {
-                    var files = Directory.GetFiles(folderDialog.SelectedPath, "*.*", SearchOption.AllDirectories)
+                    var files = Directory.GetFiles(folderDialog.FolderName, "*.*", SearchOption.AllDirectories)
                     .Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".flac"))
                     .ToArray();
 
@@ -190,10 +190,6 @@ namespace QAMP
 
                     PlaylistsListBox.SelectedItem = newPlaylist;
 
-                    // CurrentPlaylistNameText.Text = newPlaylist.Name;
-                    // CurrentPlaylistDescriptionText.Text = newPlaylist.Description;
-                    // CurrentTracksCountText.Text = "0 треков";
-
                     TracksDataGrid.ItemsSource = newPlaylist.Tracks;
 
 
@@ -244,99 +240,9 @@ namespace QAMP
                     UpdateFavoriteIcon(Player.CurrentTrack);
                 }
 
-                // Загружаем последний трек этого плейлиста, если он был сохранен
-                string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
-                System.Diagnostics.Debug.WriteLine($"DEBUG: Поиск последнего трека: {lastTrackPath}");
-                if (!string.IsNullOrEmpty(lastTrackPath))
-                {
-                    var lastTrack = selected.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
-                    if (lastTrack != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"DEBUG: Найден трек для загрузки: {lastTrack.Name}");
-                        // Загружаем трек, но не воспроизводим его
-                        _playService.LoadTrack(lastTrack);
-
-                        // Восстанавливаем позицию проигрывания
-                        string positionStr = DatabaseService.GetSetting("LastTrackPosition", "0");
-                        if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
-                        {
-                            _playService.Seek(position);
-                            System.Diagnostics.Debug.WriteLine($"DEBUG: Последний трек загружен: {lastTrack.Name} | Позиция: {position}s");
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"DEBUG: Не удалось распарсить позицию: {positionStr}");
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"DEBUG: Трек не найден в плейлисте: {lastTrackPath}");
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"DEBUG: LastTrackPath пуст");
-                }
-
-                // Обновляем иконку Play/Pause в зависимости от текущего состояния
                 UpdatePlayPauseIconState();
             }
         }
-
-        /// <summary>
-        /// Применяет сохраненный тип сортировки к плейлисту
-        /// </summary>
-        // private void ApplySortToPlaylist(Playlist playlist)
-        // {
-        //     System.Diagnostics.Debug.WriteLine($"=== ApplySortToPlaylist ===");
-        //     System.Diagnostics.Debug.WriteLine($"Плейлист: {playlist.Name}");
-        //     System.Diagnostics.Debug.WriteLine($"SortType: {playlist.SortType}");
-        //     System.Diagnostics.Debug.WriteLine($"Треков в коллекции: {playlist.Tracks.Count}");
-
-        //     // Выводим исходный порядок треков
-        //     System.Diagnostics.Debug.WriteLine($"ИСХОДНЫЙ ПОРЯДОК в playlist.Tracks:");
-        //     for (int i = 0; i < Math.Min(15, playlist.Tracks.Count); i++)
-        //     {
-        //         System.Diagnostics.Debug.WriteLine($"  {i}: {playlist.Tracks[i].Name} (Album: {playlist.Tracks[i].Album})");
-        //     }
-
-        //     if (playlist.SortType != TrackSortType.AddedDate)
-        //     {
-        //         System.Diagnostics.Debug.WriteLine($"Применяю сортировку: {playlist.SortType}");
-        //         var sortedTracks = SortTracks([.. playlist.Tracks], playlist.SortType);
-
-        //         // Выводим первые 3 трека до и после сортировки
-        //         System.Diagnostics.Debug.WriteLine("ОТСОРТИРОВАННЫЙ ПОРЯДОК:");
-        //         for (int i = 0; i < Math.Min(15, sortedTracks.Count); i++)
-        //         {
-        //             System.Diagnostics.Debug.WriteLine($"  {i}: {sortedTracks[i].Name} (Album: {sortedTracks[i].Album})");
-        //         }
-
-        //         // ВАЖНО: НЕ изменяем саму коллекцию Tracks!
-        //         // Вместо этого отображаем отсортированные треки в DataGrid
-        //         System.Diagnostics.Debug.WriteLine("Переустанавливаю ItemsSource для DataGrid");
-        //         TracksDataGrid.ItemsSource = null;
-        //         TracksDataGrid.ItemsSource = new ObservableCollection<Track>(sortedTracks);
-
-        //         // Обновляем иконку сортировки (светит при активной сортировке)
-        //         if (sortImage1 != null)
-        //         {
-        //             sortImage1.Fill = (Brush)Application.Current.Resources["AccentBrush"];
-        //         }
-        //     }
-        //     else
-        //     {
-        //         System.Diagnostics.Debug.WriteLine("Сортировка по умолчанию (AddedDate), не применяю");
-        //         // Иконка тусклая при дефолтной сортировке
-        //         if (sortImage1 != null)
-        //         {
-        //             sortImage1.Fill = (Brush)Application.Current.Resources["DisabledBrush"] ??
-        //                              (Brush)Application.Current.Resources["AccentBrush"];
-        //         }
-        //         // Отображаем исходный порядок треков
-        //         TracksDataGrid.ItemsSource = playlist.Tracks;
-        //     }
-        // }
 
         private void TracksDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -382,7 +288,7 @@ namespace QAMP
             }
             try
             {
-                System.Windows.Media.Color dominant = ThemeHelper.GetDominantColor(cover);
+                Color dominant = ThemeHelper.GetDominantColor(cover);
 
                 // Создаем градиент
                 var brush = new LinearGradientBrush

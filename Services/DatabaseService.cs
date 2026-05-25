@@ -1359,5 +1359,128 @@ public class DatabaseService
         cmd.ExecuteNonQuery();
     }
 
+    /// <summary>
+    /// Асинхронная загрузка плейлистов БЕЗ треков для быстрого отображения
+    /// </summary>
+    public static async Task<List<Playlist>> GetPlaylistsAsync()
+    {
+        return await Task.Run(() =>
+        {
+            var playlists = new List<Playlist>();
 
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+
+                try
+                {
+                    bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+
+                    string selectQuery = hasIsSystemPlaylist
+                        ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC"
+                        : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+
+                    command.CommandText = selectQuery;
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        var playlist = new Playlist
+                        {
+                            Id = reader.GetInt32(0),
+                            Name = reader.GetString(1),
+                            Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                            CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
+                            IsPinned = !reader.IsDBNull(4) && reader.GetInt32(4) != 0
+                        };
+
+                        if (!reader.IsDBNull(5))
+                        {
+                            playlist.SortOrder = reader.GetInt32(5);
+                        }
+
+                        if (!reader.IsDBNull(6))
+                        {
+                            string dateString = reader.GetString(6);
+                            if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                System.Globalization.DateTimeStyles.None,
+                                out DateTime parsedDate))
+                            {
+                                playlist.CreatedDate = parsedDate;
+                            }
+                            else if (DateTime.TryParse(dateString, out DateTime secondTry))
+                            {
+                                playlist.CreatedDate = secondTry;
+                            }
+                            else
+                            {
+                                playlist.CreatedDate = DateTime.Now;
+                            }
+                        }
+                        else
+                        {
+                            playlist.CreatedDate = DateTime.Now;
+                        }
+
+                        if (!reader.IsDBNull(7))
+                        {
+                            playlist.SortType = (TrackSortType)reader.GetInt32(7);
+                        }
+
+                        if (hasIsSystemPlaylist && !reader.IsDBNull(8))
+                        {
+                            playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
+                        }
+
+                        // НЕ загружаем треки здесь - это будет сделано отдельно асинхронно
+                        playlists.Add(playlist);
+                    }
+                }
+                catch (SqliteException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлистов: {ex.Message}");
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Асинхронно загружено плейлистов: {playlists.Count}");
+            return playlists;
+        });
+    }
+
+    /// <summary>
+    /// Асинхронная загрузка треков для плейлиста
+    /// </summary>
+    public static async Task<List<Track>> GetTracksForPlaylistAsync(int playlistId)
+    {
+        return await Task.Run(() => GetTracksForPlaylist(playlistId));
+    }
+
+    /// <summary>
+    /// Загружает все плейлисты с треками асинхронно, постепенно
+    /// </summary>
+    public static async Task<List<Playlist>> GetAllPlaylistsWithTracksAsync(Func<int, int, Task>? onPlaylistLoaded = null)
+    {
+        var playlists = await GetPlaylistsAsync();
+        
+        // Загружаем треки для каждого плейлиста последовательно
+        for (int i = 0; i < playlists.Count; i++)
+        {
+            var tracks = await GetTracksForPlaylistAsync(playlists[i].Id);
+            foreach (var track in tracks)
+            {
+                playlists[i].Tracks.Add(track);
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Загружены треки для плейлиста {i + 1}/{playlists.Count}: '{playlists[i].Name}' ({tracks.Count} треков)");
+            
+            // Вызываем callback для уведомления о прогрессе
+            if (onPlaylistLoaded != null)
+            {
+                await onPlaylistLoaded(i + 1, playlists.Count);
+            }
+        }
+
+        return playlists;
+    }
 }

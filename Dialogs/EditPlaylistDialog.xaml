@@ -121,32 +121,17 @@
                                         Click="CancelButton_Click"
                                         Width="100"
                                         Height="35"
-                                        FontWeight="Bold"
-                                        Background="{DynamicResource AccentBrush}"
-                                        Foreground="Black"
+                                        Style="{StaticResource ModernPlayerButton}"
                                         Margin="0,0,10,0"
                                         IsCancel="True"
                                         BorderThickness="0">
-                                        <Button.Resources>
-                                                <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius"
-                                                                Value="5"/>
-                                                </Style>
-                                        </Button.Resources>
+                                        
                                 </Button>
                                 <Button Content="Сохранить"
                                         Click="EditPlaylist_Click"
                                         Width="100"
                                         Height="35"
-                                        Background="{DynamicResource AccentBrush}"
-                                        Foreground="Black"
-                                        FontWeight="Bold">
-                                        <Button.Resources>
-                                                <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius"
-                                                                Value="5"/>
-                                                </Style>
-                                        </Button.Resources>
+                                        Style="{StaticResource ModernPlayerButton}">
                                 </Button>
                         </StackPanel>
                 </Grid>

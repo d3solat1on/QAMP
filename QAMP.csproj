@@ -3,20 +3,34 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    
     <ApplicationIcon>icon\QAMP_icon.ico</ApplicationIcon>
+    
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <GarbageCollectionAdaptation>1</GarbageCollectionAdaptation>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
-     <None Remove="Resources\**\*.png" />
+    <None Remove="Resources\**\*.png" />
     <None Remove="Resources\**\*.svg" />
-	  <!-- <None Remove="Resources\Fonts"/> -->
+    <None Remove="icon\QAMP_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\**\*.png" />
+    <Resource Include="Resources\**\*.svg" />
+    <Resource Include="Resources\Fonts\GOST_TYPE_A.ttf" />
+    <Resource Include="icon\QAMP_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,31 +38,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BunLabs.NAudio.Flac" Version="2.0.1" />
     <PackageReference Include="FftSharp" Version="2.2.0" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="ksemenenko.ColorThief" Version="1.1.1.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.5" />
-    <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ScottPlot" Version="5.1.58" />
     <PackageReference Include="ScottPlot.WPF" Version="5.1.58" NoWarn="NU1701" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
     <PackageReference Include="Un4seen.Bass" Version="2.4.18.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Resources\**\*.png" />
-    <Resource Include="Resources\**\*.svg" />
-    <Resource Include="Resources\Fonts\GOST_TYPE_A.ttf" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="icon\QAMP_icon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="icon\QAMP_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,7 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using QAMP.Models;
 using QAMP.Services;
@@ -10,8 +12,6 @@ namespace QAMP
     public partial class MainWindow : Window
     {
         private readonly PlayerService _playService = PlayerService.Instance;
-        private readonly DispatcherTimer _memoryCleanupTimer;
-        private System.Windows.Forms.NotifyIcon? _notifyIcon;
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => PlayerService.Instance;
         private bool _isSliderDragging = false;
@@ -19,12 +19,21 @@ namespace QAMP
         private double _lastVolume = 0.5;
         private Track? _lastTrackWithCover;
         private bool _isLyricsMode = false;
-        // private StressTester? _stressTester;
+
+        private readonly Grid? _playlistsLoadingPlaceholder;
+        private readonly Grid? _tracksLoadingPlaceholder;
+        private readonly Grid? _nowPlayingLoadingPlaceholder;
+        private readonly StackPanel? _nowPlayingPanel;
+        private MediaControlsManager? _mediaManager;
 
         public MainWindow()
         {
             InitializeComponent();
-            SetupTrayIcon();
+
+            _playlistsLoadingPlaceholder = (Grid?)FindName("PlaylistsLoadingPlaceholder");
+            _tracksLoadingPlaceholder = (Grid?)FindName("TracksLoadingPlaceholder");
+            _nowPlayingLoadingPlaceholder = (Grid?)FindName("NowPlayingLoadingPlaceholder");
+            _nowPlayingPanel = (StackPanel?)FindName("NowPlayingPanel");
 
             System.Diagnostics.Debug.WriteLine("=== ПУТЬ К БАЗЕ ДАННЫХ ===");
             System.Diagnostics.Debug.WriteLine($"Путь: {DatabaseService.DatabasePath}");
@@ -33,7 +42,6 @@ namespace QAMP
             DatabaseService.EnsureDatabaseCreated();
 
             System.Diagnostics.Debug.WriteLine($"База данных существует: {File.Exists(DatabaseService.DatabasePath)}");
-            LoadPlaylists();
             LoadApplicationSettings();
             DataContext = MusicLibrary.Instance;
 
@@ -47,41 +55,163 @@ namespace QAMP
             PreviewKeyDown += Window_PreviewKeyDown;
             PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
             PlayerService.Instance.AddSpectrumControl(SpectrumViewer);
-            _memoryCleanupTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMinutes(5)
-            };
-            _memoryCleanupTimer.Tick += (s, e) =>
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-            };
-            _memoryCleanupTimer.Start();
-
             Closing += (s, e) => OnClosing(e);
         }
-
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("=== MainWindow_Loaded НАЧАЛО ===");
+
+            if (_mediaManager == null)
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd != IntPtr.Zero)
+                {
+                    _mediaManager = new MediaControlsManager(hwnd);
+                    InitializeMediaControlsManagerHandlers();
+
+                    _mediaManager.UpdatePlaybackStatus(Player.IsPlaying);
+                }
+            }
+
             // Загружаем громкость - устанавливаем в слайдер, это вызовет VolumeSlider_ValueChanged
             string savedVolume = DatabaseService.GetSetting("Volume", "0.5");
 
             // ВАЖНО: парсим с InvariantCulture! В БД сохраняется с точкой (0.5), а не с запятой (0,5)
             if (double.TryParse(savedVolume, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double vol))
             {
-                // Важно: устанавливаем сначала Value слайдера
-                // Это вызовет VolumeSlider_ValueChanged, который установит Player.Volume
                 VolumeSlider.Value = vol * 100;
-
-                // На случай если ValueChanged не сработал (например, если новое значение = старому)
-                // Явно установим Player.Volume
                 if (Math.Abs(Player.Volume - vol) > 0.01)
                 {
                     Player.Volume = vol;
                 }
             }
 
+            // Обновляем UI элементы
+            VolumePercentage?.Text = $"{VolumeSlider.Value:F0}%";
+
+            System.Diagnostics.Debug.WriteLine("=== ЗАПУСК АСИНХРОННОЙ ЗАГРУЗКИ ===");
+            _ = InitializePlaylistsAndTracksAsync();
+        }
+
+        /// <summary>
+        /// Асинхронно загружает плейлисты и треки, показывая плейсхолдеры во время загрузки
+        /// </summary>
+        private async Task InitializePlaylistsAndTracksAsync()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Шаг 1: Показываем плейсхолдер плейлистов");
+                _playlistsLoadingPlaceholder?.Visibility = Visibility.Visible;
+                PlaylistsListBox.Visibility = Visibility.Collapsed;
+
+                System.Diagnostics.Debug.WriteLine("Шаг 2: Загружаем плейлисты");
+                await MusicLibrary.Instance.RefreshPlaylistsAsync();
+
+                System.Diagnostics.Debug.WriteLine("Шаг 3: Показываем плейлисты");
+                _playlistsLoadingPlaceholder?.Visibility = Visibility.Collapsed;
+                PlaylistsListBox.Visibility = Visibility.Visible;
+
+                System.Diagnostics.Debug.WriteLine("Шаг 4: Показываем плейсхолдер треков");
+                _tracksLoadingPlaceholder?.Visibility = Visibility.Visible;
+                TracksDataGrid.Visibility = Visibility.Collapsed;
+
+                System.Diagnostics.Debug.WriteLine("Шаг 5: Загружаем треки для плейлистов");
+                await MusicLibrary.Instance.LoadAllPlaylistsTracksAsync(
+                    onProgress: (current, total) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Прогресс загрузки треков: {current}/{total}");
+                    }
+                );
+
+                System.Diagnostics.Debug.WriteLine("Шаг 6: Показываем DataGrid");
+                _tracksLoadingPlaceholder?.Visibility = Visibility.Collapsed;
+                TracksDataGrid.Visibility = Visibility.Visible;
+
+                System.Diagnostics.Debug.WriteLine("Шаг 7: Показываем плейсхолдер информации о треке");
+                _nowPlayingLoadingPlaceholder?.Visibility = Visibility.Visible;
+                _nowPlayingPanel?.Visibility = Visibility.Collapsed;
+
+                System.Diagnostics.Debug.WriteLine("Шаг 8: Восстанавливаем последний плейлист и трек");
+                await RestoreLastPlaylistAndTrackAsync();
+
+                System.Diagnostics.Debug.WriteLine("Шаг 9: Показываем информацию о треке");
+                _nowPlayingLoadingPlaceholder?.Visibility = Visibility.Collapsed;
+                _nowPlayingPanel?.Visibility = Visibility.Visible;
+
+                System.Diagnostics.Debug.WriteLine("=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при инициализации: {ex.Message}");
+                _playlistsLoadingPlaceholder?.Visibility = Visibility.Collapsed;
+                PlaylistsListBox.Visibility = Visibility.Visible;
+                _tracksLoadingPlaceholder?.Visibility = Visibility.Collapsed;
+                TracksDataGrid.Visibility = Visibility.Visible;
+                _nowPlayingLoadingPlaceholder?.Visibility = Visibility.Collapsed;
+                _nowPlayingPanel?.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void InitializeMediaControlsManagerHandlers()
+        {
+            if (_mediaManager == null) return;
+
+            _mediaManager.OnPlayRequested += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    System.Diagnostics.Debug.WriteLine("SMTC: Play Requested");
+                    if (_playService.CurrentTrack != null)
+                    {
+                        if (!_playService.IsPlaying)
+                        {
+                            _playService.Resume();
+                        }
+                    }
+                    else if (MusicLibrary.Instance.PlaybackQueue.Count > 0)
+                    {
+                        var t = MusicLibrary.Instance.PlaybackQueue[0];
+                        _ = _playService.PlayTrack(t);
+                    }
+                });
+            };
+
+            _mediaManager.OnPauseRequested += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    System.Diagnostics.Debug.WriteLine("SMTC: Pause Requested");
+                    if (_playService.IsPlaying)
+                    {
+                        _ = _playService.PauseAsync();
+                    }
+                });
+            };
+
+            _mediaManager.OnNextRequested += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    System.Diagnostics.Debug.WriteLine("SMTC: Next Requested");
+                    _playService.PlayNextTrack();
+                });
+            };
+
+            _mediaManager.OnPreviousRequested += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    System.Diagnostics.Debug.WriteLine("SMTC: Previous Requested");
+                    _playService.PlayPreviousTrack();
+                });
+            };
+        }
+
+        /// <summary>
+        /// Восстанавливает последний выбранный плейлист и трек
+        /// </summary>
+        private async Task RestoreLastPlaylistAndTrackAsync()
+        {
             // Загружаем последний выбранный плейлист
             string lastPlaylistIdStr = DatabaseService.GetSetting("LastPlaylistId", "-1");
 
@@ -104,14 +234,14 @@ namespace QAMP
 
                     // Явно загружаем последний трек этого плейлиста
                     string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
-                    System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: LastTrackPath={lastTrackPath}");
+                    System.Diagnostics.Debug.WriteLine($"DEBUG: RestoreLastPlaylistAndTrackAsync - LastTrackPath={lastTrackPath}");
 
                     if (!string.IsNullOrEmpty(lastTrackPath))
                     {
                         var lastTrack = playlist.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
                         if (lastTrack != null)
                         {
-                            System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Загружаю трек {lastTrack.Name}");
+                            System.Diagnostics.Debug.WriteLine($"DEBUG: Загружаю трек {lastTrack.Name}");
                             _playService.LoadTrack(lastTrack);
 
                             // Восстанавливаем позицию проигрывания
@@ -119,70 +249,32 @@ namespace QAMP
                             if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
                             {
                                 _playService.Seek(position);
-                                System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Позиция установлена на {position}s");
+                                System.Diagnostics.Debug.WriteLine($"DEBUG: Позиция установлена на {position}s");
                             }
                         }
                         else
                         {
-                            System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Трек не найден, инициализирую пустое состояние");
+                            System.Diagnostics.Debug.WriteLine($"DEBUG: Трек не найден, инициализирую пустое состояние");
                             OnTrackChanged(null);
                         }
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: LastTrackPath пуст, инициализирую пустое состояние");
+                        System.Diagnostics.Debug.WriteLine($"DEBUG: LastTrackPath пуст, инициализирую пустое состояние");
                         OnTrackChanged(null);
                     }
                 }
                 else
                 {
-                    // Плейлист не найден - инициализируем UI для пустого состояния
-                    System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Плейлист не найден");
+                    System.Diagnostics.Debug.WriteLine($"DEBUG: Плейлист не найден");
                     OnTrackChanged(null);
                 }
             }
             else
             {
-                // Нет последнего плейлиста (первый запуск или БД пуста) - инициализируем UI для пустого состояния
-                System.Diagnostics.Debug.WriteLine($"DEBUG MainWindow_Loaded: Нет последнего плейлиста");
+                System.Diagnostics.Debug.WriteLine($"DEBUG: Нет последнего плейлиста");
                 OnTrackChanged(null);
             }
-
-            // Обновляем UI элементы
-            if (VolumePercentage != null)
-            {
-                VolumePercentage.Text = $"{VolumeSlider.Value:F0}%";
-                System.Diagnostics.Debug.WriteLine($"DEBUG: VolumePercent обновлен: {VolumeSlider.Value:F0}%");
-            }
-            // _stressTester = new StressTester(
-            //     togglePlayPause: TogglePlayPause,
-            //     setPlaylistIndex: (index) => PlaylistsListBox.SelectedIndex = index,
-            //     getPlaylistsCount: () => PlaylistsListBox.Items.Count,
-            //     getTracksCount: () => TracksDataGrid.Items.Count,
-            //     playTrackByIndex: (index) =>
-            //     {
-            //         if (TracksDataGrid.Items[index] is Track track)
-            //             _ = Player.PlayTrack(track);
-            //     },
-            //     showMessage: (text) => Task.Run(() =>
-            //     {
-            //         Application.Current.Dispatcher.Invoke(() =>
-            //         {
-            //             NotificationWindow.Show(text, this, NotificationMode.Info);
-            //         });
-            //     })
-            // );
-
-            // KeyDown += async (s, e) =>
-            // {
-            //     if (e.Key == Key.T && Keyboard.Modifiers == ModifierKeys.Control)
-            //     {
-            //         if (_stressTester.IsRunning)
-            //             _stressTester.Stop();
-            //         else
-            //             await _stressTester.Run(TimeSpan.FromMinutes(5));
-            //     }
-            // };
         }
 
         private static void LoadApplicationSettings()
@@ -230,6 +322,23 @@ namespace QAMP
                     NextTrack.Text = "Следующий трек";
                     NowPlaying.Text = "NOW PLAYING";
                     Title = $"{track.Name} - {track.Executor} | QAMP";
+                    if (_mediaManager != null)
+                    {
+                        try
+                        {
+                            _mediaManager.UpdateTrackInfo(
+                                track.Name ?? "Неизвестный трек",
+                                track.Executor ?? "Неизвестный исполнитель",
+                                track.Album ?? "Неизвестный альбом",
+                                track.CoverImage
+                            );
+                            _mediaManager.UpdatePlaybackStatus(PlayerService.Instance.IsPlaying);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Ошибка обновления SMTC: {ex.Message}");
+                        }
+                    }
 
                     string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Загрузка...";
                     if (Player.Duration <= 0) CheckDurationAsync();

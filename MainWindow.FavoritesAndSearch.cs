@@ -359,13 +359,6 @@ namespace QAMP
             FavoriteIcon.Fill = (Brush)Application.Current.Resources["AccentBrush"];
         }
 
-        private static void LoadPlaylists()
-        {
-            System.Diagnostics.Debug.WriteLine("=== НАЧАЛО ЗАГРУЗКИ ПЛЕЙЛИСТОВ ===");
-            MusicLibrary.Instance.RefreshPlaylists();
-            System.Diagnostics.Debug.WriteLine("=== КОНЕЦ ЗАГРУЗКИ ПЛЕЙЛИСТОВ ===");
-        }
-
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
             PerformSearch();

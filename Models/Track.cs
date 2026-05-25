@@ -40,7 +40,7 @@ namespace QAMP.Models
             }
         }
 
-        private string _album = "Без альбома";
+        private string _album = "Неизвестный альбом";
         public string Album
         {
             get => _album;
@@ -68,7 +68,7 @@ namespace QAMP.Models
             }
         }
 
-        private string _genre = "Неизвестно";
+        private string _genre = "Неизвестный жанр";
         public string Genre
         {
             get => _genre;
