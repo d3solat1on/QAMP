@@ -175,19 +175,25 @@
                                 BorderThickness="0,1,0,0"
                                 Padding="15,0">
                                 <Grid>
+                                        <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="1*"/>
                                                 <ColumnDefinition Width="2*"/>
                                                 <ColumnDefinition Width="1*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0"
+                                        <!-- Левая панель: избранное и информация о треке -->
+                                        <StackPanel Grid.Row="0"
+                                                    Grid.Column="0"
                                                     Orientation="Horizontal"
                                                     VerticalAlignment="Center">
 
                                                 <!-- Кнопка избранного -->
-                                                <Grid  x:Name="FavoriteButton1Grid"
-                                                       Height="40">
+                                                <Grid x:Name="FavoriteButton1Grid"
+                                                      Height="40">
                                                         <Button x:Name="FavoriteButton"
                                                                 Style="{StaticResource IconButton}"
                                                                 Click="FavoriteButton_Click"
@@ -220,116 +226,162 @@
                                                 </StackPanel>
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="1"
+                                        <!-- Центральная панель: кнопки управления -->
+                                        <StackPanel Grid.Row="0"
+                                                    Grid.Column="1"
                                                     Margin="0,5"
                                                     VerticalAlignment="Center">
-                                                <StackPanel Orientation="Horizontal"
-                                                            HorizontalAlignment="Center">
-                                                        <Grid Height="40">
-                                                                <Button x:Name="Shuffle_button"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Click="ShuffleButton_Click"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0">
-                                                                        <Path x:Name="ShuffleImage"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource shuffleGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button Style="{StaticResource IconButton}"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0"
-                                                                        Click="PrevButton_Click">
-                                                                        <Path
-                                                                                Width="25"
-                                                                                Height="25"
-                                                                                Margin="5"
-                                                                                Data="{StaticResource fast_rewindGeometry}"
-                                                                                Fill="{DynamicResource AccentBrush}"
-                                                                                Stretch="Uniform"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button x:Name="PlayPauseButton"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0"
-                                                                        Click="PlayPauseButton_Click">
-                                                                        <Path x:Name="PlayPauseIcon"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource playGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"
-                                                                              HorizontalAlignment="Center"
-                                                                              VerticalAlignment="Center"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button Style="{StaticResource IconButton}"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0"
-                                                                        Click="NextButton_Click">
-                                                                        <Path
-                                                                                Width="25"
-                                                                                Height="25"
-                                                                                Margin="5"
-                                                                                Data="{StaticResource fast_forwardGeometry}"
-                                                                                Fill="{DynamicResource AccentBrush}"
-                                                                                Stretch="Uniform"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button Style="{StaticResource IconButton}"
-                                                                        Click="RepeatButton_Click"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0">
-                                                                        <Path x:Name="RepeatIcon"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource repeatGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"
-                                                                              HorizontalAlignment="Center"
-                                                                              VerticalAlignment="Center"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button x:Name="ViewLyrics"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Click="ViewLyricsButton_Click"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0">
-                                                                        <Path
-                                                                                Width="25"
-                                                                                Height="25"
-                                                                                Margin="5"
-                                                                                Data="{StaticResource lyricsGeometry}"
-                                                                                Fill="{DynamicResource AccentBrush}"
-                                                                                Stretch="Uniform"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"/>
-                                                                </Button>
-                                                        </Grid>
-                                                </StackPanel>
 
+                                                <Grid HorizontalAlignment="Stretch"
+                                                      VerticalAlignment="Center">
+                                                        <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <!-- Левая группа кнопок -->
+                                                        <StackPanel Grid.Column="0"
+                                                                    Orientation="Horizontal"
+                                                                    HorizontalAlignment="Right">
+                                                                <Grid Height="40">
+                                                                        <Button x:Name="FullSpectrumWindowButton"
+                                                                                Style="{StaticResource IconButton}"
+                                                                                Click="FullSpectrumWindowButton_Click"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                ToolTip="Открыть спектр в полноэкранном режиме">
+                                                                                <Path x:Name="FullSpectrumWindowImage"
+                                                                                      Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource FullSpectrumWindowGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                                <Grid Height="40">
+                                                                        <Button x:Name="Shuffle_button"
+                                                                                Style="{StaticResource IconButton}"
+                                                                                Click="ShuffleButton_Click"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                ToolTip="Включить перемешивание">
+                                                                                <Path x:Name="ShuffleImage"
+                                                                                      Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource shuffleGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                                <Grid Height="40">
+                                                                        <Button Style="{StaticResource IconButton}"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                ToolTip="Предыдущий трек"
+                                                                                Click="PrevButton_Click">
+                                                                                <Path Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource fast_rewindGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"
+                                                                                      HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                        </StackPanel>
+
+                                                        <!-- Кнопка Play/Pause -->
+                                                        <Grid Grid.Column="1"
+                                                              HorizontalAlignment="Center">
+                                                                <Grid Height="40">
+                                                                        <Button x:Name="PlayPauseButton"
+                                                                                Style="{StaticResource IconButton}"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                Click="PlayPauseButton_Click"
+                                                                                ToolTip="Воспроизвести/пауза">
+                                                                                <Path x:Name="PlayPauseIcon"
+                                                                                      Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource playGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"
+                                                                                      HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                        </Grid>
+
+                                                        <!-- Правая группа кнопок -->
+                                                        <StackPanel Grid.Column="2"
+                                                                    Orientation="Horizontal"
+                                                                    HorizontalAlignment="Left">
+                                                                <Grid Height="40">
+                                                                        <Button Style="{StaticResource IconButton}"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                Click="NextButton_Click"
+                                                                                ToolTip="Следующий трек">
+                                                                                <Path Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource fast_forwardGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"
+                                                                                      HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                                <Grid Height="40">
+                                                                        <Button Style="{StaticResource IconButton}"
+                                                                                Click="RepeatButton_Click"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                ToolTip="Включить повтор">
+                                                                                <Path x:Name="RepeatIcon"
+                                                                                      Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource repeatGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"
+                                                                                      HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                                <Grid Height="40">
+                                                                        <Button x:Name="ViewLyrics"
+                                                                                Style="{StaticResource IconButton}"
+                                                                                Click="ViewLyricsButton_Click"
+                                                                                Width="40"
+                                                                                Height="40"
+                                                                                Margin="5,0"
+                                                                                ToolTip="Просмотреть тексты">
+                                                                                <Path Width="25"
+                                                                                      Height="25"
+                                                                                      Margin="5"
+                                                                                      Data="{StaticResource lyricsGeometry}"
+                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                      Stretch="Uniform"
+                                                                                      HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center"/>
+                                                                        </Button>
+                                                                </Grid>
+                                                        </StackPanel>
+                                                </Grid>
+
+                                                <!-- Прогресс-бар -->
                                                 <Grid Margin="20,5"
                                                       HorizontalAlignment="Stretch">
                                                         <Grid.ColumnDefinitions>
@@ -375,7 +427,9 @@
                                                 </Grid>
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="2"
+                                        <!-- Правая панель: управление громкостью -->
+                                        <StackPanel Grid.Row="0"
+                                                    Grid.Column="2"
                                                     Orientation="Horizontal"
                                                     HorizontalAlignment="Right"
                                                     VerticalAlignment="Center"
@@ -613,47 +667,66 @@
                                                                                                 BorderThickness="1"
                                                                                                 CornerRadius="4"
                                                                                                 Background="{DynamicResource CentralPanelCardBackground}">
+
                                                                                                 <Grid>
+
                                                                                                         <!-- Изображение (если есть) -->
+
                                                                                                         <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
                                                                                                                Stretch="UniformToFill"
                                                                                                                Margin="2">
+
                                                                                                                 <Image.Style>
+
                                                                                                                         <Style TargetType="Image">
+
                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                         Value="Visible"/>
+
                                                                                                                                 <Style.Triggers>
+
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage}"
                                                                                                                                                      Value="{x:Null}">
+
                                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                                         Value="Collapsed"/>
+
                                                                                                                                         </DataTrigger>
+
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage.Length}"
                                                                                                                                                      Value="0">
+
                                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                                         Value="Collapsed"/>
+
                                                                                                                                         </DataTrigger>
+
                                                                                                                                 </Style.Triggers>
+
                                                                                                                         </Style>
+
                                                                                                                 </Image.Style>
+
                                                                                                         </Image>
 
+
+
                                                                                                         <!-- Текстовая иконка (если нет изображения) -->
-                                                                                                        <TextBlock Text="📁"
-                                                                                                                   FontSize="24"
-                                                                                                                   HorizontalAlignment="Center"
-                                                                                                                   VerticalAlignment="Center"
-                                                                                                                   Foreground="#888888">
-                                                                                                                <TextBlock.Style>
-                                                                                                                        <Style TargetType="TextBlock">
+
+                                                                                                        <Grid x:Name="PlaylistPlaceholderContainer">
+                                                                                                                <Grid.Style>
+                                                                                                                        <Style TargetType="Grid">
+                                                                                                                                <!-- По умолчанию скрываем весь контейнер заглушки -->
                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                         Value="Collapsed"/>
                                                                                                                                 <Style.Triggers>
+                                                                                                                                        <!-- Показываем, если CoverImage равен null -->
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage}"
                                                                                                                                                      Value="{x:Null}">
                                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                                         Value="Visible"/>
                                                                                                                                         </DataTrigger>
+                                                                                                                                        <!-- Показываем, если строка пути/массив пустой (длина 0) -->
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage.Length}"
                                                                                                                                                      Value="0">
                                                                                                                                                 <Setter Property="Visibility"
@@ -661,9 +734,33 @@
                                                                                                                                         </DataTrigger>
                                                                                                                                 </Style.Triggers>
                                                                                                                         </Style>
-                                                                                                                </TextBlock.Style>
-                                                                                                        </TextBlock>
+                                                                                                                </Grid.Style>
+
+                                                                                                                <!-- Сама иконка, которая управляет своей геометрией -->
+                                                                                                                <Path Fill="{DynamicResource AccentBrush}"
+                                                                                                                      HorizontalAlignment="Center"
+                                                                                                                      VerticalAlignment="Center"
+                                                                                                                      Stretch="Uniform">
+                                                                                                                        <Path.Style>
+                                                                                                                                <Style TargetType="Path">
+                                                                                                                                        <!-- Геометрия по умолчанию (обычная заглушка) -->
+                                                                                                                                        <Setter Property="Data"
+                                                                                                                                                Value="{StaticResource PlugForTheRightSideGeometry}"/>
+                                                                                                                                        <Style.Triggers>
+                                                                                                                                                <!-- Если это избранное (Id = 1), меняем геометрию -->
+                                                                                                                                                <DataTrigger Binding="{Binding Id}"
+                                                                                                                                                             Value="1">
+                                                                                                                                                        <Setter Property="Data"
+                                                                                                                                                                Value="{StaticResource FavoriteCoverGeometry}"/>
+                                                                                                                                                </DataTrigger>
+                                                                                                                                        </Style.Triggers>
+                                                                                                                                </Style>
+                                                                                                                        </Path.Style>
+                                                                                                                </Path>
+                                                                                                        </Grid>
+
                                                                                                 </Grid>
+
                                                                                         </Border>
 
                                                                                         <!-- Информация о плейлисте -->
@@ -822,6 +919,23 @@
                                                                                         </Setter>
 
                                                                                         <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding CurrentPlaylist.CoverImage}"
+                                                                                                             Value="{x:Null}">
+                                                                                                        <Setter Property="Content">
+                                                                                                                <Setter.Value>
+                                                                                                                        <Grid Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                                                <Path Data="{StaticResource PlugForTheCoverPlaylistGeometry}"
+                                                                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                                                                      Opacity="1"
+                                                                                                                                      Stretch="Uniform"
+                                                                                                                                      Margin="5"
+                                                                                                                                      VerticalAlignment="Center"
+                                                                                                                                      HorizontalAlignment="Center"/>
+                                                                                                                        </Grid>
+                                                                                                                </Setter.Value>
+                                                                                                        </Setter>
+                                                                                                </DataTrigger>
+
                                                                                                 <DataTrigger Binding="{Binding CurrentPlaylist.Name}"
                                                                                                              Value="Избранное">
                                                                                                         <Setter Property="Content">
@@ -849,7 +963,6 @@
                                                                         </ContentControl.Style>
                                                                 </ContentControl>
                                                         </Border>
-
                                                         <Grid Grid.Column="1">
                                                                 <Grid.RowDefinitions>
                                                                         <RowDefinition Height="Auto"/>

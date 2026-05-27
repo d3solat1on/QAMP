@@ -12,6 +12,11 @@ namespace QAMP
 {
     public partial class App : Application
     {
+        private class BassConfigDto
+        {
+            public string? BassEmail { get; set; }
+            public string? BassKey { get; set; }
+        }
         public static TaskbarIcon? TrayIcon { get; private set; }
         private static Mutex? _mutex = null;
 
@@ -32,19 +37,23 @@ namespace QAMP
         private const int SW_RESTORE = 9;
         protected override void OnStartup(StartupEventArgs e)
         {
-            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7");
+            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.1");
 
             try
             {
-                // Ensure Start Menu shortcut exists with the same AppUserModelID — this is required
-                // so Windows can show app name and icon in the volume flyout / media overlay.
-                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7");
+                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.1");
             }
             catch (Exception ex)
             {
                 LogException(ex, "EnsureStartMenuShortcut");
             }
-            const string appName = "QAMP_MusicPlayer_Unique_Mutex";
+
+#if DEBUG
+            const string appName = "QAMP_MusicPlayer_Unique_Mutex_DEBUG";
+#else
+    const string appName = "QAMP_MusicPlayer_Unique_Mutex";
+#endif
+
             _mutex = new Mutex(true, appName, out bool createdNew);
 
             if (!createdNew)
@@ -113,8 +122,36 @@ namespace QAMP
             }
             try
             {
-                //Here we register BASS.NET with the email and registration key. You should replace these with your own if you have a license.
-                BassNet.Registration("example@mail.com", "key-example-1234567890");
+                // Дефолтные заглушки на случай отсутствия файла
+                string bassEmail = "example@mail.com";
+                string bassKey = "key-example-1234567890";
+
+                // Формируем путь к файлу в папке с запущенным .exe
+                string configPath = Path.Combine(AppContext.BaseDirectory, "bass_settings.json");
+
+                if (File.Exists(configPath))
+                {
+                    try
+                    {
+                        string jsonString = File.ReadAllText(configPath);
+                        // Используем анонимный тип для мгновенного парсинга без создания лишних классов
+                        var configData = System.Text.Json.JsonSerializer.Deserialize<BassConfigDto>(jsonString);
+
+                        if (configData != null)
+                        {
+                            if (!string.IsNullOrEmpty(configData.BassEmail)) bassEmail = configData.BassEmail;
+                            if (!string.IsNullOrEmpty(configData.BassKey)) bassKey = configData.BassKey;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[BASS CONFIG ERROR] Не удалось прочитать json: {ex.Message}");
+                    }
+                }
+
+                // Регистрируем (либо реальные ключи из файла, либо заглушки)
+                BassNet.Registration(bassEmail, bassKey);
+
                 if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, nint.Zero))
                 {
                     var errorCode = Bass.BASS_ErrorGetCode();
@@ -123,7 +160,7 @@ namespace QAMP
             }
             catch (Exception ex)
             {
-                LogException(ex, "App Startup");
+                LogException(ex, "App Startup BASS");
             }
 
             ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);

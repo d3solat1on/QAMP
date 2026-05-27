@@ -22,7 +22,13 @@
 `Получите ключ на оффициальном сайте библиотеки Bass`  
 `git clone https://github.com/d3solat1on/QAMP.git`  
 `cd QAMP`  
-`В файле App.xaml.cs нужно указать данные (ключ и почту) в методе OnStartup`  
+`Создайте в папке проекта файл bass_settings.json`  
+```json
+{
+  "BassEmail": "your-email@example.com",
+  "BassKey": "your-bass-registration-key"
+}
+```
 `dotnet restore`  
 `dotnet build`  
 ### Скриншоты:

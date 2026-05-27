@@ -223,7 +223,7 @@ namespace QAMP
                 ApplySort(selected.SortType);
 
                 // Для плейлиста "Избранное" используем цвет приложения
-                if (selected.IsSystemPlaylist)
+                if (selected.IsSystemPlaylist || selected.CoverImage == null)
                 {
                     UpdateUpperPanelGradientForFavorites();
                 }

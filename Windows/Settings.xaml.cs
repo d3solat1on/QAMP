@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using QAMP.Models;
 using QAMP.Services;
 using QAMP.ViewModels;
+using QAMP.Visualization;
 
 namespace QAMP.Windows
 {
@@ -351,10 +352,14 @@ namespace QAMP.Windows
         {
             SettingsManager.Instance.Save();
 
-            // Обновляем интерфейс, если опция адаптивных градиентов изменилась
             if (Application.Current.MainWindow is MainWindow mainWindow)
             {
                 mainWindow.RefreshAdaptiveGradients();
+
+                if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
+                {
+                    mainWindow.SpectrumViewer?.ClearSpectrum();
+                }
             }
 
             DialogResult = true;
@@ -583,32 +588,15 @@ namespace QAMP.Windows
             }
         }
 
-        // private void SetBarCountComboValue(int barCount)
-        // {
-        //     for (int i = 0; i < BarCountCombo.Items.Count; i++)
-        //     {
-        //         if (BarCountCombo.Items[i] is ComboBoxItem item &&
-        //             item.Content?.ToString() == barCount.ToString())
-        //         {
-        //             BarCountCombo.SelectedIndex = i;
-        //             return;
-        //         }
-        //     }
-        //     BarCountCombo.SelectedIndex = 1; // По умолчанию 64
-        // }
-
         private void VisualizerToggle_Changed(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
 
             var config = SettingsManager.Instance.Config;
             config.IsVisualizerEnabled = VisualizerEnabled.IsChecked ?? false;
-
-            // Очищаем спектрограмму при отключении
-            // if (_player?.SpectrumViewModel?.Bars != null)
-            // {
-            //     _player.SpectrumViewModel.Bars.Clear();
-            // }
+            var spectrumControls = new Visualization.SpectrumControl();
+            spectrumControls.ClearSpectrum();
+            SettingsManager.Instance.Save();
         }
         private void HelpWindowButton_Click(object sender, RoutedEventArgs e)
         {

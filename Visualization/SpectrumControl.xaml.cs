@@ -143,7 +143,7 @@ namespace QAMP.Visualization
                 if (myBars != null && myBars.Bars.Any(b => b.Value > 0))
                 {
                     ResetPeaks();
-                    SpectrumPlot.Refresh(); 
+                    SpectrumPlot.Refresh();
                 }
                 return;
             }
@@ -200,6 +200,18 @@ namespace QAMP.Visualization
                 _peakValues[i] = 0.01;
                 _smoothedValues[i] = 0.01;
             }
+        }
+
+        public void ClearSpectrum()
+        {
+            if (myBars == null || _peakBars == null) return;
+
+            for (int i = 0; i < BarCount && i < myBars.Bars.Count; i++)
+            {
+                myBars.Bars[i].Value = 0.01;
+                _peakBars.Bars[i].Value = 0.01;
+            }
+            SpectrumPlot.Refresh();
         }
 
         public void SetBarCount(int count)

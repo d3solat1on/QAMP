@@ -484,7 +484,7 @@ namespace QAMP.Services
 
         private void SpectrumTimer_Tick(object? sender, EventArgs e)
         {
-            if (_currentStream != 0 && IsPlaying)
+            if (_currentStream != 0 && IsPlaying && SettingsManager.Instance.Config.IsVisualizerEnabled)
             {
                 // Получаем FFT данные для спектра
                 if (Bass.BASS_ChannelGetData(_currentStream, _fftBuffer, (int)BASSData.BASS_DATA_FFT1024) > 0)

@@ -329,8 +329,7 @@ namespace QAMP
                             _mediaManager.UpdateTrackInfo(
                                 track.Name ?? "Неизвестный трек",
                                 track.Executor ?? "Неизвестный исполнитель",
-                                track.Album ?? "Неизвестный альбом",
-                                track.CoverImage
+                                track.Album ?? "Неизвестный альбом"
                             );
                             _mediaManager.UpdatePlaybackStatus(PlayerService.Instance.IsPlaying);
                         }

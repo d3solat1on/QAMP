@@ -59,4 +59,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="bass_settings.json" Condition="Exists('bass_settings.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

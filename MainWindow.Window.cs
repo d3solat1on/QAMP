@@ -185,6 +185,10 @@ namespace QAMP
             }
         }
 
+        private void FullSpectrumWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenSpectrumFullScreen();
+        }
         private void OpenSpectrumFullScreen()
         {
             if (_spectrumFullWindow != null)
