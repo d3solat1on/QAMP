@@ -30,7 +30,7 @@ namespace QAMP.Dialogs
                     PlaylistCoverImage = existingPlaylist.CoverImage;
                     var bitmap = ByteArrayToBitmapImage(existingPlaylist.CoverImage);
                     CoverImage.Source = bitmap;
-                    if (PlaceholderText != null) PlaceholderText.Visibility = Visibility.Collapsed;
+                    PlaceholderText?.Visibility = Visibility.Collapsed;
                 }
             }
             else
@@ -69,21 +69,11 @@ namespace QAMP.Dialogs
                 {
                     // 1. Загружаем изображение
                     var bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
-                    
-                    // 2. Проверяем размер файла (не более 2 МБ)
-                    // var fileInfo = new FileInfo(openFileDialog.FileName);
-                    // if (fileInfo.Length > 2 * 1024 * 1024)
-                    // {
-                    //     NotificationWindow.Show("Изображение слишком большое. Максимальный размер - 2 МБ.", this);
-                    //     return;
-                    // }
-
-                    // 3. Проверяем, является ли оно квадратным (допуск 2 пикселя)
                     if (Math.Abs(bitmap.PixelWidth - bitmap.PixelHeight) < 2)
                     {
                         // Изображение уже 1 к 1
                         CoverImage.Source = bitmap;
-                        if (PlaceholderText != null) PlaceholderText.Visibility = Visibility.Collapsed;
+                        PlaceholderText?.Visibility = Visibility.Collapsed;
                         
                         // Сохраняем в байты
                         PlaylistCoverImage = BitmapSourceToByteArray(bitmap);
@@ -99,7 +89,7 @@ namespace QAMP.Dialogs
                         if (cropper.ShowDialog() == true && cropper.ResultImage != null)
                         {
                             CoverImage.Source = cropper.ResultImage;
-                            if (PlaceholderText != null) PlaceholderText.Visibility = Visibility.Collapsed;
+                            PlaceholderText?.Visibility = Visibility.Collapsed;
                             
                             // Сохраняем обрезанное изображение
                             PlaylistCoverImage = BitmapSourceToByteArray(cropper.ResultImage);

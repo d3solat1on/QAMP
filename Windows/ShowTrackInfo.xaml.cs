@@ -78,7 +78,7 @@ namespace QAMP.Windows
             }
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+        private async void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -94,12 +94,6 @@ namespace QAMP.Windows
                     file.Tag.Composers = [_track.Composer];
                     file.Tag.Track = (uint)_track.TrackNumber;
 
-                    // if (uint.TryParse(_track.TrackNumber.ToString(), out uint trackNum))
-                    //     file.Tag.TrackNumber = trackNum;
-
-                    // if (uint.TryParse(_track.Bpm.ToString(), out uint bpm))
-                    //     file.Tag.BeatsPerMinute = bpm;
-
                     if (uint.TryParse(_track.Year.ToString(), out uint year))
                         file.Tag.Year = year;
 
@@ -108,17 +102,17 @@ namespace QAMP.Windows
 
                 Services.DatabaseService.UpdateTrackMetadata(_track); // <-- дополнительно
 
-                NotificationWindow.Show("Теги сохранены!", this);
+                await TrackInfoToast.ShowAsync("Теги сохранены!");
 
                 EditModeButton.IsChecked = false;
             }
             catch (Exception ex)
             {
-                NotificationWindow.Show($"Ошибка: {ex.Message}", this);
+                NotificationWindow.Show($"Ошибка: {ex.Message}", this, NotificationWindow.NotificationMode.Info);
             }
         }
 
-        private void ExtractCover_Click(object sender, RoutedEventArgs e)
+        private async void ExtractCover_Click(object sender, RoutedEventArgs e)
         {
             string safeFileName = $"{_track.Executor} - {_track.Name} Cover";
             foreach (char c in Path.GetInvalidFileNameChars())
@@ -142,7 +136,7 @@ namespace QAMP.Windows
                 try
                 {
                     System.IO.File.WriteAllBytes(sfd.FileName, _track.CoverImage);
-                    NotificationWindow.Show("Обложка извлечена!", this);
+                    await TrackInfoToast.ShowAsync("Обложка извлечена!");
                 }
                 catch (Exception ex)
                 {
@@ -151,7 +145,7 @@ namespace QAMP.Windows
             }
         }
 
-        private void ChangeCover_Click(object sender, MouseButtonEventArgs e)
+        private async void ChangeCover_Click(object sender, MouseButtonEventArgs e)
         {
             if (EditModeButton.IsChecked != true) return;
 
@@ -172,7 +166,7 @@ namespace QAMP.Windows
                     }
 
                     _track.CoverImage = System.IO.File.ReadAllBytes(ofd.FileName);
-                    NotificationWindow.Show("Обложка обновлена! Перезапустите трек.", this);
+                    await TrackInfoToast.ShowAsync("Обложка обновлена! Перезапустите трек.");
                 }
                 catch (Exception ex)
                 {
@@ -213,17 +207,11 @@ namespace QAMP.Windows
                 return;
             }
 
-            var loader = new NotificationWindow { Owner = this };
-            loader.SingleOkButton.Visibility = Visibility.Collapsed;
-            loader.Show();
-
-            var animationTask = loader.StartDotAnimation("Поиск в LRCLIB");
+            TrackInfoToast.StartLoading("Поиск в LRCLIB");
 
             try
             {
                 string? lyrics = await FetchLrcFromLrcLib(track.Executor, track.Name);
-
-                loader.StopDotAnimation();
 
                 if (!string.IsNullOrEmpty(lyrics))
                 {
@@ -235,34 +223,35 @@ namespace QAMP.Windows
                             tb.Text = lyrics;
                         });
                     }
-
                     try
                     {
-                        using (var file = TagLib.File.Create(track.Path!))
+                        using (var file = TagLib.File.Create(track.Path))
                         {
                             file.Tag.Lyrics = lyrics;
                             file.Save();
                         }
-                        loader.MessageText.Text = "Текст найден и сохранен!";
+                        await TrackInfoToast.ShowAsync("Текст найден и сохранен!");
+                        await TrackInfoToast.StopLoadingAsync();
                     }
                     catch (Exception ex)
                     {
-                        loader.MessageText.Text = $"Найдено, но не сохранено: {ex.Message}";
+                        await TrackInfoToast.StopLoadingAsync();
+                        NotificationWindow.Show($"Ошибка сохранения файла: {ex.Message}", this);
                     }
                 }
                 else
                 {
-                    loader.MessageText.Text = "Текст не найден.";
+                    await TrackInfoToast.ShowAsync("Текст не найден.");
                 }
             }
             catch (Exception ex)
             {
-                loader.StopDotAnimation();
-                loader.MessageText.Text = $"Ошибка: {ex.Message}";
+                await TrackInfoToast.StopLoadingAsync();
+                NotificationWindow.Show($"Ошибка: {ex.Message}", this);
             }
             finally
             {
-                loader.SingleOkButton.Visibility = Visibility.Visible;
+                await TrackInfoToast.StopLoadingAsync();
             }
         }
         private static async Task<string?> FetchLrcFromLrcLib(string artist, string title)
@@ -293,7 +282,7 @@ namespace QAMP.Windows
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LRCLIB Error: {ex.Message}");
+                Debug.WriteLine($"LRCLIB Error: {ex.Message}");
             }
             return null;
         }

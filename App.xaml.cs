@@ -37,11 +37,11 @@ namespace QAMP
         private const int SW_RESTORE = 9;
         protected override void OnStartup(StartupEventArgs e)
         {
-            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.1");
+            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.2");
 
             try
             {
-                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.1");
+                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.2");
             }
             catch (Exception ex)
             {
@@ -94,7 +94,11 @@ namespace QAMP
             {
                 TrayIcon = new TaskbarIcon
                 {
-                    ToolTipText = "QAMP",
+#if DEBUG
+                    ToolTipText = "QAMP [DEBUG]",
+#else
+ToolTipText = "QAMP",
+#endif                    
                     Visibility = Visibility.Visible,
                     IconSource = new System.Windows.Media.ImageSourceConverter()
                         .ConvertFromString("pack://application:,,,/icon/QAMP_icon.ico") as System.Windows.Media.ImageSource
@@ -388,7 +392,7 @@ namespace QAMP
 
                 // Create ShellLink object
                 var shellType = Type.GetTypeFromCLSID(new Guid("00021401-0000-0000-C000-000000000046"));
-                var shellLink = (IShellLinkW)Activator.CreateInstance(shellType)!;
+                var shellLink = (IShellLinkW)Activator.CreateInstance(shellType!)!;
                 shellLink.SetPath(targetPath);
                 shellLink.SetDescription(shortcutName);
                 shellLink.SetIconLocation(targetPath, 0);

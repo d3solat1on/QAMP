@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 namespace QAMP.Dialogs
 {
     public partial class NotificationWindow : Window
@@ -95,29 +97,60 @@ namespace QAMP.Dialogs
         }
 
 
-        public static async void ShowToast(string message, Window owner) //Когда-нибудь сделаю
+        public static async Task ShowToast(string message, Window owner)
         {
+            if (owner == null || !owner.IsLoaded) return;
+
+            // Создаем окно-"стекло" строго поверх Owner
             var win = new NotificationWindow
             {
-                Owner = owner
+                Owner = owner,
+                // Полностью копируем геометрию главного окна
+                Left = owner.Left,
+                Top = owner.Top,
+                Width = owner.Width,
+                Height = owner.Height,
+                Opacity = 0
             };
+
+            // Заполняем текст
             win.MessageText.Text = message;
 
-            // Убираем кнопку ОК, если это авто-уведомление
-            // (для этого кнопке в XAML тоже нужно дать x:Name, например x:Name="OkButton")
-            // win.OkButton.Visibility = Visibility.Collapsed; 
+            // Скрываем все дефолтные кнопки
+            win.SingleOkButton.Visibility = Visibility.Collapsed;
+            win.ConfirmButtons.Visibility = Visibility.Collapsed;
 
-            win.Show(); // Show вместо ShowDialog, чтобы не блокировать плеер
+            // На случай, если главное окно изменит размер или подвинется, пока висит тост
+            owner.LocationChanged += (s, e) => { win.Left = owner.Left; win.Top = owner.Top; };
+            owner.SizeChanged += (s, e) => { win.Width = owner.Width; win.Height = owner.Height; };
 
-            await Task.Delay(3000);
+            win.Show();
 
-            // Плавное исчезновение (опционально)
-            for (double i = 1; i > 0; i -= 0.1)
-            {
-                win.Opacity = i;
-                await Task.Delay(50);
-            }
+            // --- НАСТРОЙКА АНИМАЦИИ ВНУТРИ ОКНА ---
+            var duration = TimeSpan.FromMilliseconds(250);
+            var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
 
+            // 1. Плавное появление самого окна
+            var fadeIn = new DoubleAnimation(0, 1, duration);
+
+            // 2. Выплывание карточки снизу вверх (смещаем по оси Y с 30px до 0)
+            var slideIn = new DoubleAnimation(30, 0, duration) { EasingFunction = ease };
+
+            win.BeginAnimation(OpacityProperty, fadeIn);
+            win.ToastTranslate.BeginAnimation(TranslateTransform.YProperty, slideIn);
+
+            // Ждем 2 секунды (в Релизе этот await держит ссылку, спасая от GC!)
+            await Task.Delay(2000);
+
+            // --- АНИМАЦИЯ ИСЧЕЗНОВЕНИЯ ---
+            var fadeOut = new DoubleAnimation(1, 0, duration);
+            var slideOut = new DoubleAnimation(0, -15, duration) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
+
+            win.BeginAnimation(OpacityProperty, fadeOut);
+            win.ToastTranslate.BeginAnimation(TranslateTransform.YProperty, slideOut);
+
+            // Даем анимации завершиться и закрываем окно
+            await Task.Delay(250);
             win.Close();
         }
         // private void OkButton_Click(object sender, RoutedEventArgs e)

@@ -90,6 +90,8 @@ namespace QAMP
             VolumePercentage?.Text = $"{VolumeSlider.Value:F0}%";
 
             System.Diagnostics.Debug.WriteLine("=== ЗАПУСК АСИНХРОННОЙ ЗАГРУЗКИ ===");
+            var savedSort = AppSettings.CurrentPlaylistSort;
+            ApplyPlaylistSorting(savedSort);
             _ = InitializePlaylistsAndTracksAsync();
         }
 

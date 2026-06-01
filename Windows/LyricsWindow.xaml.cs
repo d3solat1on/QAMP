@@ -13,7 +13,7 @@ public partial class LyricsWindow : Window
         DataContext = _track;
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private async void Save_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -23,7 +23,7 @@ public partial class LyricsWindow : Window
                 file.Save();
             }
             _track.Lyrics = FullLyricsEditor.Text; // Обновляем модель
-            NotificationWindow.Show("Текст сохранен в файл!", this);
+            await TrackInfoToast.ShowAsync("Текст сохранен в файл!");
             Close();
         }
         catch (Exception ex)

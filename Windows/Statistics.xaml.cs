@@ -48,11 +48,11 @@ public partial class Statistics : Window
         _debounceTimer?.Dispose();
 
         // Запускаем новый timer с задержкой
-        _debounceTimer = new System.Threading.Timer(async (_) =>
+        _debounceTimer = new Timer(async (_) =>
         {
             System.Diagnostics.Debug.WriteLine("Statistics окно: debounce завершен, обновляю данные...");
             await Dispatcher.BeginInvoke(async () => await RefreshAllStatisticsAsync());
-        }, null, DebounceDelayMs, System.Threading.Timeout.Infinite);
+        }, null, DebounceDelayMs, Timeout.Infinite);
     }
     public async Task RefreshAllStatisticsAsync()
     {

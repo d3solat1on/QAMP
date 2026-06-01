@@ -75,8 +75,7 @@
                                                 <Grid>
                                                         <Image Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
                                                                Stretch="UniformToFill"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Center">
+                                                               Margin="2">
                                                                 <Image.Style>
                                                                         <Style TargetType="Image">
                                                                                 <Setter Property="Visibility"
@@ -96,15 +95,10 @@
                                                                         </Style>
                                                                 </Image.Style>
                                                         </Image>
-                                                        <TextBlock Text="Обложка отсутствует"
-                                                                   Foreground="#888"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center"
-                                                                   TextAlignment="Center"
-                                                                   TextWrapping="Wrap"
-                                                                   Visibility="Collapsed">
-                                                                <TextBlock.Style>
-                                                                        <Style TargetType="TextBlock">
+
+                                                        <Grid x:Name="PlaylistPlaceholderContainer">
+                                                                <Grid.Style>
+                                                                        <Style TargetType="Grid">
                                                                                 <Setter Property="Visibility"
                                                                                         Value="Collapsed"/>
                                                                                 <Style.Triggers>
@@ -120,18 +114,40 @@
                                                                                         </DataTrigger>
                                                                                 </Style.Triggers>
                                                                         </Style>
-                                                                </TextBlock.Style>
-                                                        </TextBlock>
+                                                                </Grid.Style>
+
+                                                                <Path Fill="{DynamicResource AccentBrush}"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"
+                                                                      Stretch="Uniform">
+                                                                        <Path.Style>
+                                                                                <Style TargetType="Path">
+                                                                                        <Setter Property="Data"
+                                                                                                Value="{StaticResource PlugForTheRightSideGeometry}"/>
+                                                                                        <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding Id}"
+                                                                                                             Value="1">
+                                                                                                        <Setter Property="Data"
+                                                                                                                Value="{StaticResource FavoriteCoverGeometry}"/>
+                                                                                                </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                </Style>
+                                                                        </Path.Style>
+                                                                </Path>
+                                                        </Grid>
+
                                                 </Grid>
                                         </Border>
                                         <StackPanel Grid.Column="1"
                                                     Margin="25,0,0,0">
-                                                <TextBlock Text="{Binding Name}"
+                                                <TextBlock x:Name="NameTextBlock"
+                                                           Text="{Binding Name}"
                                                            FontSize="28"
                                                            FontWeight="Bold"
                                                            Foreground="White"
                                                            TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding Description}"
+                                                <TextBlock x:Name="DescriptionTextBlock"
+                                                           Text="{Binding Description}"
                                                            FontSize="14"
                                                            Foreground="#AAA"
                                                            Margin="0,12,0,20"
@@ -153,78 +169,91 @@
                                                                 <RowDefinition Height="Auto"/>
                                                         </Grid.RowDefinitions>
 
-                                                        <TextBlock Grid.Row="0"
+                                                        <TextBlock x:Name="IdTextBlock"
+                                                                   Grid.Row="0"
                                                                    Grid.Column="0"
                                                                    Text="ID:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="0"
+                                                        <TextBlock x:Name="IdValueTextBlock"
+                                                                   Grid.Row="0"
                                                                    Grid.Column="1"
                                                                    Text="{Binding Id}"
                                                                    Foreground="White"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock Grid.Row="1"
+                                                        <TextBlock x:Name="TracksCountTextBlock"
+                                                                   Grid.Row="1"
                                                                    Grid.Column="0"
                                                                    Text="Треков:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="1"
+                                                        <TextBlock x:Name="TracksCountValueTextBlock"
+                                                                   Grid.Row="1"
                                                                    Grid.Column="1"
                                                                    Text="{Binding TrackCountDisplay}"
                                                                    Foreground="White"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock Grid.Row="2"
+                                                        <TextBlock x:Name="TotalDurationTextBlock"
+                                                                   Grid.Row="2"
                                                                    Grid.Column="0"
                                                                    Text="Длительность:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="2"
+                                                        <TextBlock x:Name="TotalDurationValueTextBlock"
+                                                                   Grid.Row="2"
                                                                    Grid.Column="1"
-                                                                   Text="{Binding TotalDurationDisplay}"
                                                                    Foreground="White"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock Grid.Row="3"
+                                                        <TextBlock x:Name="CreatedDateTextBlock"
+                                                                   Grid.Row="3"
                                                                    Grid.Column="0"
                                                                    Text="Создано:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="3"
+                                                        <TextBlock x:Name="CreatedDateValueTextBlock"
+                                                                   Grid.Row="3"
                                                                    Grid.Column="1"
                                                                    Text="{Binding CreatedDateDisplay}"
                                                                    Foreground="White"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock Grid.Row="4"
+                                                        <TextBlock x:Name="PinnedTextBlock"
+                                                                   Grid.Row="4"
                                                                    Grid.Column="0"
                                                                    Text="Закреплен:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="4"
+                                                        <TextBlock x:Name="PinnedValueTextBlock"
+                                                                   Grid.Row="4"
                                                                    Grid.Column="1"
                                                                    Text="{Binding PinnedDisplay}"
                                                                    Foreground="White"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock Grid.Row="5"
+                                                        <TextBlock x:Name="SystemPlaylistTextBlock"
+                                                                   Grid.Row="5"
                                                                    Grid.Column="0"
                                                                    Text="Системный:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="5"
+                                                        <TextBlock x:Name="SystemPlaylistValueTextBlock"
+                                                                   Grid.Row="5"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SystemPlaylistDisplay}"
                                                                    Foreground="White"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock Grid.Row="6"
+                                                        <TextBlock x:Name="SortTypeTextBlock"
+                                                                   Grid.Row="6"
                                                                    Grid.Column="0"
                                                                    Text="Сортировка:"
                                                                    Foreground="#888"
                                                                    Margin="0,4,12,4"/>
-                                                        <TextBlock Grid.Row="6"
+                                                        <TextBlock x:Name="SortTypeValueTextBlock"
+                                                                   Grid.Row="6"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SortTypeDisplay}"
                                                                    Foreground="White"
@@ -241,12 +270,12 @@
                                           FontSize="12">
                                         <DataGrid.Resources>
                                                 <Style TargetType="{x:Type DataGridRowHeader}">
-                                                <Setter Property="Background"
-                                                        Value="Transparent"/>
-                                                <Setter Property="BorderThickness"
-                                                        Value="0"/>
-                                                <Setter Property="Width"
-                                                        Value="0"/>
+                                                        <Setter Property="Background"
+                                                                Value="Transparent"/>
+                                                        <Setter Property="BorderThickness"
+                                                                Value="0"/>
+                                                        <Setter Property="Width"
+                                                                Value="0"/>
                                                 </Style>
                                                 <Style TargetType="DataGridColumnHeader">
                                                         <Setter Property="Background"

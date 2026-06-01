@@ -4,6 +4,16 @@ using Newtonsoft.Json;
 
 namespace QAMP.Models
 {
+    public enum PlaylistSortOrder
+    {
+        Manual = 0,             // Ручной порядок (по умолчанию)
+        NameAZ = 1,            // По названию (A-Z)
+        NameZA = 2,            // По названию (Z-A)
+        CreatedDateNewest = 3, // По дате создания (новые сверху)
+        CreatedDateOldest = 4,  // По дате создания (старые сверху)
+        Custom = 5             // Пользовательский порядок (для ручной сортировки)
+    }
+    
     public enum TrackSortType
     {
         AddedDate = 0,          // По дате добавления (по умолчанию)
@@ -151,7 +161,7 @@ namespace QAMP.Models
             TrackSortType.NameAZ => "Название A-Z",
             _ => SortType.ToString()
         };
-
+        
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {

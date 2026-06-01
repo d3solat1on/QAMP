@@ -1,6 +1,7 @@
 <Window x:Class="QAMP.Windows.LyricsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dialogs="clr-namespace:QAMP.Dialogs"
         Title="Lyrics Editor"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -58,6 +59,10 @@
                         Width="100">
                 </Button>
             </StackPanel>
+            <dialogs:ModernNotice x:Name="TrackInfoToast"
+                                  VerticalAlignment="Bottom"
+                                  HorizontalAlignment="Center"
+                                  Panel.ZIndex="9999"/>
         </Grid>
     </Border>
 </Window>

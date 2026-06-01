@@ -9,6 +9,7 @@
         xmlns:services="clr-namespace:QAMP.Services"
         xmlns:models="clr-namespace:QAMP.Models"
         xmlns:vis="clr-namespace:QAMP.Visualization"
+        xmlns:dialogs="clr-namespace:QAMP.Dialogs"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="QAMP"
@@ -68,7 +69,7 @@
                                     WindowChrome.IsHitTestVisibleInChrome="True">
                                 <TextBox x:Name="SearchBox"
                                          Width="300"
-                                         Height="24"
+                                         Height="30"
                                          Padding="8,4"
                                          Background="{DynamicResource TertiaryBackgroundBrush}"
                                          Foreground="{DynamicResource ForegroundBrush}"
@@ -80,34 +81,30 @@
                                 <Button x:Name="SearchButton"
                                         Style="{StaticResource IconButton}"
                                         Width="30"
-                                        Height="24"
+                                        Height="30"
                                         Margin="5,0,0,0"
-                                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1"
-                                        Foreground="{DynamicResource ForegroundBrush}"
                                         Click="SearchButton_Click">
                                         <Path Data="{StaticResource searchGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
-                                              Width="18"
-                                              Height="18"
+                                              Width="25"
+                                              Height="25"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                                 </Button>
                                 <Button x:Name="ClearSearchButton"
                                         Style="{StaticResource IconButton}"
                                         Width="30"
-                                        Height="24"
+                                        Height="30"
                                         Margin="5,0,0,0"
-                                        Background="{DynamicResource TertiaryBackgroundBrush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1"
-                                        Foreground="{DynamicResource ForegroundBrush}"
                                         Click="ClearSearchButton_Click">
                                         <Path Data="{StaticResource closeGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
+                                              Width="25"
+                                              Height="25"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                                 </Button>
@@ -117,6 +114,19 @@
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
                                     WindowChrome.IsHitTestVisibleInChrome="True">
+                                <Button x:Name="EqualizerButton"
+                                        Style="{StaticResource IconButton}"
+                                        ToolTip="Открыть эквалайзер"
+                                        Visibility="Hidden">
+                                        <!-- Click="EqualizerButton_Click" -->
+                                        <Path Data="{StaticResource EqualizerGeometry}"
+                                              Fill="{DynamicResource AccentBrush}"
+                                              Stretch="Uniform"
+                                              Width="18"
+                                              Height="18"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </Button>
                                 <Button x:Name="Settings"
                                         Style="{StaticResource TitleBarButtonStyle}"
                                         Click="Settings_Click">
@@ -496,53 +506,74 @@
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
-                                                <DockPanel Grid.Row="0"
-                                                           Margin="0,0,0,10">
-                                                        <TextBlock Text="ПЛЕЙЛИСТЫ"
-                                                                   FontSize="24"
+                                                <Grid Grid.Row="0"
+                                                      Margin="10,0,10,15">
+                                                        <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <TextBlock Grid.Row="0"
+                                                                   Text="LIBRARY"
+                                                                   FontSize="28"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource ForegroundBrush}"
-                                                                   VerticalAlignment="Center"/>
+                                                                   HorizontalAlignment="Center"
+                                                                   Margin="0,0,0,12"/>
 
-                                                        <StackPanel Orientation="Horizontal"
-                                                                    DockPanel.Dock="Right">
+                                                        <UniformGrid Grid.Row="1"
+                                                                     Columns="4"
+                                                                     Height="40">
+
+                                                                <Button x:Name="SortByButton"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Background="Transparent"
+                                                                        BorderBrush="Transparent"
+                                                                        Click="SortByButton_Click"
+                                                                        ToolTip="Сортировать плейлисты">
+                                                                        <Path Data="{StaticResource sortGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              Width="40"
+                                                                              Height="40"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                </Button>
+
                                                                 <Button x:Name="CreatePlaylistButton"
                                                                         Style="{StaticResource IconButton}"
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
-                                                                        Width="40"
-                                                                        Height="40"
                                                                         Click="CreatePlaylistButton_Click"
                                                                         ToolTip="Создать плейлист">
-                                                                        <Path
-                                                                                Data="{StaticResource create_playlistGeometry}"
-                                                                                Fill="{DynamicResource AccentBrush}"
-                                                                                Stretch="Uniform"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"/>
+                                                                        <Path Data="{StaticResource create_playlistGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              Width="40"
+                                                                              Height="40"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
                                                                 </Button>
+
                                                                 <Button x:Name="RemovePlaylistButton"
                                                                         Style="{StaticResource IconButton}"
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
-                                                                        Width="40"
-                                                                        Height="40"
                                                                         Click="RemovePlaylist_Click"
                                                                         ToolTip="Удалить выбранный плейлист"
                                                                         IsEnabled="{Binding ElementName=PlaylistsListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}">
-                                                                        <Path
-                                                                                Data="{StaticResource playlist_removeGeometry}"
-                                                                                Fill="{DynamicResource AccentBrush}"
-                                                                                Stretch="Uniform"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"/>
+                                                                        <Path Data="{StaticResource playlist_removeGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              Width="40"
+                                                                              Height="40"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
                                                                 </Button>
-                                                                <Button
-                                                                        Style="{StaticResource IconButton}"
+
+                                                                <Button Style="{StaticResource IconButton}"
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
-                                                                        Width="40"
-                                                                        Height="40"
                                                                         Click="AddMusicButton_Click"
                                                                         ToolTip="Добавить музыку">
                                                                         <Button.Resources>
@@ -572,22 +603,25 @@
                                                                                 <ContextMenu x:Name="AddMusicMenu"
                                                                                              Style="{StaticResource ModernMenu}">
                                                                                         <MenuItem x:Name="MenuAddFilesPlaylist"
+                                                                                                  Header="Добавить файлы"
                                                                                                   Click="AddFilesToPlaylist_Click"/>
                                                                                         <MenuItem x:Name="MenuAddFolderPlaylist"
+                                                                                                  Header="Добавить папку"
                                                                                                   Click="AddFolderToPlaylist_Click"/>
-
                                                                                 </ContextMenu>
                                                                         </Button.ContextMenu>
 
-                                                                        <Path
-                                                                                Data="{StaticResource add_musicGeometry}"
-                                                                                Fill="{DynamicResource AccentBrush}"
-                                                                                Stretch="Uniform"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"/>
+                                                                        <Path Data="{StaticResource add_musicGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              Width="40"
+                                                                              Height="40"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
                                                                 </Button>
-                                                        </StackPanel>
-                                                </DockPanel>
+
+                                                        </UniformGrid>
+                                                </Grid>
 
                                                 <!-- Placeholder для загрузки плейлистов -->
                                                 <Grid Grid.Row="1"
@@ -667,52 +701,31 @@
                                                                                                 BorderThickness="1"
                                                                                                 CornerRadius="4"
                                                                                                 Background="{DynamicResource CentralPanelCardBackground}">
-
                                                                                                 <Grid>
-
                                                                                                         <!-- Изображение (если есть) -->
-
                                                                                                         <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
                                                                                                                Stretch="UniformToFill"
                                                                                                                Margin="2">
-
                                                                                                                 <Image.Style>
-
                                                                                                                         <Style TargetType="Image">
-
                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                         Value="Visible"/>
-
                                                                                                                                 <Style.Triggers>
-
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage}"
                                                                                                                                                      Value="{x:Null}">
-
                                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                                         Value="Collapsed"/>
-
                                                                                                                                         </DataTrigger>
-
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage.Length}"
                                                                                                                                                      Value="0">
-
                                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                                         Value="Collapsed"/>
-
                                                                                                                                         </DataTrigger>
-
                                                                                                                                 </Style.Triggers>
-
                                                                                                                         </Style>
-
                                                                                                                 </Image.Style>
-
                                                                                                         </Image>
-
-
-
                                                                                                         <!-- Текстовая иконка (если нет изображения) -->
-
                                                                                                         <Grid x:Name="PlaylistPlaceholderContainer">
                                                                                                                 <Grid.Style>
                                                                                                                         <Style TargetType="Grid">
@@ -735,7 +748,6 @@
                                                                                                                                 </Style.Triggers>
                                                                                                                         </Style>
                                                                                                                 </Grid.Style>
-
                                                                                                                 <!-- Сама иконка, которая управляет своей геометрией -->
                                                                                                                 <Path Fill="{DynamicResource AccentBrush}"
                                                                                                                       HorizontalAlignment="Center"
@@ -758,9 +770,7 @@
                                                                                                                         </Path.Style>
                                                                                                                 </Path>
                                                                                                         </Grid>
-
                                                                                                 </Grid>
-
                                                                                         </Border>
 
                                                                                         <!-- Информация о плейлисте -->
@@ -821,9 +831,23 @@
                                                                                                                 </ContextMenu.Resources>
                                                                                                                 <MenuItem Header="Редактировать"
                                                                                                                           Click="EditPlaylist_Click"/>
-                                                                                                                <MenuItem Header="Закрепить"
-                                                                                                                          x:Name="PinPlaylistMenuItem"
-                                                                                                                          Click="PinPlaylist_Click"/>
+                                                                                                                <MenuItem x:Name="PinPlaylistMenuItem"
+                                                                                                                          Click="PinPlaylist_Click">
+                                                                                                                        <MenuItem.Style>
+                                                                                                                                <Style TargetType="MenuItem"
+                                                                                                                                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                                                                                                        <Setter Property="Header"
+                                                                                                                                                Value="Закрепить"/>
+                                                                                                                                        <Style.Triggers>
+                                                                                                                                                <DataTrigger Binding="{Binding IsPinned}"
+                                                                                                                                                             Value="True">
+                                                                                                                                                        <Setter Property="Header"
+                                                                                                                                                                Value="Открепить"/>
+                                                                                                                                                </DataTrigger>
+                                                                                                                                        </Style.Triggers>
+                                                                                                                                </Style>
+                                                                                                                        </MenuItem.Style>
+                                                                                                                </MenuItem>
                                                                                                                 <MenuItem Header="Информация"
                                                                                                                           Click="ShowPlaylistInfo_Click"/>
                                                                                                                 <MenuItem Header="Обновить плейлист"
@@ -837,12 +861,19 @@
                                                                                                 </StackPanel.ContextMenu>
                                                                                                 <StackPanel Orientation="Horizontal"
                                                                                                             VerticalAlignment="Center">
-                                                                                                        <TextBlock Text="📌"
-                                                                                                                   FontSize="12"
-                                                                                                                   Margin="0,0,5,0"
-                                                                                                                   Foreground="Orange">
-                                                                                                                <TextBlock.Style>
-                                                                                                                        <Style TargetType="TextBlock">
+                                                                                                        <Viewbox x:Name="PinForPlaylistContainer"
+                                                                                                                 Width="14"
+                                                                                                                 Height="14"
+                                                                                                                 Margin="0,0,5,0"
+                                                                                                                 VerticalAlignment="Center">
+
+                                                                                                                <Path x:Name="PinForPlaylist"
+                                                                                                                      Data="{StaticResource PinForPlaylistGeometry}"
+                                                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                                                      Stretch="Uniform"/>
+
+                                                                                                                <Viewbox.Style>
+                                                                                                                        <Style TargetType="Viewbox">
                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                         Value="Collapsed"/>
                                                                                                                                 <Style.Triggers>
@@ -853,8 +884,8 @@
                                                                                                                                         </DataTrigger>
                                                                                                                                 </Style.Triggers>
                                                                                                                         </Style>
-                                                                                                                </TextBlock.Style>
-                                                                                                        </TextBlock>
+                                                                                                                </Viewbox.Style>
+                                                                                                        </Viewbox>
                                                                                                         <TextBlock Text="{Binding Name}"
                                                                                                                    FontWeight="Bold"
                                                                                                                    FontSize="14"
@@ -971,7 +1002,8 @@
                                                                         <RowDefinition Height="Auto"/>
                                                                 </Grid.RowDefinitions>
 
-                                                                <TextBlock Grid.Row="0"
+                                                                <TextBlock x:Name="PlaylistRS"
+                                                                           Grid.Row="0"
                                                                            Text="ПЛЕЙЛИСТ"
                                                                            Foreground="{DynamicResource CentralPanelHighlightForeground}"
                                                                            FontSize="12"
@@ -1556,10 +1588,14 @@
                                                                                      BorderThickness="2"/>
                                                         </Grid>
                                                 </StackPanel>
-
                                         </Grid>
                                 </Border>
                         </Grid>
                 </DockPanel>
+                <dialogs:ModernNotice x:Name="MyToast"
+                                      Grid.Row="1"
+                                      VerticalAlignment="Bottom"
+                                      HorizontalAlignment="Center"
+                                      Panel.ZIndex="9999"/>
         </Grid>
 </Window>

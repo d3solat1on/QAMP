@@ -583,7 +583,7 @@ namespace QAMP.Services
             }
 
             // Удаляем временный файл, если он создавался ранее
-            if (!string.IsNullOrEmpty(_tempFilePath) && System.IO.File.Exists(_tempFilePath))
+            if (!string.IsNullOrEmpty(_tempFilePath) && File.Exists(_tempFilePath))
             {
                 try { File.Delete(_tempFilePath); } catch { }
                 _tempFilePath = null;

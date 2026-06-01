@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -42,7 +44,7 @@ namespace QAMP
         private void AddFilesToPlaylist_Click(object sender, RoutedEventArgs e) => AddFilesToCurrentPlaylist();
         private void AddFolderToPlaylist_Click(object sender, RoutedEventArgs e) => AddFolderToCurrentPlaylist();
 
-        private void AddFolderToCurrentPlaylist() //Вроде норм (не, не норм xd)
+        private async void AddFolderToCurrentPlaylist() //Вроде норм (не, не норм xd)
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
@@ -55,7 +57,7 @@ namespace QAMP
             var folderDialog = new OpenFolderDialog
             {
                 Title = "Выберите папку с музыкой (включая подпапки)",
-                Multiselect = true 
+                Multiselect = true
             };
 
             if (folderDialog.ShowDialog() == true)
@@ -99,7 +101,7 @@ namespace QAMP
                         TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     }
                     UpdateNextTrackUI();
-                    NotificationWindow.Show($"Добавлено {addedCount} треков", this);
+                    await MyToast.ShowAsync($"Добавлено {addedCount} треков");
                 }
                 finally
                 {
@@ -107,7 +109,7 @@ namespace QAMP
                 }
             }
         }
-        private void AddFilesToCurrentPlaylist()
+        private async void AddFilesToCurrentPlaylist()
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
@@ -147,7 +149,7 @@ namespace QAMP
                     TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                 }
                 UpdateNextTrackUI();
-                NotificationWindow.Show($"Добавлено {addedCount} треков", this);
+                await MyToast.ShowAsync($"Добавлено {addedCount} треков");
             }
         }
 
@@ -166,7 +168,7 @@ namespace QAMP
             return null;
         }
 
-        private void CreatePlaylistButton_Click(object sender, RoutedEventArgs e)
+        private async void CreatePlaylistButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new CreatePlaylistDialog
             {
@@ -192,8 +194,7 @@ namespace QAMP
 
                     TracksDataGrid.ItemsSource = newPlaylist.Tracks;
 
-
-                    NotificationWindow.Show($"Плейлист \"{dialog.PlaylistName}\" создан", this);
+                    await MyToast.ShowAsync($"Плейлист \"{dialog.PlaylistName}\" создан");
                 }
             }
         }
@@ -299,7 +300,7 @@ namespace QAMP
 
                 brush.GradientStops.Add(new GradientStop(dominant, 0));
 
-                brush.GradientStops.Add(new GradientStop(System.Windows.Media.Color.FromRgb(25, 25, 25), 1));
+                brush.GradientStops.Add(new GradientStop(Color.FromRgb(25, 25, 25), 1));
 
                 UpperPanel.Background = brush;
             }
@@ -326,7 +327,7 @@ namespace QAMP
                     };
 
                     brush.GradientStops.Add(new GradientStop(accentBrush.Color, 0));
-                    brush.GradientStops.Add(new GradientStop(System.Windows.Media.Color.FromRgb(25, 25, 25), 1));
+                    brush.GradientStops.Add(new GradientStop(Color.FromRgb(25, 25, 25), 1));
 
                     UpperPanel.Background = brush;
                 }
@@ -361,7 +362,7 @@ namespace QAMP
                 UpdateUpperPanelGradient(bitmap!);
             }
         }
-        public void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+        public async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
             {
@@ -375,9 +376,109 @@ namespace QAMP
                     }
                     ApplySort(updatedPlaylist.SortType);
                     UpdateNextTrackUI();
-                    NotificationWindow.Show($"Плейлист \"{updatedPlaylist.Name}\" обновлен", this);
+                    await MyToast.ShowAsync($"Плейлист \"{updatedPlaylist.Name}\" обновлен");
                 }
             }
+        }
+        public void SortByButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Меню должно открываться в любом случае, даже если плейлист не выбран
+            var contextMenu = new ContextMenu();
+
+            foreach (PlaylistSortOrder sortOrder in Enum.GetValues<PlaylistSortOrder>())
+            {
+                // Пропускаем дефолтный Manual, если Custom делает то же самое
+                if (sortOrder == PlaylistSortOrder.Manual) continue;
+
+                var menuItem = new MenuItem
+                {
+                    Header = sortOrder switch
+                    {
+                        PlaylistSortOrder.NameAZ => "Названию (A-Z)",
+                        PlaylistSortOrder.NameZA => "Названию (Z-A)",
+                        PlaylistSortOrder.CreatedDateNewest => "Дате создания (новые сверху)",
+                        PlaylistSortOrder.CreatedDateOldest => "Дате создания (старые сверху)",
+                        PlaylistSortOrder.Custom => "Пользовательский порядок",
+                        _ => "Без сортировки"
+                    },
+                    Tag = sortOrder
+                };
+
+                menuItem.Click += (s, args) =>
+                {
+                    // 1. Применяем визуальную сортировку в WPF
+                    ApplyPlaylistSorting(sortOrder);
+
+                    // 2. Сохраняем глобальный выбор сортировки (например, в менеджер библиотеки)
+                    // MusicLibrary.Instance.CurrentSortOrder = sortOrder;
+
+                    // 3. Опционально: вызываем сохранение этой настройки в БД/конфиг,
+                    // чтобы при следующем запуске QAMP конфигурация восстановилась.
+                    AppSettings.CurrentPlaylistSort = sortOrder;
+                    SettingsManager.Instance.Save();
+                    _ = MyToast.ShowAsync($"Сортировка изменена");
+                };
+
+                contextMenu.Items.Add(menuItem);
+            }
+
+            // Привязываем контекстное меню к кнопке, которая его вызвала, и открываем
+            if (sender is FrameworkElement element)
+            {
+                contextMenu.PlacementTarget = element;
+                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                contextMenu.IsOpen = true;
+            }
+        }
+        private void ApplyPlaylistSorting(PlaylistSortOrder sortOrder)
+        {
+            // Получаем представление по умолчанию для твоей коллекции плейлистов
+            ICollectionView view = CollectionViewSource.GetDefaultView(MusicLibrary.Instance.Playlists);
+
+            if (view == null) return;
+
+            // 1. Очищаем старые правила сортировки
+            view.SortDescriptions.Clear();
+
+            // 2. ЖЕЛЕЗНОЕ ПРАВИЛО №1: Закрепленные плейлисты ВСЕГДА первыми
+            // Сортируем по IsPinned по убыванию: true (1) будет выше, чем false (0)
+            view.SortDescriptions.Add(new SortDescription("IsPinned", ListSortDirection.Descending));
+
+            // 3. ПРАВИЛО №2: Сортировка внутри групп (среди закрепов и среди обычных)
+            switch (sortOrder)
+            {
+                case PlaylistSortOrder.NameAZ:
+                    // Сортировка по имени от А до Я
+                    view.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
+                    break;
+
+                case PlaylistSortOrder.NameZA:
+                    // Сортировка по имени от Я до А
+                    view.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Descending));
+                    break;
+
+                case PlaylistSortOrder.CreatedDateNewest:
+                    // Новые сверху. Используем Id (так как новые записи получают Id больше)
+                    // Если в классе есть поле CreatedDate, замени "Id" на "CreatedDate"
+                    view.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Descending));
+                    break;
+
+                case PlaylistSortOrder.CreatedDateOldest:
+                    // Старые сверху (по возрастанию Id)
+                    view.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Ascending));
+                    break;
+
+                case PlaylistSortOrder.Custom:
+                case PlaylistSortOrder.Manual:
+                    // Для ручной сортировки (Drag-and-drop). 
+                    // Предполагаем, что у тебя в клаصه Playlist есть свойство OrderIndex (или Position).
+                    // Если его пока нет, можно использовать "Id" как базовый вариант.
+                    view.SortDescriptions.Add(new SortDescription("OrderIndex", ListSortDirection.Ascending));
+                    break;
+            }
+
+            // Заставляем WPF обновить интерфейс на экране
+            view.Refresh();
         }
     }
 }

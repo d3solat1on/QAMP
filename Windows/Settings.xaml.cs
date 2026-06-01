@@ -253,7 +253,7 @@ namespace QAMP.Windows
             }
 
             // Рисуем график АЧХ
-            Dispatcher.InvokeAsync(() => DrawEqGraph(), System.Windows.Threading.DispatcherPriority.Loaded);
+            Dispatcher.InvokeAsync(DrawEqGraph, DispatcherPriority.Loaded);
             if (config.IsCompactMode)
                 CompactModeRadio.IsChecked = true;
             else
@@ -429,11 +429,6 @@ namespace QAMP.Windows
             {
                 AutoLaunchDisabled.IsChecked = true;
             }
-
-            // if (_player?.SpectrumViewModel != null)
-            // {
-            //     _player.SpectrumViewModel.BarCount = originalBarCount;
-            // }
 
             if (originalColorScheme != null)
                 ThemeManager.ApplyTheme(originalColorScheme);
@@ -668,7 +663,7 @@ namespace QAMP.Windows
                 }
                 catch
                 {
-                    MessageBox.Show("Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dialogs.NotificationWindow.Show("Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
                     AutoLaunchEnabled.IsChecked = false;
                     config.IsAutoLaunchEnabled = false;
                     SettingsManager.Instance.Save();
@@ -683,7 +678,7 @@ namespace QAMP.Windows
                 }
                 catch
                 {
-                    MessageBox.Show("Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dialogs.NotificationWindow.Show("Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
                     AutoLaunchEnabled.IsChecked = true;
                     config.IsAutoLaunchEnabled = true;
                     SettingsManager.Instance.Save();

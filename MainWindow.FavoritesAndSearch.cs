@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using QAMP.Dialogs;
@@ -14,12 +16,12 @@ namespace QAMP
 {
     public partial class MainWindow
     {
-        private void RemoveFromPlaylist_Click(object sender, RoutedEventArgs e)
+        private async void RemoveFromPlaylist_Click(object sender, RoutedEventArgs e)
         {
             var selectedPlaylist = Library.CurrentPlaylist;
             if (selectedPlaylist == null)
             {
-                NotificationWindow.Show("Сначала выберите плейлист", this);
+                await MyToast.ShowAsync("Сначала выберите плейлист");
                 return;
             }
 
@@ -50,13 +52,13 @@ namespace QAMP
             }
         }
 
-        private void RemovePlaylist_Click(object sender, RoutedEventArgs e)
+        private async void RemovePlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
             {
                 if (selectedPlaylist.Name == MusicLibrary.FavoritesName)
                 {
-                    NotificationWindow.Show("Системный плейлист нельзя удалить", this);
+                    await MyToast.ShowAsync("Системный плейлист нельзя удалить");
                     return;
                 }
 
@@ -106,8 +108,7 @@ namespace QAMP
                             PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
                         }
                     }
-
-                    NotificationWindow.Show("Плейлист удален", this);
+                    await MyToast.ShowAsync("Плейлист удален");
                 }
             }
         }
@@ -181,8 +182,7 @@ namespace QAMP
 
         private void DeletePlaylist_Click(object sender, RoutedEventArgs e) => RemovePlaylist_Click(sender, e);
 
-
-        private void PinPlaylist_Click(object sender, RoutedEventArgs e)
+        private async void PinPlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem menuItem && menuItem.DataContext is Playlist selectedPlaylist)
             {
@@ -190,11 +190,15 @@ namespace QAMP
                 DatabaseService.UpdatePlaylistPinnedState(selectedPlaylist.Id, newPinnedState);
                 selectedPlaylist.IsPinned = newPinnedState;
 
-                // Используем RefreshSinglePlaylist для оптимизации вместо RefreshPlaylists
-                MusicLibrary.Instance.RefreshSinglePlaylist(selectedPlaylist.Id);
-                PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
+                // Вместо полной перезагрузки просто обновляем наш View!
+                ICollectionView view = CollectionViewSource.GetDefaultView(MusicLibrary.Instance.Playlists);
+                view?.Refresh();
+
+                // Возвращаем фокус на измененный плейлист
+                PlaylistsListBox.SelectedItem = selectedPlaylist;
+
                 var message = newPinnedState ? "Плейлист закреплен" : "Плейлист откреплен";
-                NotificationWindow.Show(message, this);
+                await MyToast.ShowAsync(message);
             }
         }
 
@@ -208,16 +212,38 @@ namespace QAMP
 
         private void Playlist_Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetData(typeof(Playlist)) is Playlist droppedPlaylist && sender is ListBoxItem { DataContext: Playlist targetPlaylist } && droppedPlaylist != targetPlaylist)
+            // 1. Проверяем, что сейчас включен именно кастомный/ручной режим сортировки.
+            // Если включен "По алфавиту", таскать элементы UI запрещено, иначе начнется хаос.
+            var currentSort = AppSettings.CurrentPlaylistSort;
+            if (currentSort != PlaylistSortOrder.Custom && currentSort != PlaylistSortOrder.Manual)
             {
+                return;
+            }
+
+            if (e.Data.GetData(typeof(Playlist)) is Playlist droppedPlaylist &&
+                sender is ListBoxItem { DataContext: Playlist targetPlaylist } &&
+                droppedPlaylist != targetPlaylist)
+            {
+                if (droppedPlaylist.IsPinned != targetPlaylist.IsPinned)
+                {
+                    return;
+                }
+
                 var playlists = MusicLibrary.Instance.Playlists;
                 int oldIndex = playlists.IndexOf(droppedPlaylist);
                 int newIndex = playlists.IndexOf(targetPlaylist);
 
                 if (oldIndex != -1 && newIndex != -1)
                 {
+                    // Перемещаем элемент в основной коллекции
                     playlists.Move(oldIndex, newIndex);
-                    DatabaseService.SavePlaylistsOrder();
+
+                    // Сохраняем новый порядок в базу данных SQLite (метод перепишем ниже)
+                    DatabaseService.SavePlaylistsOrder(playlists);
+
+                    // Обновляем представление на экране, чтобы зафиксировать изменения
+                    ICollectionView view = CollectionViewSource.GetDefaultView(playlists);
+                    view?.Refresh();
                 }
             }
         }
@@ -245,7 +271,7 @@ namespace QAMP
             }
         }
 
-        private void ShowTrackInfo_Click(object sender, RoutedEventArgs e)
+        private async void ShowTrackInfo_Click(object sender, RoutedEventArgs e)
         {
             var selectedTrack = TracksDataGrid.SelectedItem as Track;
 
@@ -269,7 +295,7 @@ namespace QAMP
             }
             else
             {
-                NotificationWindow.Show("Пожалуйста, сначала выделите трек.", this);
+                await MyToast.ShowAsync("Пожалуйста, сначала выделите трек.");
             }
         }
 
@@ -283,7 +309,7 @@ namespace QAMP
             }
         }
 
-        private void FavoriteButton_Click(object? sender, RoutedEventArgs? e)
+        private async void FavoriteButton_Click(object? sender, RoutedEventArgs? e)
         {
             if (Player.CurrentTrack == null)
             {
@@ -309,10 +335,13 @@ namespace QAMP
                 DatabaseService.SaveTrackToPlaylist(favoritePlaylist.Id, trackToSave);
                 favoritePlaylist.Tracks.Add(trackToSave);
                 UpdateFavoriteIcon(Player.CurrentTrack, true);
-                NotificationWindow.Show("Добавлено в Избранное", this);
+                await MyToast.ShowAsync("Успешно добавлено в избранное");
+                System.Diagnostics.Debug.WriteLine($"DEBUG: Трек \"{trackToSave.Name}\" добавлен в Избранное. Путь: {trackToSave.Path}");
             }
             else
             {
+                await MyToast.ShowAsync("Успешно удалено из избранного");
+                System.Diagnostics.Debug.WriteLine($"DEBUG: Трек \"{Player.CurrentTrack.Name}\" удален из Избранного. Путь: {Player.CurrentTrack.Path}");
                 DatabaseService.RemoveTrackFromPlaylist(favoritePlaylist.Id, Player.CurrentTrack.Id);
                 var trackToRemove = favoritePlaylist.Tracks.FirstOrDefault(t => t.Id == Player.CurrentTrack.Id);
                 if (trackToRemove != null)
@@ -320,7 +349,6 @@ namespace QAMP
                     favoritePlaylist.Tracks.Remove(trackToRemove);
                 }
                 UpdateFavoriteIcon(Player.CurrentTrack, false);
-                NotificationWindow.Show("Удалено из Избранного", this);
             }
 
             if (Library.CurrentPlaylist?.Id == favoritePlaylist.Id)
@@ -382,12 +410,12 @@ namespace QAMP
             }
         }
 
-        private void PerformSearch()
+        private async void PerformSearch()
         {
             string searchQuery = SearchBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
-                NotificationWindow.Show("Введите текст для поиска", this);
+                await MyToast.ShowAsync("Введите текст для поиска");
                 return;
             }
 
@@ -414,14 +442,14 @@ namespace QAMP
             ShowSearchResults(searchResults, searchQuery);
         }
 
-        private void ShowSearchResults(List<Track> results, string searchQuery)
+        private async void ShowSearchResults(List<Track> results, string searchQuery)
         {
             if (results.Count == 0)
             {
-                NotificationWindow.Show($"По запросу \"{searchQuery}\" ничего не найдено", this);
+                await MyToast.ShowAsync($"По запросу \"{searchQuery}\" ничего не найдено");
                 return;
             }
-
+            PlaylistRS.Visibility = Visibility.Collapsed;
             var searchPlaylist = new Playlist
             {
                 Name = "Результаты поиска",
@@ -433,24 +461,6 @@ namespace QAMP
             MusicLibrary.Instance.CurrentPlaylist = searchPlaylist;
 
             TracksDataGrid.ItemsSource = searchPlaylist.Tracks;
-        }
-
-        private void AddToPlaylistSubMenu_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            if (sender is not MenuItem subMenu) return;
-            subMenu.Items.Clear();
-            if (MusicLibrary.Instance.Playlists.Count == 0)
-            {
-                subMenu.Items.Add(new MenuItem { Header = "Нет плейлистов", IsEnabled = false });
-                return;
-            }
-
-            foreach (var playlist in MusicLibrary.Instance.Playlists)
-            {
-                MenuItem item = new() { Header = playlist.Name, DataContext = playlist, Tag = playlist.Id };
-                item.Click += AddToSpecificPlaylist_Click;
-                subMenu.Items.Add(item);
-            }
         }
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
@@ -479,7 +489,7 @@ namespace QAMP
             subMenu.IsEnabled = true;
         }
 
-        private void AddToSpecificPlaylist_Click(object sender, RoutedEventArgs e)
+        private async void AddToSpecificPlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem menuItem && menuItem.DataContext is Playlist targetPlaylist)
             {
@@ -501,7 +511,7 @@ namespace QAMP
                     var tracksFromDb = DatabaseService.GetTracksForPlaylist(targetPlaylist.Id);
                     targetPlaylist.Tracks = new ObservableCollection<Track>(tracksFromDb);
 
-                    NotificationWindow.Show($"Добавлено в \"{targetPlaylist.Name}\"", this);
+                    await MyToast.ShowAsync($"Добавлено в \"{targetPlaylist.Name}\"");
                 }
             }
         }
@@ -534,7 +544,7 @@ namespace QAMP
                 {
                     Owner = this
                 };
-                infoWindow.ShowDialog();
+                infoWindow.Show();
             }
             else
             {

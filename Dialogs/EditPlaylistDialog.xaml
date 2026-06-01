@@ -55,7 +55,7 @@
                                 Background="#282828">
                                 <Grid>
                                         <Image x:Name="CoverImage"
-                                               Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
+                                               Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
                                                Stretch="UniformToFill"
                                                Margin="2">
                                                 <Image.Style>
@@ -77,13 +77,45 @@
                                                         </Style>
                                                 </Image.Style>
                                         </Image>
-                                        <StackPanel VerticalAlignment="Center"
-                                                    x:Name="PlaceholderText">
-                                                <TextBlock Text="Изменить обложку"
-                                                           Foreground="Gray"
-                                                           FontSize="12"
-                                                           HorizontalAlignment="Center"/>
-                                        </StackPanel>
+                                        <Grid x:Name="PlaylistPlaceholderContainer">
+                                                <Grid.Style>
+                                                        <Style TargetType="Grid">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding CoverImage}"
+                                                                                     Value="{x:Null}">
+                                                                                <Setter Property="Visibility"
+                                                                                        Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding CoverImage.Length}"
+                                                                                     Value="0">
+                                                                                <Setter Property="Visibility"
+                                                                                        Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Grid.Style>
+
+                                                <Path Fill="{DynamicResource AccentBrush}"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Stretch="Uniform">
+                                                        <Path.Style>
+                                                                <Style TargetType="Path">
+                                                                        <Setter Property="Data"
+                                                                                Value="{StaticResource PlugForTheRightSideGeometry}"/>
+                                                                        <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Id}"
+                                                                                             Value="1">
+                                                                                        <Setter Property="Data"
+                                                                                                Value="{StaticResource FavoriteCoverGeometry}"/>
+                                                                                </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                </Style>
+                                                        </Path.Style>
+                                                </Path>
+                                        </Grid>
                                 </Grid>
                         </Button>
 
@@ -125,7 +157,6 @@
                                         Margin="0,0,10,0"
                                         IsCancel="True"
                                         BorderThickness="0">
-                                        
                                 </Button>
                                 <Button Content="Сохранить"
                                         Click="EditPlaylist_Click"

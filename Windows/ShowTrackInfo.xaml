@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:QAMP.Windows"
         xmlns:converters="clr-namespace:QAMP.Converters"
+        xmlns:dialogs="clr-namespace:QAMP.Dialogs"
         Background="Transparent"
         AllowsTransparency="True"
         WindowStyle="None"
@@ -60,459 +61,465 @@
                 </Style>
         </Window.Resources>
 
-        <Border Background="#1E1E1E"
-                CornerRadius="5"
-                BorderBrush="#333"
-                BorderThickness="1">
-                <Grid Margin="0">
-                        <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+        <Grid>
+                <Border Background="#1E1E1E"
+                        CornerRadius="5"
+                        BorderBrush="#333"
+                        BorderThickness="1">
+                        <Grid Margin="0">
+                                <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
 
-                        <Grid Grid.Row="0"
-                              Margin="20,15,20,0"
-                              Height="40">
-                                <TextBlock Text="Подробная информация о треке"
-                                           FontSize="18"
-                                           FontWeight="Bold"
-                                           Foreground="White"
-                                           VerticalAlignment="Center"/>
-                                <ToggleButton x:Name="EditModeButton"
-                                              HorizontalAlignment="Right"
-                                              VerticalAlignment="Center"
-                                              Width="30"
-                                              Height="30"
-                                              Margin="0,0,40,0"
-                                              ToolTip="Редактировать теги"
-                                              Background="{DynamicResource AccentBrush}">
-                                        <Path Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04C21.1,6.65 21.1,6.02 20.71,5.63L18.37,3.29C17.98,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04Z"
-                                              Fill="{Binding RelativeSource={RelativeSource AncestorType=ToggleButton}, Path=Foreground}"
-                                              Stretch="Uniform"
-                                              Width="14"
-                                              Height="14"/>
-                                        <ToggleButton.Resources>
-                                                <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius"
-                                                                Value="2"/>
-                                                </Style>
-                                        </ToggleButton.Resources>
-                                </ToggleButton>
-                                <Button Style="{StaticResource ModernPlayerButton}"
-                                        Content="Сохранить"
-                                        Click="Save_Click"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        Width="100"
-                                        Height="30"
-                                        Margin="0,0,75,0"
-                                        Visibility="{Binding ElementName=EditModeButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                </Button>
-                                <Button Content="✕"
-                                        Click="Close_Click"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        Style="{StaticResource CloseButtonStyle}"
-                                        Background="{DynamicResource AccentBrush}"
-                                        Width="30"
-                                        Height="30">
-                                        <Button.Resources>
-                                                <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius"
-                                                                Value="2"/>
-                                                </Style>
-                                        </Button.Resources>
-                                </Button>
-                        </Grid>
+                                <Grid Grid.Row="0"
+                                      Margin="20,15,20,0"
+                                      Height="40">
+                                        <TextBlock Text="Подробная информация о треке"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   VerticalAlignment="Center"/>
+                                        <ToggleButton x:Name="EditModeButton"
+                                                      HorizontalAlignment="Right"
+                                                      VerticalAlignment="Center"
+                                                      Width="30"
+                                                      Height="30"
+                                                      Margin="0,0,40,0"
+                                                      ToolTip="Редактировать теги"
+                                                      Background="{DynamicResource AccentBrush}">
+                                                <Path Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04C21.1,6.65 21.1,6.02 20.71,5.63L18.37,3.29C17.98,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04Z"
+                                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=ToggleButton}, Path=Foreground}"
+                                                      Stretch="Uniform"
+                                                      Width="14"
+                                                      Height="14"/>
+                                                <ToggleButton.Resources>
+                                                        <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius"
+                                                                        Value="2"/>
+                                                        </Style>
+                                                </ToggleButton.Resources>
+                                        </ToggleButton>
+                                        <Button Style="{StaticResource ModernPlayerButton}"
+                                                Content="Сохранить"
+                                                Click="Save_Click"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                Width="100"
+                                                Height="30"
+                                                Margin="0,0,75,0"
+                                                Visibility="{Binding ElementName=EditModeButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        </Button>
+                                        <Button Content="✕"
+                                                Click="Close_Click"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource CloseButtonStyle}"
+                                                Background="{DynamicResource AccentBrush}"
+                                                Width="30"
+                                                Height="30">
+                                                <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius"
+                                                                        Value="2"/>
+                                                        </Style>
+                                                </Button.Resources>
+                                        </Button>
+                                </Grid>
 
-                        <ScrollViewer Grid.Row="1"
-                                      Margin="20">
-                                <Grid>
-                                        <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="300"/>
-                                                <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                                <ScrollViewer Grid.Row="1"
+                                              Margin="20">
+                                        <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="300"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0">
-                                                <Border CornerRadius="10"
-                                                        ClipToBounds="True"
-                                                        Height="300"
-                                                        Width="300"
-                                                        Background="#2D2D2D"
-                                                        Cursor="Hand"
-                                                        MouseLeftButtonDown="ChangeCover_Click">
-                                                        <Grid>
-                                                                <Path Data="{DynamicResource default_coverGeometry}"
-                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                      Stretch="Uniform"
-                                                                      HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center"/>
-                                                                <Image Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
-                                                                       Stretch="UniformToFill"
-                                                                       HorizontalAlignment="Center"
-                                                                       VerticalAlignment="Center">
-                                                                        <Image.Style>
-                                                                                <Style TargetType="Image">
-                                                                                        <Setter Property="Visibility"
-                                                                                                Value="Visible"/>
-                                                                                        <Style.Triggers>
-                                                                                                <DataTrigger Binding="{Binding CoverImage}"
-                                                                                                             Value="{x:Null}">
-                                                                                                        <Setter Property="Visibility"
-                                                                                                                Value="Collapsed"/>
-                                                                                                </DataTrigger>
-                                                                                                <DataTrigger Binding="{Binding CoverImage.Length}"
-                                                                                                             Value="0">
-                                                                                                        <Setter Property="Visibility"
-                                                                                                                Value="Collapsed"/>
-                                                                                                </DataTrigger>
-                                                                                        </Style.Triggers>
-                                                                                </Style>
-                                                                        </Image.Style>
-                                                                </Image>
-                                                        </Grid>
-                                                </Border>
+                                                <StackPanel Grid.Column="0">
+                                                        <Border CornerRadius="10"
+                                                                ClipToBounds="True"
+                                                                Height="300"
+                                                                Width="300"
+                                                                Background="#2D2D2D"
+                                                                Cursor="Hand"
+                                                                MouseLeftButtonDown="ChangeCover_Click">
+                                                                <Grid>
+                                                                        <Path Data="{DynamicResource default_coverGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                        <Image Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
+                                                                               Stretch="UniformToFill"
+                                                                               HorizontalAlignment="Center"
+                                                                               VerticalAlignment="Center">
+                                                                                <Image.Style>
+                                                                                        <Style TargetType="Image">
+                                                                                                <Setter Property="Visibility"
+                                                                                                        Value="Visible"/>
+                                                                                                <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding CoverImage}"
+                                                                                                                     Value="{x:Null}">
+                                                                                                                <Setter Property="Visibility"
+                                                                                                                        Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                        <DataTrigger Binding="{Binding CoverImage.Length}"
+                                                                                                                     Value="0">
+                                                                                                                <Setter Property="Visibility"
+                                                                                                                        Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                </Style.Triggers>
+                                                                                        </Style>
+                                                                                </Image.Style>
+                                                                        </Image>
+                                                                </Grid>
+                                                        </Border>
 
-                                                <TextBlock Text="{Binding Duration}"
-                                                           HorizontalAlignment="Center"
-                                                           FontSize="24"
-                                                           FontWeight="Bold"
-                                                           Foreground="#00CCFF"
-                                                           Margin="0,15,0,0"/>
-                                                <Button Style="{StaticResource ModernPlayerButton}"
-                                                        Content="Извлечь обложку"
-                                                        Click="ExtractCover_Click"
-                                                        HorizontalAlignment="Center"
-                                                        Margin="0,10,0,0"
-                                                        Background="{DynamicResource AccentBrush}">
-                                                </Button>
-                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Duration}"
+                                                                   HorizontalAlignment="Center"
+                                                                   FontSize="24"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource AccentBrush}"
+                                                                   Margin="0,15,0,0"/>
+                                                        <Button Style="{StaticResource ModernPlayerButton}"
+                                                                Content="Извлечь обложку"
+                                                                Click="ExtractCover_Click"
+                                                                HorizontalAlignment="Center"
+                                                                Margin="0,10,0,0"
+                                                                Background="{DynamicResource AccentBrush}">
+                                                        </Button>
+                                                </StackPanel>
 
-                                        <StackPanel Grid.Column="1"
-                                                    Margin="25,0,0,0">
-                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                                                         Style="{StaticResource EditableTextStyle}"
-                                                         FontSize="28"
-                                                         FontWeight="Bold"
-                                                         Foreground="White"
-                                                         TextWrapping="Wrap"
-                                                         Margin="0,0,0,5"/>
-
-                                                <TextBox Text="{Binding Executor, UpdateSourceTrigger=PropertyChanged}"
-                                                         Style="{StaticResource EditableTextStyle}"
-                                                         FontSize="18"
-                                                         Foreground="#00CCFF"
-                                                         Margin="0,0,0,20"/>
-
-                                                <Grid Margin="0,0,0,15">
-                                                        <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="100"/>
-                                                                <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-
-                                                        <TextBlock Grid.Row="0"
-                                                                   Grid.Column="0"
-                                                                   Text="Альбом:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,5"/>
-                                                        <TextBox Grid.Row="0"
-                                                                 Grid.Column="1"
-                                                                 Text="{Binding Album, UpdateSourceTrigger=PropertyChanged}"
+                                                <StackPanel Grid.Column="1"
+                                                            Margin="25,0,0,0">
+                                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                                                                  Style="{StaticResource EditableTextStyle}"
+                                                                 FontSize="28"
+                                                                 FontWeight="Bold"
                                                                  Foreground="White"
-                                                                 Margin="0,5"
-                                                                 TextWrapping="Wrap"/>
-
-                                                        <TextBlock Grid.Row="1"
-                                                                   Grid.Column="0"
-                                                                   Text="Альбом исполнитель:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,5"/>
-                                                        <TextBox Grid.Row="1"
-                                                                 Grid.Column="1"
-                                                                 Text="{Binding AlbumArtist, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Style="{StaticResource EditableTextStyle}"
-                                                                 Foreground="White"
-                                                                 Margin="0,5"
-                                                                 TextWrapping="Wrap"/>
-
-                                                        <TextBlock Grid.Row="2"
-                                                                   Grid.Column="0"
-                                                                   Text="Жанр:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,5"/>
-                                                        <TextBox Grid.Row="2"
-                                                                 Grid.Column="1"
-                                                                 Text="{Binding Genre, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Style="{StaticResource EditableTextStyle}"
-                                                                 Margin="0,5"/>
-
-                                                        <TextBlock Grid.Row="3"
-                                                                   Grid.Column="0"
-                                                                   Text="Год:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,5"/>
-                                                        <TextBox Grid.Row="3"
-                                                                 Grid.Column="1"
-                                                                 Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Style="{StaticResource EditableTextStyle}"
-                                                                 Foreground="White"
-                                                                 Margin="0,5"/>
-
-                                                        <TextBlock Grid.Row="4"
-                                                                   Grid.Column="0"
-                                                                   Text="Трек №:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,5"/>
-                                                        <TextBox Grid.Row="4"
-                                                                 Grid.Column="1"
-                                                                 Text="{Binding TrackNumber, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Style="{StaticResource EditableTextStyle}"
-                                                                 Foreground="White"
-                                                                 Margin="0,5"/>
-
-                                                        <TextBlock Grid.Row="5"
-                                                                   Grid.Column="0"
-                                                                   Text="Композитор:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,5"/>
-                                                        <TextBox Grid.Row="5"
-                                                                 Grid.Column="1"
-                                                                 Text="{Binding Composer, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Style="{StaticResource EditableTextStyle}"
-                                                                 Foreground="White"
-                                                                 Margin="0,5"
-                                                                 TextWrapping="Wrap"/>
-                                                </Grid>
-
-                                                <Separator Background="#333"
-                                                           Margin="0,10"/>
-
-                                                <TextBlock Text="Параметры аудио"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-
-                                                <Grid Margin="0,0,0,15">
-                                                        <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="100"/>
-                                                                <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-
-                                                        <TextBlock Grid.Row="0"
-                                                                   Grid.Column="0"
-                                                                   Text="Битрейт:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="0"
-                                                                   Grid.Column="1"
-                                                                   Text="{Binding Bitrate, StringFormat='{}{0} kbps'}"
-                                                                   Foreground="White"
-                                                                   Margin="0,3"/>
-
-                                                        <TextBlock Grid.Row="1"
-                                                                   Grid.Column="0"
-                                                                   Text="Частота:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="1"
-                                                                   Grid.Column="1"
-                                                                   Text="{Binding SampleRate, StringFormat='{}{0} Hz'}"
-                                                                   Foreground="White"
-                                                                   Margin="0,3"/>
-
-                                                        <TextBlock Grid.Row="2"
-                                                                   Grid.Column="0"
-                                                                   Text="Каналы:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="2"
-                                                                   Grid.Column="1"
-                                                                   Text="{Binding Channels}"
-                                                                   Foreground="White"
-                                                                   Margin="0,3"/>
-
-                                                        <TextBlock Grid.Row="3"
-                                                                   Grid.Column="0"
-                                                                   Text="Разрядность:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="3"
-                                                                   Grid.Column="1"
-                                                                   Text="{Binding BitsPerSample, StringFormat='{}{0} bit'}"
-                                                                   Foreground="White"
-                                                                   Margin="0,3"/>
-
-                                                        <TextBlock Grid.Row="4"
-                                                                   Grid.Column="0"
-                                                                   Text="Кодек:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="4"
-                                                                   Grid.Column="1"
-                                                                   Text="{Binding Description}"
-                                                                   Foreground="White"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="5"
-                                                                   Grid.Column="0"
-                                                                   Text="BPS:"
-                                                                   Foreground="Gray"
-                                                                   Margin="0,3"/>
-                                                        <TextBlock Grid.Row="5"
-                                                                   Grid.Column="1"
-                                                                   Text="{Binding BitsPerSample}"
-                                                                   Foreground="White"
-                                                                   Margin="0,3"/>
-
-                                                </Grid>
-                                                <Separator Background="#333"
-                                                           Margin="0,10"/>
-
-                                                <TextBlock Text="Комментарий"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-                                                <Border Background="#2D2D2D"
-                                                        CornerRadius="5"
-                                                        Padding="10"
-                                                        Margin="0,0,0,10">
-                                                        <TextBox Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Style="{StaticResource EditableTextStyle}"
-                                                                 Foreground="#CCCCCC"
                                                                  TextWrapping="Wrap"
-                                                                 FontSize="12"
-                                                                 MaxHeight="100"/>
-                                                </Border>
+                                                                 Margin="0,0,0,5"/>
 
-                                                <Button Style="{StaticResource ModernPlayerButton}"
-                                                        Content="Найти текст песни"
-                                                        Click="SearchLyrics_Click"
-                                                        Visibility="{Binding ElementName=EditModeButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Width="150"
-                                                        Height="25"
-                                                        Background="{DynamicResource AccentBrush}"
-                                                        ToolTip="Функция поиска текста использует открытые API исключительно для ознакомительных целей и личного использования"
-                                                        Margin="5">
-                                                </Button>
-                                                <TextBlock Text="Текст песни"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-                                                <Border x:Name="LyricsBorder"
-                                                        Background="#2D2D2D"
-                                                        CornerRadius="5"
-                                                        Padding="10"
-                                                        Margin="0,0,0,10"
-                                                        Cursor="Hand">
-                                                        <ScrollViewer MaxHeight="150"
-                                                                      PreviewMouseLeftButtonDown="LyricsBorder_MouseLeftButtonDown"
-                                                                      VerticalScrollBarVisibility="Auto">
-                                                                <TextBox Text="{Binding Lyrics, UpdateSourceTrigger=PropertyChanged}"
+                                                        <TextBox Text="{Binding Executor, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Style="{StaticResource EditableTextStyle}"
+                                                                 FontSize="18"
+                                                                 Foreground="{DynamicResource AccentBrush}"
+                                                                 Margin="0,0,0,20"/>
+
+                                                        <Grid Margin="0,0,0,15">
+                                                                <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <TextBlock Grid.Row="0"
+                                                                           Grid.Column="0"
+                                                                           Text="Альбом:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,5"/>
+                                                                <TextBox Grid.Row="0"
+                                                                         Grid.Column="1"
+                                                                         Text="{Binding Album, UpdateSourceTrigger=PropertyChanged}"
                                                                          Style="{StaticResource EditableTextStyle}"
-                                                                         AcceptsReturn="True"
+                                                                         Foreground="White"
+                                                                         Margin="0,5"
+                                                                         TextWrapping="Wrap"/>
+
+                                                                <TextBlock Grid.Row="1"
+                                                                           Grid.Column="0"
+                                                                           Text="Альбом исполнитель:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,5"/>
+                                                                <TextBox Grid.Row="1"
+                                                                         Grid.Column="1"
+                                                                         Text="{Binding AlbumArtist, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource EditableTextStyle}"
+                                                                         Foreground="White"
+                                                                         Margin="0,5"
+                                                                         TextWrapping="Wrap"/>
+
+                                                                <TextBlock Grid.Row="2"
+                                                                           Grid.Column="0"
+                                                                           Text="Жанр:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,5"/>
+                                                                <TextBox Grid.Row="2"
+                                                                         Grid.Column="1"
+                                                                         Text="{Binding Genre, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource EditableTextStyle}"
+                                                                         Margin="0,5"/>
+
+                                                                <TextBlock Grid.Row="3"
+                                                                           Grid.Column="0"
+                                                                           Text="Год:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,5"/>
+                                                                <TextBox Grid.Row="3"
+                                                                         Grid.Column="1"
+                                                                         Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource EditableTextStyle}"
+                                                                         Foreground="White"
+                                                                         Margin="0,5"/>
+
+                                                                <TextBlock Grid.Row="4"
+                                                                           Grid.Column="0"
+                                                                           Text="Трек №:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,5"/>
+                                                                <TextBox Grid.Row="4"
+                                                                         Grid.Column="1"
+                                                                         Text="{Binding TrackNumber, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource EditableTextStyle}"
+                                                                         Foreground="White"
+                                                                         Margin="0,5"/>
+
+                                                                <TextBlock Grid.Row="5"
+                                                                           Grid.Column="0"
+                                                                           Text="Композитор:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,5"/>
+                                                                <TextBox Grid.Row="5"
+                                                                         Grid.Column="1"
+                                                                         Text="{Binding Composer, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource EditableTextStyle}"
+                                                                         Foreground="White"
+                                                                         Margin="0,5"
+                                                                         TextWrapping="Wrap"/>
+                                                        </Grid>
+
+                                                        <Separator Background="#333"
+                                                                   Margin="0,10"/>
+
+                                                        <TextBlock Text="Параметры аудио"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+
+                                                        <Grid Margin="0,0,0,15">
+                                                                <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <TextBlock Grid.Row="0"
+                                                                           Grid.Column="0"
+                                                                           Text="Битрейт:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="0"
+                                                                           Grid.Column="1"
+                                                                           Text="{Binding Bitrate, StringFormat='{}{0} kbps'}"
+                                                                           Foreground="White"
+                                                                           Margin="0,3"/>
+
+                                                                <TextBlock Grid.Row="1"
+                                                                           Grid.Column="0"
+                                                                           Text="Частота:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="1"
+                                                                           Grid.Column="1"
+                                                                           Text="{Binding SampleRate, StringFormat='{}{0} Hz'}"
+                                                                           Foreground="White"
+                                                                           Margin="0,3"/>
+
+                                                                <TextBlock Grid.Row="2"
+                                                                           Grid.Column="0"
+                                                                           Text="Каналы:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="2"
+                                                                           Grid.Column="1"
+                                                                           Text="{Binding Channels}"
+                                                                           Foreground="White"
+                                                                           Margin="0,3"/>
+
+                                                                <TextBlock Grid.Row="3"
+                                                                           Grid.Column="0"
+                                                                           Text="Разрядность:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="3"
+                                                                           Grid.Column="1"
+                                                                           Text="{Binding BitsPerSample, StringFormat='{}{0} bit'}"
+                                                                           Foreground="White"
+                                                                           Margin="0,3"/>
+
+                                                                <TextBlock Grid.Row="4"
+                                                                           Grid.Column="0"
+                                                                           Text="Кодек:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="4"
+                                                                           Grid.Column="1"
+                                                                           Text="{Binding Description}"
+                                                                           Foreground="White"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="5"
+                                                                           Grid.Column="0"
+                                                                           Text="BPS:"
+                                                                           Foreground="Gray"
+                                                                           Margin="0,3"/>
+                                                                <TextBlock Grid.Row="5"
+                                                                           Grid.Column="1"
+                                                                           Text="{Binding BitsPerSample}"
+                                                                           Foreground="White"
+                                                                           Margin="0,3"/>
+
+                                                        </Grid>
+                                                        <Separator Background="#333"
+                                                                   Margin="0,10"/>
+
+                                                        <TextBlock Text="Комментарий"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+                                                        <Border Background="#2D2D2D"
+                                                                CornerRadius="5"
+                                                                Padding="10"
+                                                                Margin="0,0,0,10">
+                                                                <TextBox Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource EditableTextStyle}"
                                                                          Foreground="#CCCCCC"
                                                                          TextWrapping="Wrap"
                                                                          FontSize="12"
-                                                                         FontFamily="Consolas"
-                                                                         AcceptsTab="True"/>
-                                                        </ScrollViewer>
-                                                </Border>
+                                                                         MaxHeight="100"/>
+                                                        </Border>
 
-                                                <TextBlock Text="Количество воспроизведений"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-                                                <Border Background="#2D2D2D"
-                                                        CornerRadius="5"
-                                                        Padding="10">
-                                                        <TextBlock x:Name="PlayCountTextBlock"
-                                                                   Text="{Binding PlayCount}"
-                                                                   Foreground="White"
-                                                                   TextWrapping="Wrap"
-                                                                   FontSize="10"
-                                                                   FontFamily="Consolas"/>
-                                                </Border>
-                                                <TextBlock Text="Размер файла"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-                                                <Border Background="#2D2D2D"
-                                                        CornerRadius="5"
-                                                        Padding="10">
-                                                        <TextBlock Text="{Binding Size, StringFormat='{}{0:F3} MB'}"
-                                                                   Foreground="White"
-                                                                   TextWrapping="Wrap"
-                                                                   FontSize="10"
-                                                                   FontFamily="Consolas"/>
-                                                </Border>
+                                                        <Button Style="{StaticResource ModernPlayerButton}"
+                                                                Content="Найти текст песни"
+                                                                Click="SearchLyrics_Click"
+                                                                Visibility="{Binding ElementName=EditModeButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                Width="150"
+                                                                Height="25"
+                                                                Background="{DynamicResource AccentBrush}"
+                                                                ToolTip="Функция поиска текста использует открытые API исключительно для ознакомительных целей и личного использования"
+                                                                Margin="5">
+                                                        </Button>
+                                                        <TextBlock Text="Текст песни"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+                                                        <Border x:Name="LyricsBorder"
+                                                                Background="#2D2D2D"
+                                                                CornerRadius="5"
+                                                                Padding="10"
+                                                                Margin="0,0,0,10"
+                                                                Cursor="Hand">
+                                                                <ScrollViewer MaxHeight="150"
+                                                                              PreviewMouseLeftButtonDown="LyricsBorder_MouseLeftButtonDown"
+                                                                              VerticalScrollBarVisibility="Auto">
+                                                                        <TextBox Text="{Binding Lyrics, UpdateSourceTrigger=PropertyChanged}"
+                                                                                 Style="{StaticResource EditableTextStyle}"
+                                                                                 AcceptsReturn="True"
+                                                                                 Foreground="#CCCCCC"
+                                                                                 TextWrapping="Wrap"
+                                                                                 FontSize="12"
+                                                                                 FontFamily="Consolas"
+                                                                                 AcceptsTab="True"/>
+                                                                </ScrollViewer>
+                                                        </Border>
 
-                                                <TextBlock Text="Формат файла"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-                                                <Border Background="#2D2D2D"
-                                                        CornerRadius="5"
-                                                        Padding="10">
-                                                        <TextBlock x:Name="ExstensionFile"
-                                                                   Text="{Binding DisplayExtension}"
-                                                                   Foreground="White"
-                                                                   TextWrapping="Wrap"
-                                                                   FontSize="10"
-                                                                   FontFamily="Consolas"/>
-                                                </Border>
-                                                <TextBlock Text="Путь к файлу"
-                                                           FontWeight="Bold"
-                                                           Foreground="Gray"
-                                                           Margin="0,10,0,5"/>
-                                                <Border Background="#2D2D2D"
-                                                        CornerRadius="5"
-                                                        Padding="10"
-                                                        Cursor="Hand">
-                                                        <TextBlock Text="{Binding Path}"
-                                                                   Foreground="#00CCFF"
-                                                                   Background="Transparent"
-                                                                   TextWrapping="Wrap"
-                                                                   FontSize="10"
-                                                                   FontFamily="Consolas"
-                                                                   TextDecorations="Underline"
-                                                                   MouseLeftButtonDown="PathTextBlock_MouseLeftButtonDown">
-                                                                <TextBlock.Style>
-                                                                        <Style TargetType="TextBlock">
-                                                                                <Setter Property="Cursor"
-                                                                                        Value="Hand"/>
-                                                                                <Style.Triggers>
-                                                                                        <Trigger Property="IsMouseOver"
-                                                                                                 Value="True">
-                                                                                                <Setter Property="Foreground"
-                                                                                                        Value="#33CCFF"/>
-                                                                                        </Trigger>
-                                                                                </Style.Triggers>
-                                                                        </Style>
-                                                                </TextBlock.Style>
-                                                        </TextBlock>
-                                                </Border>
-                                        </StackPanel>
-                                </Grid>
-                        </ScrollViewer>
-                </Grid>
-        </Border>
+                                                        <TextBlock Text="Количество воспроизведений"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+                                                        <Border Background="#2D2D2D"
+                                                                CornerRadius="5"
+                                                                Padding="10">
+                                                                <TextBlock x:Name="PlayCountTextBlock"
+                                                                           Text="{Binding PlayCount}"
+                                                                           Foreground="White"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="10"
+                                                                           FontFamily="Consolas"/>
+                                                        </Border>
+                                                        <TextBlock Text="Размер файла"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+                                                        <Border Background="#2D2D2D"
+                                                                CornerRadius="5"
+                                                                Padding="10">
+                                                                <TextBlock Text="{Binding Size, StringFormat='{}{0:F3} MB'}"
+                                                                           Foreground="White"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="10"
+                                                                           FontFamily="Consolas"/>
+                                                        </Border>
+
+                                                        <TextBlock Text="Формат файла"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+                                                        <Border Background="#2D2D2D"
+                                                                CornerRadius="5"
+                                                                Padding="10">
+                                                                <TextBlock x:Name="ExstensionFile"
+                                                                           Text="{Binding DisplayExtension}"
+                                                                           Foreground="White"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="10"
+                                                                           FontFamily="Consolas"/>
+                                                        </Border>
+                                                        <TextBlock Text="Путь к файлу"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="Gray"
+                                                                   Margin="0,10,0,5"/>
+                                                        <Border Background="#2D2D2D"
+                                                                CornerRadius="5"
+                                                                Padding="10"
+                                                                Cursor="Hand">
+                                                                <TextBlock Text="{Binding Path}"
+                                                                           Foreground="#00CCFF"
+                                                                           Background="Transparent"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="10"
+                                                                           FontFamily="Consolas"
+                                                                           TextDecorations="Underline"
+                                                                           MouseLeftButtonDown="PathTextBlock_MouseLeftButtonDown">
+                                                                        <TextBlock.Style>
+                                                                                <Style TargetType="TextBlock">
+                                                                                        <Setter Property="Cursor"
+                                                                                                Value="Hand"/>
+                                                                                        <Style.Triggers>
+                                                                                                <Trigger Property="IsMouseOver"
+                                                                                                         Value="True">
+                                                                                                        <Setter Property="Foreground"
+                                                                                                                Value="#33CCFF"/>
+                                                                                                </Trigger>
+                                                                                        </Style.Triggers>
+                                                                                </Style>
+                                                                        </TextBlock.Style>
+                                                                </TextBlock>
+                                                        </Border>
+                                                </StackPanel>
+                                        </Grid>
+                                </ScrollViewer>
+                        </Grid>
+                </Border>
+                <dialogs:ModernNotice x:Name="TrackInfoToast"
+                                      VerticalAlignment="Bottom"
+                                      HorizontalAlignment="Center"
+                                      Panel.ZIndex="9999"/>
+        </Grid>
 </Window>

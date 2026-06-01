@@ -1,4 +1,13 @@
 # CHANGELOG
+
+## (01.06.2026) Version 1.7.2:
+    - New notification system (Toast Notifications): Notifications are divided into two types. New lightweight notifications have been added for successful routine actions (saving tags, adding a track to favorites, creating a playlist). They smoothly slide in from the bottom of the screen, change statuses in real time, and don't require clicking buttons. Modal windows with an "OK" button now appear only when critical errors occur, so the text can be easily read or copied.  
+    - Library panel redesign: The "LIBRARY" label in the left column is now neatly centered. All playlist control buttons are now arranged in a single symmetrical row and automatically adjust to the full panel width.  
+    - New feature: A "Sort playlists" button has been added to the library control panel for quickly organizing playlists.  
+    - Asynchronous data loading: The processes of reading metadata and loading information in the "Playlist Details" window have been switched to asynchronous. Heavy disk operations no longer block or freeze the main player interface.  
+    - Dynamic Art Placeholders: When a playlist lacks custom art, the ShowInfoPlaylist window now automatically renders a neat vector placeholder geometry instead of the empty space. This is the exact same logic as the "Edit Playlist" window.  
+    - Removed old png files from the project.
+
 ## (28.05.2026) Version: 1.7.1:
     - A "Open Spectrum in Full Screen" button has been added to the bottom control panel.  
     - BASS registration data has been moved to a separate file. More details in readme.md.   

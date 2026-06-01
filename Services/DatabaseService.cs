@@ -901,26 +901,39 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("$id", playlistId);
         cmd.ExecuteNonQuery();
     }
-    public static void SavePlaylistsOrder()
+    public static void SavePlaylistsOrder(IList<Playlist> playlists)
     {
-        var playlists = MusicLibrary.Instance.Playlists;
-
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        using var transaction = connection.BeginTransaction();
-        var command = connection.CreateCommand();
-        command.CommandText = "UPDATE Playlists SET SortOrder = @order WHERE Id = @id";
-
-        var orderParam = command.Parameters.Add("@order", SqliteType.Integer);
-        var idParam = command.Parameters.Add("@id", SqliteType.Integer);
-
-        for (int i = 0; i < playlists.Count; i++)
+        try
         {
-            orderParam.Value = i;
-            idParam.Value = playlists[i].Id;
-            command.ExecuteNonQuery();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE Playlists SET SortOrder = @order WHERE Id = @id";
+
+            var orderParam = command.Parameters.Add("@order", SqliteType.Integer);
+            var idParam = command.Parameters.Add("@id", SqliteType.Integer);
+
+            for (int i = 0; i < playlists.Count; i++)
+            {
+                // 1. Обновляем значение свойства прямо в объекте в оперативной памяти,
+                // чтобы WPF ICollectionView сразу подхватил новые индексы сортировки
+                playlists[i].SortOrder = i;
+
+                // 2. Записываем в базу данных SQLite
+                orderParam.Value = i;
+                idParam.Value = playlists[i].Id;
+                command.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+            System.Diagnostics.Debug.WriteLine("Порядок плейлистов успешно сохранен в БД.");
         }
-        transaction.Commit();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении порядка плейлистов: {ex.Message}");
+        }
     }
 
     public static void SaveSettingSync(string key, string value)
@@ -972,7 +985,7 @@ public class DatabaseService
             message += "----------------------------------------------------------------\n";
             try
             {
-                System.IO.File.AppendAllText(logPath, message);
+                File.AppendAllText(logPath, message);
             }
             catch
             {
@@ -1462,7 +1475,7 @@ public class DatabaseService
     public static async Task<List<Playlist>> GetAllPlaylistsWithTracksAsync(Func<int, int, Task>? onPlaylistLoaded = null)
     {
         var playlists = await GetPlaylistsAsync();
-        
+
         // Загружаем треки для каждого плейлиста последовательно
         for (int i = 0; i < playlists.Count; i++)
         {
@@ -1471,9 +1484,9 @@ public class DatabaseService
             {
                 playlists[i].Tracks.Add(track);
             }
-            
+
             System.Diagnostics.Debug.WriteLine($"Загружены треки для плейлиста {i + 1}/{playlists.Count}: '{playlists[i].Name}' ({tracks.Count} треков)");
-            
+
             // Вызываем callback для уведомления о прогрессе
             if (onPlaylistLoaded != null)
             {

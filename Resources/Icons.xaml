@@ -2,6 +2,50 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Geometry x:Key="QAMP_Q_Geometry">M322,107H262l6-17H228l-9,17H162l32-73H342l6,7V52ZM132,295l27,32-52,58L59,339V315l95-201h63Zm22-31h32l70-149h61L220,320H172l-27-32Z</Geometry>
+    <DrawingGroup x:Key="QAMP_Q_DrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource QAMP_Q_Geometry}"/>
+    </DrawingGroup>
+
+    <Geometry x:Key="EqualizerGeometry">M280-240v-480h80v480h-80ZM440-80v-800h80v800h-80ZM120-400v-160h80v160h-80Zm480 160v-480h80v480h-80Zm160-160v-160h80v160h-80Z</Geometry>
+    <DrawingGroup x:Key="EqualizerDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource EqualizerGeometry}"/>
+    </DrawingGroup>
+
+    <Geometry x:Key="LibraryMusicGeometry">"M486-333q41 0 70-28.42T585-431v-252h116v-60H545v237q-11-9-26.32-14T486-525q-39.06 0-66.03 27.37-26.97 27.36-26.97 67Q393-391 419.97-362q26.97 29 66.03 29ZM260-200q-24 0-42-18t-18-42v-560q0-24 18-42t42-18h560q24 0 42 18t18 42v560q0 24-18 42t-42 18H260Zm0-60h560v-560H260v560ZM140-80q-24 0-42-18t-18-42v-620h60v620h620v60H140Zm120-740v560-560Z</Geometry>
+    <DrawingGroup x:Key="LibraryMusicDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource LibraryMusicGeometry}"/>
+    </DrawingGroup>
+
+    <Geometry x:Key="PinForPlaylistGeometry">m640-480 80 80v80H520v240l-40 40-40-40v-240H240v-80l80-80v-280h-40v-80h400v80h-40v280Zm-286 80h252l-46-46v-314H400v314l-46 46Zm126 0Z</Geometry>
+    <DrawingGroup x:Key="PinForPlaylistDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource PinForPlaylistGeometry}"/>
+    </DrawingGroup>
+
     <Geometry x:Key="FullSpectrumWindowGeometry">M160-160v-320h160v320H160Zm240 0v-640h160v640H400Zm240 0v-440h160v440H640Z</Geometry>
     <DrawingGroup x:Key="FullSpectrumWindowDrawingGroup"
                   ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
@@ -12,7 +56,7 @@
         <GeometryDrawing Brush="#FFE3E3E3"
                          Geometry="{StaticResource FullSpectrumWindowGeometry}"/>
     </DrawingGroup>
-    
+
     <Geometry x:Key="PlugForTheRightSideGeometry">M240-440h360v-80H240v80Zm0-120h360v-80H240v80Zm-80 400q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-480H160v480Zm0 0v-480 480Z</Geometry>
     <DrawingGroup x:Key="PlugForTheRightSideDrawingGroup"
                   ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">

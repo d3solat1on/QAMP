@@ -32,8 +32,6 @@ namespace QAMP.Dialogs
                 {
                     // Изображение уже 1 к 1 — просто применяем его
                     CoverImage.Source = bitmap;
-                    if (PlaceholderText != null) PlaceholderText.Visibility = Visibility.Collapsed;
-
                     // Сохраняем в данные плейлиста (конвертируем в байты)
                     if (DataContext is Playlist playlist)
                     {
@@ -51,7 +49,6 @@ namespace QAMP.Dialogs
                     if (cropper.ShowDialog() == true && cropper.ResultImage != null)
                     {
                         CoverImage.Source = cropper.ResultImage;
-                        if (PlaceholderText != null) PlaceholderText.Visibility = Visibility.Collapsed;
 
                         if (DataContext is Playlist playlist)
                         {
