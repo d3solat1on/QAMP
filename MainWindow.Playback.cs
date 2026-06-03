@@ -347,7 +347,7 @@ namespace QAMP
             }
         }
 
-        private void ApplySort(TrackSortType sortType, bool showNotification = false)
+        private async void ApplySort(TrackSortType sortType, bool showNotification = false)
         {
             if (Library.CurrentPlaylist == null) return;
 
@@ -377,7 +377,7 @@ namespace QAMP
                     TrackSortType.NameAZ => "по названию (A-Z)",
                     _ => "неизвестно"
                 };
-                _ = NotificationWindow.Show($"Плейлист отсортирован {sortName}", this);
+                await MyToast.ShowAsync($"Плейлист отсортирован {sortName}");
             }
         }
 

@@ -116,9 +116,8 @@
                                     WindowChrome.IsHitTestVisibleInChrome="True">
                                 <Button x:Name="EqualizerButton"
                                         Style="{StaticResource IconButton}"
-                                        ToolTip="Открыть эквалайзер"
-                                        Visibility="Hidden">
-                                        <!-- Click="EqualizerButton_Click" -->
+                                        ToolTip="Открыть параметры звука"
+                                        Click="EqualizerButton_Click">
                                         <Path Data="{StaticResource EqualizerGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
@@ -580,9 +579,9 @@
                                                                                 <Style TargetType="ContextMenu"
                                                                                        x:Key="ModernMenu">
                                                                                         <Setter Property="Background"
-                                                                                                Value="#1E1E1E"/>
+                                                                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                                                                         <Setter Property="BorderBrush"
-                                                                                                Value="#333"/>
+                                                                                                Value="{DynamicResource AccentBrush}"/>
                                                                                         <Setter Property="Template">
                                                                                                 <Setter.Value>
                                                                                                         <ControlTemplate TargetType="ContextMenu">
@@ -764,6 +763,14 @@
                                                                                                                                                              Value="1">
                                                                                                                                                         <Setter Property="Data"
                                                                                                                                                                 Value="{StaticResource FavoriteCoverGeometry}"/>
+                                                                                                                                                        <Setter Property="Effect">
+                                                                                                                                                                <Setter.Value>
+                                                                                                                                                                        <DropShadowEffect Color="{Binding Source={StaticResource AccentBrush}, Path=Color}"
+                                                                                                                                                                                          BlurRadius="15"
+                                                                                                                                                                                          ShadowDepth="0"
+                                                                                                                                                                                          Opacity="0.5"/>
+                                                                                                                                                                </Setter.Value>
+                                                                                                                                                        </Setter>
                                                                                                                                                 </DataTrigger>
                                                                                                                                         </Style.Triggers>
                                                                                                                                 </Style>
@@ -1032,17 +1039,17 @@
                                                                             Orientation="Horizontal"
                                                                             VerticalAlignment="Bottom">
                                                                         <TextBlock Text="{Binding CurrentPlaylist.TrackCountDisplay, StringFormat='Треков: {0}'}"
-                                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                                   Foreground="{DynamicResource TextBrush}"
                                                                                    FontSize="13"/>
                                                                         <TextBlock Text=" • "
-                                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                   Foreground="{DynamicResource TextBrush}"/>
                                                                         <TextBlock Text="{Binding CurrentPlaylist.TotalDurationDisplay}"
-                                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                                   Foreground="{DynamicResource TextBrush}"
                                                                                    FontSize="13"/>
                                                                         <TextBlock Text=" • "
-                                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                   Foreground="{DynamicResource TextBrush}"/>
                                                                         <TextBlock Text="{Binding CurrentPlaylist.CreatedDate, StringFormat=\{0:dd\\.MM\\.yyyy\}}"
-                                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                                   Foreground="{DynamicResource TextBrush}"
                                                                                    FontSize="13"/>
                                                                 </StackPanel>
                                                         </Grid>

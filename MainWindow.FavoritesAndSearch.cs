@@ -551,5 +551,13 @@ namespace QAMP
                 NotificationWindow.Show("Сначала выберите плейлист", this);
             }
         }
+        private void EqualizerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsAudioWindow = new SettingsAudio()
+            {
+                Owner = this
+            };
+            settingsAudioWindow.Show();
+        }
     }
 }

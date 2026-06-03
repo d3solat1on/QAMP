@@ -3,12 +3,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.IO;
 using QAMP.Models;
 using QAMP.Services;
-using QAMP.ViewModels;
-using QAMP.Visualization;
+using Microsoft.Win32;
+using QAMP.Dialogs;
 
 namespace QAMP.Windows
 {
@@ -17,8 +17,6 @@ namespace QAMP.Windows
         private bool isInitializing;
         private string? originalColorScheme;
         private string? originalAccentColor;
-        private double[]? originalEqGains;
-        private string? originalPreset;
         private bool originalVisualizerEnabled;
         private int originalBarCount;
         private bool originalCloseToTray;
@@ -29,167 +27,249 @@ namespace QAMP.Windows
         public Settings(PlayerService player)
         {
             InitializeComponent();
+            InitializeCustomThemes();
             _player = player;
-            LoadEqualizerData();
             StartMemoryTicking();
         }
 
-        private void LoadEqualizerData()
+        private static string ThemesFolderPath => System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
+
+        private void InitializeCustomThemes()
         {
-            var bands = new List<EqBandViewModel>();
-            float[] freqs = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
-            var config = SettingsManager.Instance.Config;
+            var appSettings = new AppSettings();
+            Debug.WriteLine("[QAMP Theme Debug] --- Инициализация пользовательских тем ---");
+            DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
+            LightThemeRadio.Checked -= StandardThemeRadio_Checked;
+            CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
 
-            for (int i = 0; i < freqs.Length; i++)
+            try
             {
-                string freqLabel = freqs[i] < 1000 ? $"{freqs[i]}" : $"{freqs[i] / 1000}k";
-                bands.Add(new EqBandViewModel
+                Debug.WriteLine($"[QAMP Theme Debug] Целевой путь к папке тем: {ThemesFolderPath}");
+
+                if (!Directory.Exists(ThemesFolderPath))
                 {
-                    Index = i,
-                    Frequency = freqLabel,
-                    // Читаем значение из сохраненного конфига, а не из памяти плеера!
-                    Gain = (float)config.EqualizerGains[i]
-                });
-            }
-            EqItemsControl.ItemsSource = bands;
-
-            // Восстанавливаем сохраненный режим
-            SetPresetComboBoxValue(config.EqualizerPreset);
-
-            // Применяем сохраненные значения к плееру
-            ApplySavedGains();
-        }
-
-        private void EqSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (sender is Slider slider && slider.DataContext is EqBandViewModel band)
-            {
-                float newValue = (float)e.NewValue;
-
-                // Обновляем эквалайзер в плеере
-                if (_player != null)
+                    Debug.WriteLine("[QAMP Theme Debug] Папка Themes не найдена. Создаю директорию...");
+                    Directory.CreateDirectory(ThemesFolderPath);
+                }
+                else
                 {
-                    _player.EqGains[band.Index] = newValue;
-                    _player.ApplyCurrentEqGains();
+                    Debug.WriteLine("[QAMP Theme Debug] Папка Themes успешно обнаружена.");
                 }
 
-                // Сохраняем в конфиг
-                var config = SettingsManager.Instance.Config;
-                config.EqualizerGains[band.Index] = newValue;
+                RefreshThemesList();
+                DarkThemeRadio.IsChecked = false;
+                LightThemeRadio.IsChecked = false;
+                CustomThemesComboBox.SelectedIndex = -1;
+                // Проверяем, что записано в настройках
+                if (appSettings.ColorScheme != null)
+                {
+                    string currentTheme = appSettings.ColorScheme;
+                    Debug.WriteLine($"[QAMP Theme Debug] Текущая тема из settings.json: {currentTheme}");
 
-                // Обновляем график АЧХ
-                DrawEqGraph();
+                    if (currentTheme == "Dark")
+                    {
+                        DarkThemeRadio.IsChecked = true;
+                    }
+                    else if (currentTheme == "Light")
+                    {
+                        LightThemeRadio.IsChecked = true;
+                    }
+                    else
+                    {
+                        // Если это кастомный файл темы, выбираем его в списке
+                        if (CustomThemesComboBox.Items.Contains(currentTheme))
+                        {
+                            CustomThemesComboBox.SelectedItem = currentTheme;
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("[QAMP Theme Debug] Предупреждение: SettingsManager или CurrentTheme равны null.");
+                }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[QAMP Theme Debug] КРИТИЧЕСКАЯ ОШИБКА при инициализации: {ex.Message}");
+            }
+            DarkThemeRadio.Checked += StandardThemeRadio_Checked;
+            LightThemeRadio.Checked += StandardThemeRadio_Checked;
+            CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
+            Debug.WriteLine("[QAMP Theme Debug] ---------------------------------------------");
+        }
+        private void RefreshThemesList()
+        {
+            Debug.WriteLine("[QAMP Theme Debug] --- Обновление списка тем в ComboBox ---");
+
+            // 1. Отключаем событие
+            CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
+            Debug.WriteLine("[QAMP Theme Debug] Событие SelectionChanged временно отключено.");
+
+            // 2. Очищаем элементы
+            CustomThemesComboBox.Items.Clear();
+            Debug.WriteLine("[QAMP Theme Debug] Элементы ComboBox очищены.");
+
+            if (Directory.Exists(ThemesFolderPath))
+            {
+                // 3. Ищем файлы
+                var xamlFiles = Directory.GetFiles(ThemesFolderPath, "*.xaml")
+                                         .Select(System.IO.Path.GetFileName)
+                                         .ToList();
+
+                Debug.WriteLine($"[QAMP Theme Debug] Найдено файлов .xaml в папке: {xamlFiles.Count}");
+
+                foreach (var file in xamlFiles)
+                {
+                    CustomThemesComboBox.Items.Add(file);
+                    Debug.WriteLine($"[QAMP Theme Debug] Добавлен в ComboBox: {file}");
+                }
+            }
+            else
+            {
+                Debug.WriteLine("[QAMP Theme Debug] Ошибка: Папка Themes не существует на момент вызова RefreshThemesList.");
+            }
+
+            // 4. Возвращаем событие
+            CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
+            Debug.WriteLine("[QAMP Theme Debug] Событие SelectionChanged снова подключено.");
+
+            // На всякий случай выведем итоговое количество элементов в самом контроле
+            Debug.WriteLine($"[QAMP Theme Debug] Итоговое количество Items в ComboBox: {CustomThemesComboBox.Items.Count}");
+
+            // Принудительно заставляем UI перерисоваться
+            CustomThemesComboBox.UpdateLayout();
         }
 
-        private void PresetComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private static bool IsThemeValid(string filePath, out string errorMessage)
         {
-            if (PresetComboBox.SelectedItem is ComboBoxItem item)
+            errorMessage = string.Empty;
+            try
             {
-                string presetName = item.Content?.ToString() ?? "Пользовательский";
-                switch (presetName)
+                // 1. Быстрая проверка размера файла
+                var fileInfo = new FileInfo(filePath);
+                if (fileInfo.Length > 1024 * 1024)
                 {
-                    case "Bass Boost":
-                        ApplyPreset([8, 10, 7, 3, 0, 0, 2, 4, 6, 5]);
-                        break;
-                    case "Rock":
-                        ApplyPreset([5, 4, 3, 1, -1, -1, 2, 4, 5, 3]);
-                        break;
-                    case "Classical":
-                        ApplyPreset([4, 3, 2, 1, 1, 1, 2, 3, 4, 4]);
-                        break;
-                    case "Pop":
-                        ApplyPreset([-2, -1, 1, 2, 4, 4, 3, 1, -1, -2]);
-                        break;
-                    case "Lo-Fi":
-                        ApplyPreset([4, 3, 2, 2, 3, 4, 3, 1, -3, -5]);
-                        break;
-                    case "Electronic":
-                        ApplyPreset([7, 6, 3, -1, -3, -3, 0, 4, 7, 8]);
-                        break;
-                    case "Vocal":
-                        ApplyPreset([-5, -4, -2, 2, 5, 6, 4, 2, 0, -2]);
-                        break;
-                    case "Metal":
-                        ApplyPreset([6, 5, 2, -2, -3, -1, 3, 5, 4, 2]);
-                        break;
-                    case "808":
-                        ApplyPreset([12, 11, 8, 2, -2, -1, 1, 4, 8, 10]);
-                        break;
-                    default:
-                        break;
+                    errorMessage = "Файл темы слишком большой (макс. 1 МБ).";
+                    return false;
                 }
 
-                SettingsManager.Instance.Config.EqualizerPreset = presetName;
-                SettingsManager.Instance.Save();
-            }
-        }
-
-        private void ApplyPreset(float[] gains)
-        {
-            if (EqItemsControl.ItemsSource is List<EqBandViewModel> bands)
-            {
-                for (int i = 0; i < bands.Count && i < gains.Length; i++)
+                // 2. Пытаемся распарсить кастомный XAML
+                ResourceDictionary? customDict;
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    bands[i].Gain = gains[i]; // Обновляет UI через Binding
+                    customDict = System.Windows.Markup.XamlReader.Load(fs) as ResourceDictionary;
                 }
 
-                // Применяем к плееру
-                _player?.UpdateEqualizerGains(gains);
-
-                // Сохраняем в конфиг
-                var config = SettingsManager.Instance.Config;
-                for (int i = 0; i < gains.Length; i++)
+                if (customDict == null)
                 {
-                    config.EqualizerGains[i] = gains[i];
+                    errorMessage = "Файл не является корректным словарем ресурсов (ResourceDictionary).";
+                    return false;
                 }
-                config.EqualizerPreset = GetCurrentPresetName();
-                SettingsManager.Instance.Save();
 
-                // Обновляем график
-                DrawEqGraph();
-            }
-        }
-        private string GetCurrentPresetName()
-        {
-            if (PresetComboBox.SelectedItem is ComboBoxItem item)
-            {
-                return item.Content?.ToString() ?? "Пользовательский";
-            }
-            return "Пользовательский";
-        }
+                // 3. Загружаем нашу стандартную Темную тему как эталон для сверки
+                var defaultThemeUri = new Uri(";component/Themes/DarkTheme.xaml", UriKind.RelativeOrAbsolute);
+                var baseThemeDict = new ResourceDictionary { Source = defaultThemeUri };
 
-        private void ResetEq_Click(object sender, RoutedEventArgs e)
-        {
-            ApplyPreset(new float[10]); // Все в 0
-            PresetComboBox.SelectedIndex = 0; // Возвращаем в "Пользовательский"
-        }
-
-        private void ApplySavedGains()
-        {
-            if (_player == null) return;
-
-            var config = SettingsManager.Instance.Config;
-            for (int i = 0; i < config.EqualizerGains.Length; i++)
-            {
-                _player.EqGains[i] = (float)config.EqualizerGains[i];
-            }
-            _player.ApplyCurrentEqGains();
-        }
-
-        private void SetPresetComboBoxValue(string presetName)
-        {
-            for (int i = 0; i < PresetComboBox.Items.Count; i++)
-            {
-                if (PresetComboBox.Items[i] is ComboBoxItem item && item.Content.ToString() == presetName)
+                // 4. Проверяем, что в новой теме есть все ключи из базовой
+                foreach (var key in baseThemeDict.Keys)
                 {
-                    PresetComboBox.SelectedIndex = i;
+                    if (!customDict.Contains(key))
+                    {
+                        errorMessage = $"В теме отсутствует обязательный ресурс: '{key}'";
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Ошибка чтения XAML: {ex.Message}";
+                return false;
+            }
+        }
+
+        private async void AddThemeButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new();
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string selectedFilePath = openFileDialog.FileName;
+                string fileName = System.IO.Path.GetFileName(selectedFilePath);
+                string destFilePath = System.IO.Path.Combine(ThemesFolderPath, fileName);
+
+                // Валидация файла
+                if (!IsThemeValid(selectedFilePath, out string error))
+                {
+                    NotificationWindow.Show($"Не удалось импортировать тему.\n{error}", this);
                     return;
                 }
+
+                try
+                {
+                    // Копируем в папку приложения
+                    File.Copy(selectedFilePath, destFilePath, overwrite: true);
+
+                    // Обновляем список в ComboBox
+                    RefreshThemesList();
+
+                    // Автоматически выбираем добавленную тему
+                    CustomThemesComboBox.SelectedItem = fileName;
+
+                    await SettingsInfoToast.ShowAsync("Тема успешно добавлена!");
+                }
+                catch (Exception ex)
+                {
+                    NotificationWindow.Show($"Не удалось скопировать файл: {ex.Message}", this);
+                }
             }
-            PresetComboBox.SelectedIndex = 0; // По умолчанию на "Пользовательский"
         }
 
+        private void StandardThemeRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (CustomThemesComboBox == null) return;
+
+            // Сбрасываем выбор в кастомных темах
+            CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
+            CustomThemesComboBox.SelectedIndex = -1;
+            CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
+
+            string themeName = (sender == DarkThemeRadio) ? "Dark" : "Light";
+            SettingsManager.Instance.Config.ColorScheme = themeName;
+            ThemeManager.ApplyTheme(themeName);
+        }
+
+        private void CustomThemeRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (CustomThemesComboBox == null) return;
+
+            if (CustomThemesComboBox.SelectedItem is string selectedThemeFile)
+            {
+                SettingsManager.Instance.Config.ColorScheme = selectedThemeFile;
+                ThemeManager.ApplyTheme(selectedThemeFile);
+            }
+        }
+
+        // Выбор кастомной темы из ComboBox
+        private void CustomThemesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CustomThemesComboBox.SelectedItem is string selectedThemeFile)
+            {
+                // Снимаем флажки со стандартных радио-кнопок
+                DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
+                LightThemeRadio.Checked -= StandardThemeRadio_Checked;
+
+                DarkThemeRadio.IsChecked = false;
+                LightThemeRadio.IsChecked = false;
+
+                DarkThemeRadio.Checked += StandardThemeRadio_Checked;
+                LightThemeRadio.Checked += StandardThemeRadio_Checked;
+
+                SettingsManager.Instance.Config.ColorScheme = selectedThemeFile;
+                ThemeManager.ApplyTheme(selectedThemeFile);
+            }
+        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             isInitializing = true;
@@ -197,8 +277,6 @@ namespace QAMP.Windows
             var config = SettingsManager.Instance.Config;
             originalColorScheme = config.ColorScheme;
             originalAccentColor = config.AccentColor;
-            originalEqGains = (double[])config.EqualizerGains.Clone();
-            originalPreset = config.EqualizerPreset;
             originalVisualizerEnabled = config.IsVisualizerEnabled;
             originalBarCount = config.VisualizerBarCount;
             originalCloseToTray = config.CloseToTray;
@@ -219,11 +297,10 @@ namespace QAMP.Windows
                 case "Light":
                     LightThemeRadio.IsChecked = true;
                     break;
-                case "Custom":
+                default:
                     CustomThemeRadio.IsChecked = true;
                     break;
             }
-
             // Установить акцентный цвет
             AccentColorTextBox.Text = config.AccentColor;
             UpdateColorPreview();
@@ -240,25 +317,13 @@ namespace QAMP.Windows
             AutoLaunchEnabled.IsChecked = config.IsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !config.IsAutoLaunchEnabled;
 
-            isInitializing = false;
-
-            // Синхронизируем эквалайзер с плеером
-            if (_player != null)
-            {
-                for (int i = 0; i < config.EqualizerGains.Length; i++)
-                {
-                    _player.EqGains[i] = (float)config.EqualizerGains[i];
-                }
-                _player.ApplyCurrentEqGains();
-            }
-
-            // Рисуем график АЧХ
-            Dispatcher.InvokeAsync(DrawEqGraph, DispatcherPriority.Loaded);
             if (config.IsCompactMode)
                 CompactModeRadio.IsChecked = true;
             else
                 DefaultModeRadio.IsChecked = true;
             CheckAutoLaunch(null, null);
+
+            isInitializing = false;
         }
 
         private void AdaptiveGradients_Checked(object sender, RoutedEventArgs e)
@@ -376,16 +441,6 @@ namespace QAMP.Windows
             if (originalAccentColor != null)
                 config.AccentColor = originalAccentColor;
 
-            // Восстановить оригинальные значения эквалайзера
-            if (originalEqGains != null)
-            {
-                for (int i = 0; i < originalEqGains.Length; i++)
-                {
-                    config.EqualizerGains[i] = originalEqGains[i];
-                }
-            }
-            if (originalPreset != null)
-                config.EqualizerPreset = originalPreset;
 
             // Восстановить оригинальные значения спектрограммы
             config.IsVisualizerEnabled = originalVisualizerEnabled;
@@ -438,150 +493,12 @@ namespace QAMP.Windows
             // Обновляем цвета спектра при отмене настроек
             PlayerService.Instance.RefreshSpectrumControls();
 
-            ApplySavedGains();
-
             DialogResult = false;
             _memoryTimer?.Stop();
             Close();
+            MemoryOptimizer.RunAsync(Dispatcher);
         }
 
-        private void DrawEqGraph()
-        {
-            if (EqGraphCanvas == null) return;
-
-            EqGraphCanvas.Children.Clear();
-
-            var config = SettingsManager.Instance.Config;
-            double canvasWidth = EqGraphCanvas.ActualWidth;
-            double canvasHeight = EqGraphCanvas.ActualHeight;
-
-            if (canvasWidth <= 0 || canvasHeight <= 0) return;
-
-            // Параметры графика
-            const double maxDb = 12;
-            double midY = canvasHeight / 2; // Центр для 0dB
-
-            // Получаем текущие значения эквалайзера
-            float[] gains = new float[10];
-            if (EqItemsControl.ItemsSource is List<EqBandViewModel> bands)
-            {
-                for (int i = 0; i < bands.Count; i++)
-                {
-                    gains[i] = bands[i].Gain;
-                }
-            }
-
-            // Рисуем фоновую сетку
-            DrawGridLines(canvasWidth, canvasHeight, midY);
-
-            // Рисуем линию 0dB
-            var zeroline = new Line
-            {
-                X1 = 0,
-                Y1 = midY,
-                X2 = canvasWidth,
-                Y2 = midY,
-                Stroke = new SolidColorBrush(Color.FromArgb(60, 0, 200, 0)),
-                StrokeThickness = 1,
-                StrokeDashArray = new DoubleCollection([3, 3])
-            };
-            EqGraphCanvas.Children.Add(zeroline);
-
-            // Вычисляем точки для полилинии
-            PointCollection points = [];
-
-            // Интерполируем значения между полосами для плавной кривой
-            for (int i = 0; i <= 100; i++)
-            {
-                double t = i / 100.0; // 0 до 1
-                int bandIndex = (int)(t * (gains.Length - 1));
-                double bandFraction = t * (gains.Length - 1) - bandIndex;
-
-                float gainValue;
-                if (bandIndex >= gains.Length - 1)
-                {
-                    gainValue = gains[gains.Length - 1];
-                }
-                else
-                {
-                    // Линейная интерполяция между двумя полосами
-                    gainValue = gains[bandIndex] * (1 - (float)bandFraction) +
-                               gains[bandIndex + 1] * (float)bandFraction;
-                }
-
-                // Преобразуем dB в координаты Y (инвертируем, чтобы положительные dB шли вверх)
-                double y = midY - (gainValue / maxDb) * (midY - 2);
-                double x = (i / 100.0) * canvasWidth;
-
-                points.Add(new Point(x, y));
-            }
-
-            // Рисуем полилинию
-            var polyline = new Polyline
-            {
-                Points = points,
-                Stroke = (Brush)TryFindResource("AccentBrush") ?? new SolidColorBrush(Colors.Green),
-                StrokeThickness = 2.5,
-                StrokeLineJoin = PenLineJoin.Round,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round
-            };
-            EqGraphCanvas.Children.Add(polyline);
-
-            // Рисуем точки для каждой полосы
-            double stepX = canvasWidth / (gains.Length - 1);
-            for (int i = 0; i < gains.Length; i++)
-            {
-                double x = i * stepX;
-                double y = midY - (gains[i] / maxDb) * (midY - 2);
-
-                var circle = new Ellipse
-                {
-                    Width = 6,
-                    Height = 6,
-                    Fill = (Brush)TryFindResource("AccentBrush") ?? new SolidColorBrush(Colors.Green)
-                };
-                Canvas.SetLeft(circle, x - 3);
-                Canvas.SetTop(circle, y - 3);
-                EqGraphCanvas.Children.Add(circle);
-            }
-        }
-
-        private void DrawGridLines(double canvasWidth, double canvasHeight, double midY)
-        {
-            // Вертикальные линии сетки
-            for (int i = 0; i < 10; i++)
-            {
-                double x = (i / 9.0) * canvasWidth;
-                var line = new Line
-                {
-                    X1 = x,
-                    Y1 = 0,
-                    X2 = x,
-                    Y2 = canvasHeight,
-                    Stroke = new SolidColorBrush(Color.FromArgb(20, 200, 200, 200)),
-                    StrokeThickness = 1
-                };
-                EqGraphCanvas.Children.Add(line);
-            }
-
-            // Горизонтальные линии сетки
-            double stepY = canvasHeight / 4.0;
-            for (int i = 0; i <= 4; i++)
-            {
-                double y = i * stepY;
-                var line = new Line
-                {
-                    X1 = 0,
-                    Y1 = y,
-                    X2 = canvasWidth,
-                    Y2 = y,
-                    Stroke = new SolidColorBrush(Color.FromArgb(20, 200, 200, 200)),
-                    StrokeThickness = 1
-                };
-                EqGraphCanvas.Children.Add(line);
-            }
-        }
 
         private void VisualizerToggle_Changed(object sender, RoutedEventArgs e)
         {

@@ -7,6 +7,7 @@
         xmlns:converters="clr-namespace:QAMP.Converters"
         xmlns:viewModels="clr-namespace:QAMP.ViewModels"
         xmlns:services="clr-namespace:QAMP.Services"
+        xmlns:dialogs="clr-namespace:QAMP.Dialogs"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Настройки QAMP"
@@ -160,18 +161,58 @@
                                      GroupName="Theme"
                                      Margin="0,0,0,10"
                                      Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="ThemeRadio_Checked"/>
+                                     Checked="StandardThemeRadio_Checked"/>
+
                         <RadioButton x:Name="LightThemeRadio"
                                      Content="Светлая"
                                      GroupName="Theme"
-                                     Margin="0,0,0,10"
+                                     Margin="0,0,0,15"
                                      Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="ThemeRadio_Checked"/>
+                                     Checked="StandardThemeRadio_Checked"/>
+
                         <RadioButton x:Name="CustomThemeRadio"
                                      Content="Пользовательская"
                                      GroupName="Theme"
+                                     Margin="0,0,0,15"
                                      Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="ThemeRadio_Checked"/>
+                                     Checked="CustomThemeRadio_Checked"/>
+
+                        <TextBlock Text="Пользовательские темы:"
+                                   Margin="0,0,0,5"
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   FontSize="11"
+                                   Opacity="0.7"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox x:Name="CustomThemesComboBox"
+                                      Grid.Column="0"
+                                      Margin="0,0,10,0"
+                                      Height="25"
+                                      VerticalContentAlignment="Center"
+                                      SelectionChanged="CustomThemesComboBox_SelectionChanged">
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="ComboBoxItem">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource ForegroundBrush}"/>
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
+
+                            <Button x:Name="AddThemeButton"
+                                    Grid.Column="1"
+                                    Style="{StaticResource ModernPlayerButton}"
+                                    Content="Добавить тему"
+                                    Padding="10,0"
+                                    Height="25"
+                                    Click="AddThemeButton_Click"/>
+                        </Grid>
                     </StackPanel>
                 </GroupBox>
 
@@ -227,155 +268,6 @@
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Header="Эквалайзер"
-                          Grid.Row="4"
-                          Margin="0,0,0,30"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <Grid Height="Auto">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="80"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- График АЧХ -->
-                        <Canvas x:Name="EqGraphCanvas"
-                                Grid.Row="0"
-                                Background="{DynamicResource TertiaryBackgroundBrush}"
-                                Margin="10"/>
-
-                        <StackPanel Grid.Row="1">
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center"
-                                        Margin="0,5,0,10">
-                                <ComboBox x:Name="PresetComboBox"
-                                          Width="150"
-                                          Margin="0,0,10,0"
-                                          SelectionChanged="PresetComboBox_SelectionChanged">
-                                    <ComboBox.Style>
-                                        <Style TargetType="{x:Type ComboBox}">
-                                            <Setter Property="Background"
-                                                    Value="Black"/>
-                                            <Setter Property="Foreground"
-                                                    Value="{DynamicResource AccentBrush}"/>
-                                            <Setter Property="BorderBrush"
-                                                    Value="{DynamicResource AccentBrush}"/>
-
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="{x:Type ComboBox}">
-                                                        <Grid>
-                                                            <ToggleButton x:Name="ToggleButton"
-                                                                          Background="{TemplateBinding Background}"
-                                                                          BorderBrush="{TemplateBinding BorderBrush}"
-                                                                          Foreground="{TemplateBinding Foreground}"
-                                                                          BorderThickness="{TemplateBinding BorderThickness}"
-                                                                          Focusable="false"
-                                                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                          ClickMode="Press"/>
-
-                                                            <ContentPresenter x:Name="ContentSite"
-                                                                              IsHitTestVisible="False"
-                                                                              Content="{TemplateBinding SelectionBoxItem}"
-                                                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                                              Margin="3,3,23,3"
-                                                                              VerticalAlignment="Center"
-                                                                              HorizontalAlignment="Left">
-                                                            </ContentPresenter>
-
-                                                            <Popup x:Name="Popup"
-                                                                   Placement="Bottom"
-                                                                   IsOpen="{TemplateBinding IsDropDownOpen}"
-                                                                   AllowsTransparency="True"
-                                                                   Focusable="False"
-                                                                   PopupAnimation="Slide">
-                                                                <Grid x:Name="DropDown"
-                                                                      SnapsToDevicePixels="True"
-                                                                      MinWidth="{TemplateBinding ActualWidth}"
-                                                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                                                    <Border x:Name="DropDownBorder"
-                                                                            Background="Black"
-                                                                            BorderBrush="{DynamicResource AccentBrush}"
-                                                                            BorderThickness="1"/>
-                                                                    <ScrollViewer Margin="4,6,4,6"
-                                                                                  SnapsToDevicePixels="True">
-                                                                        <StackPanel IsItemsHost="True"
-                                                                                    KeyboardNavigation.DirectionalNavigation="Contained"/>
-                                                                    </ScrollViewer>
-                                                                </Grid>
-                                                            </Popup>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </ComboBox.Style>
-                                    <ComboBoxItem Content="Пользовательский"/>
-                                    <ComboBoxItem Content="Bass Boost"/>
-                                    <ComboBoxItem Content="Rock"/>
-                                    <ComboBoxItem Content="Classical"/>
-                                    <ComboBoxItem Content="Pop"/>
-                                    <ComboBoxItem Content="Lo-Fi"/>
-                                    <ComboBoxItem Content="Electronic"/>
-                                    <ComboBoxItem Content="Vocal"/>
-                                    <ComboBoxItem Content="Metal"/>
-                                    <ComboBoxItem Content="808"/>
-                                </ComboBox>
-
-                                <Button Style="{StaticResource ModernPlayerButton}"
-                                        Content="Сбросить"
-                                        Padding="10,5"
-                                        Click="ResetEq_Click"
-                                        BorderBrush="{DynamicResource BorderBrush}">
-                                </Button>
-                            </StackPanel>
-
-                            <ScrollViewer VerticalScrollBarVisibility="Hidden"
-                                          HorizontalScrollBarVisibility="Auto"
-                                          Margin="10,0">
-                                <ItemsControl x:Name="EqItemsControl">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"
-                                                        HorizontalAlignment="Center"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Width="50"
-                                                        Margin="7,0">
-                                                <TextBlock Text="{Binding Gain, StringFormat={}{0:0}}"
-                                                           FontSize="11"
-                                                           FontWeight="Bold"
-                                                           HorizontalAlignment="Center"
-                                                           Foreground="{DynamicResource AccentBrush}"
-                                                           Margin="0,0,0,3"/>
-
-                                                <Slider Orientation="Vertical"
-                                                        Height="160"
-                                                        Minimum="-12"
-                                                        Maximum="12"
-                                                        Value="{Binding Gain, Mode=TwoWay}"
-                                                        TickFrequency="1"
-                                                        IsSnapToTickEnabled="True"
-                                                        ValueChanged="EqSlider_ValueChanged"
-                                                        HorizontalAlignment="Center"/>
-
-                                                <TextBlock Text="{Binding Frequency}"
-                                                           FontSize="10"
-                                                           FontWeight="Bold"
-                                                           Margin="0,5,0,0"
-                                                           HorizontalAlignment="Center"
-                                                           Foreground="{DynamicResource ForegroundBrush}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </Grid>
-                </GroupBox>
 
                 <GroupBox Grid.Row="5"
                           Header="Формат библиотеки"
@@ -507,7 +399,6 @@
                         Click="HelpWindowButton_Click"
                         Width="100"
                         Height="35">
-
                 </Button>
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="CancelButton"
@@ -525,9 +416,12 @@
                         Height="35"
                         Margin="5,0,0,0"
                         Click="SaveButton_Click">
-
                 </Button>
             </StackPanel>
+            <dialogs:ModernNotice x:Name="SettingsInfoToast"
+                                  VerticalAlignment="Bottom"
+                                  HorizontalAlignment="Center"
+                                  Panel.ZIndex="9999"/>
         </Grid>
     </Grid>
 </Window>

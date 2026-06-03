@@ -148,7 +148,7 @@
                      Width="100"
                      Height="35"
                      Background="{DynamicResource AccentBrush}"
-                     Foreground="Black"
+                     Foreground="{DynamicResource BackgroundBrush}"
                      FontWeight="Bold">
                 <TextBox.Resources>
                     <Style TargetType="Border">

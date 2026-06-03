@@ -37,11 +37,11 @@ namespace QAMP
         private const int SW_RESTORE = 9;
         protected override void OnStartup(StartupEventArgs e)
         {
-            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.2");
+            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.3");
 
             try
             {
-                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.2");
+                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.3");
             }
             catch (Exception ex)
             {
@@ -155,6 +155,12 @@ ToolTipText = "QAMP",
 
                 // Регистрируем (либо реальные ключи из файла, либо заглушки)
                 BassNet.Registration(bassEmail, bassKey);
+
+                var audioConfig = SettingsManager.Instance.Config;
+                if (audioConfig.OutputDeviceId >= 0)
+                {
+                    Bass.BASS_SetDevice(audioConfig.OutputDeviceId);
+                }
 
                 if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, nint.Zero))
                 {

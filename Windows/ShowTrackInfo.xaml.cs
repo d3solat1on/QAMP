@@ -1,12 +1,16 @@
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.Win32;
 using TagLib;
+using QAMP.Audio;
 using QAMP.Dialogs;
 using QAMP.Models;
-using Microsoft.Win32;
-using System.Net.Http;
+using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Fx;
+using Un4seen.Bass.AddOn.Flac;
 
 
 namespace QAMP.Windows
@@ -77,38 +81,130 @@ namespace QAMP.Windows
                 NotificationWindow.Show($"Ошибка открытия папки: {ex.Message}", this);
             }
         }
+        private async void DetectBPM_Click(object sender, RoutedEventArgs e)
+        {
+            string filePath = _track.Path;
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                NotificationWindow.Show("Файл не найден.", this);
+                return;
+            }
+
+            BPMTextBlock.Text = "...";
+
+            try
+            {
+                var (bpm, error) = await Task.Run(() =>
+                {
+                    int decodeStream = 0;
+                    string extension = System.IO.Path.GetExtension(filePath).ToLower();
+
+                    if (extension == ".flac")
+                    {
+                        decodeStream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0L, 0L, BASSFlag.BASS_STREAM_DECODE);
+                    }
+                    else
+                    {
+                        decodeStream = Bass.BASS_StreamCreateFile(filePath, 0L, 0L,
+                            BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_STREAM_PRESCAN);
+                    }
+
+                    if (decodeStream == 0)
+                    {
+                        var errorCode = Bass.BASS_ErrorGetCode();
+                        return (Bpm: -1, Error: errorCode);
+                    }
+
+                    try
+                    {
+                        double startSec = 60.0;
+                        double endSec = 110.0;
+                        int minBpm = 45;
+                        int maxBpm = 160;
+
+                        float detectedBpm = BassFx.BASS_FX_BPM_DecodeGet(
+                            decodeStream,
+                            startSec,
+                            endSec,
+                            minBpm | (maxBpm << 16),
+                            BASSFXBpm.BASS_FX_BPM_DEFAULT,
+                            null,
+                            IntPtr.Zero
+                        );
+
+                        if (detectedBpm > 0)
+                        {
+                            while (detectedBpm > 165.0f)
+                            {
+                                detectedBpm /= 2.0f;
+                            }
+                            return (Bpm: (int)Math.Round(detectedBpm), Error: BASSError.BASS_OK);
+                        }
+
+                        return (Bpm: 0, Error: BASSError.BASS_OK);
+                    }
+                    finally
+                    {
+                        Bass.BASS_StreamFree(decodeStream);
+                    }
+                });
+
+                if (bpm > 0)
+                {
+                    _track.BPM = bpm;
+                    BPMTextBlock.Text = bpm.ToString();
+                    await TrackInfoToast.ShowAsync("BPM определен.");
+                }
+                else if (bpm == -1)
+                {
+                    NotificationWindow.Show($"Не удалось открыть файл для анализа. Ошибка BASS: {error}", this);
+                }
+                else
+                {
+                    NotificationWindow.Show("Не удалось определить темп трека. Возможно, в нем нет четкого ритма.", this);
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationWindow.Show($"Ошибка при анализе: {ex.Message}", this);
+                System.Diagnostics.Debug.WriteLine($"BPM Detection Error: {ex}");
+            }
+        }
 
         private async void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                using (var file = TagLib.File.Create(_track.Path))
-                {
-                    file.Tag.Title = _track.Name;
-                    file.Tag.Performers = [_track.Executor];
-                    file.Tag.Album = _track.Album;
-                    file.Tag.AlbumArtists = [_track.AlbumArtist];
-                    file.Tag.Genres = [_track.Genre];
-                    file.Tag.Comment = _track.Comment;
-                    file.Tag.Lyrics = _track.Lyrics;
-                    file.Tag.Composers = [_track.Composer];
-                    file.Tag.Track = (uint)_track.TrackNumber;
+                using var fileStream = new FileStream(_track.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                var fileAbstraction = new StreamFileAbstraction(_track.Path, fileStream, fileStream);
+                using var file = TagLib.File.Create(fileAbstraction);
 
-                    if (uint.TryParse(_track.Year.ToString(), out uint year))
-                        file.Tag.Year = year;
+                file.Tag.Title = _track.Name ?? string.Empty;
+                file.Tag.Performers = [_track.Executor ?? string.Empty];
+                file.Tag.Album = _track.Album ?? string.Empty;
+                file.Tag.AlbumArtists = [_track.AlbumArtist ?? string.Empty];
+                file.Tag.Genres = [_track.Genre ?? string.Empty];
+                file.Tag.Comment = _track.Comment ?? string.Empty;
+                file.Tag.Lyrics = _track.Lyrics ?? string.Empty;
+                file.Tag.Composers = [_track.Composer ?? string.Empty];
+                file.Tag.Track = _track.TrackNumber > 0 ? (uint)_track.TrackNumber : 0;
+                file.Tag.BeatsPerMinute = _track.BPM > 0 ? (uint)_track.BPM : 0;
 
-                    file.Save();
-                }
+                if (_track.Year > 0)
+                    file.Tag.Year = (uint)_track.Year;
 
-                Services.DatabaseService.UpdateTrackMetadata(_track); // <-- дополнительно
+                file.Save();
+
+                Services.DatabaseService.UpdateTrackMetadata(_track);
 
                 await TrackInfoToast.ShowAsync("Теги сохранены!");
-
                 EditModeButton.IsChecked = false;
             }
             catch (Exception ex)
             {
                 NotificationWindow.Show($"Ошибка: {ex.Message}", this, NotificationWindow.NotificationMode.Info);
+                System.Diagnostics.Debug.WriteLine($"Error saving tags: {ex}");
             }
         }
 
@@ -305,6 +401,7 @@ namespace QAMP.Windows
                 Owner.Focus();
                 Owner.Activate();
             }
+            Services.MemoryOptimizer.RunAsync(this.Dispatcher);
         }
     }
 }

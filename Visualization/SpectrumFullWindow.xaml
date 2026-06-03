@@ -75,7 +75,7 @@
                            Text="Название трека"
                            FontSize="24"
                            FontWeight="Bold"
-                           Foreground="White"
+                           Foreground="{DynamicResource TextBrush}"
                            Margin="0,0,0,5"/>
 
                 <TextBlock x:Name="TrackArtistText"

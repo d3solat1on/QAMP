@@ -80,5 +80,6 @@ public partial class Statistics : Window
     public void Close_Click(object sender, RoutedEventArgs e)
     {
         Close();
+        MemoryOptimizer.RunAsync(Dispatcher);
     }
 }

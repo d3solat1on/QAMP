@@ -14,17 +14,10 @@
 
 
         <Border
-                Background="#1A1A1A"
+                Background="{DynamicResource SecondaryBackgroundBrush}"
                 CornerRadius="15"
-                BorderBrush="#333"
+                BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1">
-                <Border.Effect>
-                        <DropShadowEffect BlurRadius="15"
-                                          Direction="0"
-                                          RenderingBias="Quality"
-                                          ShadowDepth="0"
-                                          Opacity="0.5"/>
-                </Border.Effect>
                 <Grid Margin="20">
 
                         <Grid.RowDefinitions>
@@ -35,7 +28,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="Новый плейлист"
-                                   Foreground="White"
+                                   Foreground="{DynamicResource TextBrush}"
                                    FontSize="20"
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center"
@@ -45,7 +38,7 @@
                                 Width="180"
                                 Height="180"
                                 Click="SelectCoverButton_Click"
-                                Background="#282828">
+                                Background="{DynamicResource CentralPanelCardBackground}">
                                 <Grid>
                                         <Image x:Name="CoverImage"
                                                Stretch="UniformToFill"/>
@@ -55,7 +48,7 @@
                                                            FontSize="30"
                                                            HorizontalAlignment="Center"/>
                                                 <TextBlock Text="Выбрать обложку"
-                                                           Foreground="Gray"
+                                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                            FontSize="12"
                                                            HorizontalAlignment="Center"/>
                                         </StackPanel>
@@ -65,21 +58,21 @@
                         <StackPanel Grid.Row="2"
                                     Margin="0,20">
                                 <TextBlock Text="Название"
-                                           Foreground="Gray"
+                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="PlaylistNameTextBox"
-                                         Background="#252525"
-                                         Foreground="White"
+                                         Background="{DynamicResource CentralPanelCardBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
                                          BorderThickness="0"
                                          Padding="10"
                                          Margin="0,0,0,15"/>
 
                                 <TextBlock Text="Описание"
-                                           Foreground="Gray"
+                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="PlaylistDescriptionTextBox"
-                                         Background="#252525"
-                                         Foreground="White"
+                                         Background="{DynamicResource CentralPanelCardBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
                                          BorderThickness="0"
                                          Padding="10"
                                          Height="80"

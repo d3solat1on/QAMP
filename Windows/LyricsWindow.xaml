@@ -8,9 +8,9 @@
         Background="Transparent"
         WindowStartupLocation="CenterOwner">
 
-    <Border Background="#121212"
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
             CornerRadius="20"
-            BorderBrush="#333"
+            BorderBrush="{DynamicResource AccentBrush}"
             BorderThickness="1">
         <Grid Margin="30">
             <Grid.RowDefinitions>
@@ -24,23 +24,23 @@
                 <TextBlock Text="{Binding Name}"
                            FontSize="32"
                            FontWeight="Bold"
-                           Foreground="White"/>
+                           Foreground="{DynamicResource TextBrush}"/>
                 <TextBlock Text="{Binding Executor}"
                            FontSize="18"
-                           Foreground="#00CCFF"/>
+                           Foreground="{DynamicResource AccentBrush}"/>
             </StackPanel>
 
             <TextBox Grid.Row="1"
                      x:Name="FullLyricsEditor"
                      Text="{Binding Lyrics, UpdateSourceTrigger=PropertyChanged}"
                      FontSize="20"
-                     Foreground="#E3E3E3"
+                     Foreground="{DynamicResource ForegroundBrush}"
                      Background="Transparent"
                      BorderThickness="0"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto"
-                     CaretBrush="#00CCFF"
+                     CaretBrush="{DynamicResource AccentBrush}"
                      FontFamily="Consolas"/>
 
             <StackPanel Grid.Row="2"

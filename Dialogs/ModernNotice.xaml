@@ -9,7 +9,7 @@
 
     <Border Background="{DynamicResource BackgroundBrush}"
             CornerRadius="10"
-            BorderBrush="#333"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             Padding="20,12"
             HorizontalAlignment="Center"

@@ -13,7 +13,7 @@
         ShowInTaskbar="False"
         IsHitTestVisible="False">
     <Border x:Name="MainBorder"
-            Background="#E6111111"
+            Background="{DynamicResource BackgroundBrush}"
             CornerRadius="5"
             BorderBrush="{DynamicResource AccentBrush}"
             BorderThickness="1.5"
@@ -23,7 +23,7 @@
         <StackPanel Orientation="Horizontal"
                     Margin="15,5">
             <Path Data="{StaticResource QAMP_Q_Geometry}"
-                  Fill="White"
+                  Fill="{DynamicResource TextBrush}"
                   Width="16"
                   Height="16"
                   Stretch="Uniform"
@@ -36,11 +36,11 @@
                        Foreground="{DynamicResource AccentBrush}"
                        VerticalAlignment="Center"/>
             <TextBlock Text=" — "
-                       Foreground="White"
+                       Foreground="{DynamicResource TextBrush}"
                        VerticalAlignment="Center"/>
             <TextBlock x:Name="NameText"
                        Text="Track Title"
-                       Foreground="White"
+                       Foreground="{DynamicResource TextBrush}"
                        VerticalAlignment="Center"/>
         </StackPanel>
     </Border>

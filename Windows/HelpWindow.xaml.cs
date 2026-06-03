@@ -37,5 +37,6 @@ partial class HelpWindow : Window
     public void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
+        Services.MemoryOptimizer.RunAsync(this.Dispatcher);
     }
 }

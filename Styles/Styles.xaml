@@ -393,7 +393,7 @@
         <Setter Property="Background"
                 Value="{DynamicResource AccentBrush}"/>
         <Setter Property="Foreground"
-                Value="Black"/>
+                Value="{DynamicResource TextBrush}"/>
         <Setter Property="FontWeight"
                 Value="Bold"/>
         <Style.Resources>

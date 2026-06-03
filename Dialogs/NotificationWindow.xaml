@@ -5,13 +5,12 @@
         AllowsTransparency="True"
         WindowStyle="None"
         ShowInTaskbar="False"
-        WindowStartupLocation="Manual"
-        IsHitTestVisible="False">
+        WindowStartupLocation="Manual">
         <Grid>
                 <Border x:Name="ToastBorder"
-                        Background="#1A1A1A"
+                        Background="{DynamicResource SecondaryBackgroundBrush}"
                         CornerRadius="10"
-                        BorderBrush="#333"
+                        BorderBrush="{DynamicResource BorderBrush}"
                         BorderThickness="1"
                         Padding="20,12"
                         HorizontalAlignment="Center"
@@ -25,7 +24,7 @@
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center">
                                 <TextBlock x:Name="MessageText"
-                                           Foreground="White"
+                                           Foreground="{DynamicResource TextBrush}"
                                            FontSize="14"
                                            FontWeight="SemiBold"
                                            VerticalAlignment="Center"

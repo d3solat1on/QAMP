@@ -22,9 +22,9 @@
                                 Value="Transparent"/>
                 </Style>
         </Window.Resources>
-        <Border Background="#1E1E1E"
+        <Border Background="{DynamicResource CentralPanelCardBackground}"
                 CornerRadius="5"
-                BorderBrush="#333"
+                BorderBrush="{DynamicResource AccentBrush}"
                 BorderThickness="1">
                 <Grid Margin="0">
                         <Grid.RowDefinitions>
@@ -38,7 +38,7 @@
                                 <TextBlock Text="Подробная информация о плейлисте"
                                            FontSize="18"
                                            FontWeight="Bold"
-                                           Foreground="White"
+                                           Foreground="{DynamicResource TextBrush}"
                                            VerticalAlignment="Center"/>
                                 <Button x:Name="CloseButton"
                                         Content="✕"
@@ -69,7 +69,7 @@
                                                 Width="320"
                                                 Height="320"
                                                 CornerRadius="10"
-                                                Background="#2E2E2D"
+                                                Background="{DynamicResource CentralPanelCardBackground}"
                                                 Padding="8"
                                                 ClipToBounds="True">
                                                 <Grid>
@@ -144,12 +144,12 @@
                                                            Text="{Binding Name}"
                                                            FontSize="28"
                                                            FontWeight="Bold"
-                                                           Foreground="White"
+                                                           Foreground="{DynamicResource TextBrush}"
                                                            TextWrapping="Wrap"/>
                                                 <TextBlock x:Name="DescriptionTextBlock"
                                                            Text="{Binding Description}"
                                                            FontSize="14"
-                                                           Foreground="#AAA"
+                                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                            Margin="0,12,0,20"
                                                            TextWrapping="Wrap"
                                                            MaxHeight="120"/>
@@ -173,90 +173,90 @@
                                                                    Grid.Row="0"
                                                                    Grid.Column="0"
                                                                    Text="ID:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="IdValueTextBlock"
                                                                    Grid.Row="0"
                                                                    Grid.Column="1"
                                                                    Text="{Binding Id}"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="TracksCountTextBlock"
                                                                    Grid.Row="1"
                                                                    Grid.Column="0"
                                                                    Text="Треков:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="TracksCountValueTextBlock"
                                                                    Grid.Row="1"
                                                                    Grid.Column="1"
                                                                    Text="{Binding TrackCountDisplay}"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="TotalDurationTextBlock"
                                                                    Grid.Row="2"
                                                                    Grid.Column="0"
                                                                    Text="Длительность:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="TotalDurationValueTextBlock"
                                                                    Grid.Row="2"
                                                                    Grid.Column="1"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="CreatedDateTextBlock"
                                                                    Grid.Row="3"
                                                                    Grid.Column="0"
                                                                    Text="Создано:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="CreatedDateValueTextBlock"
                                                                    Grid.Row="3"
                                                                    Grid.Column="1"
                                                                    Text="{Binding CreatedDateDisplay}"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="PinnedTextBlock"
                                                                    Grid.Row="4"
                                                                    Grid.Column="0"
                                                                    Text="Закреплен:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="PinnedValueTextBlock"
                                                                    Grid.Row="4"
                                                                    Grid.Column="1"
                                                                    Text="{Binding PinnedDisplay}"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="SystemPlaylistTextBlock"
                                                                    Grid.Row="5"
                                                                    Grid.Column="0"
                                                                    Text="Системный:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SystemPlaylistValueTextBlock"
                                                                    Grid.Row="5"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SystemPlaylistDisplay}"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="SortTypeTextBlock"
                                                                    Grid.Row="6"
                                                                    Grid.Column="0"
                                                                    Text="Сортировка:"
-                                                                   Foreground="#888"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SortTypeValueTextBlock"
                                                                    Grid.Row="6"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SortTypeDisplay}"
-                                                                   Foreground="White"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
                                                 </Grid>
                                         </StackPanel>

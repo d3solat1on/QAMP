@@ -27,6 +27,7 @@ namespace QAMP.Services
                     Extension = extension,
                     Year = (int)file.Tag.Year,
                     TrackNumber = (int)file.Tag.Track,
+                    BPM = (int)file.Tag.BeatsPerMinute,
                     AddedDate = DateTime.Now
                 };
             }
@@ -56,6 +57,7 @@ namespace QAMP.Services
                     Album = file.Tag.Album ?? "Неизвестный альбом",
                     Year = (int)file.Tag.Year,
                     Genre = file.Tag.FirstGenre ?? "Неизвестный жанр",
+                    BPM = (int)file.Tag.BeatsPerMinute,
 
                     Bitrate = file.Properties.AudioBitrate,
                     SampleRate = file.Properties.AudioSampleRate,

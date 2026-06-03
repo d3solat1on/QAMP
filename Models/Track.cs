@@ -270,6 +270,20 @@ namespace QAMP.Models
             }
         }
 
+        private int _BPM = 0;
+        public int BPM
+        {
+            get => _BPM;
+            set
+            {
+                if(_BPM != value)
+                {
+                    _BPM = value;
+                    OnPropertyChanged(nameof(BPM));
+                }
+            }
+        }
+        
         [JsonIgnore]
         private byte[]? _coverImage;
 

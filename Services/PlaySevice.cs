@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Flac;
+using Un4seen.Bass.AddOn.Fx;
 using QAMP.Models;
 using QAMP.ViewModels;
 using QAMP.Dialogs;
@@ -10,6 +11,8 @@ using QAMP.Visualization;
 
 namespace QAMP.Services
 {
+    public record OutputDeviceInfo(int Id, string Name);
+
     public class PlayerService : IDisposable
     {
         private static PlayerService? _instance;
@@ -22,10 +25,13 @@ namespace QAMP.Services
         // BASS параметры
         private readonly BASS_CHANNELINFO _channelInfo = new();
         private int _sampleRate = 44100;
-        private SYNCPROC? _endSyncProc;
+        private readonly SYNCPROC? _endSyncProc;
 
         public float[] EqGains { get; set; } = new float[10];
-        private int _fxHandle = 0; // Handle for EQ effect
+        private readonly int[] _eqFxHandles = new int[10];
+        private int _reverbFxHandle = 0;
+        private int _echoFxHandle = 0;
+        private int _compressorFxHandle = 0;
 
         private bool _disposed = false;
         private bool _playCountIncremented = false;
@@ -37,9 +43,12 @@ namespace QAMP.Services
         // Таймер для обновления позиции и спектра
         private readonly DispatcherTimer _positionTimer = new();
         private readonly DispatcherTimer _spectrumTimer = new();
-
-        // Буфер для спектра
-        private readonly float[] _fftBuffer = new float[1024];
+        
+        // Buffer
+        private readonly float[] _nativeSpectrumBuffer = new float[128];
+        private readonly float[] _nativePeakBuffer = new float[128];
+        private readonly double[] _scottPlotBuffer = new double[128];
+        private readonly double[] _scottPlotPeakBuffer = new double[128];
 
         // События
         public event Action<Track>? TrackChanged;
@@ -246,7 +255,7 @@ namespace QAMP.Services
             {
                 if (MusicLibrary.Instance.CurrentPlaylist != null)
                 {
-                    _actualPlayingQueue = new List<Track>(MusicLibrary.Instance.PlaybackQueue);
+                    _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
                     System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь инициализирована: {_actualPlayingQueue.Count} треков");
                 }
             }
@@ -313,7 +322,7 @@ namespace QAMP.Services
             }
         }
 
-        private int CreateStreamFromFile(string filePath)
+        private static int CreateStreamFromFile(string filePath)
         {
             string extension = Path.GetExtension(filePath).ToLowerInvariant();
             int stream = 0;
@@ -341,34 +350,138 @@ namespace QAMP.Services
         {
             if (_currentStream == 0) return;
 
-            // Удаляем старый эффект эквалайзера, если есть
-            if (_fxHandle != 0)
+            for (int i = 0; i < _eqFxHandles.Length; i++)
             {
-                Bass.BASS_ChannelRemoveFX(_currentStream, _fxHandle);
-                _fxHandle = 0;
+                if (_eqFxHandles[i] != 0)
+                {
+                    Bass.BASS_ChannelRemoveFX(_currentStream, _eqFxHandles[i]);
+                    _eqFxHandles[i] = 0;
+                }
             }
 
-            // Создаем параметры для 10-полосного эквалайзера
+            var config = SettingsManager.Instance.Config;
+            float[] effectiveGains = new float[EqGains.Length];
+            EqGains.CopyTo(effectiveGains, 0);
+
+            if (config.VocalEnhancementEnabled)
+            {
+                // Укрепляем средние частоты для лучшей разборчивости вокала
+                for (int i = 4; i <= 6 && i < effectiveGains.Length; i++)
+                {
+                    effectiveGains[i] += 2.0f;
+                }
+            }
+
+            if (config.LoudnessEnabled && Volume < 0.4)
+            {
+                effectiveGains[0] += 3.0f;
+                effectiveGains[1] += 2.0f;
+                effectiveGains[8] += 2.0f;
+                effectiveGains[9] += 3.0f;
+            }
+
             var equalizer = new BASS_DX8_PARAMEQ[10];
-            float[] frequencies = new float[] { 31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000 };
-            for (int i = 0; i < 10 && i < EqGains.Length; i++)
+            float[] frequencies = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+            for (int i = 0; i < 10 && i < effectiveGains.Length; i++)
             {
                 equalizer[i] = new BASS_DX8_PARAMEQ
                 {
-                    fGain = EqGains[i], // Gain in dB (-15 to 15)
-                    fBandwidth = 18.0f, // Bandwidth (0-36, default 18)
+                    fGain = effectiveGains[i],
+                    fBandwidth = 18.0f,
                     fCenter = frequencies[i]
                 };
             }
 
-            // Применяем эффект для каждой полосы
             for (int i = 0; i < 10; i++)
             {
                 int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_DX8_PARAMEQ, 1);
                 if (fx != 0)
                 {
                     Bass.BASS_FXSetParameters(fx, equalizer[i]);
-                    if (i == 0) _fxHandle = fx;
+                    _eqFxHandles[i] = fx;
+                }
+                else
+                {
+                    _eqFxHandles[i] = 0;
+                }
+            }
+
+            ApplyOptionalEffects();
+        }
+
+        private void ApplyOptionalEffects()
+        {
+            if (_currentStream == 0) return;
+
+            if (_reverbFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(_currentStream, _reverbFxHandle);
+                _reverbFxHandle = 0;
+            }
+            if (_echoFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(_currentStream, _echoFxHandle);
+                _echoFxHandle = 0;
+            }
+            if (_compressorFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(_currentStream, _compressorFxHandle);
+                _compressorFxHandle = 0;
+            }
+
+            var config = SettingsManager.Instance.Config;
+
+            if (config.ReverbEnabled)
+            {
+                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_BFX_FREEVERB, 1);
+                if (fx != 0)
+                {
+                    var reverb = new BASS_BFX_FREEVERB
+                    {
+                        fDryMix = 0.4f,
+                        fWetMix = (float)(1.0 + config.ReverbLevel / 100.0),
+                        fRoomSize = 0.7f,
+                        fDamp = 0.5f,
+                        fWidth = 1.0f
+                    };
+                    Bass.BASS_FXSetParameters(fx, reverb);
+                    _reverbFxHandle = fx;
+                }
+            }
+
+            if (config.EchoEnabled)
+            {
+                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_BFX_ECHO4, 1);
+                if (fx != 0)
+                {
+                    var echo = new BASS_BFX_ECHO4
+                    {
+                        fDryMix = 1.0f,
+                        fWetMix = 0.5f,
+                        fFeedback = 0.5f,
+                        fDelay = (float)Math.Max(0.05, Math.Min(2.0, config.EchoDelay / 1000.0)),
+                        bStereo = true
+                    };
+                    Bass.BASS_FXSetParameters(fx, echo);
+                    _echoFxHandle = fx;
+                }
+            }
+
+            if (config.CompressorEnabled)
+            {
+                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_BFX_COMPRESSOR2, 1);
+                if (fx != 0)
+                {
+                    var compressor = new BASS_BFX_COMPRESSOR2
+                    {
+                        fGain = 5.0f,
+                        fThreshold = (float)(-60.0 + config.CompressorThreshold * 60.0),
+                        fRatio = 4.0f,
+                        fAttack = 20.0f,
+                        fRelease = 200.0f
+                    };
+                    Bass.BASS_FXSetParameters(fx, compressor);
+                    _compressorFxHandle = fx;
                 }
             }
         }
@@ -398,6 +511,62 @@ namespace QAMP.Services
         {
             if (_currentStream == 0) return;
             ApplyEqualizerToStream();
+        }
+
+        public void ApplyAudioEffects()
+        {
+            if (_currentStream == 0) return;
+            ApplyEqualizerToStream();
+        }
+
+        public void ApplyPlaybackRate(double tempo, double pitch)
+        {
+            var config = SettingsManager.Instance.Config;
+            config.Tempo = tempo;
+            config.Pitch = pitch;
+            SettingsManager.Instance.Save();
+
+            if (_currentStream != 0)
+            {
+                Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_TEMPO, (float)((tempo - 1.0) * 100.0));
+                float pitchSemitones = pitch > 0 ? (float)(Math.Log(pitch, 2.0) * 12.0) : 0f;
+                Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_TEMPO_PITCH, pitchSemitones);
+            }
+        }
+
+        public void SetBalance(float balance)
+        {
+            if (_currentStream != 0)
+            {
+                Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, balance);
+            }
+        }
+
+        public static List<OutputDeviceInfo> GetOutputDevices()
+        {
+            var devices = new List<OutputDeviceInfo>();
+            int count = Bass.BASS_GetDeviceCount();
+            for (int i = 0; i < count; i++)
+            {
+                var info = Bass.BASS_GetDeviceInfo(i);
+                if (info != null)
+                {
+                    devices.Add(new OutputDeviceInfo(i, info.name));
+                }
+            }
+            return devices;
+        }
+
+        public void SetOutputDevice(int deviceId)
+        {
+            var config = SettingsManager.Instance.Config;
+            config.OutputDeviceId = deviceId;
+            SettingsManager.Instance.Save();
+
+            if (_isInitialized)
+            {
+                Bass.BASS_SetDevice(deviceId);
+            }
         }
 
         private void EndSyncCallback(int handle, int channel, int data, IntPtr user)
@@ -463,7 +632,7 @@ namespace QAMP.Services
 
                 if ((_actualPlayingQueue == null || _actualPlayingQueue.Count == 0) && MusicLibrary.Instance.PlaybackQueue.Count > 0)
                 {
-                    _actualPlayingQueue = new List<Track>(MusicLibrary.Instance.PlaybackQueue);
+                    _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
                     System.Diagnostics.Debug.WriteLine($"[QUEUE] Восстановлена очередь из PlaybackQueue: {_actualPlayingQueue.Count} треков");
                 }
                 else if (_actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
@@ -486,19 +655,20 @@ namespace QAMP.Services
         {
             if (_currentStream != 0 && IsPlaying && SettingsManager.Instance.Config.IsVisualizerEnabled)
             {
-                // Получаем FFT данные для спектра
-                if (Bass.BASS_ChannelGetData(_currentStream, _fftBuffer, (int)BASSData.BASS_DATA_FFT1024) > 0)
+                foreach (var control in SpectrumControls)
                 {
-                    // Конвертируем FFT данные в спектр
-                    double[] spectrumData = new double[32]; // 32 bands for visualization
-                    for (int i = 0; i < 32 && i < _fftBuffer.Length / 2; i++)
-                    {
-                        spectrumData[i] = _fftBuffer[i];
-                    }
+                    int barsCount = control.BarCount;
+                    if (barsCount > 128) barsCount = 128;
 
-                    foreach (var control in SpectrumControls)
+                    if (QampCoreNative.GetSpectrumDataAdvanced(_currentStream, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
                     {
-                        control.UpdateSpectrum(spectrumData);
+                        for (int i = 0; i < barsCount; i++)
+                        {
+                            _scottPlotBuffer[i] = _nativeSpectrumBuffer[i];
+                            _scottPlotPeakBuffer[i] = _nativePeakBuffer[i];
+                        }
+
+                        control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
                     }
                 }
             }
@@ -577,9 +747,9 @@ namespace QAMP.Services
             IsPlaying = false;
 
             // Очищаем эффекты
-            if (_fxHandle != 0)
+            for (int i = 0; i < _eqFxHandles.Length; i++)
             {
-                _fxHandle = 0;
+                _eqFxHandles[i] = 0;
             }
 
             // Удаляем временный файл, если он создавался ранее
@@ -663,6 +833,7 @@ namespace QAMP.Services
 
         public void PlayNextTrack()
         {
+            QampCoreNative.ResetCorePeaks();
             if (CurrentTrack == null)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: CurrentTrack == null");
@@ -763,7 +934,7 @@ namespace QAMP.Services
 
             if (IsShuffleEnabled)
             {
-                ShuffledQueue = new List<Track>(_actualPlayingQueue);
+                ShuffledQueue = [.. _actualPlayingQueue];
                 var rnd = new Random();
                 for (int i = ShuffledQueue.Count - 1; i > 0; i--)
                 {

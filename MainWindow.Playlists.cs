@@ -291,7 +291,6 @@ namespace QAMP
             {
                 Color dominant = ThemeHelper.GetDominantColor(cover);
 
-                // Создаем градиент
                 var brush = new LinearGradientBrush
                 {
                     StartPoint = new Point(0, 0),
@@ -300,7 +299,8 @@ namespace QAMP
 
                 brush.GradientStops.Add(new GradientStop(dominant, 0));
 
-                brush.GradientStops.Add(new GradientStop(Color.FromRgb(25, 25, 25), 1));
+                Color secondary = ThemeHelper.GetAdaptiveSecondaryColor(dominant);
+                brush.GradientStops.Add(new GradientStop(secondary, 1));
 
                 UpperPanel.Background = brush;
             }
@@ -317,7 +317,6 @@ namespace QAMP
         {
             try
             {
-                // Получаем цвет Accent из ресурсов приложения
                 if (Application.Current.Resources["AccentBrush"] is SolidColorBrush accentBrush)
                 {
                     var brush = new LinearGradientBrush
@@ -327,7 +326,9 @@ namespace QAMP
                     };
 
                     brush.GradientStops.Add(new GradientStop(accentBrush.Color, 0));
-                    brush.GradientStops.Add(new GradientStop(Color.FromRgb(25, 25, 25), 1));
+
+                    Color secondary = ThemeHelper.GetAdaptiveSecondaryColor(accentBrush.Color);
+                    brush.GradientStops.Add(new GradientStop(secondary, 1));
 
                     UpperPanel.Background = brush;
                 }

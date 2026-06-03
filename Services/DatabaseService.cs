@@ -148,6 +148,19 @@ public class DatabaseService
             {
                 System.Diagnostics.Debug.WriteLine("Колонка PlayCount уже существует в Tracks");
             }
+
+            if(!tracksColumns.Contains("BPM"))
+            {
+                System.Diagnostics.Debug.WriteLine("Добавляем колонку BPM в таблицу Tracks...");
+                var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE Tracks ADD COLUMN BPM INTEGER DEFAULT 0";
+                alterCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Колонка BPM успешно добавлена");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Колонка BPM уже существует в Tracks");
+            }
         }
         catch (Exception ex)
         {
@@ -1360,7 +1373,8 @@ public class DatabaseService
             Album = $album,
             Genre = $genre,
             Year = $year,
-            TrackNumber = $trackNum
+            TrackNumber = $trackNum,
+            BPM = $bpm
         WHERE Path = $path";
         cmd.Parameters.AddWithValue("$name", (object)track.Name ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$exec", (object)track.Executor ?? DBNull.Value);
@@ -1368,6 +1382,7 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("$genre", (object)track.Genre ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$year", track.Year > 0 ? track.Year : DBNull.Value);
         cmd.Parameters.AddWithValue("$trackNum", track.TrackNumber);
+        cmd.Parameters.AddWithValue("$bpm", track.BPM);
         cmd.Parameters.AddWithValue("$path", track.Path);
         cmd.ExecuteNonQuery();
     }

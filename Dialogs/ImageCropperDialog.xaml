@@ -11,13 +11,13 @@
         <Style x:Key="CustomSliderStyle"
                TargetType="Slider">
             <Setter Property="Background"
-                    Value="#333"/>
+                    Value="{DynamicResource SecondaryBackgroundBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Slider">
                         <Grid>
                             <Border Height="4"
-                                    Background="#333"
+                                    Background="{DynamicResource SecondaryBackgroundBrush}"
                                     CornerRadius="2"
                                     VerticalAlignment="Center"/>
                             <Track x:Name="PART_Track">
@@ -26,7 +26,7 @@
                                         <RepeatButton.Template>
                                             <ControlTemplate TargetType="RepeatButton">
                                                 <Border Height="4"
-                                                        Background="#1DB954"
+                                                        Background="{DynamicResource AccentBrush}"
                                                         CornerRadius="2"/>
                                             </ControlTemplate>
                                         </RepeatButton.Template>
@@ -38,7 +38,7 @@
                                             <ControlTemplate TargetType="Thumb">
                                                 <Ellipse Width="14"
                                                          Height="14"
-                                                         Fill="White"/>
+                                                         Fill="{DynamicResource TextBrush}"/>
                                             </ControlTemplate>
                                         </Thumb.Template>
                                     </Thumb>
@@ -50,17 +50,10 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Background="#1A1A1A"
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
             CornerRadius="15"
-            BorderBrush="#333"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="15"
-                              Direction="0"
-                              RenderingBias="Quality"
-                              ShadowDepth="0"
-                              Opacity="0.5"/>
-        </Border.Effect>
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -69,7 +62,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="Обрезать обложку"
-                       Foreground="White"
+                       Foreground="{DynamicResource TextBrush}"
                        FontSize="20"
                        FontWeight="Bold"
                        HorizontalAlignment="Center"
@@ -80,7 +73,7 @@
                     Height="300"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    BorderBrush="#1DB954"
+                    BorderBrush="{DynamicResource AccentBrush}"
                     BorderThickness="2"
                     ClipToBounds="True">
                 <Canvas x:Name="ContainerCanvas"
@@ -104,7 +97,7 @@
                         VerticalAlignment="Bottom"
                         Margin="0,0,0,-25">
                 <TextBlock Text="Масштаб"
-                           Foreground="Gray"
+                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                            HorizontalAlignment="Center"
                            FontSize="10"/>
                 <Slider x:Name="ZoomSlider"

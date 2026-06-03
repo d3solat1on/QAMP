@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -11,6 +12,8 @@ namespace QAMP
 {
     public partial class MainWindow : Window
     {
+        [DllImport("QampCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int GetCoreVersion();
         private readonly PlayerService _playService = PlayerService.Instance;
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => PlayerService.Instance;
@@ -29,7 +32,7 @@ namespace QAMP
         public MainWindow()
         {
             InitializeComponent();
-
+            TestCppDll();
             _playlistsLoadingPlaceholder = (Grid?)FindName("PlaylistsLoadingPlaceholder");
             _tracksLoadingPlaceholder = (Grid?)FindName("TracksLoadingPlaceholder");
             _nowPlayingLoadingPlaceholder = (Grid?)FindName("NowPlayingLoadingPlaceholder");
@@ -151,6 +154,10 @@ namespace QAMP
                 TracksDataGrid.Visibility = Visibility.Visible;
                 _nowPlayingLoadingPlaceholder?.Visibility = Visibility.Collapsed;
                 _nowPlayingPanel?.Visibility = Visibility.Visible;
+            }
+            finally
+            {
+                MemoryOptimizer.RunAsync(Dispatcher);
             }
         }
 
@@ -413,6 +420,18 @@ namespace QAMP
         private void OnPlaybackPaused(bool isPaused)
         {
             Dispatcher.Invoke(UpdatePlayPauseIconState);
+        }
+        private static void TestCppDll()
+        {
+            try
+            {
+                int version = GetCoreVersion();
+                System.Diagnostics.Debug.WriteLine($"[QAMP Native] Версия C++ ядра: {version}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[QAMP Native] Ошибка вызова DLL: {ex.Message}");
+            }
         }
     }
 }

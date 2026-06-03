@@ -50,12 +50,14 @@
     <PackageReference Include="Un4seen.Bass" Version="2.4.18.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="bass.dll">
+ <ItemGroup>
+    <Content Include="Native\*.dll">
+      <Link>%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="bassflac.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <None Update="Native\*.cpp;Native\*.h;Native\*.lib">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

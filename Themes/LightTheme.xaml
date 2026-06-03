@@ -1,33 +1,64 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Светлая тема -->
-    <SolidColorBrush x:Key="IconBrush" Color="#FF444444"/>
-    <SolidColorBrush x:Key="BackgroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="#F5F5F5"/>
-    <SolidColorBrush x:Key="TertiaryBackgroundBrush" Color="#EEEEEE"/>
-    <SolidColorBrush x:Key="ForegroundBrush" Color="Black"/>
-    <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="#666666"/>
-    <SolidColorBrush x:Key="BorderBrush" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="DataGridHeaderBackground" Color="#F5F5F5"/>
-    <SolidColorBrush x:Key="DataGridHeaderForeground" Color="#333333"/>
-    <SolidColorBrush x:Key="DataGridRowBackground" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="DataGridRowAltBackground" Color="#F8F8F8"/>
-    <SolidColorBrush x:Key="DataGridRowSelectedBackground" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="DataGridCellSelectedForeground" Color="#000000"/>
-    <SolidColorBrush x:Key="DataGridCellForeground" Color="#000000"/>
-    <SolidColorBrush x:Key="DataGridCellBackground" Color="Transparent"/>
-    <SolidColorBrush x:Key="DataGridCellHoverBackground" Color="#EDEDED"/>
-    <SolidColorBrush x:Key="DataGridBorderBrush" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="DataGridRowBorderBrush" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="ContextMenuBackground" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="ContextMenuBorderBrush" Color="#999999"/>
-    <SolidColorBrush x:Key="DataGridSelectionBorderBrush" Color="#888888"/>
-    <SolidColorBrush x:Key="GridHeaderSeperatorBrush" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="CentralPanelHeaderBackground" Color="#FAFAFA"/>
-    <SolidColorBrush x:Key="CentralPanelCardBackground" Color="#EEEEEE"/>
-    <SolidColorBrush x:Key="CentralPanelCardBorderBrush" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="CentralPanelHighlightForeground" Color="#000000"/>
-    <SolidColorBrush x:Key="CentralPanelSecondaryForeground" Color="#333333"/>
-    <SolidColorBrush x:Key="CentralPanelMutedForeground" Color="#666666"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="#1db954"/>
+    <SolidColorBrush x:Key="IconBrush"
+                     Color="#FF444444"/>
+    <SolidColorBrush x:Key="BackgroundBrush"
+                     Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SecondaryBackgroundBrush"
+                     Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="TertiaryBackgroundBrush"
+                     Color="#EEEEEE"/>
+    <SolidColorBrush x:Key="ForegroundBrush"
+                     Color="Black"/>
+    <SolidColorBrush x:Key="SecondaryForegroundBrush"
+                     Color="#666666"/>
+    <SolidColorBrush x:Key="BorderBrush"
+                     Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="DataGridHeaderBackground"
+                     Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="DataGridHeaderForeground"
+                     Color="#333333"/>
+    <SolidColorBrush x:Key="DataGridRowBackground"
+                     Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridRowAltBackground"
+                     Color="#F8F8F8"/>
+    <SolidColorBrush x:Key="DataGridRowSelectedBackground"
+                     Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="DataGridCellSelectedForeground"
+                     Color="#000000"/>
+    <SolidColorBrush x:Key="DataGridCellForeground"
+                     Color="#000000"/>
+    <SolidColorBrush x:Key="DataGridCellBackground"
+                     Color="Transparent"/>
+    <SolidColorBrush x:Key="DataGridCellHoverBackground"
+                     Color="#EDEDED"/>
+    <SolidColorBrush x:Key="DataGridBorderBrush"
+                     Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="DataGridRowBorderBrush"
+                     Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="ContextMenuBackground"
+                     Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ContextMenuBorderBrush"
+                     Color="#999999"/>
+    <SolidColorBrush x:Key="DataGridSelectionBorderBrush"
+                     Color="#888888"/>
+    <SolidColorBrush x:Key="GridHeaderSeperatorBrush"
+                     Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="CentralPanelHeaderBackground"
+                     Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="CentralPanelCardBackground"
+                     Color="#EEEEEE"/>
+    <SolidColorBrush x:Key="CentralPanelCardBorderBrush"
+                     Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="CentralPanelHighlightForeground"
+                     Color="#000000"/>
+    <SolidColorBrush x:Key="CentralPanelSecondaryForeground"
+                     Color="#333333"/>
+    <SolidColorBrush x:Key="CentralPanelMutedForeground"
+                     Color="#666666"/>
+    <SolidColorBrush x:Key="AccentBrush"
+                     Color="#1db954"/>
+    <SolidColorBrush x:Key="TextBrush"
+                     Color="Black"/>
 </ResourceDictionary>

@@ -81,7 +81,13 @@ namespace QAMP.Visualization
                 SpectrumPlot.Plot.HideGrid();
                 SpectrumPlot.Plot.HideAxesAndGrid();
 
-                SpectrumPlot.Plot.Axes.SetLimits(left: -0.5, right: BarCount - 0.5, bottom: 0, top: 1.0);
+                SpectrumPlot.Plot.Axes.SetLimitsY(0.0, 1.0);
+                SpectrumPlot.Plot.Axes.SetLimitsX(0, BarCount);
+                SpectrumPlot.Plot.Axes.Top.FrameLineStyle.Width = 0;
+                SpectrumPlot.Plot.Axes.Right.FrameLineStyle.Width = 0;
+                SpectrumPlot.Plot.Axes.Left.FrameLineStyle.Width = 0;
+                SpectrumPlot.Plot.Axes.Bottom.FrameLineStyle.Width = 0;
+
 
                 SpectrumPlot.IsEnabled = false;
                 ApplyColors();
@@ -111,15 +117,27 @@ namespace QAMP.Visualization
 
             if (myBars != null)
             {
+                Color plotColor;
+
                 if (Application.Current.Resources["AccentBrush"] is System.Windows.Media.SolidColorBrush accent)
                 {
-                    myBars.Color = new Color(accent.Color.R, accent.Color.G, accent.Color.B);
-                    _peakBars.Color = new Color(accent.Color.R, accent.Color.G, accent.Color.B);
+                    plotColor = new Color(accent.Color.R, accent.Color.G, accent.Color.B);
                 }
                 else
                 {
-                    myBars.Color = Colors.LimeGreen;
-                    _peakBars.Color = Colors.LimeGreen;
+                    plotColor = Colors.LimeGreen;
+                }
+
+                myBars.Color = plotColor;
+                _peakBars.Color = plotColor;
+
+                foreach (var bar in myBars.Bars)
+                {
+                    bar.LineStyle.Width = 0;
+                }
+                foreach (var bar in _peakBars.Bars)
+                {
+                    bar.LineStyle.Width = 0;
                 }
             }
         }
@@ -135,9 +153,10 @@ namespace QAMP.Visualization
             SpectrumPlot.Refresh();
             System.Diagnostics.Debug.WriteLine("SpectrumControl colors refreshed");
         }
-        public void UpdateSpectrum(double[] spectrumData)
+        public void UpdateSpectrum(double[] spectrumData, double[] peakData, int incomingCount)
         {
-            if (myBars == null || _peakBars == null || spectrumData == null || spectrumData.Length == 0) return;
+            if (myBars == null || _peakBars == null || spectrumData == null || peakData == null) return;
+
             if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
             {
                 if (myBars != null && myBars.Bars.Any(b => b.Value > 0))
@@ -151,35 +170,11 @@ namespace QAMP.Visualization
             {
                 try
                 {
-                    double gain = 15.5; //tweak
-
-                    for (int i = 0; i < BarCount && i < myBars.Bars.Count; i++)
+                    for (int i = 0; i < incomingCount && i < myBars.Bars.Count; i++)
                     {
-                        int spectrumIndex = i * spectrumData.Length / BarCount;
-                        if (spectrumIndex >= spectrumData.Length) spectrumIndex = spectrumData.Length - 1;
-
-                        double targetValue = spectrumData[spectrumIndex] * gain;
-                        targetValue = Math.Min(0.95, Math.Max(0, targetValue));
-
-                        if (targetValue > _smoothedValues[i])
-                            _smoothedValues[i] = _smoothedValues[i] + (targetValue - _smoothedValues[i]) * 0.6;
-                        else
-                            _smoothedValues[i] = _smoothedValues[i] * 0.88;
-
-                        if (_smoothedValues[i] > _peakValues[i])
-                        {
-                            _peakValues[i] = _smoothedValues[i];
-                        }
-                        else
-                        {
-                            _peakValues[i] = _peakValues[i] * 0.98;
-                            if (_peakValues[i] < 0.02) _peakValues[i] = 0.02;
-                        }
-
-                        myBars.Bars[i].Value = _smoothedValues[i];
-                        _peakBars.Bars[i].Value = _peakValues[i];
+                        myBars.Bars[i].Value = spectrumData[i];
+                        _peakBars.Bars[i].Value = peakData[i];
                     }
-
                     SpectrumPlot.Refresh();
                 }
                 catch (Exception ex)
@@ -188,11 +183,6 @@ namespace QAMP.Visualization
                 }
             });
         }
-        // public void SetSpectrumPreset(string presetName)
-        // {
-        //     _settings.ApplyPreset(presetName);
-        //     System.Diagnostics.Debug.WriteLine($"Spectrum preset changed to: {presetName}");
-        // }
         public void ResetPeaks()
         {
             for (int i = 0; i < BarCount; i++)

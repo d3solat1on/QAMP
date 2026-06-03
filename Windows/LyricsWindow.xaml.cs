@@ -32,5 +32,9 @@ public partial class LyricsWindow : Window
         }
     }
 
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+        Services.MemoryOptimizer.RunAsync(this.Dispatcher);
+    }
 }
