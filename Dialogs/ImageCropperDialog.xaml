@@ -61,7 +61,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Обрезать обложку"
+            <TextBlock x:Name="CropCover"
+                       Text="{DynamicResource LngCropCover}"
                        Foreground="{DynamicResource TextBrush}"
                        FontSize="20"
                        FontWeight="Bold"
@@ -96,7 +97,8 @@
             <StackPanel Grid.Row="1"
                         VerticalAlignment="Bottom"
                         Margin="0,0,0,-25">
-                <TextBlock Text="Масштаб"
+                <TextBlock x:Name="Scale"
+                           Text="{DynamicResource LngScale}"
                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                            HorizontalAlignment="Center"
                            FontSize="10"/>
@@ -114,7 +116,7 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="0,20,0,0">
-                <Button Content="Отмена"
+                <Button Content="{DynamicResource LngCancelPlaylist}"
                         Click="Cancel_Click"
                         Width="100"
                         Height="35"
@@ -123,7 +125,8 @@
                         IsCancel="True"
                         BorderThickness="0">
                 </Button>
-                <Button Content="Готово"
+                <Button x:Name="Done"
+                        Content="{DynamicResource LngDone}"
                         Click="Done_Click"
                         Width="100"
                         Height="35"

@@ -8,7 +8,7 @@
         WindowStyle="None"
         Width="1000"
         Height="800"
-        Title="Подробная информация"
+        Title="{DynamicResource LngInfoPlaylistTitle}"
         WindowStartupLocation="CenterOwner">
         <Window.Resources>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
@@ -35,7 +35,7 @@
                         <Grid Grid.Row="0"
                               Margin="20,15,20,0"
                               Height="40">
-                                <TextBlock Text="Подробная информация о плейлисте"
+                                <TextBlock Text="{DynamicResource LngInfoPlaylistTitle}"
                                            FontSize="18"
                                            FontWeight="Bold"
                                            Foreground="{DynamicResource TextBrush}"
@@ -185,7 +185,7 @@
                                                         <TextBlock x:Name="TracksCountTextBlock"
                                                                    Grid.Row="1"
                                                                    Grid.Column="0"
-                                                                   Text="Треков:"
+                                                                   Text="{DynamicResource LngTrackCount}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="TracksCountValueTextBlock"
@@ -198,7 +198,7 @@
                                                         <TextBlock x:Name="TotalDurationTextBlock"
                                                                    Grid.Row="2"
                                                                    Grid.Column="0"
-                                                                   Text="Длительность:"
+                                                                   Text="{DynamicResource LngTotalDuration}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="TotalDurationValueTextBlock"
@@ -210,7 +210,7 @@
                                                         <TextBlock x:Name="CreatedDateTextBlock"
                                                                    Grid.Row="3"
                                                                    Grid.Column="0"
-                                                                   Text="Создано:"
+                                                                   Text="{DynamicResource LngCreatedDate}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="CreatedDateValueTextBlock"
@@ -223,7 +223,7 @@
                                                         <TextBlock x:Name="PinnedTextBlock"
                                                                    Grid.Row="4"
                                                                    Grid.Column="0"
-                                                                   Text="Закреплен:"
+                                                                   Text="{DynamicResource LngPinnded}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="PinnedValueTextBlock"
@@ -236,7 +236,7 @@
                                                         <TextBlock x:Name="SystemPlaylistTextBlock"
                                                                    Grid.Row="5"
                                                                    Grid.Column="0"
-                                                                   Text="Системный:"
+                                                                   Text="{DynamicResource LngSystemPlaylist}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SystemPlaylistValueTextBlock"
@@ -249,7 +249,7 @@
                                                         <TextBlock x:Name="SortTypeTextBlock"
                                                                    Grid.Row="6"
                                                                    Grid.Column="0"
-                                                                   Text="Сортировка:"
+                                                                   Text="{DynamicResource LngSortType}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SortTypeValueTextBlock"

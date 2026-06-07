@@ -18,7 +18,7 @@ partial class HelpWindow : Window
     public void ShowVersion()
     {
         string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
-        CurrentVersion.Text = $"Версия {version}";
+        CurrentVersion.Text = $"Version {version}";
         CurrentVersion.IsReadOnly = true;
     }
     public void ShowHelpWindow()

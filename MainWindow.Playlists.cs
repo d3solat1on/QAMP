@@ -25,8 +25,13 @@ namespace QAMP
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
             {
-                MenuAddFilesPlaylist.Header = $"Добавить файлы в \"{selectedPlaylist.Name}\"";
-                MenuAddFolderPlaylist.Header = $"Добавить папку в \"{selectedPlaylist.Name}\"";
+                string filesTemplate = Application.Current.TryFindResource("LngMenuAddFilesTo") as string
+                                       ?? "Добавить файлы в \"{0}\"";
+                string folderTemplate = Application.Current.TryFindResource("LngMenuAddFolderTo") as string
+                                        ?? "Добавить папку в \"{0}\"";
+
+                MenuAddFilesPlaylist.Header = string.Format(filesTemplate, selectedPlaylist.Name);
+                MenuAddFolderPlaylist.Header = string.Format(folderTemplate, selectedPlaylist.Name);
 
                 MenuAddFilesPlaylist.Visibility = Visibility.Visible;
                 MenuAddFolderPlaylist.Visibility = Visibility.Visible;
@@ -44,19 +49,22 @@ namespace QAMP
         private void AddFilesToPlaylist_Click(object sender, RoutedEventArgs e) => AddFilesToCurrentPlaylist();
         private void AddFolderToPlaylist_Click(object sender, RoutedEventArgs e) => AddFolderToCurrentPlaylist();
 
-        private async void AddFolderToCurrentPlaylist() //Вроде норм (не, не норм xd)
+        private async void AddFolderToCurrentPlaylist()
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
             if (MusicLibrary.Instance.CurrentPlaylist == null)
             {
-                NotificationWindow.Show("Сначала выберите плейлист!", this);
+                string errorMsg = Application.Current.FindResource("LngSelectPlaylistFirst") as string ?? "Сначала выберите плейлист!";
+                NotificationWindow.Show(errorMsg, this);
                 return;
             }
 
+            string dialogTitle = Application.Current.FindResource("LngChooseFolderTitle") as string ?? "Выберите папку с музыкой (включая подпапки)";
+
             var folderDialog = new OpenFolderDialog
             {
-                Title = "Выберите папку с музыкой (включая подпапки)",
+                Title = dialogTitle,
                 Multiselect = true
             };
 
@@ -65,9 +73,14 @@ namespace QAMP
                 Cursor = Cursors.Wait;
                 try
                 {
+                    var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
+                        };
+
                     var files = Directory.GetFiles(folderDialog.FolderName, "*.*", SearchOption.AllDirectories)
-                    .Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".flac"))
-                    .ToArray();
+                        .Where(file => supportedExtensions.Contains(Path.GetExtension(file)))
+                        .ToArray();
 
                     var tracks = TagReader.ReadTracksFromFiles(files);
                     int addedCount = 0;
@@ -87,10 +100,12 @@ namespace QAMP
                             });
                         }
                     }
+
                     if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
                     {
                         Player.UpdateQueueOrder([.. selectedPlaylist.Tracks]);
                     }
+
                     if (selectedPlaylist.SortType != TrackSortType.AddedDate)
                     {
                         ApplySort(selectedPlaylist.SortType);
@@ -101,7 +116,11 @@ namespace QAMP
                         TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     }
                     UpdateNextTrackUI();
-                    await MyToast.ShowAsync($"Добавлено {addedCount} треков");
+
+                    string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено {0} треков";
+                    string toastMessage = string.Format(toastTemplate, addedCount);
+
+                    await MyToast.ShowAsync(toastMessage);
                 }
                 finally
                 {
@@ -113,10 +132,14 @@ namespace QAMP
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
+            var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
+                        };
             var openFileDialog = new OpenFileDialog
             {
                 Multiselect = true,
-                Filter = "Music files (*.mp3;*.wav;*.flac)|*.mp3;*.wav;*.flac"
+                Filter = "music | supportedExtensions"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -149,7 +172,10 @@ namespace QAMP
                     TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                 }
                 UpdateNextTrackUI();
-                await MyToast.ShowAsync($"Добавлено {addedCount} треков");
+                string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено {0} треков";
+                string toastMessage = string.Format(toastTemplate, addedCount);
+
+                await MyToast.ShowAsync(toastMessage);
             }
         }
 
@@ -194,7 +220,12 @@ namespace QAMP
 
                     TracksDataGrid.ItemsSource = newPlaylist.Tracks;
 
-                    await MyToast.ShowAsync($"Плейлист \"{dialog.PlaylistName}\" создан");
+                    string toastTemplate = Application.Current.TryFindResource("LngCreatedPlaylist") as string
+                                           ?? "Плейлист \"{0}\" создан";
+
+                    string message = string.Format(toastTemplate, dialog.PlaylistName);
+                    await MyToast.ShowAsync(message); string toastMessage = string.Format(toastTemplate, dialog.PlaylistName);
+                    await MyToast.ShowAsync(toastMessage);
                 }
             }
         }
@@ -259,7 +290,7 @@ namespace QAMP
             }
         }
 
-        private void UpdateNowPlayingInfo(Track track)
+        private void UpdateNowPlayingInfo(Track track) //Переделать
         {
             if (_lastTrackWithCover != null && _lastTrackWithCover != track)
             {
@@ -377,7 +408,9 @@ namespace QAMP
                     }
                     ApplySort(updatedPlaylist.SortType);
                     UpdateNextTrackUI();
-                    await MyToast.ShowAsync($"Плейлист \"{updatedPlaylist.Name}\" обновлен");
+                    string toastTemple = Application.Current.FindResource("LngPlaylistUpdate") as string ?? "Плейсит {updatedPlaylist.Name} обновлен";
+                    string toastMessage = string.Format(toastTemple);
+                    await MyToast.ShowAsync(toastMessage);
                 }
             }
         }
@@ -391,17 +424,21 @@ namespace QAMP
                 // Пропускаем дефолтный Manual, если Custom делает то же самое
                 if (sortOrder == PlaylistSortOrder.Manual) continue;
 
+                string resourceKey = sortOrder switch
+                {
+                    PlaylistSortOrder.NameAZ => "LngSortNameAZ",
+                    PlaylistSortOrder.NameZA => "LngSortNameZA",
+                    PlaylistSortOrder.CreatedDateNewest => "LngSortDateNewest",
+                    PlaylistSortOrder.CreatedDateOldest => "LngSortDateOldest",
+                    PlaylistSortOrder.Custom => "LngSortCustom",
+                    _ => "LngSortNone"
+                };
+
+                string headerText = Application.Current.FindResource(resourceKey) as string ?? "Без сортировки";
+
                 var menuItem = new MenuItem
                 {
-                    Header = sortOrder switch
-                    {
-                        PlaylistSortOrder.NameAZ => "Названию (A-Z)",
-                        PlaylistSortOrder.NameZA => "Названию (Z-A)",
-                        PlaylistSortOrder.CreatedDateNewest => "Дате создания (новые сверху)",
-                        PlaylistSortOrder.CreatedDateOldest => "Дате создания (старые сверху)",
-                        PlaylistSortOrder.Custom => "Пользовательский порядок",
-                        _ => "Без сортировки"
-                    },
+                    Header = headerText,
                     Tag = sortOrder
                 };
 
@@ -417,7 +454,8 @@ namespace QAMP
                     // чтобы при следующем запуске QAMP конфигурация восстановилась.
                     AppSettings.CurrentPlaylistSort = sortOrder;
                     SettingsManager.Instance.Save();
-                    _ = MyToast.ShowAsync($"Сортировка изменена");
+                    string toastMessage = Application.Current.FindResource("LngSortingChanged") as string ?? "Сортировка изменена";
+                    _ = MyToast.ShowAsync(toastMessage);
                 };
 
                 contextMenu.Items.Add(menuItem);
@@ -431,7 +469,7 @@ namespace QAMP
                 contextMenu.IsOpen = true;
             }
         }
-        private void ApplyPlaylistSorting(PlaylistSortOrder sortOrder)
+        private static void ApplyPlaylistSorting(PlaylistSortOrder sortOrder)
         {
             // Получаем представление по умолчанию для твоей коллекции плейлистов
             ICollectionView view = CollectionViewSource.GetDefaultView(MusicLibrary.Instance.Playlists);

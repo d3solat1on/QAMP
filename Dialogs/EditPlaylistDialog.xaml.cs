@@ -77,7 +77,8 @@ namespace QAMP.Dialogs
 
             if (string.IsNullOrWhiteSpace(newName))
             {
-                NotificationWindow.Show("Название не может быть пустым!", this);
+                string message = Application.Current.Resources["LngNameCannotBeEmpty"] as string ?? "Название не может быть пустым!";
+                NotificationWindow.Show(message, this);
                 return;
             }
 
@@ -86,7 +87,8 @@ namespace QAMP.Dialogs
             // Проверяем через базу данных
             if (DatabaseService.PlaylistExists(newName, currentPlaylist.Id))
             {
-                NotificationWindow.Show("Плейлист с таким названием уже существует!", this);
+                string message = Application.Current.Resources["LngPlaylistNameExists"] as string ?? "Плейлист с таким названием уже существует!";
+                NotificationWindow.Show(message, this);
                 return;
             }
 

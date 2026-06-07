@@ -4,11 +4,11 @@ namespace QAMP.Windows;
 
 public partial class Statistics : Window
 {
-    private System.Threading.Timer? _debounceTimer;
+    private Timer? _debounceTimer;
     private const int DebounceDelayMs = 1000; // Обновлять не чаще чем раз в секунду
 
     public Statistics()
-    {        
+    {
         InitializeComponent();
         Loaded += async (s, e) => await RefreshAllStatisticsAsync();
         Loaded += (s, e) => SubscribeToStatisticsChanges();
@@ -65,12 +65,13 @@ public partial class Statistics : Window
         var totalLibrarySize = await Task.Run(() => DatabaseService.GetTotalLibrarySize());
         var totalLibraryWeight = await Task.Run(() => DatabaseService.GetTotalLibraryWeight());
         var mostListenedArtistText = await Task.Run(() => DatabaseService.GetMostListenedArtist());
-        var tracksWithoutListening = await Task.Run(() => DatabaseService.GetTracksWithoutListnenig());
-        TracksWithoutListening.Text = $"Треки без прослушивания \n{tracksWithoutListening}";
-        MostListenedArtistText.Text = $"Самый прослушиваемый исполнитель: {mostListenedArtistText}";
+        var tracksWithoutListening = await Task.Run(() => DatabaseService.GetTracksWithoutListening());
+
+        TracksWithoutListening.Text = tracksWithoutListening;
+        MostListenedArtistText.Text = LocalizationService.GetFormattedString("LngMostListenedArtistValue", mostListenedArtistText);
         PlaylistCountText.Text = playlistCount;
         TrackCountText.Text = trackCount;
-        MostListenedTrackText.Text = mostListened;
+        MostListenedTrackText.Text = LocalizationService.GetFormattedString("LngMostListenedTrackValue", mostListened);
         HighestBitrateText.Text = hiResKing;
         LongestTrackText.Text = longestTrack;
         ShortestTrackText.Text = shortestTrack;

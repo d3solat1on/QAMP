@@ -116,7 +116,7 @@
                                     WindowChrome.IsHitTestVisibleInChrome="True">
                                 <Button x:Name="EqualizerButton"
                                         Style="{StaticResource IconButton}"
-                                        ToolTip="Открыть параметры звука"
+                                        ToolTip="{DynamicResource LngEqualizer}"
                                         Click="EqualizerButton_Click">
                                         <Path Data="{StaticResource EqualizerGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
@@ -128,6 +128,7 @@
                                 </Button>
                                 <Button x:Name="Settings"
                                         Style="{StaticResource TitleBarButtonStyle}"
+                                        ToolTip="{DynamicResource LngSettings}"
                                         Click="Settings_Click">
                                         <Path Data="{StaticResource settingsGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
@@ -206,7 +207,6 @@
                                                         <Button x:Name="FavoriteButton"
                                                                 Style="{StaticResource IconButton}"
                                                                 Click="FavoriteButton_Click"
-                                                                ToolTip="Добавить в избранное"
                                                                 Width="40"
                                                                 Height="40"
                                                                 Margin="0,0,10,0">
@@ -260,7 +260,7 @@
                                                                                 Width="40"
                                                                                 Height="40"
                                                                                 Margin="5,0"
-                                                                                ToolTip="Открыть спектр в полноэкранном режиме">
+                                                                                ToolTip="{DynamicResource LngFullSpectrumWindow}">
                                                                                 <Path x:Name="FullSpectrumWindowImage"
                                                                                       Width="25"
                                                                                       Height="25"
@@ -277,7 +277,7 @@
                                                                                 Width="40"
                                                                                 Height="40"
                                                                                 Margin="5,0"
-                                                                                ToolTip="Включить перемешивание">
+                                                                                ToolTip="{DynamicResource LngShuffle}">
                                                                                 <Path x:Name="ShuffleImage"
                                                                                       Width="25"
                                                                                       Height="25"
@@ -288,11 +288,12 @@
                                                                         </Button>
                                                                 </Grid>
                                                                 <Grid Height="40">
-                                                                        <Button Style="{StaticResource IconButton}"
+                                                                        <Button x:Name="PrevButton"
+                                                                                Style="{StaticResource IconButton}"
                                                                                 Width="40"
                                                                                 Height="40"
                                                                                 Margin="5,0"
-                                                                                ToolTip="Предыдущий трек"
+                                                                                ToolTip="{DynamicResource LngPrev}"
                                                                                 Click="PrevButton_Click">
                                                                                 <Path Width="25"
                                                                                       Height="25"
@@ -316,7 +317,7 @@
                                                                                 Height="40"
                                                                                 Margin="5,0"
                                                                                 Click="PlayPauseButton_Click"
-                                                                                ToolTip="Воспроизвести/пауза">
+                                                                                ToolTip="{DynamicResource LngPlayPause}">
                                                                                 <Path x:Name="PlayPauseIcon"
                                                                                       Width="25"
                                                                                       Height="25"
@@ -335,12 +336,13 @@
                                                                     Orientation="Horizontal"
                                                                     HorizontalAlignment="Left">
                                                                 <Grid Height="40">
-                                                                        <Button Style="{StaticResource IconButton}"
+                                                                        <Button x:Name="NextButton"
+                                                                                Style="{StaticResource IconButton}"
                                                                                 Width="40"
                                                                                 Height="40"
                                                                                 Margin="5,0"
                                                                                 Click="NextButton_Click"
-                                                                                ToolTip="Следующий трек">
+                                                                                ToolTip="{DynamicResource LngNext}">
                                                                                 <Path Width="25"
                                                                                       Height="25"
                                                                                       Margin="5"
@@ -352,12 +354,13 @@
                                                                         </Button>
                                                                 </Grid>
                                                                 <Grid Height="40">
-                                                                        <Button Style="{StaticResource IconButton}"
+                                                                        <Button x:Name="RepeatButton"
+                                                                                Style="{StaticResource IconButton}"
                                                                                 Click="RepeatButton_Click"
                                                                                 Width="40"
                                                                                 Height="40"
                                                                                 Margin="5,0"
-                                                                                ToolTip="Включить повтор">
+                                                                                ToolTip="{DynamicResource LngRepeat}">
                                                                                 <Path x:Name="RepeatIcon"
                                                                                       Width="25"
                                                                                       Height="25"
@@ -376,7 +379,7 @@
                                                                                 Width="40"
                                                                                 Height="40"
                                                                                 Margin="5,0"
-                                                                                ToolTip="Просмотреть тексты">
+                                                                                ToolTip="{DynamicResource LngViewLyrics}">
                                                                                 <Path Width="25"
                                                                                       Height="25"
                                                                                       Margin="5"
@@ -529,7 +532,7 @@
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
                                                                         Click="SortByButton_Click"
-                                                                        ToolTip="Сортировать плейлисты">
+                                                                        ToolTip="{DynamicResource LngSortByButton}">
                                                                         <Path Data="{StaticResource sortGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"
@@ -544,7 +547,7 @@
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
                                                                         Click="CreatePlaylistButton_Click"
-                                                                        ToolTip="Создать плейлист">
+                                                                        ToolTip="{DynamicResource LngCreatePlaylist}">
                                                                         <Path Data="{StaticResource create_playlistGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"
@@ -559,7 +562,7 @@
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
                                                                         Click="RemovePlaylist_Click"
-                                                                        ToolTip="Удалить выбранный плейлист"
+                                                                        ToolTip="{DynamicResource LngRemovePlaylist}"
                                                                         IsEnabled="{Binding ElementName=PlaylistsListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}">
                                                                         <Path Data="{StaticResource playlist_removeGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
@@ -574,7 +577,7 @@
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
                                                                         Click="AddMusicButton_Click"
-                                                                        ToolTip="Добавить музыку">
+                                                                        ToolTip="{DynamicResource LngAddMusic}">
                                                                         <Button.Resources>
                                                                                 <Style TargetType="ContextMenu"
                                                                                        x:Key="ModernMenu">
@@ -602,10 +605,10 @@
                                                                                 <ContextMenu x:Name="AddMusicMenu"
                                                                                              Style="{StaticResource ModernMenu}">
                                                                                         <MenuItem x:Name="MenuAddFilesPlaylist"
-                                                                                                  Header="Добавить файлы"
+                                                                                                  Header="{DynamicResource LngAddFiles}"
                                                                                                   Click="AddFilesToPlaylist_Click"/>
                                                                                         <MenuItem x:Name="MenuAddFolderPlaylist"
-                                                                                                  Header="Добавить папку"
+                                                                                                  Header="{DynamicResource LngAddFolder}"
                                                                                                   Click="AddFolderToPlaylist_Click"/>
                                                                                 </ContextMenu>
                                                                         </Button.ContextMenu>
@@ -836,7 +839,8 @@
                                                                                                                                 </Setter>
                                                                                                                         </Style>
                                                                                                                 </ContextMenu.Resources>
-                                                                                                                <MenuItem Header="Редактировать"
+                                                                                                                <MenuItem x:Name="EditPlaylist"
+                                                                                                                          Header="{DynamicResource LngEditPlaylist}"
                                                                                                                           Click="EditPlaylist_Click"/>
                                                                                                                 <MenuItem x:Name="PinPlaylistMenuItem"
                                                                                                                           Click="PinPlaylist_Click">
@@ -844,24 +848,27 @@
                                                                                                                                 <Style TargetType="MenuItem"
                                                                                                                                        BasedOn="{StaticResource {x:Type MenuItem}}">
                                                                                                                                         <Setter Property="Header"
-                                                                                                                                                Value="Закрепить"/>
+                                                                                                                                                Value="{DynamicResource LngPinPlaylist}"/>
                                                                                                                                         <Style.Triggers>
                                                                                                                                                 <DataTrigger Binding="{Binding IsPinned}"
                                                                                                                                                              Value="True">
                                                                                                                                                         <Setter Property="Header"
-                                                                                                                                                                Value="Открепить"/>
+                                                                                                                                                                Value="{DynamicResource LngUnpinPlaylist}"/>
                                                                                                                                                 </DataTrigger>
                                                                                                                                         </Style.Triggers>
                                                                                                                                 </Style>
                                                                                                                         </MenuItem.Style>
                                                                                                                 </MenuItem>
-                                                                                                                <MenuItem Header="Информация"
+                                                                                                                <MenuItem x:Name="InfoPlaylist"
+                                                                                                                          Header="{DynamicResource LngInfoPlaylist}"
                                                                                                                           Click="ShowPlaylistInfo_Click"/>
-                                                                                                                <MenuItem Header="Обновить плейлист"
-                                                                                                                          ToolTip="Пересканировать папки плейлиста и обновить его содержимое(Если это не произошло автоматически)"
+                                                                                                                <MenuItem x:Name="RefreshPlaylist"
+                                                                                                                          Header="{DynamicResource LngUpdatePlaylist}"
+                                                                                                                          ToolTip="{DynamicResource LngRefreshPlaylist}"
                                                                                                                           Click="RefreshPlaylist_Click"/>
                                                                                                                 <Separator Background="{DynamicResource BorderBrush}"/>
-                                                                                                                <MenuItem Header="Удалить"
+                                                                                                                <MenuItem x:Name="DeletePlaylist"
+                                                                                                                          Header="{DynamicResource LngDeletePlaylist}"
                                                                                                                           Click="DeletePlaylist_Click"
                                                                                                                           Foreground="Red"/>
                                                                                                         </ContextMenu>
@@ -899,11 +906,14 @@
                                                                                                                    Foreground="{DynamicResource ForegroundBrush}"
                                                                                                                    TextTrimming="CharacterEllipsis"/>
                                                                                                 </StackPanel>
-                                                                                                <TextBlock Text="{Binding TrackCount, StringFormat='{}{0} треков'}"
-                                                                                                           x:Name="CurrentTracksCountText"
+                                                                                                <TextBlock x:Name="CurrentTracksCountText"
                                                                                                            FontSize="10"
                                                                                                            Foreground="{DynamicResource CentralPanelMutedForeground}"
-                                                                                                           Margin="0,2,0,0"/>
+                                                                                                           Margin="0,2,0,0">
+                                                                                                                <Run Text="{Binding TrackCount, Mode=OneWay}"/>
+                                                                                                                <Run Text=""/>
+                                                                                                                <Run Text="{DynamicResource LngTracksForLeftSide}"/>
+                                                                                                </TextBlock>
                                                                                         </StackPanel>
                                                                                 </Grid>
                                                                         </Border>
@@ -1011,7 +1021,7 @@
 
                                                                 <TextBlock x:Name="PlaylistRS"
                                                                            Grid.Row="0"
-                                                                           Text="ПЛЕЙЛИСТ"
+                                                                           Text="{DynamicResource LngPlaylistRS}"
                                                                            Foreground="{DynamicResource CentralPanelHighlightForeground}"
                                                                            FontSize="12"
                                                                            FontWeight="Bold"
@@ -1038,9 +1048,13 @@
                                                                 <StackPanel Grid.Row="3"
                                                                             Orientation="Horizontal"
                                                                             VerticalAlignment="Bottom">
-                                                                        <TextBlock Text="{Binding CurrentPlaylist.TrackCountDisplay, StringFormat='Треков: {0}'}"
-                                                                                   Foreground="{DynamicResource TextBrush}"
-                                                                                   FontSize="13"/>
+                                                                        <TextBlock
+                                                                                Foreground="{DynamicResource TextBrush}"
+                                                                                FontSize="13">
+                                                                                <Run Text="{Binding CurrentPlaylist.TrackCountDisplay, Mode=OneWay}"/>
+                                                                                <Run Text=""/>
+                                                                                <Run Text="{DynamicResource LngTracksForLeftSide}"/>
+                                                                        </TextBlock>
                                                                         <TextBlock Text=" • "
                                                                                    Foreground="{DynamicResource TextBrush}"/>
                                                                         <TextBlock Text="{Binding CurrentPlaylist.TotalDurationDisplay}"
@@ -1172,12 +1186,16 @@
                                                                 <ContextMenu Background="{DynamicResource ContextMenuBackground}"
                                                                              BorderBrush="{DynamicResource ContextMenuBorderBrush}"
                                                                              Opened="ContextMenu_Opened">
-                                                                        <MenuItem Header="Воспроизвести"
+                                                                        <MenuItem x:Name="PlayTrackMenu"
+                                                                                  Header="{DynamicResource LngPlayTrackMenu}"
                                                                                   Click="PlayTrackMenuItem_Click"/>
-                                                                        <MenuItem Header="Информация"
+                                                                        <MenuItem x:Name="ShowTrackInfoMenu"
+                                                                                  Header="{DynamicResource LngShowInfoTrackMenu}"
                                                                                   Click="ShowTrackInfo_Click"/>
-                                                                        <MenuItem Header="Добавить в плейлист"/>
-                                                                        <MenuItem Header="Удалить из плейлиста"
+                                                                        <MenuItem x:Name="AddToPlaylist"
+                                                                                  Header="{DynamicResource LngAddToPlaylist}"/>
+                                                                        <MenuItem x:Name="DeleteFromPlaylist"
+                                                                                  Header="{DynamicResource LngDeleteFromPlaylist}"
                                                                                   Click="RemoveFromPlaylist_Click"/>
                                                                 </ContextMenu>
                                                         </DataGrid.ContextMenu>

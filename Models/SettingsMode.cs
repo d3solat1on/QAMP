@@ -46,6 +46,7 @@ public class AppSettings : INotifyPropertyChanged
     public double SpectrumAttackSpeed { get; set; } = 0.5;
     public double SpectrumReleaseSpeed { get; set; } = 0.9;
     public PlaylistSortOrder CurrentPlaylistSort { get; set; } = PlaylistSortOrder.Manual;
+    public string Language { get; set; } = "ru";
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

@@ -9,7 +9,7 @@
         WindowStyle="None"
         Width="1000"
         Height="800"
-        Title="Подробная информация"
+        Title="{DynamicResource LngInfoTrack}"
         WindowStartupLocation="CenterOwner"
         MouseDown="Window_MouseDown">
 
@@ -82,14 +82,14 @@
                                                 <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0"
-                                                   Text="Подробная информация о треке"
+                                                   Text="{DynamicResource LngInfoTrack}"
                                                    FontSize="18"
                                                    FontWeight="Bold"
                                                    Foreground="{DynamicResource TextBrush}"
                                                    VerticalAlignment="Center"/>
                                         <Button Grid.Column="1"
                                                 Style="{StaticResource ModernPlayerButton}"
-                                                Content="Сохранить"
+                                                Content="{DynamicResource LngSaveButton}"
                                                 Click="Save_Click"
                                                 VerticalAlignment="Center"
                                                 Width="100"
@@ -102,7 +102,7 @@
                                                       Width="30"
                                                       Height="30"
                                                       Margin="0,0,10,0"
-                                                      ToolTip="Редактировать теги"
+                                                      ToolTip="{DynamicResource LngEditTags}"
                                                       Background="{DynamicResource AccentBrush}">
                                                 <Path Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04C21.1,6.65 21.1,6.02 20.71,5.63L18.37,3.29C17.98,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04Z"
                                                       Fill="{Binding RelativeSource={RelativeSource AncestorType=ToggleButton}, Path=Foreground}"
@@ -188,7 +188,7 @@
                                                                    Foreground="{DynamicResource AccentBrush}"
                                                                    Margin="0,15,0,0"/>
                                                         <Button Style="{StaticResource ModernPlayerButton}"
-                                                                Content="Извлечь обложку"
+                                                                Content="{DynamicResource LngExtractCover}"
                                                                 Click="ExtractCover_Click"
                                                                 HorizontalAlignment="Center"
                                                                 Margin="0,10,0,0"
@@ -231,7 +231,7 @@
 
                                                                 <TextBlock Grid.Row="0"
                                                                            Grid.Column="0"
-                                                                           Text="Альбом:"
+                                                                           Text="{DynamicResource LngAlbum}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,5"/>
                                                                 <TextBox Grid.Row="0"
@@ -244,7 +244,7 @@
 
                                                                 <TextBlock Grid.Row="1"
                                                                            Grid.Column="0"
-                                                                           Text="Альбом исполнитель:"
+                                                                           Text="{DynamicResource LngAlbumArtist}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,5"/>
                                                                 <TextBox Grid.Row="1"
@@ -257,7 +257,7 @@
 
                                                                 <TextBlock Grid.Row="2"
                                                                            Grid.Column="0"
-                                                                           Text="Жанр:"
+                                                                           Text="{DynamicResource LngGenre}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,5"/>
                                                                 <TextBox Grid.Row="2"
@@ -269,7 +269,7 @@
 
                                                                 <TextBlock Grid.Row="3"
                                                                            Grid.Column="0"
-                                                                           Text="Год:"
+                                                                           Text="{DynamicResource LngYear}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,5"/>
                                                                 <TextBox Grid.Row="3"
@@ -281,7 +281,7 @@
 
                                                                 <TextBlock Grid.Row="4"
                                                                            Grid.Column="0"
-                                                                           Text="Трек №:"
+                                                                           Text="{DynamicResource LngTrackNumber}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,5"/>
                                                                 <TextBox Grid.Row="4"
@@ -293,7 +293,7 @@
 
                                                                 <TextBlock Grid.Row="5"
                                                                            Grid.Column="0"
-                                                                           Text="Композитор:"
+                                                                           Text="{DynamicResource LngComposer}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,5"/>
                                                                 <TextBox Grid.Row="5"
@@ -308,7 +308,7 @@
                                                         <Separator Background="#333"
                                                                    Margin="0,10"/>
 
-                                                        <TextBlock Text="Параметры аудио"
+                                                        <TextBlock Text="{DynamicResource LngSettingsAudio}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
@@ -331,7 +331,7 @@
 
                                                                 <TextBlock Grid.Row="0"
                                                                            Grid.Column="0"
-                                                                           Text="Битрейт:"
+                                                                           Text="{DynamicResource LngBitrate}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,3"/>
                                                                 <TextBlock Grid.Row="0"
@@ -342,7 +342,7 @@
 
                                                                 <TextBlock Grid.Row="1"
                                                                            Grid.Column="0"
-                                                                           Text="Частота:"
+                                                                           Text="{DynamicResource LngSampleRate}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,3"/>
                                                                 <TextBlock Grid.Row="1"
@@ -353,7 +353,7 @@
 
                                                                 <TextBlock Grid.Row="2"
                                                                            Grid.Column="0"
-                                                                           Text="Каналы:"
+                                                                           Text="{DynamicResource LngChannels}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,3"/>
                                                                 <TextBlock Grid.Row="2"
@@ -364,7 +364,7 @@
 
                                                                 <TextBlock Grid.Row="3"
                                                                            Grid.Column="0"
-                                                                           Text="Разрядность:"
+                                                                           Text="{DynamicResource LngBitsPerSample}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,3"/>
                                                                 <TextBlock Grid.Row="3"
@@ -375,7 +375,7 @@
 
                                                                 <TextBlock Grid.Row="4"
                                                                            Grid.Column="0"
-                                                                           Text="Кодек:"
+                                                                           Text="{DynamicResource LngDescription}"
                                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                            Margin="0,3"/>
                                                                 <TextBlock Grid.Row="4"
@@ -408,7 +408,7 @@
                                                                         Height="25"
                                                                         Grid.Row="7"
                                                                         Grid.Column="1"
-                                                                        Content="Определить BPM"
+                                                                        Content="{DynamicResource LngDetectBPM}"
                                                                         Click="DetectBPM_Click"
                                                                         Background="{DynamicResource AccentBrush}"
                                                                         Style="{StaticResource ModernPlayerButton}"
@@ -419,7 +419,7 @@
                                                         <Separator Background="#333"
                                                                    Margin="0,10"/>
 
-                                                        <TextBlock Text="Комментарий"
+                                                        <TextBlock Text="{DynamicResource LngComment}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
@@ -436,7 +436,7 @@
                                                         </Border>
 
                                                         <Button Style="{StaticResource ModernPlayerButton}"
-                                                                Content="Найти текст песни"
+                                                                Content="{DynamicResource LngFindLyrics}"
                                                                 Click="SearchLyrics_Click"
                                                                 Visibility="{Binding ElementName=EditModeButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                 Width="150"
@@ -445,7 +445,7 @@
                                                                 ToolTip="Функция поиска текста использует открытые API исключительно для ознакомительных целей и личного использования"
                                                                 Margin="5">
                                                         </Button>
-                                                        <TextBlock Text="Текст песни"
+                                                        <TextBlock Text="{DynamicResource LngLyricsTrack}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
@@ -469,7 +469,7 @@
                                                                 </ScrollViewer>
                                                         </Border>
 
-                                                        <TextBlock Text="Количество воспроизведений"
+                                                        <TextBlock Text="{DynamicResource LngPlayCountTrack}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
@@ -483,7 +483,7 @@
                                                                            FontSize="10"
                                                                            FontFamily="Consolas"/>
                                                         </Border>
-                                                        <TextBlock Text="Размер файла"
+                                                        <TextBlock Text="{DynamicResource LngSizeFile}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
@@ -497,7 +497,7 @@
                                                                            FontFamily="Consolas"/>
                                                         </Border>
 
-                                                        <TextBlock Text="Формат файла"
+                                                        <TextBlock Text="{DynamicResource LngExstensionFile}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
@@ -511,7 +511,7 @@
                                                                            FontSize="10"
                                                                            FontFamily="Consolas"/>
                                                         </Border>
-                                                        <TextBlock Text="Путь к файлу"
+                                                        <TextBlock Text="{DynamicResource LngPathTrack}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>

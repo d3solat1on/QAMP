@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QAMP"
-        Title="Справка - QAMP"
+        Title="{DynamicResource LngHelpAndSupport}"
         SizeToContent="WidthAndHeight"
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}"
@@ -18,7 +18,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Справка и поддержка"
+        <TextBlock x:Name="HelpAndSupport"
+            Text="{DynamicResource LngHelpAndSupport}"
                    FontSize="24"
                    Foreground="{DynamicResource ForegroundBrush}"
                    Margin="0,0,0,15"/>
@@ -32,55 +33,45 @@
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="Горячие клавиши"
+                <GroupBox x:Name="HotKeys"
+                          Header="{DynamicResource LngHotKeys}"
                           Foreground="{DynamicResource ForegroundBrush}"
                           Margin="0,10">
-                    <TextBlock Text="
-                    Ctrl+Пробел - Пауза/Плей&#x0a;
-                    Ctrl+N - След. трек&#x0a;
-                    Ctrl+B - Пред. трек&#x0a;
-                    Ctrl+L - Режим текста&#x0a;
-                    Ctrl+W - Спектрограмма на весь экран&#x0a;
-                    Ctrl+F - Добавить в избранное/убрать из избранного&#x0a;
-                    Ctrl+I - Информация о треке&#x0a;
-                    Ctrl+R - Повтор трека&#x0a;
-                    Ctrl+S - Перемешивание треков&#x0a;
-                    Ctrl+Tab - Переключение между ячейками в плейлисте&#x0a;
-                    Ctrl+Стрелка вправо - 5 сек вперед&#x0a;
-                    Ctrl+Стрелка влево - 5 сек назад&#x0a;
-                    FN+F1 - Плей/Пауза &#x0a;
-                    FN+F2 - След. трек &#x0a;
-                    FN+F3 - Пред. трек &#x0a;
-                    (*Клавиши FN зависят от производителя компьютера/ноутбука/клавиатуры и т.п.*)"
+                    <TextBlock x:Name="HotKeysTextBlock"
+                               Text="{DynamicResource LngHotKeysTextBlock}"
                                Margin="10"
                                Foreground="{DynamicResource ForegroundBrush}"/>
                 </GroupBox>
 
-                <GroupBox Header="О программе"
+                <GroupBox x:Name="AboutProgramm"
+                          Header="{DynamicResource LngAboutProgramm}"
                           Foreground="{DynamicResource ForegroundBrush}"
                           Margin="0,10">
                     <TextBlock TextWrapping="Wrap"
                                Margin="10"
                                Foreground="{DynamicResource ForegroundBrush}"
-                               Text="QAMP (Quick Attractive Media Player) - современный аудиоплеер с открытым исходным кодом.">
+                               Text="{DynamicResource LngDescQAMP}">
                     </TextBlock>
                 </GroupBox>
-                <GroupBox Header="Поддержка"
+                <GroupBox x:Name="Support"
+                          Header="{DynamicResource LngSupport}"
                           Foreground="{DynamicResource ForegroundBrush}"
                           Margin="0,10">
                     <TextBlock TextWrapping="Wrap"
                                Margin="10"
                                Foreground="{DynamicResource ForegroundBrush}"
-                               Text="Если у вас возникли вопросы или проблемы, пожалуйста, посетите наш репозиторий на GitHub для получения поддержки и информации о проекте.">
+                               Text="{DynamicResource LngHelpGitHub}">
                     </TextBlock>
                 </GroupBox>
-                <GroupBox Header="Используемые библиотеки"
+                <GroupBox x:Name="LibrariesUsed"
+                          Header="{DynamicResource LngLibrariesUsed}"
                           Foreground="{DynamicResource ForegroundBrush}"
                           Margin="0,10">
                     <StackPanel Margin="10">
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                        <Run Text="Визуализация построена на "/>
+                        <Run x:Name="Visualization"
+                             Text="{DynamicResource LngVisualization}"/>
                         <Hyperlink NavigateUri="https://scottplot.net/"
                                    RequestNavigate="Hyperlink_RequestNavigate">
                             ScottPlot
@@ -88,15 +79,17 @@
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                        <Run Text="Аудио-движок — "/>
+                        <Run x:Name="Audio"
+                             Text="{DynamicResource LngAudio}"/>
                         <Hyperlink NavigateUri="http://www.un4seen.com"
-                                    RequestNavigate="Hyperlink_RequestNavigate">
+                                   RequestNavigate="Hyperlink_RequestNavigate">
                             BASS Audio Library (Bass.Net)
                         </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Работа с метаданными - "/>
+                            <Run x:Name="Metadata"
+                                 Text="{DynamicResource LngMetaData}"/>
                             <Hyperlink NavigateUri="https://github.com/mono/taglib-sharp"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 TagLibSharp
@@ -104,7 +97,8 @@
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Ресурсы иконок - "/>
+                            <Run x:Name="Icons"
+                                 Text="{DynamicResource LngIcons}"/>
                             <Hyperlink NavigateUri="https://fonts.google.com/icons"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 Google Material Icons
@@ -112,7 +106,8 @@
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Графический интерфейс - "/>
+                            <Run x:Name="GraphicsUI"
+                                 Text="{DynamicResource LngGraphicsUI}"/>
                             <Hyperlink NavigateUri="https://github.com/KSemenenko/ColorThief"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 ColorThief
@@ -120,7 +115,8 @@
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Тексты песен - "/>
+                            <Run x:Name="Lirycs"
+                                 Text="{DynamicResource LngLirycs}"/>
                             <Hyperlink NavigateUri="https://lrclib.net/"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 LrcLib
@@ -128,7 +124,8 @@
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="База данных - "/>
+                            <Run x:Name="DataBase"
+                                 Text="База данных - "/>
                             <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=net-cli"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 Microsoft.Data.Sqlite
@@ -158,7 +155,8 @@
                 </TextBox.Resources>
             </TextBox>
 
-            <Button Content="Закрыть"
+            <Button x:Name="CloseButton"
+                    Content="Закрыть"
                     Margin="5,0,0,0"
                     Click="CloseButton_Click"
                     Width="100"

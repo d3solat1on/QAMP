@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="Styles/Styles.xaml"/>
                 <ResourceDictionary Source="Resources/Icons.xaml"/>
                 <ResourceDictionary Source="Themes/DarkTheme.xaml"/>
+                <ResourceDictionary Source="Localization/LangRU.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <FontFamily x:Key="MainFont">pack://application:,,,/Resources/Fonts/GOST_TYPE_A.ttf#GOST type A</FontFamily>

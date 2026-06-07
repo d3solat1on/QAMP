@@ -1,4 +1,8 @@
 # CHANGELOG
+## (07.06.2026) Version 1.7.4:
+    - Added English language support (The Favorites playlist is created with a Russian title and description, this will be fixed later xD).  
+    - Support for more audio formats has also been added.  
+
 ## (02.06.2026) Version 1.7.3:
     - A new window for sound settings has appeared.  
     - The equalizer has been redesigned.  

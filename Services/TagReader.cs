@@ -9,7 +9,7 @@ namespace QAMP.Services
         public static Track? ReadTrackFromFile(string filePath)
         {
             if (!File.Exists(filePath)) return null;
-            string extension = Path.GetExtension(filePath)?.TrimStart('.').ToLower() ?? "Неизвестно";
+            string extension = Path.GetExtension(filePath)?.TrimStart('.').ToLower() ?? "Unknown";
             try
             {
                 using var file = TagLib.File.Create(filePath);
@@ -53,10 +53,10 @@ namespace QAMP.Services
                     Path = filePath,
                     Extension = Path.GetExtension(filePath).ToUpper(),
                     Name = file.Tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
-                    Executor = file.Tag.FirstPerformer ?? "Неизвестеный исполнитель",
-                    Album = file.Tag.Album ?? "Неизвестный альбом",
+                    Executor = file.Tag.FirstPerformer ?? "Unknown artist",
+                    Album = file.Tag.Album ?? "Unknown album",
                     Year = (int)file.Tag.Year,
-                    Genre = file.Tag.FirstGenre ?? "Неизвестный жанр",
+                    Genre = file.Tag.FirstGenre ?? "Unknown genre",
                     BPM = (int)file.Tag.BeatsPerMinute,
 
                     Bitrate = file.Properties.AudioBitrate,
@@ -67,9 +67,9 @@ namespace QAMP.Services
                     BitsPerSample = file.Properties.BitsPerSample,
 
                     Comment = file.Tag.Comment ?? "",
-                    Lyrics = file.Tag.Lyrics ?? "Текст песни отсутствует",
+                    Lyrics = file.Tag.Lyrics ?? "Lyrics are missing",
                     TrackNumber = (int)file.Tag.Track,
-                    Composer = file.Tag.FirstComposer ?? "Не указан",
+                    Composer = file.Tag.FirstComposer ?? "Unknow composer",
                     AlbumArtist = file.Tag.FirstAlbumArtist ?? "",
                     AddedDate = DateTime.Now
                 };

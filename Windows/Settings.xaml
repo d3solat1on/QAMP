@@ -10,7 +10,7 @@
         xmlns:dialogs="clr-namespace:QAMP.Dialogs"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Настройки QAMP"
+        Title="{DynamicResource LngSettingsQAMP}"
         SizeToContent="Manual"
         ResizeMode="CanMinimize"
         Height="900"
@@ -104,9 +104,10 @@
                         VerticalAlignment="Center"
                         Margin="10,0,0,0"
                         WindowChrome.IsHitTestVisibleInChrome="True">
-                <TextBlock Text="Настройки QAMP"
-                           Foreground="{DynamicResource ForegroundBrush}"
-                           FontWeight="Bold"/>
+                <TextBlock
+                    Text="{DynamicResource LngSettingsQAMP}"
+                    Foreground="{DynamicResource ForegroundBrush}"
+                    FontWeight="Bold"/>
             </StackPanel>
 
 
@@ -142,42 +143,46 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Настройки"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           Grid.Row="0"
-                           Margin="0,0,0,20"/>
+                <TextBlock
+                    Text="{DynamicResource LngSettingsTitle}"
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Grid.Row="0"
+                    Margin="0,0,0,20"/>
 
                 <!-- Выбор темы -->
-                <GroupBox Header="Тема"
+                <GroupBox x:Name="Theme"
+                          Header="{DynamicResource LngTheme}"
                           Grid.Row="1"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
                         <RadioButton x:Name="DarkThemeRadio"
-                                     Content="Темная"
+                                     Content="{DynamicResource LngDarkTheme}"
                                      GroupName="Theme"
                                      Margin="0,0,0,10"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="StandardThemeRadio_Checked"/>
 
                         <RadioButton x:Name="LightThemeRadio"
-                                     Content="Светлая"
+                                     Content="{DynamicResource LngLightTheme}"
                                      GroupName="Theme"
                                      Margin="0,0,0,15"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="StandardThemeRadio_Checked"/>
 
                         <RadioButton x:Name="CustomThemeRadio"
-                                     Content="Пользовательская"
+                                     Content="{DynamicResource LngCustomTheme}"
                                      GroupName="Theme"
                                      Margin="0,0,0,15"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CustomThemeRadio_Checked"/>
 
-                        <TextBlock Text="Пользовательские темы:"
+                        <TextBlock x:Name="CustomThemeRadio1"
+                                   Text="{DynamicResource LngCustomThemes}"
                                    Margin="0,0,0,5"
                                    Foreground="{DynamicResource ForegroundBrush}"
                                    FontSize="11"
@@ -208,7 +213,7 @@
                             <Button x:Name="AddThemeButton"
                                     Grid.Column="1"
                                     Style="{StaticResource ModernPlayerButton}"
-                                    Content="Добавить тему"
+                                    Content="{DynamicResource LngAddTheme}"
                                     Padding="10,0"
                                     Height="25"
                                     Click="AddThemeButton_Click"/>
@@ -217,12 +222,36 @@
                 </GroupBox>
 
                 <!-- Настройка акцентного цвета -->
-                <GroupBox Header="Акцентный цвет"
+
+                <!-- Language selection -->
+                <GroupBox x:Name="LanguageGroup"
+                          Grid.Row="10"
+                          Header="{DynamicResource LngLanguage}"
+                          Margin="0,0,0,20"
+                          Foreground="{DynamicResource ForegroundBrush}">
+                    <StackPanel Margin="10"
+                                Orientation="Horizontal">
+                        <RadioButton x:Name="LanguageRuRadio"
+                                     Content="{DynamicResource LngLanguageRussian}"
+                                     GroupName="Language"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Margin="0,0,20,0"
+                                     Checked="LanguageRadio_Checked"/>
+                        <RadioButton x:Name="LanguageEnRadio"
+                                     Content="{DynamicResource LngLanguageEnglish}"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     GroupName="Language"
+                                     Checked="LanguageRadio_Checked"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox x:Name="MainColor"
+                          Header="{DynamicResource AccentColor}"
                           Grid.Row="2"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
-                        <TextBlock Text="Выберите цвет (HEX):"
+                        <TextBlock x:Name="SelectColor"
+                                   Text="{DynamicResource LngMainColor}"
                                    Foreground="{DynamicResource ForegroundBrush}"
                                    Margin="0,0,0,5"/>
                         <TextBox x:Name="AccentColorTextBox"
@@ -238,7 +267,8 @@
                                    Foreground="{DynamicResource ForegroundBrush}"/>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="Спектрограмма"
+                <GroupBox x:Name="Spectrum"
+                          Header="{DynamicResource LngSpectrum}"
                           Grid.Row="3"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
@@ -246,19 +276,20 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,0,0,15">
                             <StackPanel>
-                                <TextBlock Text="Включить/отключить:"
+                                <TextBlock x:Name="OnOff"
+                                           Text="{DynamicResource LngOnOff}"
                                            Foreground="{DynamicResource ForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <StackPanel Orientation="Horizontal"
                                             Margin="0,0,0,10">
                                     <RadioButton x:Name="VisualizerEnabled"
-                                                 Content="Включено"
+                                                 Content="{DynamicResource LngVisualizerEnabled}"
                                                  GroupName="Visualizer"
                                                  Margin="0,0,20,0"
                                                  Foreground="{DynamicResource ForegroundBrush}"
                                                  Checked="VisualizerToggle_Changed"/>
                                     <RadioButton x:Name="VisualizerDisabled"
-                                                 Content="Отключено"
+                                                 Content="{DynamicResource LngVisualizerDisabled}"
                                                  GroupName="Visualizer"
                                                  Foreground="{DynamicResource ForegroundBrush}"
                                                  Checked="VisualizerToggle_Changed"/>
@@ -269,64 +300,68 @@
                 </GroupBox>
 
 
-                <GroupBox Grid.Row="5"
-                          Header="Формат библиотеки"
+                <GroupBox x:Name="FormatLibrary"
+                          Grid.Row="5"
+                          Header="{DynamicResource LngFormatLibrary}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
                         <RadioButton x:Name="DefaultModeRadio"
-                                     Content="Компактный"
+                                     Content="{DynamicResource LngDefaultMode}"
                                      GroupName="Format"
                                      Margin="0,0,0,10"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="Format_Checked"/>
                         <RadioButton x:Name="CompactModeRadio"
-                                     Content="Обычный"
+                                     Content="{DynamicResource LngCompactMode}"
                                      GroupName="Format"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="Format_Checked"/>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Grid.Row="6"
-                          Header="Системные настройки"
+                <GroupBox x:Name="SystemSettings"
+                          Grid.Row="6"
+                          Header="{DynamicResource LngSystemSettings}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
                         <RadioButton x:Name="CloseAppRadio"
-                                     Content="Закрывать приложение при закрытии"
+                                     Content="{DynamicResource LngCloseApp}"
                                      GroupName="CloseAction"
                                      Margin="0,0,0,10"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CloseAction_Checked"/>
                         <RadioButton x:Name="CloseToTrayRadio"
-                                     Content="Сворачивать в трей при закрытии"
+                                     Content="{DynamicResource LngCloseToTrayApp}"
                                      GroupName="CloseAction"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CloseAction_Checked"/>
                     </StackPanel>
 
                 </GroupBox>
-                <GroupBox Grid.Row="7"
-                          Header="Дополнительно"
+                <GroupBox x:Name="Dopolnitelno"
+                          Grid.Row="7"
+                          Header="{DynamicResource LngDopolnitelno}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
                         <RadioButton x:Name="AdaptiveGradientsRadio"
-                                     Content="Использовать адаптивные градиенты на основе обложки"
+                                     Content="{DynamicResource LngAdaptiveGradients}"
                                      GroupName="AdaptiveGradients"
                                      Margin="0,0,0,10"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="AdaptiveGradients_Checked"/>
                         <RadioButton x:Name="StaticGradientsRadio"
-                                     Content="Использовать статический цвет"
+                                     Content="{DynamicResource LngStaticGradients}"
                                      GroupName="AdaptiveGradients"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="AdaptiveGradients_Checked"/>
 
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Grid.Row="8"
-                          Header="Система"
+                <GroupBox x:Name="SystemGroupBox"
+                          Grid.Row="8"
+                          Header="{DynamicResource LngSystem}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10"
@@ -335,32 +370,33 @@
                         <Button Style="{StaticResource ModernPlayerButton}"
                                 x:Name="DatabaseLocation"
                                 Margin="5"
-                                Content="Открыть папку с базой данных"
+                                Content="{DynamicResource LngOpenDataBase}"
                                 Click="OpenDatabaseLocation_Click">
                         </Button>
                         <Button Style="{StaticResource ModernPlayerButton}"
                                 x:Name="AppLocation"
                                 Margin="5"
-                                Content="Открыть папку с приложением"
+                                Content="{DynamicResource LngOpenAppLocation}"
                                 Click="OpenAppLocation_Click">
                         </Button>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Grid.Row="9"
-                          Header="Автозагрузка"
+                <GroupBox x:Name="AutoLaunch"
+                          Grid.Row="9"
+                          Header="{DynamicResource LngAutoLauch}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10"
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Left">
                         <RadioButton x:Name="AutoLaunchEnabled"
-                                     Content="Включить автозапуск"
+                                     Content="{DynamicResource LngAutoLaunchOn}"
                                      GroupName="AutoLaunch"
                                      Margin="0,0,20,0"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CheckAutoLaunch"/>
                         <RadioButton x:Name="AutoLaunchDisabled"
-                                     Content="Отключить автозапуск"
+                                     Content="{DynamicResource LngAutoLaunchOff}"
                                      GroupName="AutoLaunch"
                                      Margin="0,0,20,0"
                                      Foreground="{DynamicResource ForegroundBrush}"
@@ -386,7 +422,7 @@
                            Visibility="Collapsed"/>
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="Statistics"
-                        Content="Статистика"
+                        Content="{DynamicResource LngStatistics}"
                         Margin="5,0,0,0"
                         Click="StatisticsButton_Click"
                         Width="100"
@@ -394,7 +430,7 @@
                 </Button>
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="HelpWindowButton"
-                        Content="Справка"
+                        Content="{DynamicResource LngOpenHelpWindow}"
                         Margin="5,0,0,0"
                         Click="HelpWindowButton_Click"
                         Width="100"
@@ -402,7 +438,7 @@
                 </Button>
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="CancelButton"
-                        Content="Отмена"
+                        Content="{DynamicResource LngCancelButton}"
                         Click="CancelButton_Click"
                         Margin="5,0,0,0"
                         Width="100"
@@ -411,7 +447,7 @@
                 </Button>
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="SaveButton"
-                        Content="Сохранить"
+                        Content="{DynamicResource LngSaveButton}"
                         Width="100"
                         Height="35"
                         Margin="5,0,0,0"

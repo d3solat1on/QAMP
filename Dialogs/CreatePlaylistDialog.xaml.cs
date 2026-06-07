@@ -21,7 +21,7 @@ namespace QAMP.Dialogs
             // Если редактируем существующий плейлист
             if (existingPlaylist != null)
             {
-                Title = "Редактировать плейлист";
+                Title = Application.Current.Resources["LngEditPlaylistTitle"] as string ?? "Редактировать плейлист";
                 PlaylistNameTextBox.Text = existingPlaylist.Name;
                 PlaylistDescriptionTextBox.Text = existingPlaylist.Description;
                 
@@ -35,7 +35,7 @@ namespace QAMP.Dialogs
             }
             else
             {
-                Title = "Создать плейлист";
+                Title = Application.Current.Resources["LngCreatePlaylistTitle"] as string ?? "Создать плейлист";
             }
         }
 
@@ -59,7 +59,7 @@ namespace QAMP.Dialogs
         {
             var openFileDialog = new OpenFileDialog
             {
-                Title = "Выберите изображение для обложки",
+                Title = Application.Current.Resources["LngSelectCoverImage"] as string ?? "Выберите изображение для обложки",
                 Filter = "Images|*.jpg;*.jpeg;*.png;*.bmp"
             };
 
@@ -98,7 +98,9 @@ namespace QAMP.Dialogs
                 }
                 catch (Exception ex)
                 {
-                    NotificationWindow.Show($"Ошибка загрузки изображения: {ex.Message}", this);
+                    var errorMsg = (Application.Current.Resources["LngImageLoadError"] as string ?? "Ошибка загрузки изображения: {0}")
+                        .Replace("{0}", ex.Message);
+                    NotificationWindow.Show(errorMsg, this);
                 }
             }
         }
@@ -122,16 +124,18 @@ namespace QAMP.Dialogs
             // Валидация
             if (string.IsNullOrWhiteSpace(name))
             {
-                NotificationWindow.Show("Введите название плейлиста", this);
+                string message = Application.Current.Resources["LngPlaylistNameEmpty"] as string ?? "Пожалуйста, введите название плейлиста";
+                NotificationWindow.Show(message, this);
                 return;
             }
             
             // Проверка на дубликат имени (если создаем новый)
-            if (Title == "Создать плейлист")
+            if (Title == (Application.Current.Resources["LngCreatePlaylistTitle"] as string ?? "Создать плейлист"))
             {
                 if (DatabaseService.PlaylistExists(name, -1))
                 {
-                    NotificationWindow.Show("Плейлист с таким названием уже существует", this);
+                    string message = Application.Current.Resources["LngPlaylistNameExists"] as string ?? "Плейлист с таким названием уже существует";
+                    NotificationWindow.Show(message, this);
                     return;
                 }
             }

@@ -57,7 +57,7 @@ namespace QAMP
         {
             if (Library.CurrentPlaylist == null || Library.CurrentPlaylist.Tracks.Count == 0)
             {
-                _ = NotificationWindow.Show("Плейлист пуст!", this);
+                _ = MyToast.ShowAsync(Application.Current.FindResource("LngPlaylistEmpty") as string ?? "Playlist is empty");
                 return;
             }
 
@@ -187,7 +187,7 @@ namespace QAMP
             // Проверяем, что у нас есть текущий трек
             if (Player.CurrentTrack == null)
             {
-                _ = NotificationWindow.Show("Нет трека для воспроизведения!", this);
+                _ = MyToast.ShowAsync(Application.Current.FindResource("LngNoTrackToPlay") as string ?? "No track to play");
                 return;
             }
             Player.PlayPreviousTrack();
@@ -213,7 +213,8 @@ namespace QAMP
                 var current = Player.CurrentTrack;
                 if (current != null)
                 {
-                    NextTrackName.Text = "Повтор текущего трека";
+                    string text = Application.Current.FindResource("LngRepeatTrack") as string ?? "Repeat current track";
+                    NextTrackName.Text = text;
                 }
             }
             else
@@ -226,7 +227,8 @@ namespace QAMP
                 }
                 else
                 {
-                    NextTrackName.Text = "Плейлист закончился";
+                    string text = Application.Current.FindResource("LngPlaylistEnded") as string ?? "Playlist has ended";
+                    NextTrackName.Text = text;
                 }
             }
         }
@@ -314,28 +316,28 @@ namespace QAMP
         {
             if (Library.CurrentPlaylist == null)
             {
-                _ = NotificationWindow.Show("Сначала выберите плейлист!", this);
+                _ = NotificationWindow.Show(Application.Current.FindResource("LngSelectPlaylistFirst") as string ?? "Please select a playlist first!", this);
                 return;
             }
             var contextMenu = new ContextMenu();
 
             // По дате добавления
-            var menuItemDate = new MenuItem { Header = "По дате добавления" };
+            var menuItemDate = new MenuItem { Header = Application.Current.FindResource("LngSortDateNewest") as string ?? "By date added" };
             menuItemDate.Click += (s, args) => ApplySort(TrackSortType.AddedDate, true);
             _ = contextMenu.Items.Add(menuItemDate);
 
             // По альбому 
-            var menuItemAlbum = new MenuItem { Header = "По альбому (A-Z)" };
+            var menuItemAlbum = new MenuItem { Header = Application.Current.FindResource("LngSortAlbumAZ") as string ?? "By album (A-Z)" };
             menuItemAlbum.Click += (s, args) => ApplySort(TrackSortType.AlbumAZ, true);
             _ = contextMenu.Items.Add(menuItemAlbum);
 
             // По исполнителю 
-            var menuItemExecutor = new MenuItem { Header = "По исполнителю (A-Z)" };
+            var menuItemExecutor = new MenuItem { Header = Application.Current.FindResource("LngSortExecutorAZ") as string ?? "By artist (A-Z)" };
             menuItemExecutor.Click += (s, args) => ApplySort(TrackSortType.ExecutorAZ, true);
             _ = contextMenu.Items.Add(menuItemExecutor);
 
             //По названию 
-            var menuItemName = new MenuItem { Header = "По названию (A-Z)" };
+            var menuItemName = new MenuItem { Header = Application.Current.FindResource("LngSortNameAZ") as string ?? "By name (A-Z)" };
             menuItemName.Click += (s, args) => ApplySort(TrackSortType.NameAZ, true);
             _ = contextMenu.Items.Add(menuItemName);
 
@@ -371,10 +373,10 @@ namespace QAMP
             {
                 string sortName = sortType switch
                 {
-                    TrackSortType.AddedDate => "по дате добавления",
-                    TrackSortType.AlbumAZ => "по альбому (A-Z)",
-                    TrackSortType.ExecutorAZ => "по исполнителю (A-Z)",
-                    TrackSortType.NameAZ => "по названию (A-Z)",
+                    TrackSortType.AddedDate => Application.Current.FindResource("LngSortDateNewest") as string ?? "by date added",
+                    TrackSortType.AlbumAZ => Application.Current.FindResource("LngSortAlbumAZ") as string ?? "by album (A-Z)",
+                    TrackSortType.ExecutorAZ => Application.Current.FindResource("LngSortExecutorAZ") as string ?? "by artist (A-Z)",
+                    TrackSortType.NameAZ => Application.Current.FindResource("LngSortNameAZ") as string ?? "by name (A-Z)",
                     _ => "неизвестно"
                 };
                 await MyToast.ShowAsync($"Плейлист отсортирован {sortName}");

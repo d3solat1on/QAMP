@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:QAMP.Windows"
         xmlns:converters="clr-namespace:QAMP.Converters"
-        Title="Настройки звука"
+        Title="DynamicResource LngSettingsAudio"
         Width="1000"
         Height="800"
         Background="{DynamicResource BackgroundBrush}"
@@ -73,12 +73,13 @@
 
             <Grid Grid.Row="0"
                   Background="{DynamicResource SecondaryBackgroundBrush}">
-                <TextBlock Text="Настройки звука"
-                           VerticalAlignment="Center"
-                           Margin="16,0,0,0"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource ForegroundBrush}"/>
+                <TextBlock
+                    Text="{DynamicResource LngSettingsAudioTitle}"
+                    VerticalAlignment="Center"
+                    Margin="16,0,0,0"
+                    FontSize="16"
+                    FontWeight="Bold"
+                    Foreground="{DynamicResource ForegroundBrush}"/>
                 <Button x:Name="BtnClose"
                         Style="{StaticResource CloseButtonStyle}"
                         Click="CloseButton_Click"
@@ -97,7 +98,8 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="20">
-                    <GroupBox Header="Эквалайзер"
+                    <GroupBox x:Name="EQ"
+                              Header="{DynamicResource LngEQ}"
                               Foreground="{DynamicResource ForegroundBrush}"
                               Margin="0,0,0,20">
                         <Grid>
@@ -119,7 +121,7 @@
                                               Width="180"
                                               Margin="0,0,10,0"
                                               SelectionChanged="PresetComboBox_SelectionChanged">
-                                        <ComboBoxItem Content="Пользовательский"/>
+                                        <ComboBoxItem Content="{DynamicResource LngCustom}"/>
                                         <ComboBoxItem Content="Bass Boost"/>
                                         <ComboBoxItem Content="Rock"/>
                                         <ComboBoxItem Content="Classical"/>
@@ -131,8 +133,9 @@
                                         <ComboBoxItem Content="808"/>
                                     </ComboBox>
 
-                                    <Button Style="{StaticResource ModernPlayerButton}"
-                                            Content="Сбросить"
+                                    <Button x:Name="RestEQ"
+                                            Style="{StaticResource ModernPlayerButton}"
+                                            Content="{DynamicResource LngResetEQ}"
                                             Padding="10,5"
                                             Click="ResetEq_Click"
                                             BorderBrush="{DynamicResource BorderBrush}"/>
@@ -186,7 +189,8 @@
                         </Grid>
                     </GroupBox>
 
-                    <GroupBox Header="Эффекты и обработка звука"
+                    <GroupBox x:Name="EffectsAndSound"
+                              Header="{DynamicResource LngEffectsSound}"
                               Foreground="{DynamicResource ForegroundBrush}"
                               Margin="0,0,0,20">
                         <StackPanel Margin="10"
@@ -195,13 +199,13 @@
                                         VerticalAlignment="Center"
                                         Margin="0,0,0,10">
                                 <CheckBox x:Name="ReverbEnabled"
-                                          Content="Реверберация"
+                                          Content="{DynamicResource LngReverb}"
                                           Foreground="{DynamicResource ForegroundBrush}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,10,0"
                                           Checked="AudioProcessingSettingChanged"
                                           Unchecked="AudioProcessingSettingChanged"/>
-                                <TextBlock Text="Уровень:"
+                                <TextBlock Text="{DynamicResource LngLevel}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,5,0"
                                            Foreground="{DynamicResource ForegroundBrush}"/>
@@ -223,13 +227,13 @@
                                         VerticalAlignment="Center"
                                         Margin="0,0,0,10">
                                 <CheckBox x:Name="EchoEnabled"
-                                          Content="Эхо / Задержка"
+                                          Content="{DynamicResource LngEcho}"
                                           Foreground="{DynamicResource ForegroundBrush}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,10,0"
                                           Checked="AudioProcessingSettingChanged"
                                           Unchecked="AudioProcessingSettingChanged"/>
-                                <TextBlock Text="Задержка:"
+                                <TextBlock Text="{DynamicResource LngLatency}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,5,0"
                                            Foreground="{DynamicResource ForegroundBrush}"/>
@@ -251,14 +255,14 @@
                                         VerticalAlignment="Center"
                                         Margin="0,0,0,10">
                                 <CheckBox x:Name="VocalEnhancementEnabled"
-                                          Content="Усиление вокала"
+                                          Content="{DynamicResource LngVocal}"
                                           Foreground="{DynamicResource ForegroundBrush}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,15,0"
                                           Checked="AudioProcessingSettingChanged"
                                           Unchecked="AudioProcessingSettingChanged"/>
                                 <CheckBox x:Name="LoudnessEnabled"
-                                          Content="Тонкомпенсация"
+                                          Content="{DynamicResource LngLoudness}"
                                           Foreground="{DynamicResource ForegroundBrush}"
                                           VerticalAlignment="Center"
                                           Checked="AudioProcessingSettingChanged"
@@ -312,7 +316,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Динамика и баланс"
+                    <GroupBox Header="{DynamicResource LngDynamicBalance}"
                               Foreground="{DynamicResource ForegroundBrush}"
                               Margin="0,0,0,20">
                         <StackPanel Margin="10"
@@ -321,13 +325,13 @@
                                         VerticalAlignment="Center"
                                         Margin="0,0,0,10">
                                 <CheckBox x:Name="CompressorEnabled"
-                                          Content="Компрессор / Лимитер"
+                                          Content="{DynamicResource LngCompressor}"
                                           Foreground="{DynamicResource ForegroundBrush}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,10,0"
                                           Checked="AudioProcessingSettingChanged"
                                           Unchecked="AudioProcessingSettingChanged"/>
-                                <TextBlock Text="Порог:"
+                                <TextBlock Text="{DynamicResource LngThreshold}"
                                            VerticalAlignment="Center"
                                            Width="50"
                                            Margin="0,0,5,0"
@@ -349,7 +353,7 @@
 
                             <StackPanel Orientation="Horizontal"
                                         VerticalAlignment="Center">
-                                <TextBlock Text="Баланс:"
+                                <TextBlock Text="{DynamicResource LngBalance}"
                                            VerticalAlignment="Center"
                                            Width="50"
                                            Margin="0,0,5,0"
@@ -371,12 +375,12 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Вывод"
+                    <GroupBox Header="{DynamicResource LngSoundOutput}"
                               Foreground="{DynamicResource ForegroundBrush}"
                               Margin="0,0,0,20">
                         <StackPanel Margin="10"
                                     Orientation="Vertical">
-                            <TextBlock Text="Выберите устройство:"
+                            <TextBlock Text="{DynamicResource LngOutputDevice}"
                                        Foreground="{DynamicResource ForegroundBrush}"
                                        Margin="0,0,0,5"/>
                             <ComboBox x:Name="OutputDeviceComboBox"
@@ -394,7 +398,7 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Background="{DynamicResource SecondaryBackgroundBrush}">
-                <Button Content="Закрыть"
+                <Button Content="{DynamicResource LngCloseButton}"
                         Style="{StaticResource ModernPlayerButton}"
                         Margin="5,0,0,0"
                         Width="100"

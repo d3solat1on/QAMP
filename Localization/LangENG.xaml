@@ -1,0 +1,468 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngMenuAddFilesTo"
+                        xmlns:System="clr-namespace:System;assembly=mscorlib">Add files to "{0}"</System:String>
+        <System:String x:Key="LngMenuAddFolderTo"
+                        xmlns:System="clr-namespace:System;assembly=mscorlib">Add folder to "{0}"</System:String>
+        <!-- Statistics Window -->
+        <System:String x:Key="LngTopTracksHeader">Top 10 most listened tracks:</System:String>
+        <System:String x:Key="LngTrackFormat">{0}. {1} by {2} - Plays: {3}</System:String>
+        <System:String x:Key="LngNoDataBitrate">No data on tracks with bitrate.</System:String>
+        <System:String x:Key="LngNoDataDuration">No data on track duration.</System:String>
+        <System:String x:Key="LngNoDataArtist">No data on most listened artists.</System:String>
+        <System:String x:Key="LngNoDataPlaylists">No playlist data available.</System:String>
+        <System:String x:Key="LngHiResKingFormat">{0} by {1} - Bitrate: {2} kbps</System:String>
+        <System:String x:Key="LngDurationFormat">{0} by {1} - Duration: {2}</System:String>
+        <System:String x:Key="LngArtistFormat">{0} - Total plays: {1}</System:String>
+        <System:String x:Key="LngUntitled">Untitled</System:String>
+        <System:String x:Key="LngUnknownArtist">Unknown</System:String>
+        <System:String x:Key="LngTracksWithoutListeningHeader">Tracks without listening</System:String>
+        <System:String x:Key="LngMostListenedArtistValue">Most listened artist: {0}</System:String>
+        <System:String x:Key="LngMostListenedTrackValue">Most listened track: {0}</System:String>
+        <System:String x:Key="LngHelpGitHub"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">If you have any questions or problems, please visit our GitHub repository for support and information about the project.</System:String>
+        <System:String x:Key="LngDescQAMP"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">QAMP (Quick Attractive Media Player) is a modern open-source audio player.</System:String>
+        <System:String x:Key="LngInfoPlaylistTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist details</System:String>
+        <System:String x:Key="LngSortExecutorAZ"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Artist (A-Z)</System:String>
+        <System:String x:Key="LngSortAlbumAZ"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Album (A-Z)</System:String>
+        <System:String x:Key="LngTracksForLeftSide"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">tracks</System:String>
+        <System:String x:Key="LngTrackAlreadyInPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Track is already in the playlist "{0}"!</System:String>
+        <System:String x:Key="LngAddedToPlaylistToast"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Added to "{0}"</System:String>
+        <System:String x:Key="LngErrorTrackPath"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Error: Track path not defined</System:String>
+        <System:String x:Key="LngNoPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">No playlists available</System:String>
+        <System:String x:Key="LngAddToPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add To Playlist</System:String>
+        <System:String x:Key="LngSearchDescription"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Found {1} tracks for query: "{0}"</System:String>
+        <System:String x:Key="LngSearchResults"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Search Results</System:String>
+        <System:String x:Key="LngEnterTextToSearch"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enter text to search</System:String>
+        <System:String x:Key="LngNoResultsFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">No results found</System:String>
+        <System:String x:Key="LngRemoveFromFavorites"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Remove from favorites</System:String>
+        <System:String x:Key="LngAddToFavorites"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add to favorites</System:String>
+        <System:String x:Key="LngErrorFavoritesNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Error: Favorites playlist not found</System:String>
+        <System:String x:Key="LngSelectTrackFirst"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Please select a track first</System:String>
+        <System:String x:Key="LngTrackAddedToFavorites"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Successfully added to favorites</System:String>
+        <System:String x:Key="LngTrackRemovedFromFavorites"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Successfully removed from favorites</System:String>
+        <System:String x:Key="LngPlaylistDeleted"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist deleted</System:String>
+        <System:String x:Key="LngUnpinnedPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist unpinned</System:String>
+        <System:String x:Key="LngPinnedPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist pinned</System:String>
+        <System:String x:Key="LngSystemPlaylistCannotBeDeleted"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">System playlist cannot be deleted</System:String>
+        <System:String x:Key="LngPlaylistEmpty"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist is empty</System:String>
+        <System:String x:Key="LngSortingChanged"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Sorting has been changed</System:String>
+        <System:String x:Key="LngNoTrackToPlay"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">No track to play</System:String>
+        <System:String x:Key="LngPlaylistEnded"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist ended</System:String>
+        <System:String x:Key="LngRepeatTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Repeat the current track</System:String>
+        <System:String x:Key="LngSortNameAZ"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Name (A-Z)</System:String>
+        <System:String x:Key="LngSortNameZA"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Name (Z-A)</System:String>
+        <System:String x:Key="LngSortDateNewest"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Date Created (Newest first)</System:String>
+        <System:String x:Key="LngSortDateOldest"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Date Created (Oldest first)</System:String>
+        <System:String x:Key="LngSortCustom"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Custom Order</System:String>
+        <System:String x:Key="LngSortNone"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">No Sorting</System:String>
+        <System:String x:Key="LngPlaylistUpdate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist {0} was updated</System:String>
+        <System:String x:Key="LngCreatedPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist {0} was created</System:String>
+        <System:String x:Key="LngSelectPlaylistFirst"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Please select a playlist first!</System:String>
+        <System:String x:Key="LngChooseFolderTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Select music folder (including subfolders)</System:String>
+        <System:String x:Key="LngTracksAddedToast"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Added {0} tracks</System:String>
+        <System:String x:Key="LngDeleteTracksConfirm"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Are you sure you want to delete the selected tracks?</System:String>
+        <System:String x:Key="LngPlayPause"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Play/Pause</System:String>
+        <System:String x:Key="LngSettingsTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Settings</System:String>
+        <System:String x:Key="LngEqualizer"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Audio Settings</System:String>
+        <System:String x:Key="LngFavorite"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add to / Remove from Favorites</System:String>
+        <System:String x:Key="LngFullSpectrumWindow"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Open Fullscreen Spectrum</System:String>
+        <System:String x:Key="LngShuffle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enable/Disable Shuffle</System:String>
+        <System:String x:Key="LngPrev"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Previous Track</System:String>
+        <System:String x:Key="LngNext"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Next Track</System:String>
+        <System:String x:Key="LngRepeat"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enable Repeat</System:String>
+        <System:String x:Key="LngViewLyrics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">View Lyrics</System:String>
+        <System:String x:Key="LngSortByButton"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Sort Playlists</System:String>
+        <System:String x:Key="LngCreatePlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Create Playlist</System:String>
+        <System:String x:Key="LngRemovePlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Remove Playlist</System:String>
+        <System:String x:Key="LngAddMusic"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add Music</System:String>
+        <System:String x:Key="LngAddFiles"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add Files</System:String>
+        <System:String x:Key="LngAddFolder"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add Folder</System:String>
+        <System:String x:Key="LngEditPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Edit Playlist</System:String>
+        <System:String x:Key="LngPinPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Pin Playlist</System:String>
+        <System:String x:Key="LngUnpinPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Unpin Playlist</System:String>
+        <System:String x:Key="LngInfoPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Show Playlist Details</System:String>
+        <System:String x:Key="LngUpdatePlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Update Playlist</System:String>
+        <System:String x:Key="LngRefreshPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Rescan playlist folders and update contents (if not done automatically)</System:String>
+        <System:String x:Key="LngDeletePlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Delete Playlist</System:String>
+        <System:String x:Key="LngTracksFormatForLeftSide"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">{0} tracks</System:String>
+        <System:String x:Key="LngPlaylistRS"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist</System:String>
+        <System:String x:Key="LngPlayTrackMenu"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Play</System:String>
+        <System:String x:Key="LngShowInfoTrackMenu"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Information</System:String>
+        <System:String x:Key="LngDeleteFromPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Delete from Playlist</System:String>
+        <System:String x:Key="LngNextTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Next Track</System:String>
+        <System:String x:Key="LngCurrentTrackYear"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Unknown Year</System:String>
+
+        <System:String x:Key="LngNewPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">New Playlist</System:String>
+        <System:String x:Key="LngSelectCover"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Select Cover</System:String>
+        <System:String x:Key="LngTitlePlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist Title</System:String>
+        <System:String x:Key="LngDescriptionPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist Description</System:String>
+        <System:String x:Key="LngCancelPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Cancel</System:String>
+        <System:String x:Key="LngCreate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Create</System:String>
+        <System:String x:Key="LngCropCover"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Crop Cover</System:String>
+        <System:String x:Key="LngScale"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Scale</System:String>
+        <System:String x:Key="LngDone"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Done</System:String>
+        <System:String x:Key="LndDeleteButton"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Yes</System:String>
+
+        <System:String x:Key="LngAboutProgramm"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">About Program</System:String>
+        <System:String x:Key="LngHelpAndSupport"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Help &amp; Support</System:String>
+        <System:String x:Key="LngSupport"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Support</System:String>
+        <System:String x:Key="LngHotKeys"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Hotkeys</System:String>
+        <System:String x:Key="LngHotKeysTextBlock"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib"
+                       xml:space="preserve">Ctrl+Space - Pause/Play
+Ctrl+N - Next track
+Ctrl+B - Previous track
+Ctrl+L - Text mode
+Ctrl+W - Full screen spectrogram
+Ctrl+F - Add/remove from favorites
+Ctrl+I - Track info
+Ctrl+R - Repeat track
+Ctrl+S - Shuffle tracks
+Ctrl+Tab - Switch between cells
+Ctrl+Right arrow - 5 seconds forward
+Ctrl+Left arrow - 5 seconds back
+FN+F1 - Play/Pause
+FN+F2 - Next track
+FN+F3 - Previous track
+(*FN keys vary by manufacturer*)</System:String>
+        <System:String x:Key="LngLibrariesUsed"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Libraries Used</System:String>
+        <System:String x:Key="LngVisualization"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Visualization built on -</System:String>
+        <System:String x:Key="LngAudio"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Audio Engine -</System:String>
+        <System:String x:Key="LngMetaData"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Metadata Management -</System:String>
+        <System:String x:Key="LngIcons"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Icon Resources -</System:String>
+        <System:String x:Key="LngGraphicsUI"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Graphical Interface -</System:String>
+        <System:String x:Key="LngLirycs"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Song Lyrics -</System:String>
+        <System:String x:Key="LngDataBase"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Database -</System:String>
+        <System:String x:Key="LngClose"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Close</System:String>
+        <System:String x:Key="LngSaveButton"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Save</System:String>
+
+        <System:String x:Key="LngSettingsQAMP"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">QAMP Settings</System:String>
+        <System:String x:Key="LngTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Theme</System:String>
+        <System:String x:Key="LngDarkTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Dark</System:String>
+        <System:String x:Key="LngLightTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Light</System:String>
+        <System:String x:Key="LngCustomTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Custom</System:String>
+        <System:String x:Key="LngCustomThemes"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Custom Themes</System:String>
+        <System:String x:Key="LngLanguage"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Language</System:String>
+        <System:String x:Key="LngLanguageEnglish"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">English</System:String>
+        <System:String x:Key="LngLanguageRussian"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Russian</System:String>
+
+        <!-- Dialog Messages -->
+        <System:String x:Key="LngImageLoadError"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Error loading image: {0}</System:String>
+        <System:String x:Key="LngPlaylistNameEmpty"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Please enter a playlist name</System:String>
+        <System:String x:Key="LngPlaylistNameExists"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">A playlist with this name already exists</System:String>
+        <System:String x:Key="LngNameCannotBeEmpty"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Name cannot be empty!</System:String>
+        <System:String x:Key="LngSelectCoverImage"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Select an image for the cover</System:String>
+        <System:String x:Key="LngRemoveFromPlaylistConfirm"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Delete {0} from playlist "{1}"?</System:String>
+        <System:String x:Key="LngRemovePlaylistConfirm"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Delete playlist "{0}"?</System:String>
+
+        <!-- Windows -->
+        <System:String x:Key="LngHelpSupport"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Help - QAMP</System:String>
+        <!-- <System:String x:Key="LngSettingsTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">QAMP Settings</System:String> -->
+        <System:String x:Key="LngLyricsWindow"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Lyrics - QAMP</System:String>
+        <System:String x:Key="LngShowInfoPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist Information</System:String>
+        <System:String x:Key="LngShowTrackInfo"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Track Information</System:String>
+        <!-- <System:String x:Key="LngStatistics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Statistics</System:String> -->
+
+        <!-- Edit Playlist Dialog -->
+        <System:String x:Key="LngEditPlaylistTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Edit Playlist</System:String>
+        <System:String x:Key="LngCreatePlaylistTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Create Playlist</System:String>
+        <System:String x:Key="LngOk"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">OK</System:String>
+
+
+        <System:String x:Key="LngAddTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add Theme</System:String>
+        <System:String x:Key="LngAccentColor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Accent Color</System:String>
+        <System:String x:Key="LngMainColor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enter Color (HEX):</System:String>
+        <System:String x:Key="LngSpectrum"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Spectrogram</System:String>
+        <System:String x:Key="LngOnOff"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enable/Disable</System:String>
+        <System:String x:Key="LngVisualizerEnabled"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enabled</System:String>
+        <System:String x:Key="LngVisualizerDisabled"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Disabled</System:String>
+        <System:String x:Key="LngFormatLibrary"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Library Format</System:String>
+        <System:String x:Key="LngDefaultMode"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Compact</System:String>
+        <System:String x:Key="LngCompactMode"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Normal</System:String>
+        <System:String x:Key="LngSystemSettings"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">System Settings</System:String>
+        <System:String x:Key="LngCloseApp"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Close application on exit</System:String>
+        <System:String x:Key="LngCloseToTrayApp"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Minimize to tray on exit</System:String>
+        <System:String x:Key="LngDopolnitelno"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Advanced</System:String>
+        <System:String x:Key="LngAdaptiveGradients"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Use adaptive cover-based gradients</System:String>
+        <System:String x:Key="LngStaticGradients"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Use static color</System:String>
+        <System:String x:Key="LngSystem"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">System</System:String>
+        <System:String x:Key="LngOpenDataBase"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Open Database Folder</System:String>
+        <System:String x:Key="LngOpenAppLocation"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Open Application Folder</System:String>
+        <System:String x:Key="LngAutoLauch"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Startup</System:String>
+        <System:String x:Key="LngAutoLaunchOn"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enable Run at Startup</System:String>
+        <System:String x:Key="LngAutoLaunchOff"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Disable Run at Startup</System:String>
+        <System:String x:Key="LngStatistics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Statistics</System:String>
+        <System:String x:Key="LngOpenHelpWindow"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Help</System:String>
+        <System:String x:Key="LngCancelButton"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Cancel</System:String>
+
+        <System:String x:Key="LngSettingsAudioTitle"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Audio Settings</System:String>
+        <System:String x:Key="LngEQ"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Equalizer</System:String>
+        <System:String x:Key="LngCustom"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Custom</System:String>
+        <System:String x:Key="LngResetEQ"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Reset</System:String>
+        <System:String x:Key="LngEffectsSound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Sound Processing &amp; Effects</System:String>
+        <System:String x:Key="LngReverb"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Reverb</System:String>
+        <System:String x:Key="LngLevel"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Level:</System:String>
+        <System:String x:Key="LngEcho"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Echo / Delay</System:String>
+        <System:String x:Key="LngLatency"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Latency</System:String>
+        <System:String x:Key="LngVocal"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Vocal Boost</System:String>
+        <System:String x:Key="LngLoudness"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Loudness Equalization</System:String>
+        <System:String x:Key="LngDynamicBalance"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Dynamics &amp; Balance</System:String>
+        <System:String x:Key="LngCompressor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Compressor / Limiter</System:String>
+        <System:String x:Key="LngThreshold"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Threshold:</System:String>
+        <System:String x:Key="LngBalance"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Balance</System:String>
+        <System:String x:Key="LngSoundOutput"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Output</System:String>
+        <System:String x:Key="LngOutputDevice"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Select Device</System:String>
+        <System:String x:Key="LngCloseButton"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Close</System:String>
+
+        <System:String x:Key="LngTotalDuration"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Duration:</System:String>
+        <System:String x:Key="LngCreatedDate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Created:</System:String>
+        <System:String x:Key="LngPinnded"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Pinned:</System:String>
+        <System:String x:Key="LngSystemPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">System Playlist:</System:String>
+        <System:String x:Key="LngSortType"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Sort Type:</System:String>
+
+        <System:String x:Key="LngInfoTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Track Details</System:String>
+        <System:String x:Key="LngEditTags"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Edit Tags</System:String>
+        <System:String x:Key="LngExtractCover"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Extract Cover</System:String>
+        <System:String x:Key="LngAlbum"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Album:</System:String>
+        <System:String x:Key="LngAlbumArtist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Album Artist:</System:String>
+        <System:String x:Key="LngGenre"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Genre:</System:String>
+        <System:String x:Key="LngYear"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Year:</System:String>
+        <System:String x:Key="LngTrackNumber"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Track Number:</System:String>
+        <System:String x:Key="LngComposer"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Composer:</System:String>
+        <System:String x:Key="LngBitrate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Bitrate:</System:String>
+        <System:String x:Key="LngSampleRate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Sample Rate:</System:String>
+        <System:String x:Key="LngChannels"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Channels:</System:String>
+        <System:String x:Key="LngBitsPerSample"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Bit Depth:</System:String>
+        <System:String x:Key="LngDescription"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Codec:</System:String>
+        <System:String x:Key="LngDetectBPM"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Detect BPM</System:String>
+        <System:String x:Key="LngComment"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Comment:</System:String>
+        <System:String x:Key="LngFindLyrics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Find Lyrics</System:String>
+        <System:String x:Key="LngLyricsTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Lyrics</System:String>
+        <System:String x:Key="LngPlayCountTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Play Count:</System:String>
+        <System:String x:Key="LngSizeFile"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">File Size:</System:String>
+        <System:String x:Key="LngExstensionFile"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">File Format:</System:String>
+        <System:String x:Key="LngPathTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">File Path:</System:String>
+
+        <!-- <System:String x:Key="LngStatistics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Statistics</System:String> -->
+        <System:String x:Key="LngStatisticsQAMP"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">QAMP Statistics</System:String>
+        <System:String x:Key="LngGeneralStatistics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">General Statistics</System:String>
+        <System:String x:Key="LngMostListenedArtist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Most Listened Artist:</System:String>
+        <System:String x:Key="LngMostListenedTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Most Listened Track:</System:String>
+        <System:String x:Key="LngTracksWithoutListening"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Tracks without Plays</System:String>
+        <System:String x:Key="LngRecordCollection"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Collection Records</System:String>
+        <System:String x:Key="LngLongestTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Longest Track:</System:String>
+        <System:String x:Key="LngShortestTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Shortest Track:</System:String>
+        <System:String x:Key="LngHighestBitrateTrack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Highest Bitrate Track:</System:String>
+        <System:String x:Key="LngTotalLibrarySize"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Total Library Length:</System:String>
+        <System:String x:Key="LngTotalLibtatyWeight"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Library Size on Disk:</System:String>
+        <System:String x:Key="LngCountTrackAndPlaylists"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlists &amp; Tracks Count</System:String>
+        <System:String x:Key="LngPlaylistCount"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist Count:</System:String>
+        <System:String x:Key="LngTrackCount"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Track Count:</System:String>
+</ResourceDictionary>

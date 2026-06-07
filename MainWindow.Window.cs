@@ -216,9 +216,12 @@ namespace QAMP
                 if (currentPlaylist == null) return;
 
                 var tracksToDelete = TracksDataGrid.SelectedItems.Cast<Track>().ToList();
-
                 if (tracksToDelete.Count == 0) return;
-                var result = NotificationWindow.Show("Вы уверены, что хотите удалить выбранные треки?", this, NotificationMode.Confirm);
+
+                string confirmMessage = Application.Current.FindResource("LngDeleteTracksConfirm") as string
+                                        ?? "Вы уверены, что хотите удалить выбранные треки?";
+
+                var result = NotificationWindow.Show(confirmMessage, this, NotificationMode.Confirm);
                 if (result == true)
                 {
                     foreach (var track in tracksToDelete)

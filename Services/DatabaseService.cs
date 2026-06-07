@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using QAMP.Models;
 using QAMP.ViewModels;
@@ -149,7 +150,7 @@ public class DatabaseService
                 System.Diagnostics.Debug.WriteLine("Колонка PlayCount уже существует в Tracks");
             }
 
-            if(!tracksColumns.Contains("BPM"))
+            if (!tracksColumns.Contains("BPM"))
             {
                 System.Diagnostics.Debug.WriteLine("Добавляем колонку BPM в таблицу Tracks...");
                 var alterCmd = connection.CreateCommand();
@@ -1127,24 +1128,29 @@ public class DatabaseService
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Name, Executor, PlayCount 
-            FROM Tracks 
-            WHERE PlayCount IS NOT NULL AND PlayCount > 0
-            ORDER BY PlayCount DESC 
-            LIMIT 10";
+        SELECT Name, Executor, PlayCount 
+        FROM Tracks 
+        WHERE PlayCount IS NOT NULL AND PlayCount > 0
+        ORDER BY PlayCount DESC 
+        LIMIT 10";
+
         using var reader = cmd.ExecuteReader();
 
-        string result = "Топ 10 самых прослушиваемых треков:\n";
+        var result = new StringBuilder();
+        result.AppendLine(LocalizationService.GetString("LngTopTracksHeader"));
+
         int rank = 1;
         while (reader.Read())
         {
-            string name = reader.IsDBNull(0) ? "Без названия" : reader.GetString(0);
-            string executor = reader.IsDBNull(1) ? "Неизвестен" : reader.GetString(1);
+            string name = reader.IsDBNull(0) ? LocalizationService.GetString("LngUntitled") : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? LocalizationService.GetString("LngUnknownArtist") : reader.GetString(1);
             int playCount = reader.IsDBNull(2) ? 0 : reader.GetInt32(2);
-            result += $"{rank}. {name} by {executor} - Прослушиваний: {playCount}\n";
+
+            result.AppendLine(LocalizationService.GetFormattedString("LngTrackFormat", rank, name, executor, playCount));
             rank++;
         }
-        return result;
+
+        return result.ToString();
     }
     public static string GetHiResKing()
     {
@@ -1152,24 +1158,24 @@ public class DatabaseService
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Name, Executor, Bitrate 
-            FROM Tracks 
-            WHERE Bitrate IS NOT NULL AND Bitrate > 0
-            ORDER BY Bitrate DESC 
-            LIMIT 1";
+        SELECT Name, Executor, Bitrate 
+        FROM Tracks 
+        WHERE Bitrate IS NOT NULL AND Bitrate > 0
+        ORDER BY Bitrate DESC 
+        LIMIT 1";
+
         using var reader = cmd.ExecuteReader();
 
         if (reader.Read())
         {
-            string name = reader.IsDBNull(0) ? "Без названия" : reader.GetString(0);
-            string executor = reader.IsDBNull(1) ? "Неизвестен" : reader.GetString(1);
+            string name = reader.IsDBNull(0) ? LocalizationService.GetString("LngUntitled") : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? LocalizationService.GetString("LngUnknownArtist") : reader.GetString(1);
             int bitrate = reader.IsDBNull(2) ? 0 : reader.GetInt32(2);
-            return $"{name} by {executor} - Битрейт: {bitrate} kbps";
+
+            return LocalizationService.GetFormattedString("LngHiResKingFormat", name, executor, bitrate);
         }
-        else
-        {
-            return "Нет данных о треках с битрейтом.";
-        }
+
+        return LocalizationService.GetString("LngNoDataBitrate");
     }
     public static string GetLongestTrack()
     {
@@ -1177,26 +1183,26 @@ public class DatabaseService
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Name, Executor, Duration 
-            FROM Tracks 
-            WHERE Duration IS NOT NULL AND Duration != '00:00'
-            ORDER BY 
-                (CAST(SUBSTR(Duration, 1, INSTR(Duration, ':') - 1) AS INTEGER) * 60 + 
-                 CAST(SUBSTR(Duration, INSTR(Duration, ':') + 1) AS INTEGER)) DESC 
-            LIMIT 1";
+        SELECT Name, Executor, Duration 
+        FROM Tracks 
+        WHERE Duration IS NOT NULL AND Duration != '00:00'
+        ORDER BY 
+            (CAST(SUBSTR(Duration, 1, INSTR(Duration, ':') - 1) AS INTEGER) * 60 + 
+             CAST(SUBSTR(Duration, INSTR(Duration, ':') + 1) AS INTEGER)) DESC 
+        LIMIT 1";
+
         using var reader = cmd.ExecuteReader();
 
         if (reader.Read())
         {
-            string name = reader.IsDBNull(0) ? "Без названия" : reader.GetString(0);
-            string executor = reader.IsDBNull(1) ? "Неизвестен" : reader.GetString(1);
+            string name = reader.IsDBNull(0) ? LocalizationService.GetString("LngUntitled") : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? LocalizationService.GetString("LngUnknownArtist") : reader.GetString(1);
             string duration = reader.IsDBNull(2) ? "00:00" : reader.GetString(2);
-            return $"{name} by {executor} - Длительность: {duration}";
+
+            return LocalizationService.GetFormattedString("LngDurationFormat", name, executor, duration);
         }
-        else
-        {
-            return "Нет данных о длительности треков.";
-        }
+
+        return LocalizationService.GetString("LngNoDataDuration");
     }
     public static string GetTotalLibrarySize()
     {
@@ -1226,26 +1232,26 @@ public class DatabaseService
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Name, Executor, Duration 
-            FROM Tracks 
-            WHERE Duration IS NOT NULL AND Duration != '00:00'
-            ORDER BY 
-                (CAST(SUBSTR(Duration, 1, INSTR(Duration, ':') - 1) AS INTEGER) * 60 + 
-                 CAST(SUBSTR(Duration, INSTR(Duration, ':') + 1) AS INTEGER)) ASC 
-            LIMIT 1";
+        SELECT Name, Executor, Duration 
+        FROM Tracks 
+        WHERE Duration IS NOT NULL AND Duration != '00:00'
+        ORDER BY 
+            (CAST(SUBSTR(Duration, 1, INSTR(Duration, ':') - 1) AS INTEGER) * 60 + 
+             CAST(SUBSTR(Duration, INSTR(Duration, ':') + 1) AS INTEGER)) ASC 
+        LIMIT 1";
+
         using var reader = cmd.ExecuteReader();
 
         if (reader.Read())
         {
-            string name = reader.IsDBNull(0) ? "Без названия" : reader.GetString(0);
-            string executor = reader.IsDBNull(1) ? "Неизвестен" : reader.GetString(1);
+            string name = reader.IsDBNull(0) ? LocalizationService.GetString("LngUntitled") : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? LocalizationService.GetString("LngUnknownArtist") : reader.GetString(1);
             string duration = reader.IsDBNull(2) ? "00:00" : reader.GetString(2);
-            return $"{name} by {executor} - Длительность: {duration}";
+
+            return LocalizationService.GetFormattedString("LngDurationFormat", name, executor, duration);
         }
-        else
-        {
-            return "Нет данных о длительности треков.";
-        }
+
+        return LocalizationService.GetString("LngNoDataDuration");
     }
     public static string GetTotalLibraryWeight()
     {
@@ -1278,11 +1284,11 @@ public class DatabaseService
             if (totalSizeInMB > 1024)
             {
                 double totalSizeInGB = totalSizeInMB / 1024.0;
-                return $"{totalSizeInGB:F2} ГБ";
+                return $"{totalSizeInGB:F2} GB";
             }
             else
             {
-                return $"{totalSizeInMB:F2} МБ";
+                return $"{totalSizeInMB:F2} MB";
             }
         }
         catch (Exception ex)
@@ -1315,50 +1321,47 @@ public class DatabaseService
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Executor, SUM(PlayCount) as TotalPlays 
-            FROM Tracks 
-            WHERE Executor IS NOT NULL AND PlayCount IS NOT NULL AND PlayCount > 0
-            GROUP BY Executor 
-            ORDER BY TotalPlays DESC 
-            LIMIT 1";
+        SELECT Executor, SUM(PlayCount) as TotalPlays 
+        FROM Tracks 
+        WHERE Executor IS NOT NULL AND PlayCount IS NOT NULL AND PlayCount > 0
+        GROUP BY Executor 
+        ORDER BY TotalPlays DESC 
+        LIMIT 1";
+
         using var reader = cmd.ExecuteReader();
 
         if (reader.Read())
         {
-            string executor = reader.IsDBNull(0) ? "Неизвестен" : reader.GetString(0);
+            string executor = reader.IsDBNull(0) ? LocalizationService.GetString("LngUnknownArtist") : reader.GetString(0);
             int totalPlays = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
-            return $"{executor} - Всего прослушиваний: {totalPlays}";
-        }
-        else
-        {
-            return "Нет данных о наиболее прослушиваемых исполнителях.";
-        }
 
+            return LocalizationService.GetFormattedString("LngArtistFormat", executor, totalPlays);
+        }
+        return LocalizationService.GetString("LngNoDataArtist");
     }
-    public static string GetTracksWithoutListnenig()
+    public static string GetTracksWithoutListening()
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Name, Executor 
-            FROM Tracks 
-            WHERE PlayCount IS NULL OR PlayCount = 0
-            GROUP BY Name, Executor
-            ORDER BY RANDOM()
-            LIMIT 10";
+        SELECT Name, Executor 
+        FROM Tracks 
+        WHERE PlayCount IS NULL OR PlayCount = 0
+        LIMIT 20";
+
         using var reader = cmd.ExecuteReader();
 
-        var tracks = new List<string>();
+        var result = new StringBuilder();
+        result.AppendLine(LocalizationService.GetString("LngTracksWithoutListeningHeader"));
+
         while (reader.Read())
         {
-            string name = reader.IsDBNull(0) ? "Неизвестно" : reader.GetString(0);
-            string executor = reader.IsDBNull(1) ? "Неизвестен" : reader.GetString(1);
-            tracks.Add($"{name} - {executor}");
+            string name = reader.IsDBNull(0) ? LocalizationService.GetString("LngUntitled") : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? LocalizationService.GetString("LngUnknownArtist") : reader.GetString(1);
+            result.AppendLine($"  - {name} ({executor})");
         }
-
-        return string.Join("\n", tracks);
-
+        return result.ToString();
     }
 
     public static void UpdateTrackMetadata(Track track)

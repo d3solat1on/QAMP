@@ -9,7 +9,7 @@
         WindowStyle="None"
         Width="450"
         Height="550"
-        Title="Создать плейлист"
+        Title="{DynamicResource LngCreatePlaylist}"
         WindowStartupLocation="CenterOwner">
 
 
@@ -27,7 +27,8 @@
                                 <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="Новый плейлист"
+                        <TextBlock x:Name="NewPlaylist"
+                                   Text="{DynamicResource LngNewPlaylist}"
                                    Foreground="{DynamicResource TextBrush}"
                                    FontSize="20"
                                    FontWeight="Bold"
@@ -47,7 +48,8 @@
                                                 <TextBlock Text="➕"
                                                            FontSize="30"
                                                            HorizontalAlignment="Center"/>
-                                                <TextBlock Text="Выбрать обложку"
+                                                <TextBlock x:Name="SelectCover"
+                                                           Text="{DynamicResource LngSelectCover}"
                                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                            FontSize="12"
                                                            HorizontalAlignment="Center"/>
@@ -57,7 +59,8 @@
 
                         <StackPanel Grid.Row="2"
                                     Margin="0,20">
-                                <TextBlock Text="Название"
+                                <TextBlock x:Name="TitlePlaylist"
+                                           Text="{DynamicResource LngTitlePlaylist}"
                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="PlaylistNameTextBox"
@@ -67,7 +70,8 @@
                                          Padding="10"
                                          Margin="0,0,0,15"/>
 
-                                <TextBlock Text="Описание"
+                                <TextBlock x:Name="DescriptionPlaylist"
+                                           Text="{DynamicResource LngDescriptionPlaylist}"
                                            Foreground="{DynamicResource SecondaryForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="PlaylistDescriptionTextBox"
@@ -83,7 +87,8 @@
                         <StackPanel Grid.Row="3"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right">
-                                <Button Content="Отмена"
+                                <Button x:Name="CancelPlaylist"
+                                        Content="{DynamicResource LngCancelPlaylist}"
                                         Click="CancelButton_Click"
                                         Width="100"
                                         Height="35"
@@ -93,7 +98,8 @@
                                         BorderThickness="0">
 
                                 </Button>
-                                <Button Content="Создать"
+                                <Button x:Name="CreatePlaylist"
+                                        Content="{DynamicResource LngCreate}"
                                         Click="CreateButton_Click"
                                         Width="100"
                                         Height="35"

@@ -327,8 +327,8 @@ namespace QAMP
                     CurrentTrackAlbum.Text = track.Album;
                     CurrentTrackData.Text = $"{track.Genre} | {track.Duration} | {track.SampleRate} Hz | {track.Bitrate} kbps";
                     CurrentTrackExtension.Text = track.DisplayExtension;
-                    CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Неизвестный год";
-                    NextTrack.Text = "Следующий трек";
+                    CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Unknown year";
+                    NextTrack.Text = "Next Track";
                     NowPlaying.Text = "NOW PLAYING";
                     Title = $"{track.Name} - {track.Executor} | QAMP";
                     if (_mediaManager != null)

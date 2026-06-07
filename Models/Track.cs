@@ -12,7 +12,7 @@ namespace QAMP.Models
         public string? Extension { get; set; }
         public string Path { get; set; } = string.Empty;
 
-        private string _name = "Без названия";
+        private string _name = "Unknown Title";
         public string Name
         {
             get => _name;
@@ -26,7 +26,7 @@ namespace QAMP.Models
             }
         }
 
-        private string _executor = "Неизвестный исполнитель";
+        private string _executor = "Unknown Artist";
         public string Executor
         {
             get => _executor;
@@ -40,7 +40,7 @@ namespace QAMP.Models
             }
         }
 
-        private string _album = "Неизвестный альбом";
+        private string _album = "Unknown Album";
         public string Album
         {
             get => _album;
@@ -68,7 +68,7 @@ namespace QAMP.Models
             }
         }
 
-        private string _genre = "Неизвестный жанр";
+        private string _genre = "Unknown Genre";
         public string Genre
         {
             get => _genre;

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Un4seen.Bass;
 using H.NotifyIcon;
+using System.Diagnostics;
 
 namespace QAMP
 {
@@ -37,11 +38,11 @@ namespace QAMP
         private const int SW_RESTORE = 9;
         protected override void OnStartup(StartupEventArgs e)
         {
-            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.3");
+            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.4");
 
             try
             {
-                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.3");
+                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.4");
             }
             catch (Exception ex)
             {
@@ -171,6 +172,16 @@ ToolTipText = "QAMP",
             catch (Exception ex)
             {
                 LogException(ex, "App Startup BASS");
+            }
+
+            // Apply language resources first
+            try
+            {
+                LanguageManager.ApplyLanguage(SettingsManager.Instance.Config.Language);
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message}");
             }
 
             ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);

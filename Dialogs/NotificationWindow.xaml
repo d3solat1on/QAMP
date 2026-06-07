@@ -36,14 +36,14 @@
                                             Visibility="Collapsed"
                                             Margin="15,0,0,0">
                                         <Button x:Name="CancelButton"
-                                                Content="Отмена"
+                                                Content="{DynamicResource LngCreatePlaylist}"
                                                 Click="Cancel_Click"
                                                 Width="80"
                                                 Height="30"
                                                 Margin="0,0,10,0"
                                                 Style="{StaticResource ModernPlayerButton}"/>
                                         <Button x:Name="DeleteButton"
-                                                Content="Да"
+                                                Content="{DynamicResource LndDeleteButton}"
                                                 Click="Ok_Click"
                                                 Width="80"
                                                 Height="30"

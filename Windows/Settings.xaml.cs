@@ -317,6 +317,16 @@ namespace QAMP.Windows
             AutoLaunchEnabled.IsChecked = config.IsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !config.IsAutoLaunchEnabled;
 
+            // Язык
+            if (config.Language == "en")
+            {
+                LanguageEnRadio.IsChecked = true;
+            }
+            else
+            {
+                LanguageRuRadio.IsChecked = true;
+            }
+
             if (config.IsCompactMode)
                 CompactModeRadio.IsChecked = true;
             else
@@ -333,6 +343,27 @@ namespace QAMP.Windows
             var config = SettingsManager.Instance.Config;
             config.UseAdaptiveGradients = AdaptiveGradientsRadio.IsChecked ?? false;
             SettingsManager.Instance.Save();
+        }
+
+        private void LanguageRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+
+            if (sender is not RadioButton radio) return;
+
+            string lang = radio == LanguageEnRadio ? "en" : "ru";
+            var config = SettingsManager.Instance.Config;
+            if (config.Language == lang) return;
+
+            config.Language = lang;
+            SettingsManager.Instance.Save();
+
+            // Apply immediately
+            try
+            {
+                QAMP.Services.LanguageManager.ApplyLanguage(lang);
+            }
+            catch { }
         }
 
         private void ThemeRadio_Checked(object sender, RoutedEventArgs e)

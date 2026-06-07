@@ -21,7 +21,8 @@ namespace QAMP
             var selectedPlaylist = Library.CurrentPlaylist;
             if (selectedPlaylist == null)
             {
-                await MyToast.ShowAsync("Сначала выберите плейлист");
+                string message = Application.Current.Resources["LngSelectPlaylistFirst"] as string ?? "Сначала выберите плейлист";
+                await MyToast.ShowAsync(message);
                 return;
             }
 
@@ -31,10 +32,14 @@ namespace QAMP
             {
                 string trackName = selectedTracks.Count == 1
                     ? $"\"{selectedTracks[0].Name}\""
-                    : $"{selectedTracks.Count} треков";
+                    : $"{selectedTracks.Count} " + (Application.Current.Resources["LngTitlePlaylist"] as string ?? "треков");
+
+                var confirmMessage = (Application.Current.Resources["LngRemoveFromPlaylistConfirm"] as string ?? "Удалить {0} из плейлиста \"{1}\"?")
+                    .Replace("{0}", trackName)
+                    .Replace("{1}", selectedPlaylist.Name);
 
                 var result = NotificationWindow.Show(
-                    $"Удалить {trackName} из плейлиста \"{selectedPlaylist.Name}\"?",
+                    confirmMessage,
                     this,
                     NotificationMode.Confirm);
 
@@ -58,11 +63,15 @@ namespace QAMP
             {
                 if (selectedPlaylist.Name == MusicLibrary.FavoritesName)
                 {
-                    await MyToast.ShowAsync("Системный плейлист нельзя удалить");
+                    string message = Application.Current.Resources["LngSystemPlaylistCannotBeDeleted"] as string ?? "Системный плейлист нельзя удалить";
+                    await MyToast.ShowAsync(message);
                     return;
                 }
 
-                if (NotificationWindow.Show($"Удалить плейлист \"{selectedPlaylist.Name}\"?", this, NotificationMode.Confirm) == true)
+                var confirmMessage = (Application.Current.Resources["LngRemovePlaylistConfirm"] as string ?? "Удалить плейлист \"{0}\"?")
+                    .Replace("{0}", selectedPlaylist.Name);
+
+                if (NotificationWindow.Show(confirmMessage, this, NotificationMode.Confirm) == true)
                 {
                     // КРИТИЧНО: Сохраняем какой плейлист был выбран ДО удаления
                     var previouslySelectedPlaylist = MusicLibrary.Instance.CurrentPlaylist;
@@ -108,7 +117,9 @@ namespace QAMP
                             PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
                         }
                     }
-                    await MyToast.ShowAsync("Плейлист удален");
+
+                    string message = Application.Current.Resources["LngPlaylistDeleted"] as string ?? "Плейлист удален";
+                    await MyToast.ShowAsync(message);
                 }
             }
         }
@@ -197,7 +208,8 @@ namespace QAMP
                 // Возвращаем фокус на измененный плейлист
                 PlaylistsListBox.SelectedItem = selectedPlaylist;
 
-                var message = newPinnedState ? "Плейлист закреплен" : "Плейлист откреплен";
+                var message = newPinnedState ? (Application.Current.Resources["LngPinnedPlaylist"] as string ?? "Плейсит закреплен")
+                                            : (Application.Current.Resources["LngUnpinnedPlaylist"] as string ?? "Плейсит откреплен");
                 await MyToast.ShowAsync(message);
             }
         }
@@ -295,7 +307,8 @@ namespace QAMP
             }
             else
             {
-                await MyToast.ShowAsync("Пожалуйста, сначала выделите трек.");
+                string message = Application.Current.Resources["LngSelectTrackFirst"] as string ?? "Please select a track first.";
+                await MyToast.ShowAsync(message);
             }
         }
 
@@ -313,14 +326,17 @@ namespace QAMP
         {
             if (Player.CurrentTrack == null)
             {
-                NotificationWindow.Show("Нет трека для добавления в Избранное", this);
+                string message = Application.Current.Resources["LngSelectTrackFirst"] as string ?? "Please select a track first.";
+                NotificationWindow.Show(message, this);
                 return;
             }
 
             var favoritePlaylist = Library.Playlists.FirstOrDefault(p => p.Name == MusicLibrary.FavoritesName);
             if (favoritePlaylist == null)
             {
-                NotificationWindow.Show("Ошибка: плейлист 'Избранное' не найден", this);
+
+                string message = Application.Current.Resources["LngErrorFavoritesNotFound"] as string ?? "Error: Favorites playlist not found";
+                NotificationWindow.Show(message, this);
                 return;
             }
 
@@ -335,12 +351,14 @@ namespace QAMP
                 DatabaseService.SaveTrackToPlaylist(favoritePlaylist.Id, trackToSave);
                 favoritePlaylist.Tracks.Add(trackToSave);
                 UpdateFavoriteIcon(Player.CurrentTrack, true);
-                await MyToast.ShowAsync("Успешно добавлено в избранное");
+                string successMessage = Application.Current.Resources["LngTrackAddedToFavorites"] as string ?? "Successfully added to favorites";
+                await MyToast.ShowAsync(successMessage);
                 System.Diagnostics.Debug.WriteLine($"DEBUG: Трек \"{trackToSave.Name}\" добавлен в Избранное. Путь: {trackToSave.Path}");
             }
             else
             {
-                await MyToast.ShowAsync("Успешно удалено из избранного");
+                string successMessage = Application.Current.Resources["LngTrackRemovedFromFavorites"] as string ?? "Successfully removed from favorites";
+                await MyToast.ShowAsync(successMessage);
                 System.Diagnostics.Debug.WriteLine($"DEBUG: Трек \"{Player.CurrentTrack.Name}\" удален из Избранного. Путь: {Player.CurrentTrack.Path}");
                 DatabaseService.RemoveTrackFromPlaylist(favoritePlaylist.Id, Player.CurrentTrack.Id);
                 var trackToRemove = favoritePlaylist.Tracks.FirstOrDefault(t => t.Id == Player.CurrentTrack.Id);
@@ -383,7 +401,7 @@ namespace QAMP
                 ? (Geometry)Application.Current.Resources["favorites_addedGeometry"]
                 : (Geometry)Application.Current.Resources["add_favoritesGeometry"];
 
-            FavoriteButton.ToolTip = isFavorite ? "Удалить из избранного" : "Добавить в избранное";
+            FavoriteButton.ToolTip = isFavorite ? Application.Current.Resources["LngRemoveFromFavorites"] : Application.Current.Resources["LngAddToFavorites"];
             FavoriteIcon.Fill = (Brush)Application.Current.Resources["AccentBrush"];
         }
 
@@ -415,7 +433,8 @@ namespace QAMP
             string searchQuery = SearchBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
-                await MyToast.ShowAsync("Введите текст для поиска");
+                string message = Application.Current.Resources["LngEnterTextToSearch"] as string ?? "Please enter text to search";
+                await MyToast.ShowAsync(message);
                 return;
             }
 
@@ -446,27 +465,37 @@ namespace QAMP
         {
             if (results.Count == 0)
             {
-                await MyToast.ShowAsync($"По запросу \"{searchQuery}\" ничего не найдено");
+                string message = Application.Current.Resources["LngNoResultsFound"] as string ?? "No results found";
+                await MyToast.ShowAsync(message);
                 return;
             }
+
             PlaylistRS.Visibility = Visibility.Collapsed;
+
+            string namePL = Application.Current.FindResource("LngSearchResults") as string ?? "Результаты поиска";
+
+            string descriptionTemplate = Application.Current.FindResource("LngSearchDescription") as string
+                                         ?? "По запросу: \"{0}\" найдено {1} треков";
+
+            string formattedDescription = string.Format(descriptionTemplate, searchQuery, results.Count);
+
             var searchPlaylist = new Playlist
             {
-                Name = "Результаты поиска",
-                Description = $"По запросу: \"{searchQuery}\" найдено {results.Count} треков",
+                Name = namePL,
+                Description = formattedDescription,
                 Tracks = new ObservableCollection<Track>(results),
                 CoverImage = null
             };
 
             MusicLibrary.Instance.CurrentPlaylist = searchPlaylist;
-
             TracksDataGrid.ItemsSource = searchPlaylist.Tracks;
         }
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
             if (sender is not ContextMenu menu) return;
-            var subMenu = menu.Items.OfType<MenuItem>().FirstOrDefault(m => m.Header is string header && header.Contains("Добавить в плейлист"));
+            string message = (string)Application.Current.FindResource("LngAddToPlaylist");
+            var subMenu = menu.Items.OfType<MenuItem>().FirstOrDefault(m => m.Header is string header && header.Contains(message));
             if (subMenu == null) return;
 
             subMenu.ItemsSource = null;
@@ -475,7 +504,8 @@ namespace QAMP
             var playlists = MusicLibrary.Instance.Playlists;
             if (playlists == null || playlists.Count == 0)
             {
-                subMenu.Items.Add(new MenuItem { Header = "Нет доступных плейлистов", IsEnabled = false });
+                string message1 = (string)Application.Current.FindResource("LngNoPlaylist");
+                subMenu.Items.Add(new MenuItem { Header = message1, IsEnabled = false });
             }
             else
             {
@@ -497,13 +527,20 @@ namespace QAMP
                 {
                     if (string.IsNullOrEmpty(selectedTrack.Path))
                     {
-                        NotificationWindow.Show("Ошибка: путь трека не определен", this);
+                        string message = Application.Current.FindResource("LngErrorTrackPath") as string
+                                         ?? "Неверный путь к треку!";
+                        NotificationWindow.Show(message, this);
                         return;
                     }
 
                     if (IsTrackInPlaylist(targetPlaylist.Id, selectedTrack.Id))
                     {
-                        NotificationWindow.Show($"Трек уже есть в плейлисте \"{targetPlaylist.Name}\"!", this);
+                        string template = Application.Current.FindResource("LngTrackAlreadyInPlaylist") as string
+                                          ?? "Трек уже есть в плейлисте \"{0}\"!";
+
+                        string formattedMessage = string.Format(template, targetPlaylist.Name);
+
+                        NotificationWindow.Show(formattedMessage, this);
                         return;
                     }
 
@@ -511,7 +548,12 @@ namespace QAMP
                     var tracksFromDb = DatabaseService.GetTracksForPlaylist(targetPlaylist.Id);
                     targetPlaylist.Tracks = new ObservableCollection<Track>(tracksFromDb);
 
-                    await MyToast.ShowAsync($"Добавлено в \"{targetPlaylist.Name}\"");
+                    string toastTemplate = Application.Current.FindResource("LngAddedToPlaylistToast") as string
+                                           ?? "Добавлено в \"{0}\"";
+
+                    string toastMessage = string.Format(toastTemplate, targetPlaylist.Name);
+
+                    await MyToast.ShowAsync(toastMessage);
                 }
             }
         }
@@ -548,7 +590,8 @@ namespace QAMP
             }
             else
             {
-                NotificationWindow.Show("Сначала выберите плейлист", this);
+                string message = (string)Application.Current.FindResource("LngSelectPlaylistFirst");
+                NotificationWindow.Show(message, this);
             }
         }
         private void EqualizerButton_Click(object sender, RoutedEventArgs e)
