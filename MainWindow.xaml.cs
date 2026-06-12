@@ -307,38 +307,58 @@ namespace QAMP
 
         private void OnTrackChanged(Track? track)
         {
-            if (track == null)
+            if (track != null)
             {
-                CurrentTrackImage.Source = null;
-                FavoriteButton1Grid.Visibility = Visibility.Collapsed;
-                return;
+                string path = track.Path ?? string.Empty;
+                Task.Run(() => DatabaseService.SaveSettingSync("LastTrackPath", path));
             }
+
             Dispatcher.Invoke(() =>
             {
                 try
                 {
-                    DatabaseService.SaveSettingSync("LastTrackPath", track.Path ?? "");
                     UpdateNowPlayingInfo(track);
+
+                    if (track == null)
+                    {
+                        CurrentTrackImage.Source = null;
+                        FavoriteButton1Grid.Visibility = Visibility.Collapsed;
+
+                        CurrentTrackName.Text = string.Empty;
+                        CurrentTrackExecutor.Text = string.Empty;
+                        CurrentTrackAlbum.Text = string.Empty;
+                        CurrentTrackData.Text = string.Empty;
+                        CurrentTrackExtension.Text = string.Empty;
+                        CurrentTrackYear.Text = string.Empty;
+
+                        Title = "QAMP";
+                        _mediaManager?.UpdatePlaybackStatus(false);
+                        return;
+                    }
+
                     UpdatePlayPauseIconState();
                     UpdateFavoriteIcon(track);
                     FavoriteButton1Grid.Visibility = Visibility.Visible;
+
                     CurrentTrackName.Text = track.Name;
                     CurrentTrackExecutor.Text = track.Executor;
                     CurrentTrackAlbum.Text = track.Album;
                     CurrentTrackData.Text = $"{track.Genre} | {track.Duration} | {track.SampleRate} Hz | {track.Bitrate} kbps";
                     CurrentTrackExtension.Text = track.DisplayExtension;
                     CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Unknown year";
+
                     NextTrack.Text = "Next Track";
                     NowPlaying.Text = "NOW PLAYING";
                     Title = $"{track.Name} - {track.Executor} | QAMP";
+
                     if (_mediaManager != null)
                     {
                         try
                         {
                             _mediaManager.UpdateTrackInfo(
-                                track.Name ?? "Неизвестный трек",
-                                track.Executor ?? "Неизвестный исполнитель",
-                                track.Album ?? "Неизвестный альбом"
+                                track.Name ?? "Unknown Title",
+                                track.Executor ?? "Unknown Artist",
+                                track.Album ?? "Unknown Album"
                             );
                             _mediaManager.UpdatePlaybackStatus(PlayerService.Instance.IsPlaying);
                         }
@@ -348,10 +368,10 @@ namespace QAMP
                         }
                     }
 
-                    string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Загрузка...";
+                    string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Loading...";
                     if (Player.Duration <= 0) CheckDurationAsync();
                     TotalTimeText.Text = totalTime;
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged: {track.Name}");
+
                     if (_imageConverter.Convert(track.CoverImage, typeof(System.Windows.Media.Imaging.BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is System.Windows.Media.ImageSource cover)
                     {
                         CurrentTrackImage.Source = cover;
@@ -364,10 +384,12 @@ namespace QAMP
                         CurrentTrackImage.HorizontalAlignment = HorizontalAlignment.Center;
                         CurrentTrackImage.VerticalAlignment = VerticalAlignment.Center;
                     }
+
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged Успешно: {track.Name}");
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Error in OnTrackChanged: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Error in OnTrackChanged UI: {ex.Message}");
                 }
             });
         }

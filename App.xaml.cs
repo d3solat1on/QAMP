@@ -36,13 +36,14 @@ namespace QAMP
         private static partial bool SetForegroundWindow(IntPtr hWnd);
 
         private const int SW_RESTORE = 9;
+        private const string appId = "QAMPCompany.QAMP.MusicPlayer.1.7.5";
         protected override void OnStartup(StartupEventArgs e)
         {
-            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer.1.7.4");
+            _ = SetCurrentProcessExplicitAppUserModelID(appId);
 
             try
             {
-                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), "QAMPCompany.QAMP.MusicPlayer.1.7.4");
+                ShortcutHelpers.EnsureStartMenuShortcut("QAMP", Path.Combine(AppContext.BaseDirectory, "QAMP.exe"), appId);
             }
             catch (Exception ex)
             {

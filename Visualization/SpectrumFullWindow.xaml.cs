@@ -27,8 +27,8 @@ namespace QAMP.Visualization
             if (currentTrack != null)
             {
                 DataContext = currentTrack;
-                TrackNameText.Text = currentTrack.Name ?? "Неизвестный трек";
-                TrackArtistText.Text = currentTrack.Executor ?? "Неизвестный исполнитель";
+                TrackNameText.Text = currentTrack.Name ?? "Unknow Title";
+                TrackArtistText.Text = currentTrack.Executor ?? "Unknow Artist";
             }
             else
             {
@@ -48,6 +48,7 @@ namespace QAMP.Visualization
         {
             PlayerService.Instance.RemoveSpectrumControl(FullSpectrumViewer);
             PlayerService.Instance.TrackChanged -= PlayerService_TrackChanged;
+            MemoryOptimizer.RunAsync(this.Dispatcher);
         }
 
         private void SpectrumFullWindow_KeyDown(object sender, KeyEventArgs e)

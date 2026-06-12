@@ -1,4 +1,10 @@
 # CHANGELOG
+## (12.06.2026) Version 1.7.5:
+    - Minor optimizations have been made to the application.  
+    - Fixed a bug with adding files to a playlist.
+    - The left "Playlists" column is now also compact if compact mode is selected in the settings.  
+    - Removed old files from the project.
+
 ## (07.06.2026) Version 1.7.4:
     - Added English language support (The Favorites playlist is created with a Russian title and description, this will be fixed later xD).  
     - Support for more audio formats has also been added.  

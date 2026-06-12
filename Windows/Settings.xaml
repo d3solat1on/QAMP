@@ -337,7 +337,6 @@
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CloseAction_Checked"/>
                     </StackPanel>
-
                 </GroupBox>
                 <GroupBox x:Name="Dopolnitelno"
                           Grid.Row="7"

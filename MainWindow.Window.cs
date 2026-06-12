@@ -237,8 +237,8 @@ namespace QAMP
         {
             if (Player.CurrentTrack != null)
             {
-                string executor = Player.CurrentTrack.Executor ?? "Неизвестный исполнитель";
-                string name = Player.CurrentTrack.Name ?? "Без названия";
+                string executor = Player.CurrentTrack.Executor ?? "Unknown Artist";
+                string name = Player.CurrentTrack.Name ?? "Unknown Title";
                 _osd.ShowOSD(executor, name);
             }
         }
@@ -321,7 +321,7 @@ namespace QAMP
                     }
 
                     string lyricsToDisplay = string.IsNullOrEmpty(track.Lyrics)
-                        ? "Текст для этого трека отсутствует или не загружен."
+                        ? "Lyrics are missing"
                         : track.Lyrics;
 
                     _parsedLyrics = ParseLrc(lyricsToDisplay);

@@ -136,10 +136,12 @@ namespace QAMP
                         {
                             ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
                         };
+            string extensionsPattern = string.Join(";", supportedExtensions.Select(ext => $"*{ext}"));
+
             var openFileDialog = new OpenFileDialog
             {
                 Multiselect = true,
-                Filter = "music | supportedExtensions"
+                Filter = $"Music Files|{extensionsPattern}"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -290,24 +292,27 @@ namespace QAMP
             }
         }
 
-        private void UpdateNowPlayingInfo(Track track) //Переделать
+        private void UpdateNowPlayingInfo(Track? track)
         {
             if (_lastTrackWithCover != null && _lastTrackWithCover != track)
             {
                 _lastTrackWithCover.UnloadCover();
             }
+
             if (track == null)
             {
                 LastTrackName.Text = string.Empty;
                 LastTrackExecutor.Text = string.Empty;
                 UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+
+                Library.CurrentTrack = null;
+                _lastTrackWithCover = null;
                 return;
             }
-            else
-            {
-                LastTrackName.Text = track.Name;
-                LastTrackExecutor.Text = track.Executor;
-            }
+
+            LastTrackName.Text = track.Name;
+            LastTrackExecutor.Text = track.Executor;
+
             Library.CurrentTrack = track;
             _lastTrackWithCover = track;
         }

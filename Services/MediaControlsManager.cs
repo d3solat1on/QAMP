@@ -1,11 +1,4 @@
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
 using Windows.Media;
-using Windows.Media.Playback;
-using Windows.Storage.Streams;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace QAMP.Services
 {
@@ -120,9 +113,9 @@ namespace QAMP.Services
                 updater.Type = MediaPlaybackType.Music;
 
                 // Устанавливаем текстовую информацию
-                updater.MusicProperties.Title = name ?? "Неизвестный трек";
-                updater.MusicProperties.Artist = executor ?? "Неизвестный исполнитель";
-                updater.MusicProperties.AlbumTitle = album ?? "Неизвестный альбом";
+                updater.MusicProperties.Title = name ?? "Unknown Track";
+                updater.MusicProperties.Artist = executor ?? "Unknown Artist";
+                updater.MusicProperties.AlbumTitle = album ?? "Unknown Album";
 
                 Log($"[SMTC] Текстовая информация установлена: {name} - {executor}");
 

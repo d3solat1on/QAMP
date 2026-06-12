@@ -36,7 +36,6 @@ namespace QAMP.Services
         private bool _disposed = false;
         private bool _playCountIncremented = false;
 
-        private readonly SpectrumAnalyzer _spectrumAnalyzer = null!;
         public List<SpectrumControl> SpectrumControls { get; } = [];
         public SpectrumControl? SpectrumControl => SpectrumControls.FirstOrDefault();
 
@@ -96,20 +95,7 @@ namespace QAMP.Services
 
         private double _volume = 0.5;
         // Множитель громкости для быстрой регулировки (1.0 = без изменения)
-        private double _masterGain = 3.0;
-        public double MasterGain
-        {
-            get => _masterGain;
-            set
-            {
-                _masterGain = Math.Max(0, value);
-                if (_isInitialized && _currentStream != 0)
-                {
-                    float linearVolume = (float)(_volume * _masterGain);
-                    Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
-                }
-            }
-        }
+        private readonly double _masterGain = 3.0;
         public double Volume
         {
             get => _volume;
@@ -152,9 +138,6 @@ namespace QAMP.Services
         private string? _tempFilePath;
         public List<Track> _actualPlayingQueue = [];
 
-        // Настройки спектра
-        private SpectrumSettings _spectrumSettings = null!;
-
         private PlayerService()
         {
             InitializeBass();
@@ -177,8 +160,6 @@ namespace QAMP.Services
                     EqGains[i] = (float)config.EqualizerGains[i];
                 }
             }
-
-            InitializeSpectrumSettings();
             _endSyncProc = EndSyncCallback;
         }
 
@@ -186,19 +167,6 @@ namespace QAMP.Services
         {
             _isInitialized = true;
             App.LogInfo("BASS initialized successfully");
-        }
-
-        private void InitializeSpectrumSettings()
-        {
-            _spectrumSettings = new SpectrumSettings
-            {
-                FreqPower = 1.2,
-                AmplitudeGain = 25.0,
-                AmplitudePower = 0.7,
-                AutoNormalize = false,
-                MinBarValue = 0.00,
-                MaxBarValue = 0.95
-            };
         }
 
         public void AddSpectrumControl(SpectrumControl control)
@@ -222,31 +190,6 @@ namespace QAMP.Services
             {
                 control.RefreshColors();
             }
-        }
-
-        public void SetSpectrumPreset(string presetName)
-        {
-            _spectrumSettings.ApplyPreset(presetName);
-            _spectrumAnalyzer?.SetPreset(presetName);
-            App.LogInfo($"Spectrum preset changed to: {presetName}");
-        }
-
-        public void UpdateSpectrumSettings(double freqPower, double amplitudeGain, double amplitudePower,
-                                           double attackSpeed, double releaseSpeed)
-        {
-            _spectrumSettings.FreqPower = freqPower;
-            _spectrumSettings.AmplitudeGain = amplitudeGain;
-            _spectrumSettings.AmplitudePower = amplitudePower;
-            _spectrumSettings.AttackSpeed = attackSpeed;
-            _spectrumSettings.ReleaseSpeed = releaseSpeed;
-
-            var config = SettingsManager.Instance.Config;
-            config.SpectrumFreqPower = freqPower;
-            config.SpectrumAmplitudeGain = amplitudeGain;
-            config.SpectrumAmplitudePower = amplitudePower;
-            config.SpectrumAttackSpeed = attackSpeed;
-            config.SpectrumReleaseSpeed = releaseSpeed;
-            SettingsManager.Instance.Save();
         }
 
         public async Task PlayTrack(Track track, bool isNewQueue = false)
@@ -952,13 +895,5 @@ namespace QAMP.Services
         NoRepeat,
         RepeatAll,
         RepeatOne
-    }
-}
-
-namespace QAMP.Services
-{
-    public sealed class SpectrumEventArgs(float[] data)
-    {
-        public float[] Data { get; } = data ?? [];
     }
 }

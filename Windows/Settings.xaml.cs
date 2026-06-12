@@ -361,53 +361,27 @@ namespace QAMP.Windows
             // Apply immediately
             try
             {
-                QAMP.Services.LanguageManager.ApplyLanguage(lang);
+                LanguageManager.ApplyLanguage(lang);
             }
             catch { }
         }
 
-        private void ThemeRadio_Checked(object sender, RoutedEventArgs e)
+        private void Format_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
 
-            if (sender is not RadioButton radio) return;
-
-            string theme = radio.Content.ToString() switch
+            if (sender is RadioButton radio && radio.IsChecked == true)
             {
-                "Темная" => "Dark",
-                "Светлая" => "Light",
-                "Пользовательская" => "Custom",
-                _ => "Dark"
-            };
+                bool isCompact = radio == CompactModeRadio;
 
-            if (SettingsManager.Instance.Config.ColorScheme == theme)
-                return;
+                var config = SettingsManager.Instance.Config;
 
-            SettingsManager.Instance.Config.ColorScheme = theme;
-
-            // Не применяем несуществующую тему
-            if (theme == "Custom")
-            {
-                // Просто оставляем текущую тему и применяем оттенок
-                ThemeManager.UpdateAccentColor(SettingsManager.Instance.Config.AccentColor);
-                // Обновляем цвета спектра
-                PlayerService.Instance.RefreshSpectrumControls();
-                return;
+                if (config.IsCompactMode != isCompact)
+                {
+                    config.IsCompactMode = isCompact;
+                    Debug.WriteLine($"Режим отображения изменен: Компактный = {isCompact}");
+                }
             }
-
-            ThemeManager.ApplyTheme(theme);
-            // Обновляем цвета спектра после смены темы
-            PlayerService.Instance.RefreshSpectrumControls();
-        }
-        private void Format_Checked(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing || sender is not RadioButton radio) return;
-
-            bool isCompact = radio.Name == "CompactModeRadio";
-
-            var config = SettingsManager.Instance.Config;
-            config.IsCompactMode = isCompact;
-
         }
         private void CloseAction_Checked(object sender, RoutedEventArgs e)
         {
@@ -590,6 +564,9 @@ namespace QAMP.Windows
                 usingRAM.Visibility = Visibility.Collapsed;
             }
         }
+
+
+
         private void CheckAutoLaunch(object? sender, RoutedEventArgs? e)
         {
             if (isInitializing) return;
@@ -606,12 +583,12 @@ namespace QAMP.Windows
             {
                 try
                 {
-                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyName, true);
+                    using var key = Registry.CurrentUser.OpenSubKey(keyName, true);
                     key?.SetValue(appName, $"\"{appPath}QAMP.exe\"");
                 }
                 catch
                 {
-                    Dialogs.NotificationWindow.Show("Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
+                    NotificationWindow.Show("Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
                     AutoLaunchEnabled.IsChecked = false;
                     config.IsAutoLaunchEnabled = false;
                     SettingsManager.Instance.Save();
@@ -626,7 +603,7 @@ namespace QAMP.Windows
                 }
                 catch
                 {
-                    Dialogs.NotificationWindow.Show("Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
+                    NotificationWindow.Show("Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
                     AutoLaunchEnabled.IsChecked = true;
                     config.IsAutoLaunchEnabled = true;
                     SettingsManager.Instance.Save();

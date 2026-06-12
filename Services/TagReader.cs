@@ -18,12 +18,12 @@ namespace QAMP.Services
                 {
                     Path = Path.GetFullPath(filePath),
                     Name = string.IsNullOrEmpty(file.Tag.Title) ? Path.GetFileNameWithoutExtension(filePath) : file.Tag.Title,
-                    Executor = file.Tag.FirstPerformer ?? "Неизвестный исполнитель",
-                    Album = file.Tag.Album ?? "Неизвестный альбом",
+                    Executor = file.Tag.FirstPerformer ?? "Unknown artist",
+                    Album = file.Tag.Album ?? "Unknown album",
                     Duration = file.Properties.Duration.ToString(@"mm\:ss"),
                     Bitrate = file.Properties.AudioBitrate,
                     SampleRate = file.Properties.AudioSampleRate,
-                    Genre = file.Tag.FirstGenre ?? "Неизвестный жанр",
+                    Genre = file.Tag.FirstGenre ?? "Unknown genre",
                     Extension = extension,
                     Year = (int)file.Tag.Year,
                     TrackNumber = (int)file.Tag.Track,
@@ -99,19 +99,6 @@ namespace QAMP.Services
             }
 
             return [.. tracks];
-        }
-
-        public static Track[] ReadTracksFromFolder(string folderPath)
-        {
-            // Список поддерживаемых расширений
-            string[] extensions = [".mp3", ".flac", ".wav", ".aac"];
-
-            // Получаем все файлы (рекурсивно) и фильтруем их
-            var files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
-                                 .Where(file => extensions.Contains(Path.GetExtension(file).ToLower()))
-                                 .ToArray();
-
-            return ReadTracksFromFiles(files);
         }
     }
 }

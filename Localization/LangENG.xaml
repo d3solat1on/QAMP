@@ -2,9 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
         <System:String x:Key="LngMenuAddFilesTo"
-                        xmlns:System="clr-namespace:System;assembly=mscorlib">Add files to "{0}"</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add files to "{0}"</System:String>
         <System:String x:Key="LngMenuAddFolderTo"
-                        xmlns:System="clr-namespace:System;assembly=mscorlib">Add folder to "{0}"</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Add folder to "{0}"</System:String>
         <!-- Statistics Window -->
         <System:String x:Key="LngTopTracksHeader">Top 10 most listened tracks:</System:String>
         <System:String x:Key="LngTrackFormat">{0}. {1} by {2} - Plays: {3}</System:String>
@@ -308,9 +308,9 @@ FN+F3 - Previous track
         <System:String x:Key="LngFormatLibrary"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Library Format</System:String>
         <System:String x:Key="LngDefaultMode"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Compact</System:String>
-        <System:String x:Key="LngCompactMode"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Normal</System:String>
+        <System:String x:Key="LngCompactMode"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Compact</System:String>
         <System:String x:Key="LngSystemSettings"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">System Settings</System:String>
         <System:String x:Key="LngCloseApp"
