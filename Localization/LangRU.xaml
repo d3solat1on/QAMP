@@ -1,6 +1,70 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngFileNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Файл не найден</System:String>
+        <System:String x:Key="LngFolderNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Папка с файлом не найдена</System:String>
+        <System:String x:Key="LngNoBPM"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Не удалось определить темп трека. Возможно, в нем нет четкого ритма</System:String>
+        <System:String x:Key="LngBASSErorr"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Не удалось открыть файл для анализа. Ошибка BASS:</System:String>
+        <System:String x:Key="LngBPMDetected"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">BPM определен</System:String>
+        <System:String x:Key="LngTagsSaved"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Теги успешно сохранены</System:String>
+        <System:String x:Key="LngTrackNoArt"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">В треке нет обложки</System:String>
+        <System:String x:Key="LngCoverArtExtract"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Обложка успешно извлечена</System:String>
+        <System:String x:Key="LngCoverArtUpdate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Обложка успешно обновлена</System:String>
+        <System:String x:Key="LngError"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Ошибка:</System:String>
+        <System:String x:Key="LngTextNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Текст не найден</System:String>
+        <System:String x:Key="LngErrorFile"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Ошибка сохранения файла:</System:String>
+        <System:String x:Key="LngTextSaved"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Текст сохранен</System:String>
+        <System:String x:Key="LngSearchInLRCLIB"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Поиск в LRCLIB</System:String>
+        <System:String x:Key="LngNoDataToSeacrh"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Недостаточно данных для поиска</System:String>
+        <System:String x:Key="LngFailedDisableAutorun"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора</System:String>
+        <System:String x:Key="LngFailedAutorun"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора</System:String>
+        <System:String x:Key="LngThemeFileMAX"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Файл темы слишком большой (макс 1 МБ)</System:String>
+        <System:String x:Key="LngFailedImportTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Не удалось импортировать тему</System:String>
+        <System:String x:Key="LngXAMLReadingError"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Ошибка чтения XAML</System:String>
+        <System:String x:Key="LngThemeMissingResource"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">В теме отсутствует обязательный ресурс:</System:String>
+        <System:String x:Key="LngErrorResourceDictionary"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Файл не является корректным словарем ресурсов (ResourceDictionary)</System:String>
+        <System:String x:Key="LngFailedToCopyFile"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Не удалось скопировать файл:</System:String>
+        <System:String x:Key="LngThemeAdded"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Тема была успешно добавлена</System:String>
+        <System:String x:Key="LngFavoritesDescription"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Ваши любимые треки</System:String>
+        <System:String x:Key="LngFavoritesPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Избранное</System:String>
+        <System:String x:Key="LngPlaylistSorted"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Плейлист отсортирован</System:String>
+        <System:String x:Key="LngPreviewColor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Предварительный просмотр: RGB</System:String>
+        <System:String x:Key="LngInvalidColor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Неверный формат цвета</System:String>
+        <System:String x:Key="LngYes"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Да</System:String>
+        <System:String x:Key="LngNo"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Нет</System:String>
+        <System:String x:Key="LngAPILyrics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Функция поиска текста использует открытые API исключительно для ознакомительных целей и личного использования</System:String>
         <System:String x:Key="LngMenuAddFilesTo"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Добавить файлы в "{0}"</System:String>
         <System:String x:Key="LngMenuAddFolderTo"

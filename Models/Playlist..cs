@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using Newtonsoft.Json;
 
 namespace QAMP.Models
@@ -13,7 +14,7 @@ namespace QAMP.Models
         CreatedDateOldest = 4,  // По дате создания (старые сверху)
         Custom = 5             // Пользовательский порядок (для ручной сортировки)
     }
-    
+
     public enum TrackSortType
     {
         AddedDate = 0,          // По дате добавления (по умолчанию)
@@ -151,17 +152,50 @@ namespace QAMP.Models
             ? $"{(int)TotalDuration.TotalHours}:{TotalDuration.Minutes:D2}:{TotalDuration.Seconds:D2}"
             : TotalDuration.ToString(@"mm\:ss");
 
-        public string PinnedDisplay => IsPinned ? "Да" : "Нет";
-        public string SystemPlaylistDisplay => IsSystemPlaylist ? "Да" : "Нет";
+        public string PinnedDisplay
+        {
+            get
+            {
+                if (IsPinned)
+                {
+                    string result = (string)Application.Current.FindResource("LngYes");
+                    return result;
+                }
+                else
+                {
+                    string result = (string)Application.Current.FindResource("LngNo");
+                    return result;
+                }
+            }
+        }
+
+        public string SystemPlaylistDisplay
+        {
+            get
+            {
+                if (IsSystemPlaylist)
+                {
+                    string result = (string)Application.Current.FindResource("LngYes");
+                    return result;
+                }
+                else
+                {
+                    string result = (string)Application.Current.FindResource("LngNo");
+                    return result;
+                }
+            }
+        }
+
         public string SortTypeDisplay => SortType switch
         {
-            TrackSortType.AddedDate => "По дате добавления",
-            TrackSortType.AlbumAZ => "Альбом A-Z",
-            TrackSortType.ExecutorAZ => "Исполнитель A-Z",
-            TrackSortType.NameAZ => "Название A-Z",
+            TrackSortType.AddedDate => Application.Current.FindResource("LngSortDateNewest") as string ?? "By date added",
+            TrackSortType.AlbumAZ => Application.Current.FindResource("LngSortAlbumAZ") as string ?? "By album (A-Z)",
+            TrackSortType.ExecutorAZ => Application.Current.FindResource("LngSortExecutorAZ") as string ?? "By artist (A-Z)",
+            TrackSortType.NameAZ => Application.Current.FindResource("LngSortNameAZ") as string ?? "By title (A-Z)",
             _ => SortType.ToString()
         };
-        
+
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {

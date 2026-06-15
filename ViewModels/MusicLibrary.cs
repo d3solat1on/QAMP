@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Media;
 using QAMP.Models;
 using QAMP.Services;
 
@@ -27,7 +25,8 @@ namespace QAMP.ViewModels
             }
         }
 
-        public const string FavoritesName = "Избранное";
+        // public const string FavoritesName = "Избранное"; //Favorites
+        public const string FavoritesName = "Favorites";
 
         // Текущий выбранный плейлист
         private Playlist? _currentPlaylist;
@@ -99,50 +98,6 @@ namespace QAMP.ViewModels
             }
         }
 
-        public void PlayTrackFromPlaylist(Track track, Playlist playlist)
-        {
-            if (track == null || playlist == null) return;
-
-            System.Diagnostics.Debug.WriteLine($"=== ВОСПРОИЗВЕДЕНИЕ ТРЕКА: {track.Name} из плейлиста: {playlist.Name} ===");
-            System.Diagnostics.Debug.WriteLine($"Трек для воспроизведения находится на позиции в playlist.Tracks: {playlist.Tracks.IndexOf(track)}");
-
-
-            // Устанавливаем плейлист из которого воспроизводится музыка
-            PlayingPlaylist = playlist;
-
-            // Обновляем очередь воспроизведения этим плейлистом
-            PlaybackQueue.Clear();
-            foreach (var t in playlist.Tracks)
-            {
-                PlaybackQueue.Add(t);
-            }
-
-            // Отладка: выводим всю очередь
-            System.Diagnostics.Debug.WriteLine($"PlaybackQueue после заполнения (всего {PlaybackQueue.Count} треков):");
-            for (int i = 0; i < Math.Min(5, PlaybackQueue.Count); i++)
-            {
-                System.Diagnostics.Debug.WriteLine($"  {i}: {PlaybackQueue[i].Name}");
-            }
-            if (PlaybackQueue.Count > 5)
-            {
-                System.Diagnostics.Debug.WriteLine($"  ... еще {PlaybackQueue.Count - 5} треков");
-            }
-            // Найдем позицию текущего трека в очереди
-            int trackIndexInQueue = PlaybackQueue.IndexOf(track);
-            System.Diagnostics.Debug.WriteLine($"Позиция трека '{track.Name}' в PlaybackQueue: {trackIndexInQueue}");
-
-            // Если включен Shuffle, обновляем перемешанную очередь
-            if (PlayerService.Instance.IsShuffleEnabled)
-            {
-                var remainingTracks = PlaybackQueue.Where(t => t != track).OrderBy(x => Guid.NewGuid()).ToList();
-                PlayerService.Instance.ShuffledQueue = [track, .. remainingTracks];
-                System.Diagnostics.Debug.WriteLine($"ShuffledQueue обновлена, Count: {PlayerService.Instance.ShuffledQueue.Count}");
-            }
-
-            // Начинаем с выбранного трека
-            _ = PlayerService.Instance.PlayTrack(track);
-        }
-
         /// <summary>
         /// Воспроизводит трек из плейлиста с учетом отображаемого порядка (например, при сортировке)
         /// </summary>
@@ -194,30 +149,6 @@ namespace QAMP.ViewModels
             // Начинаем с выбранного трека
             _ = PlayerService.Instance.PlayTrack(track, true);
         }
-
-        public void SyncShuffledQueueWithCurrentTrack()
-        {
-            if (!PlayerService.Instance.IsShuffleEnabled) return;
-
-            var currentTrack = PlayerService.Instance.CurrentTrack;
-            if (currentTrack == null) return;
-
-            // Проверяем, есть ли текущий трек в ShuffledQueue
-            if (!PlayerService.Instance.ShuffledQueue.Contains(currentTrack))
-            {
-                System.Diagnostics.Debug.WriteLine("SyncShuffledQueue: Current track not in ShuffledQueue, rebuilding...");
-
-                // Создаем новую очередь, начиная с текущего трека
-                var remainingTracks = PlaybackQueue
-                    .Where(t => t != currentTrack)
-                    .OrderBy(x => Guid.NewGuid())
-                    .ToList();
-
-                PlayerService.Instance.ShuffledQueue = [currentTrack, .. remainingTracks];
-
-                System.Diagnostics.Debug.WriteLine($"New ShuffledQueue count: {PlayerService.Instance.ShuffledQueue.Count}");
-            }
-        }
         public MusicLibrary()
         {
             // Подписываемся на изменения коллекции треков в текущем плейлисте
@@ -245,96 +176,6 @@ namespace QAMP.ViewModels
                     PlaybackQueue.Add(track);
                 }
             }
-        }
-
-        public void RefreshPlaylists()
-        {
-            System.Diagnostics.Debug.WriteLine("=== REFRESH PLAYLISTS ===");
-
-            var list = DatabaseService.GetPlaylists();
-            System.Diagnostics.Debug.WriteLine($"Загружено плейлистов из БД: {list.Count}");
-            foreach (var p in list)
-            {
-                System.Diagnostics.Debug.WriteLine($"  - {p.Name} (ID={p.Id}): {p.Tracks.Count} треков");
-            }
-
-            // Проверяем, существует ли плейлист "Избранное"
-            var favoritesPlaylist = list.FirstOrDefault(p => p.Name == FavoritesName);
-            if (favoritesPlaylist == null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' не найден, создаем его...");
-                
-                // Создаем обложку для плейлиста "Избранное"
-                byte[]? favCover = null;
-                try
-                {
-                    var geometry = Application.Current.Resources["favoriteGeometry"] as Geometry;
-                    var accentBrush = Application.Current.Resources["AccentBrush"] as Brush;
-                    if (geometry != null && accentBrush != null)
-                    {
-                        favCover = Converters.RenderGeometryToPngConverter.RenderGeometryToPng(geometry, accentBrush);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Ошибка создания обложки для '{FavoritesName}': {ex.Message}");
-                }
-
-                long newId = DatabaseService.CreatePlaylist(FavoritesName, "Ваши любимые треки", favCover, isSystemPlaylist: true);
-                favoritesPlaylist = new Playlist
-                {
-                    Id = (int)newId,
-                    Name = FavoritesName,
-                    Description = "Ваши любимые треки",
-                    CoverImage = favCover ?? [],
-                    IsSystemPlaylist = true,
-                    CreatedDate = DateTime.Now
-                };
-
-                var tracks = DatabaseService.GetTracksForPlaylist((int)newId);
-                foreach (var track in tracks)
-                {
-                    favoritesPlaylist.Tracks.Add(track);
-                }
-
-                list.Add(favoritesPlaylist);
-                System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' успешно создан (ID={newId})");
-            }
-            else
-            {
-                // Если плейлист найден, убеждаемся что флаг установлен правильно
-                favoritesPlaylist.IsSystemPlaylist = true;
-            }
-
-            var previousPlaylistId = CurrentPlaylist?.Id;
-            var previousTracksCount = CurrentPlaylist?.Tracks.Count ?? 0;
-            System.Diagnostics.Debug.WriteLine($"Текущий плейлист ПЕРЕД очисткой: ID={previousPlaylistId}, треков={previousTracksCount}");
-
-            Playlists.Clear();
-
-            foreach (var p in list)
-            {
-                System.Diagnostics.Debug.WriteLine($"Добавляем плейлист: '{p.Name}', треков в коллекции: {p.Tracks.Count}");
-                Playlists.Add(p);
-            }
-
-            // Восстанавливаем текущий плейлист, если он был выбран
-            if (CurrentPlaylist != null)
-            {
-                var restoredPlaylist = Playlists.FirstOrDefault(p => p.Id == CurrentPlaylist.Id);
-                if (restoredPlaylist != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Восстанавливаем плейлист: '{restoredPlaylist.Name}' (ID={restoredPlaylist.Id}), треков: {restoredPlaylist.Tracks.Count}");
-                    CurrentPlaylist = restoredPlaylist;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"ОШИБКА: Плейлист с ID={CurrentPlaylist.Id} не найден в восстановленном списке!");
-                }
-            }
-
-            System.Diagnostics.Debug.WriteLine($"=== КОНЕЦ REFRESH PLAYLISTS ===");
-            OnPropertyChanged(nameof(Playlists));
         }
 
         public void UpdatePlaylist(Playlist updatedPlaylist)
@@ -383,8 +224,6 @@ namespace QAMP.ViewModels
                     // Мы НЕ ПЕРЕПРИВЯЗЫВАЕМ объект, мы просто говорим UI обновиться
                     OnPropertyChanged(nameof(CurrentPlaylist));
 
-                    // Если у тебя DataGrid привязан к Tracks, вызови и для него
-                    // OnPropertyChanged(nameof(CurrentPlaylist.Tracks));
                 }
             }
         }
@@ -422,26 +261,12 @@ namespace QAMP.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' не найден, создаем его...");
                 
-                byte[]? favCover = null;
-                try
-                {
-                    if (Application.Current.Resources["favoriteGeometry"] is Geometry geometry && Application.Current.Resources["AccentBrush"] is Brush accentBrush)
-                    {
-                        favCover = Converters.RenderGeometryToPngConverter.RenderGeometryToPng(geometry, accentBrush);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Ошибка создания обложки для '{FavoritesName}': {ex.Message}");
-                }
-
-                long newId = DatabaseService.CreatePlaylist(FavoritesName, "Ваши любимые треки", favCover, isSystemPlaylist: true);
+                long newId = DatabaseService.CreatePlaylist(FavoritesName, "Your favorite tracks", null, isSystemPlaylist: true);
                 favoritesPlaylist = new Playlist
                 {
                     Id = (int)newId,
                     Name = FavoritesName,
-                    Description = "Ваши любимые треки",
-                    CoverImage = favCover ?? [],
+                    Description = "Your favorite tracks",
                     IsSystemPlaylist = true,
                     CreatedDate = DateTime.Now
                 };

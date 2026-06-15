@@ -337,7 +337,7 @@ namespace QAMP
             _ = contextMenu.Items.Add(menuItemExecutor);
 
             //По названию 
-            var menuItemName = new MenuItem { Header = Application.Current.FindResource("LngSortNameAZ") as string ?? "By name (A-Z)" };
+            var menuItemName = new MenuItem { Header = Application.Current.FindResource("LngSortNameAZ") as string ?? "By title (A-Z)" };
             menuItemName.Click += (s, args) => ApplySort(TrackSortType.NameAZ, true);
             _ = contextMenu.Items.Add(menuItemName);
 
@@ -368,7 +368,6 @@ namespace QAMP
             TracksDataGrid.ItemsSource = null;
             TracksDataGrid.ItemsSource = new System.Collections.ObjectModel.ObservableCollection<Track>(sortedTracks);
 
-            // Player.UpdateQueueOrder(sortedTracks);
             if (showNotification)
             {
                 string sortName = sortType switch
@@ -379,7 +378,8 @@ namespace QAMP
                     TrackSortType.NameAZ => Application.Current.FindResource("LngSortNameAZ") as string ?? "by name (A-Z)",
                     _ => "неизвестно"
                 };
-                await MyToast.ShowAsync($"Плейлист отсортирован {sortName}");
+                string message = Application.Current.FindResource("LngPlaylistSorted") as string ?? $"Playlist sorted {sortName}";
+                await MyToast.ShowAsync($"{message} {sortName}");
             }
         }
 

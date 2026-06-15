@@ -125,7 +125,7 @@
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
                             <Run x:Name="DataBase"
-                                 Text="База данных - "/>
+                                 Text="{DynamicResource LngDataBase}"/>
                             <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=net-cli"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 Microsoft.Data.Sqlite
@@ -156,7 +156,7 @@
             </TextBox>
 
             <Button x:Name="CloseButton"
-                    Content="Закрыть"
+                    Content="{DynamicResource LngCloseButton}"
                     Margin="5,0,0,0"
                     Click="CloseButton_Click"
                     Width="100"

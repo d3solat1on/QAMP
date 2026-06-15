@@ -33,6 +33,8 @@
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
                 <converters:PercentOfConverter x:Key="PercentOfConverter"/>
                 <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
+                <converters:PlaylistNameLocalizationConverter x:Key="PlaylistNameLocalizationConverter"/>
+                <converters:PlaylistDescriptionLocalizationConverter x:Key="PlaylistDescriptionLocalizationConverter"/>
                 <converters:BindingProxy x:Key="Proxy"
                                          Data="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config}"/>
                 <ObjectDataProvider x:Key="HeartProvider"
@@ -903,11 +905,12 @@
                                                                                                                         </Style>
                                                                                                                 </Viewbox.Style>
                                                                                                         </Viewbox>
-                                                                                                        <TextBlock Text="{Binding Name}"
-                                                                                                                   FontWeight="Bold"
-                                                                                                                   FontSize="14"
-                                                                                                                   Foreground="{DynamicResource ForegroundBrush}"
-                                                                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                                                        <TextBlock
+                                                                                                                Text="{Binding Converter={StaticResource PlaylistNameLocalizationConverter}}"
+                                                                                                                FontWeight="Bold"
+                                                                                                                FontSize="14"
+                                                                                                                Foreground="{DynamicResource ForegroundBrush}"
+                                                                                                                TextTrimming="CharacterEllipsis"/>
                                                                                                 </StackPanel>
                                                                                                 <TextBlock x:Name="SubText"
                                                                                                            FontSize="10"
@@ -1010,8 +1013,8 @@
                                                                                                         </Setter>
                                                                                                 </DataTrigger>
 
-                                                                                                <DataTrigger Binding="{Binding CurrentPlaylist.Name}"
-                                                                                                             Value="Избранное">
+                                                                                                <DataTrigger Binding="{Binding CurrentPlaylist.Id}"
+                                                                                                             Value="1">
                                                                                                         <Setter Property="Content">
                                                                                                                 <Setter.Value>
                                                                                                                         <Grid Background="{DynamicResource CentralPanelCardBackground}">
@@ -1054,7 +1057,7 @@
                                                                            Margin="0,0,0,2"/>
 
                                                                 <TextBlock Grid.Row="1"
-                                                                           Text="{Binding CurrentPlaylist.Name}"
+                                                                           Text="{Binding CurrentPlaylist, Converter={StaticResource PlaylistNameLocalizationConverter}}"
                                                                            Foreground="{DynamicResource CentralPanelHighlightForeground}"
                                                                            FontSize="44"
                                                                            FontWeight="Black"
@@ -1062,7 +1065,7 @@
                                                                            TextTrimming="CharacterEllipsis"/>
 
                                                                 <TextBlock Grid.Row="2"
-                                                                           Text="{Binding CurrentPlaylist.Description}"
+                                                                           Text="{Binding CurrentPlaylist, Converter={StaticResource PlaylistDescriptionLocalizationConverter}}"
                                                                            Foreground="{DynamicResource CentralPanelSecondaryForeground}"
                                                                            FontSize="14"
                                                                            TextWrapping="Wrap"

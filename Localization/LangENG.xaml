@@ -1,6 +1,70 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngFileNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">File not found</System:String>
+        <System:String x:Key="LngFolderNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Folder containing file not found</System:String>
+        <System:String x:Key="LngNoBPM"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Unable to determine the track's tempo. It may not have a clear beat</System:String>
+        <System:String x:Key="LngBASSErorr"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Failed to open file for analysis. BASS error:</System:String>
+        <System:String x:Key="LngBPMDetected"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">BPM detected</System:String>
+        <System:String x:Key="LngTagsSaved"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Tags successfully saved</System:String>
+        <System:String x:Key="LngTrackNoArt"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The track does not have embedded cover art</System:String>
+        <System:String x:Key="LngCoverArtExtract"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Cover art extracted</System:String>
+        <System:String x:Key="LngCoverArtUpdate"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Cover art successfully updated</System:String>
+        <System:String x:Key="LngError"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Error:</System:String>
+        <System:String x:Key="LngTextNotFound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">TextNotFound</System:String>
+        <System:String x:Key="LngErrorFile"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Error saving file:</System:String>
+        <System:String x:Key="LngTextSaved"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Text saved</System:String>
+        <System:String x:Key="LngSearchInLRCLIB"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Search in LRCLIB</System:String>
+        <System:String x:Key="LngNoDataToSeacrh"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Not enough data to search</System:String>
+        <System:String x:Key="LngFailedDisableAutorun"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Failed to disable autostart. Please run the application as an administrator</System:String>
+        <System:String x:Key="LngFailedAutorun"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Failed to install autorun. Please run the application as administrator</System:String>
+        <System:String x:Key="LngThemeFileMAX"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Theme file is too large (max 1 MB)</System:String>
+        <System:String x:Key="LngFailedImportTheme"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Failed to import theme</System:String>
+        <System:String x:Key="LngXAMLReadingError"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">XAML reading error</System:String>
+        <System:String x:Key="LngThemeMissingResource"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The theme is missing a required resource:</System:String>
+        <System:String x:Key="LngErrorResourceDictionary"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The file is not a valid ResourceDictionary</System:String>
+        <System:String x:Key="LngFailedToCopyFile"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Failed to copy file:</System:String>
+        <System:String x:Key="LngThemeAdded"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The theme was added successfully.</System:String>
+        <System:String x:Key="LngFavoritesDescription"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Your favorite tracks</System:String>
+        <System:String x:Key="LngFavoritesPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Favorites</System:String>
+        <System:String x:Key="LngPlaylistSorted"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist sorted</System:String>
+        <System:String x:Key="LngPreviewColor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Preview: RGB</System:String>
+        <System:String x:Key="LngInvalidColor"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Invalid color format</System:String>
+        <System:String x:Key="LngYes"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Yes</System:String>
+        <System:String x:Key="LngNo"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">No</System:String>
+        <System:String x:Key="LngAPILyrics"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The text search function uses open APIs for informational and personal use only</System:String>
         <System:String x:Key="LngMenuAddFilesTo"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Add files to "{0}"</System:String>
         <System:String x:Key="LngMenuAddFolderTo"

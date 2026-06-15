@@ -1,18 +1,27 @@
 using System.Windows;
 using QAMP.Services;
+
 namespace QAMP.Windows;
 
 public partial class Statistics : Window
 {
     private Timer? _debounceTimer;
-    private const int DebounceDelayMs = 1000; // Обновлять не чаще чем раз в секунду
+    private const int DebounceDelayMs = 1000;
 
     public Statistics()
     {
         InitializeComponent();
-        Loaded += async (s, e) => await RefreshAllStatisticsAsync();
-        Loaded += (s, e) => SubscribeToStatisticsChanges();
+        MinWidth = 800;
+        MinHeight = 600;
+
+        Loaded += async (s, e) =>
+        {
+            await RefreshAllStatisticsAsync();
+            SubscribeToStatisticsChanges();
+        };
+
         Closed += (s, e) => UnsubscribeFromStatisticsChanges();
+
         MouseLeftButtonDown += (s, e) =>
         {
             if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
@@ -20,64 +29,67 @@ public partial class Statistics : Window
         };
     }
 
-    /// <summary>
-    /// Подписывается на событие изменения статистики
-    /// </summary>
     private void SubscribeToStatisticsChanges()
     {
         DatabaseService.StatisticsChanged += OnStatisticsChanged;
-        System.Diagnostics.Debug.WriteLine("Statistics окно: подписано на событие StatisticsChanged");
+        System.Diagnostics.Debug.WriteLine("Statistics window: subscribed to StatisticsChanged");
     }
 
-    /// <summary>
-    /// Отписывается от события изменения статистики
-    /// </summary>
     private void UnsubscribeFromStatisticsChanges()
     {
         DatabaseService.StatisticsChanged -= OnStatisticsChanged;
         _debounceTimer?.Dispose();
-        System.Diagnostics.Debug.WriteLine("Statistics окно: отписано от события StatisticsChanged");
+        System.Diagnostics.Debug.WriteLine("Statistics window: unsubscribed from StatisticsChanged");
     }
 
-    /// <summary>
-    /// Обработчик события изменения статистики с debouncing
-    /// </summary>
     private void OnStatisticsChanged()
     {
-        // Отменяем предыдущий timer
         _debounceTimer?.Dispose();
-
-        // Запускаем новый timer с задержкой
         _debounceTimer = new Timer(async (_) =>
         {
-            System.Diagnostics.Debug.WriteLine("Statistics окно: debounce завершен, обновляю данные...");
-            await Dispatcher.BeginInvoke(async () => await RefreshAllStatisticsAsync());
+            await Dispatcher.InvokeAsync(async () => await RefreshAllStatisticsAsync());
         }, null, DebounceDelayMs, Timeout.Infinite);
     }
+
     public async Task RefreshAllStatisticsAsync()
     {
-        var playlistCount = await Task.Run(() => DatabaseService.GetPlaylistCount().ToString());
-        var trackCount = await Task.Run(() => DatabaseService.GetTrackCount().ToString());
-        var mostListened = await Task.Run(() => DatabaseService.GetMostListenedTracks());
-        var hiResKing = await Task.Run(() => DatabaseService.GetHiResKing());
-        var longestTrack = await Task.Run(() => DatabaseService.GetLongestTrack());
-        var shortestTrack = await Task.Run(() => DatabaseService.GetShortestTrack());
-        var totalLibrarySize = await Task.Run(() => DatabaseService.GetTotalLibrarySize());
-        var totalLibraryWeight = await Task.Run(() => DatabaseService.GetTotalLibraryWeight());
-        var mostListenedArtistText = await Task.Run(() => DatabaseService.GetMostListenedArtist());
-        var tracksWithoutListening = await Task.Run(() => DatabaseService.GetTracksWithoutListening());
+        try
+        {
+            var playlistCount = await Task.Run(() => DatabaseService.GetPlaylistCount().ToString());
+            var trackCount = await Task.Run(() => DatabaseService.GetTrackCount().ToString());
+            var mostListened = await Task.Run(() => DatabaseService.GetMostListenedTracks());
+            var hiResKing = await Task.Run(() => DatabaseService.GetHiResKing());
+            var longestTrack = await Task.Run(() => DatabaseService.GetLongestTrack());
+            var shortestTrack = await Task.Run(() => DatabaseService.GetShortestTrack());
+            var totalLibrarySize = await Task.Run(() => DatabaseService.GetTotalLibrarySize());
+            var totalLibraryWeight = await Task.Run(() => DatabaseService.GetTotalLibraryWeight());
+            var mostListenedArtistText = await Task.Run(() => DatabaseService.GetMostListenedArtist());
+            var tracksWithoutListening = await Task.Run(() => DatabaseService.GetTracksWithoutListening());
 
-        TracksWithoutListening.Text = tracksWithoutListening;
-        MostListenedArtistText.Text = LocalizationService.GetFormattedString("LngMostListenedArtistValue", mostListenedArtistText);
-        PlaylistCountText.Text = playlistCount;
-        TrackCountText.Text = trackCount;
-        MostListenedTrackText.Text = LocalizationService.GetFormattedString("LngMostListenedTrackValue", mostListened);
-        HighestBitrateText.Text = hiResKing;
-        LongestTrackText.Text = longestTrack;
-        ShortestTrackText.Text = shortestTrack;
-        TotalLibrarySizeText.Text = totalLibrarySize;
-        TotalLibraryWeightText.Text = totalLibraryWeight;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                TracksWithoutListening.Text = tracksWithoutListening;
+                MostListenedArtistText.Text = LocalizationService.GetFormattedString("LngMostListenedArtistValue", mostListenedArtistText);
+                PlaylistCountText.Text = playlistCount;
+                TrackCountText.Text = trackCount;
+                MostListenedTrackText.Text = LocalizationService.GetFormattedString("LngMostListenedTrackValue", mostListened);
+                HighestBitrateText.Text = hiResKing;
+                LongestTrackText.Text = longestTrack;
+                ShortestTrackText.Text = shortestTrack;
+                TotalLibrarySizeText.Text = totalLibrarySize;
+                TotalLibraryWeightText.Text = totalLibraryWeight;
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error refreshing statistics: {ex.Message}");
+            await Dispatcher.InvokeAsync(() =>
+            {
+                MostListenedTrackText.Text = "Error loading statistics. Please try again.";
+            });
+        }
     }
+
     public void Close_Click(object sender, RoutedEventArgs e)
     {
         Close();

@@ -2,6 +2,7 @@ using System.Windows;
 using QAMP.Dialogs;
 using QAMP.Models;
 namespace QAMP.Windows;
+
 public partial class LyricsWindow : Window
 {
     private readonly Track _track;
@@ -23,12 +24,17 @@ public partial class LyricsWindow : Window
                 file.Save();
             }
             _track.Lyrics = FullLyricsEditor.Text; // Обновляем модель
-            await TrackInfoToast.ShowAsync("Текст сохранен в файл!");
+
+            string message = (string)Application.Current.FindResource("LngTextSaved");
+
+            await TrackInfoToast.ShowAsync(message);
             Close();
         }
         catch (Exception ex)
         {
-            NotificationWindow.Show($"Ошибка сохранения: {ex.Message}", this);
+            string message = (string)Application.Current.FindResource("LngErorr");
+
+            NotificationWindow.Show($"{message} {ex.Message}", this);
         }
     }
 

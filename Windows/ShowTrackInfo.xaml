@@ -62,7 +62,7 @@
         </Window.Resources>
 
         <Grid>
-                <Border Background="{DynamicResource CentralPanelCardBackground}"
+                <Border Background="{DynamicResource DataGridHeaderBackground}"
                         CornerRadius="5"
                         BorderBrush="{DynamicResource AccentBrush}"
                         BorderThickness="1">
@@ -305,7 +305,7 @@
                                                                          TextWrapping="Wrap"/>
                                                         </Grid>
 
-                                                        <Separator Background="#333"
+                                                        <Separator Background="{DynamicResource BorderBrush}"
                                                                    Margin="0,10"/>
 
                                                         <TextBlock Text="{DynamicResource LngSettingsAudio}"
@@ -423,7 +423,8 @@
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
-                                                        <Border Background="{DynamicResource CentralPanelCardBackground}"
+                                                                   <!-- p1zdec че за хуйня со цветом -->
+                                                        <Border Background="{DynamicResource DataGridRowSelectedBackground}"
                                                                 CornerRadius="5"
                                                                 Padding="10"
                                                                 Margin="0,0,0,10">
@@ -442,7 +443,7 @@
                                                                 Width="150"
                                                                 Height="25"
                                                                 Background="{DynamicResource AccentBrush}"
-                                                                ToolTip="Функция поиска текста использует открытые API исключительно для ознакомительных целей и личного использования"
+                                                                ToolTip="{DynamicResource LngAPILyrics}"
                                                                 Margin="5">
                                                         </Button>
                                                         <TextBlock Text="{DynamicResource LngLyricsTrack}"
@@ -450,7 +451,7 @@
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
                                                         <Border x:Name="LyricsBorder"
-                                                                Background="{DynamicResource CentralPanelCardBackground}"
+                                                                Background="{DynamicResource DataGridRowSelectedBackground}"
                                                                 CornerRadius="5"
                                                                 Padding="10"
                                                                 Margin="0,0,0,10"

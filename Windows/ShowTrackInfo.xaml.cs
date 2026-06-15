@@ -73,12 +73,14 @@ namespace QAMP.Windows
                 }
                 else
                 {
-                    NotificationWindow.Show("Папка с файлом не найдена", this);
+                    string message = (string)Application.Current.FindResource("LngFolderNotFound");
+                    NotificationWindow.Show(message, this);
                 }
             }
             catch (Exception ex)
             {
-                NotificationWindow.Show($"Ошибка открытия папки: {ex.Message}", this);
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message} {ex.Message}", this);
             }
         }
         private async void DetectBPM_Click(object sender, RoutedEventArgs e)
@@ -87,7 +89,8 @@ namespace QAMP.Windows
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
-                NotificationWindow.Show("Файл не найден.", this);
+                string message = (string)Application.Current.FindResource("LngFileNotFound");
+                NotificationWindow.Show(message, this);
                 return;
             }
 
@@ -154,20 +157,24 @@ namespace QAMP.Windows
                 {
                     _track.BPM = bpm;
                     BPMTextBlock.Text = bpm.ToString();
-                    await TrackInfoToast.ShowAsync("BPM определен.");
+                    string message = (string)Application.Current.FindResource("LngBPMDetected");
+                    await TrackInfoToast.ShowAsync(message);
                 }
                 else if (bpm == -1)
                 {
-                    NotificationWindow.Show($"Не удалось открыть файл для анализа. Ошибка BASS: {error}", this);
+                    string message = (string)Application.Current.FindResource("LngBASSErorr");
+                    NotificationWindow.Show($"{message} {error}", this);
                 }
                 else
                 {
-                    NotificationWindow.Show("Не удалось определить темп трека. Возможно, в нем нет четкого ритма.", this);
+                    string message = (string)Application.Current.FindResource("LngNoBPM");
+                    NotificationWindow.Show(message, this);
                 }
             }
             catch (Exception ex)
             {
-                NotificationWindow.Show($"Ошибка при анализе: {ex.Message}", this);
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message} {ex.Message}", this);
                 System.Diagnostics.Debug.WriteLine($"BPM Detection Error: {ex}");
             }
         }
@@ -198,12 +205,14 @@ namespace QAMP.Windows
 
                 Services.DatabaseService.UpdateTrackMetadata(_track);
 
-                await TrackInfoToast.ShowAsync("Теги сохранены!");
+                string message = (string)Application.Current.FindResource("LngTagsSaved");
+                await TrackInfoToast.ShowAsync(message);
                 EditModeButton.IsChecked = false;
             }
             catch (Exception ex)
             {
-                NotificationWindow.Show($"Ошибка: {ex.Message}", this, NotificationWindow.NotificationMode.Info);
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message} {ex.Message}", this, NotificationWindow.NotificationMode.Info);
                 System.Diagnostics.Debug.WriteLine($"Error saving tags: {ex}");
             }
         }
@@ -217,7 +226,8 @@ namespace QAMP.Windows
             }
             if (_track.CoverImage == null || _track.CoverImage.Length == 0)
             {
-                NotificationWindow.Show("В треке нет встроенной обложки.", this);
+                string message = (string)Application.Current.FindResource("LngTrackNoArt");
+                NotificationWindow.Show(message, this);
                 return;
             }
 
@@ -232,11 +242,13 @@ namespace QAMP.Windows
                 try
                 {
                     System.IO.File.WriteAllBytes(sfd.FileName, _track.CoverImage);
-                    await TrackInfoToast.ShowAsync("Обложка извлечена!");
+                    string message = (string)Application.Current.FindResource("LngCoverArtExtract");
+                    await TrackInfoToast.ShowAsync(message);
                 }
                 catch (Exception ex)
                 {
-                    NotificationWindow.Show($"Ошибка сохранения: {ex.Message}", this);
+                    string message = (string)Application.Current.FindResource("LngError");
+                    NotificationWindow.Show($"{message} {ex.Message}", this);
                 }
             }
         }
@@ -262,11 +274,13 @@ namespace QAMP.Windows
                     }
 
                     _track.CoverImage = System.IO.File.ReadAllBytes(ofd.FileName);
-                    await TrackInfoToast.ShowAsync("Обложка обновлена! Перезапустите трек.");
+                    string message = (string)Application.Current.FindResource("LngCoverArtUpdate");
+                    await TrackInfoToast.ShowAsync(message);
                 }
                 catch (Exception ex)
                 {
-                    NotificationWindow.Show($"Ошибка: {ex.Message}", this);
+                    string message = (string)Application.Current.FindResource("LngErorr");
+                    NotificationWindow.Show($"{message} {ex.Message}", this);
                 }
             }
         }
@@ -299,11 +313,13 @@ namespace QAMP.Windows
 
             if (isInvalidExecutor || isInvalidName)
             {
-                NotificationWindow.Show("Недостаточно данных для поиска", this);
+                string message = (string)Application.Current.FindResource("LngNoDataToSeacrh");
+                NotificationWindow.Show(message, this);
                 return;
             }
 
-            TrackInfoToast.StartLoading("Поиск в LRCLIB");
+            string SearchMessage = (string)Application.Current.FindResource("LngSearchInLRCLIB");
+            TrackInfoToast.StartLoading(SearchMessage);
 
             try
             {
@@ -326,24 +342,28 @@ namespace QAMP.Windows
                             file.Tag.Lyrics = lyrics;
                             file.Save();
                         }
-                        await TrackInfoToast.ShowAsync("Текст найден и сохранен!");
+                        string message = (string)Application.Current.FindResource("LngTextSaved");
+                        await TrackInfoToast.ShowAsync(message);
                         await TrackInfoToast.StopLoadingAsync();
                     }
                     catch (Exception ex)
                     {
                         await TrackInfoToast.StopLoadingAsync();
-                        NotificationWindow.Show($"Ошибка сохранения файла: {ex.Message}", this);
+                        string message = (string)Application.Current.FindResource("LngErrorFile");
+                        NotificationWindow.Show($"{message} {ex.Message}", this);
                     }
                 }
                 else
                 {
-                    await TrackInfoToast.ShowAsync("Текст не найден.");
+                    string message = (string)Application.Current.FindResource("LngTextNotFound");
+                    await TrackInfoToast.ShowAsync(message);
                 }
             }
             catch (Exception ex)
             {
                 await TrackInfoToast.StopLoadingAsync();
-                NotificationWindow.Show($"Ошибка: {ex.Message}", this);
+                string message = (string)Application.Current.FindResource("LngErorr");
+                NotificationWindow.Show($"{message} {ex.Message}", this);
             }
             finally
             {

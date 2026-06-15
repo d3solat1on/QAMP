@@ -19,7 +19,7 @@
 ## Технологический стек
 
     Язык: C#  
-    Платформа: .NET 10.0  
+    Платформа: .NET 11.0  
     Интерфейс: WPF  
     Звуковой движок: BASS Audio Library (Bass.Net)  
     Спектр: ScottPlot  
@@ -99,7 +99,7 @@ QAMP работает полностью локально. Для повышен
 ## Tech Stack
 
     Language: C#  
-    Platform: .NET 10.0  
+    Platform: .NET 11.0  
     Interface: WPF  
     Audio Engine: BASS Audio Library (Bass.Net)  
     Spectrum: ScottPlot  

@@ -149,7 +149,7 @@ namespace QAMP.Windows
                 var fileInfo = new FileInfo(filePath);
                 if (fileInfo.Length > 1024 * 1024)
                 {
-                    errorMessage = "Файл темы слишком большой (макс. 1 МБ).";
+                    errorMessage = (string)Application.Current.FindResource("LngThemeFileMAX");
                     return false;
                 }
 
@@ -162,7 +162,7 @@ namespace QAMP.Windows
 
                 if (customDict == null)
                 {
-                    errorMessage = "Файл не является корректным словарем ресурсов (ResourceDictionary).";
+                    errorMessage = (string)Application.Current.FindResource("LngErrorResourceDictionary");
                     return false;
                 }
 
@@ -175,7 +175,8 @@ namespace QAMP.Windows
                 {
                     if (!customDict.Contains(key))
                     {
-                        errorMessage = $"В теме отсутствует обязательный ресурс: '{key}'";
+                        string message = (string)Application.Current.FindResource("LngThemeMissingResource");
+                        errorMessage = $"{message} '{key}'";
                         return false;
                     }
                 }
@@ -184,7 +185,8 @@ namespace QAMP.Windows
             }
             catch (Exception ex)
             {
-                errorMessage = $"Ошибка чтения XAML: {ex.Message}";
+                string message = (string)Application.Current.FindResource("LngXAMLReadingError");
+                errorMessage = $"{message} {ex.Message}";
                 return false;
             }
         }
@@ -202,7 +204,8 @@ namespace QAMP.Windows
                 // Валидация файла
                 if (!IsThemeValid(selectedFilePath, out string error))
                 {
-                    NotificationWindow.Show($"Не удалось импортировать тему.\n{error}", this);
+                    string message = (string)Application.Current.FindResource("LngFailedImportTheme");
+                    NotificationWindow.Show($"{message}\n{error}", this);
                     return;
                 }
 
@@ -216,12 +219,14 @@ namespace QAMP.Windows
 
                     // Автоматически выбираем добавленную тему
                     CustomThemesComboBox.SelectedItem = fileName;
-
-                    await SettingsInfoToast.ShowAsync("Тема успешно добавлена!");
+                    
+                    string message = (string)Application.Current.FindResource("LngThemeAdded");
+                    await SettingsInfoToast.ShowAsync(message);
                 }
                 catch (Exception ex)
                 {
-                    NotificationWindow.Show($"Не удалось скопировать файл: {ex.Message}", this);
+                    string message = (string)Application.Current.FindResource("LngFailedToCopyFile");
+                    NotificationWindow.Show($"{message} {ex.Message}", this);
                 }
             }
         }
@@ -408,12 +413,14 @@ namespace QAMP.Windows
             try
             {
                 var color = (Color)ColorConverter.ConvertFromString(AccentColorTextBox.Text);
-                ColorPreview.Text = $"Предварительный просмотр: RGB({color.R}, {color.G}, {color.B})";
+                string messageColor = (string)Application.Current.FindResource("LngPreviewColor");
+                ColorPreview.Text = $"{messageColor}({color.R}, {color.G}, {color.B})";
                 ColorPreview.Foreground = new SolidColorBrush(color);
             }
             catch
             {
-                ColorPreview.Text = "Неверный формат цвета";
+                string message = Application.Current.FindResource("LngInvalidColor") as string ?? "Invalid color format";
+                ColorPreview.Text = message;
                 ColorPreview.Foreground = Brushes.Red;
             }
         }
@@ -588,7 +595,8 @@ namespace QAMP.Windows
                 }
                 catch
                 {
-                    NotificationWindow.Show("Не удалось установить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
+                    string message = (string)Application.Current.FindResource("LngFailedAutorun");
+                    NotificationWindow.Show(message, this);
                     AutoLaunchEnabled.IsChecked = false;
                     config.IsAutoLaunchEnabled = false;
                     SettingsManager.Instance.Save();
@@ -603,7 +611,8 @@ namespace QAMP.Windows
                 }
                 catch
                 {
-                    NotificationWindow.Show("Не удалось отключить автозапуск. Пожалуйста, запустите приложение от имени администратора.", this);
+                    string message = (string)Application.Current.FindResource("LngFailedDisableAutorun");
+                    NotificationWindow.Show(message, this);
                     AutoLaunchEnabled.IsChecked = true;
                     config.IsAutoLaunchEnabled = true;
                     SettingsManager.Instance.Save();

@@ -225,17 +225,16 @@
 
                 <!-- Language selection -->
                 <GroupBox x:Name="LanguageGroup"
-                          Grid.Row="10"
+                          Grid.Row="6"
                           Header="{DynamicResource LngLanguage}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10"
-                                Orientation="Horizontal">
+                    <StackPanel Margin="10">
                         <RadioButton x:Name="LanguageRuRadio"
                                      Content="{DynamicResource LngLanguageRussian}"
                                      GroupName="Language"
                                      Foreground="{DynamicResource ForegroundBrush}"
-                                     Margin="0,0,20,0"
+                                     Margin="0,0,0,10"
                                      Checked="LanguageRadio_Checked"/>
                         <RadioButton x:Name="LanguageEnRadio"
                                      Content="{DynamicResource LngLanguageEnglish}"
@@ -273,29 +272,17 @@
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0,0,0,15">
-                            <StackPanel>
-                                <TextBlock x:Name="OnOff"
-                                           Text="{DynamicResource LngOnOff}"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           Margin="0,0,0,5"/>
-                                <StackPanel Orientation="Horizontal"
-                                            Margin="0,0,0,10">
-                                    <RadioButton x:Name="VisualizerEnabled"
-                                                 Content="{DynamicResource LngVisualizerEnabled}"
-                                                 GroupName="Visualizer"
-                                                 Margin="0,0,20,0"
-                                                 Foreground="{DynamicResource ForegroundBrush}"
-                                                 Checked="VisualizerToggle_Changed"/>
-                                    <RadioButton x:Name="VisualizerDisabled"
-                                                 Content="{DynamicResource LngVisualizerDisabled}"
-                                                 GroupName="Visualizer"
-                                                 Foreground="{DynamicResource ForegroundBrush}"
-                                                 Checked="VisualizerToggle_Changed"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
+                        <RadioButton x:Name="VisualizerEnabled"
+                                     Content="{DynamicResource LngVisualizerEnabled}"
+                                     GroupName="Visualizer"
+                                     Margin="0,0,0,10"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Checked="VisualizerToggle_Changed"/>
+                        <RadioButton x:Name="VisualizerDisabled"
+                                     Content="{DynamicResource LngVisualizerDisabled}"
+                                     GroupName="Visualizer"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Checked="VisualizerToggle_Changed"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -320,7 +307,7 @@
                     </StackPanel>
                 </GroupBox>
                 <GroupBox x:Name="SystemSettings"
-                          Grid.Row="6"
+                          Grid.Row="8"
                           Header="{DynamicResource LngSystemSettings}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
@@ -359,22 +346,24 @@
                     </StackPanel>
                 </GroupBox>
                 <GroupBox x:Name="SystemGroupBox"
-                          Grid.Row="8"
+                          Grid.Row="10"
                           Header="{DynamicResource LngSystem}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Left">
+                        HorizontalAlignment="Left">
                         <Button Style="{StaticResource ModernPlayerButton}"
                                 x:Name="DatabaseLocation"
-                                Margin="5"
+                                Margin="0,0,0,10"
+                                Width="Auto"
+                                Height="30"
                                 Content="{DynamicResource LngOpenDataBase}"
                                 Click="OpenDatabaseLocation_Click">
                         </Button>
                         <Button Style="{StaticResource ModernPlayerButton}"
                                 x:Name="AppLocation"
-                                Margin="5"
+                                Width="Auto"
+                                Height="30"
                                 Content="{DynamicResource LngOpenAppLocation}"
                                 Click="OpenAppLocation_Click">
                         </Button>
@@ -385,22 +374,18 @@
                           Header="{DynamicResource LngAutoLauch}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Left">
+                    <StackPanel Margin="10">
                         <RadioButton x:Name="AutoLaunchEnabled"
                                      Content="{DynamicResource LngAutoLaunchOn}"
                                      GroupName="AutoLaunch"
-                                     Margin="0,0,20,0"
+                                     Margin="0,0,0,10"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CheckAutoLaunch"/>
                         <RadioButton x:Name="AutoLaunchDisabled"
                                      Content="{DynamicResource LngAutoLaunchOff}"
                                      GroupName="AutoLaunch"
-                                     Margin="0,0,20,0"
                                      Foreground="{DynamicResource ForegroundBrush}"
                                      Checked="CheckAutoLaunch"/>
-                        <!-- Checked="AutoLaunch_Checked"/>  -->
                     </StackPanel>
                 </GroupBox>
             </Grid>

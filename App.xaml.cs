@@ -36,7 +36,7 @@ namespace QAMP
         private static partial bool SetForegroundWindow(IntPtr hWnd);
 
         private const int SW_RESTORE = 9;
-        private const string appId = "QAMPCompany.QAMP.MusicPlayer.1.7.5";
+        private const string appId = "QAMPCompany.QAMP.MusicPlayer.1.7.6";
         protected override void OnStartup(StartupEventArgs e)
         {
             _ = SetCurrentProcessExplicitAppUserModelID(appId);

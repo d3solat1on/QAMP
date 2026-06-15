@@ -7,178 +7,199 @@
         WindowStyle="None"
         Width="1000"
         Height="800"
+        MinWidth="800"
+        MinHeight="600"
         Title="{DynamicResource LngStatistics}"
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}"
         WindowStartupLocation="CenterOwner">
-    <Window.Resources>
-        <!-- <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/> -->
-    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0"
-                  Background="{DynamicResource SecondaryBackgroundBrush}">
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            Margin="10,0,0,0"
-                            WindowChrome.IsHitTestVisibleInChrome="True">
-                    <TextBlock Text="{DynamicResource LngStatisticsQAMP}"
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               FontWeight="Bold"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="0,0,10,0"
-                            WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Button x:Name="BtnClose"
-                            Style="{StaticResource CloseButtonStyle}"
-                            Click="Close_Click">
-                        <Path Data="{StaticResource closeGeometry}"
-                              Fill="{DynamicResource AccentBrush}"
-                              Stretch="Uniform"
-                              Width="18"
-                              Height="18"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"/>
-                    </Button>
-                </StackPanel>
-
-            </Grid>
-
-            <ScrollViewer Grid.Row="1"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <Grid Margin="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0"
-                               Text="{DynamicResource LngStatistics}"
-                               FontSize="24"
-                               FontWeight="Bold"
-                               Margin="0,0,0,20"/>
-                    <GroupBox Grid.Row="1"
-                              Header="{DynamicResource LngGeneralStatistics}"
-                              Margin="0,0,0,20">
-                        <StackPanel Margin="10">
-                            <TextBlock x:Name="MostListenedTrackText"
-                                       Text="{DynamicResource LngMostListenedTrack}"
-                                       Margin="0,0,0,10"
-                                       Foreground="{DynamicResource ForegroundBrush}"/>
-                            <TextBlock x:Name="MostListenedArtistText"
-                                       Text="{DynamicResource LngMostListenedArtist}"
-                                       Margin="0,0,0,10"
-                                       Foreground="{DynamicResource ForegroundBrush}"/>
-                            <TextBlock x:Name="TracksWithoutListening"
-                                       Text="{DynamicResource LngTracksWithoutListening}"
-                                       Margin="0,0,0,10"
-                                       Foreground="{DynamicResource ForegroundBrush}"/>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Grid.Row="2"
-                              Header="{DynamicResource LngRecordCollection}"
-                              Margin="0,0,0,15">
-                        <Grid Margin="5">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="225"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Text="{DynamicResource LngLongestTrack}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Grid.Column="1"
-                                       x:Name="LongestTrackText"
-                                       Margin="10,0,0,5"
-                                       TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Grid.Row="1"
-                                       Text="{DynamicResource LngShortestTrack}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="1"
-                                       x:Name="ShortestTrackText"
-                                       Margin="10,0,0,5"/>
-
-                            <TextBlock Grid.Row="2"
-                                       Text="{DynamicResource LngHighestBitrateTrack}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Grid.Row="2"
-                                       Grid.Column="1"
-                                       x:Name="HighestBitrateText"
-                                       Margin="10,0,0,5"/>
-
-
-                            <TextBlock Grid.Row="3"
-                                       Text="{DynamicResource LngTotalLibrarySize}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Grid.Row="3"
-                                       Grid.Column="1"
-                                       x:Name="TotalLibrarySizeText"
-                                       Margin="10,0,0,5"/>
-                            <TextBlock Grid.Row="4"
-                                       Text="{DynamicResource LngTotalLibtatyWeight}"
-                                       FontWeight="SemiBold"/>
-                            <!-- Margin="10,0,0,5"/> -->
-                            <TextBlock Grid.Row="4"
-                                       Grid.Column="1"
-                                       x:Name="TotalLibraryWeightText"
-                                       Margin="10,0,0,5"/>
-                        </Grid>
-                    </GroupBox>
-                    <GroupBox Grid.Row="3"
-                              Header="{DynamicResource LngCountTrackAndPlaylists}"
-                              Margin="0,0,0,15">
-                        <Grid Margin="5">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="0"
-                                       Text="{DynamicResource LngPlaylistCount}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="1"
-                                       x:Name="PlaylistCountText"
-                                       Margin="10,0,0,5"/>
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="0"
-                                       Text="{DynamicResource LngTrackCount}"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="1"
-                                       x:Name="TrackCountText"
-                                       Margin="10,0,0,5"/>
-                        </Grid>
-                    </GroupBox>
-                </Grid>
-            </ScrollViewer>
+        <Grid Grid.Row="0"
+              Background="{DynamicResource SecondaryBackgroundBrush}"
+              Height="50">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Margin="10,0,0,0"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                <TextBlock Text="{DynamicResource LngStatisticsQAMP}"
+                           Foreground="{DynamicResource ForegroundBrush}"
+                           FontWeight="Bold"
+                           FontSize="16"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button x:Name="BtnClose"
+                        Style="{StaticResource CloseButtonStyle}"
+                        Click="Close_Click"
+                        Width="30"
+                        Height="30">
+                    <Path Data="{StaticResource closeGeometry}"
+                          Fill="{DynamicResource AccentBrush}"
+                          Stretch="Uniform"
+                          Width="18"
+                          Height="18"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"/>
+                </Button>
+            </StackPanel>
         </Grid>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      CanContentScroll="True">
+
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Text="{DynamicResource LngStatistics}"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Margin="0,0,0,20"/>
+
+                <GroupBox Grid.Row="1"
+                          Header="{DynamicResource LngGeneralStatistics}"
+                          Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <TextBlock x:Name="MostListenedTrackText"
+                                   Margin="0,0,0,10"
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="MostListenedArtistText"
+                                   Margin="0,0,0,10"
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TracksWithoutListening"
+                                   Margin="0,0,0,10"
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Grid.Row="2"
+                          Header="{DynamicResource LngRecordCollection}"
+                          Margin="0,0,0,20">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngLongestTrack}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   x:Name="LongestTrackText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngShortestTrack}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   x:Name="ShortestTrackText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngHighestBitrateTrack}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   x:Name="HighestBitrateText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngTotalLibrarySize}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
+                                   x:Name="TotalLibrarySizeText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngTotalLibtatyWeight}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="1"
+                                   x:Name="TotalLibraryWeightText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Grid.Row="3"
+                          Header="{DynamicResource LngCountTrackAndPlaylists}"
+                          Margin="0,0,0,15">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngPlaylistCount}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   x:Name="PlaylistCountText"
+                                   Margin="10,5,0,5"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngTrackCount}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   x:Name="TrackCountText"
+                                   Margin="10,5,0,5"/>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </ScrollViewer>
     </Grid>
-</Window>   
+</Window>

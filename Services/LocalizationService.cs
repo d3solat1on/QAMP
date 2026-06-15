@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Globalization;
 
 namespace QAMP.Services
 {

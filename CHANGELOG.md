@@ -1,4 +1,12 @@
 # CHANGELOG
+## (16.06.2026) Version 1.7.6:
+    - Localization files have been updated.  
+    - Fixed a bug in the Track Details window (Color scheme).  
+    - A scrolling bug has been fixed in the Statistics Window.  
+    - The Settings window has been brought into a consistent style.  
+    - The project has migrated to a new platform: dotnet 11.  
+    - A "Favorites" playlist is also created with an English title and description.
+
 ## (12.06.2026) Version 1.7.5:
     - Minor optimizations have been made to the application.  
     - Fixed a bug with adding files to a playlist.
@@ -20,7 +28,6 @@
     - Gravity physics: Native calculation of spectral band fall inertia and free-fall peak point physics (with a delay at the top) have been implemented in C++.  
     - Rendering Optimization: The `ScottPlot 5` component has been switched to non-interactive mode (`NonInteractive`) with the Y (0.0 - 1.0) and X axes rigidly fixed. The graphics engine now exclusively displays ready-made data arrays on the screen, without wasting resources on unnecessary calculations and processing mouse events. The Spectre consistently delivers a respectable 180 FPS on high-Hz monitors. (I've personally verified this.)  
     - Added MemoryOptimizer class to remove cache from RAM after closing heavy windows.  
-
 
 ## (01.06.2026) Version 1.7.2:
     - New notification system (Toast Notifications): Notifications are divided into two types. New lightweight notifications have been added for successful routine actions (saving tags, adding a track to favorites, creating a playlist). They smoothly slide in from the bottom of the screen, change statuses in real time, and don't require clicking buttons. Modal windows with an "OK" button now appear only when critical errors occur, so the text can be easily read or copied.  

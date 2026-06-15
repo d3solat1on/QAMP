@@ -35,8 +35,9 @@
                                             Orientation="Horizontal"
                                             Visibility="Collapsed"
                                             Margin="15,0,0,0">
+                                        <!-- p1zdec -->
                                         <Button x:Name="CancelButton"
-                                                Content="{DynamicResource LngCreatePlaylist}"
+                                                Content="{DynamicResource LngNo}"
                                                 Click="Cancel_Click"
                                                 Width="80"
                                                 Height="30"
