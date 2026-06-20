@@ -1,4 +1,8 @@
 # CHANGELOG
+## (20.06.2026) Version 1.7.7:
+    - Added the ability to change the background of the application.  
+    - The ability to change the rounding of objects, such as buttons, context menus, windows, and more, has also been added.
+
 ## (16.06.2026) Version 1.7.6:
     - Localization files have been updated.  
     - Fixed a bug in the Track Details window (Color scheme).  

@@ -18,7 +18,7 @@
                         <Grid>
                             <Border Height="4"
                                     Background="{DynamicResource SecondaryBackgroundBrush}"
-                                    CornerRadius="2"
+                                    CornerRadius="{DynamicResource AppCornerRadius}"
                                     VerticalAlignment="Center"/>
                             <Track x:Name="PART_Track">
                                 <Track.DecreaseRepeatButton>
@@ -27,7 +27,7 @@
                                             <ControlTemplate TargetType="RepeatButton">
                                                 <Border Height="4"
                                                         Background="{DynamicResource AccentBrush}"
-                                                        CornerRadius="2"/>
+                                                        CornerRadius="{DynamicResource AppCornerRadius}"/>
                                             </ControlTemplate>
                                         </RepeatButton.Template>
                                     </RepeatButton>

@@ -246,38 +246,6 @@ namespace QAMP
             UpdateNextTrackUI();
         }
 
-        private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (PlaylistsListBox.SelectedItem is Playlist selected)
-            {
-                MusicLibrary.Instance.CurrentPlaylist = selected;
-                System.Diagnostics.Debug.WriteLine($"=== ПРОСМОТР ПЛЕЙЛИСТА: {selected.Name} ===");
-                System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
-                App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
-                ApplySort(selected.SortType);
-
-                // Для плейлиста "Избранное" используем цвет приложения
-                if (selected.IsSystemPlaylist || selected.CoverImage == null)
-                {
-                    UpdateUpperPanelGradientForFavorites();
-                }
-                else if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
-                {
-                    UpdateUpperPanelGradient(bitmap);
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Бу-ба-бэ, что-то пошло не так");
-                }
-                if (Player.CurrentTrack != null)
-                {
-                    UpdateFavoriteIcon(Player.CurrentTrack);
-                }
-
-                UpdatePlayPauseIconState();
-            }
-        }
-
         private void TracksDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (TracksDataGrid.SelectedItem is Track selectedTrack)
@@ -316,16 +284,58 @@ namespace QAMP
             Library.CurrentTrack = track;
             _lastTrackWithCover = track;
         }
+
+        private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PlaylistsListBox.SelectedItem is Playlist selected)
+            {
+                MusicLibrary.Instance.CurrentPlaylist = selected;
+                System.Diagnostics.Debug.WriteLine($"=== ПРОСМОТР ПЛЕЙЛИСТА: {selected.Name} ===");
+                System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
+                App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
+                ApplySort(selected.SortType);
+
+                // Для плейлиста "Избранное" используем цвет приложения
+                if (selected.IsSystemPlaylist || selected.CoverImage == null)
+                {
+                    UpdateUpperPanelGradientForFavorites();
+                }
+                else if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
+                {
+                    UpdateUpperPanelGradient(bitmap);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Бу-ба-бэ, что-то пошло не так");
+                }
+                if (Player.CurrentTrack != null)
+                {
+                    UpdateFavoriteIcon(Player.CurrentTrack);
+                }
+                UpdatePlayPauseIconState();
+            }
+        }
+
         private void UpdateUpperPanelGradient(BitmapSource cover)
         {
-            if (cover == null || !AppSettings.UseAdaptiveGradients)
+            var config = SettingsManager.Instance.Config;
+
+            if (cover == null || !config.UseAdaptiveGradients)
             {
-                UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+                UpperPanel.Background = GetDefaultUpperPanelBrush(config);
                 return;
             }
+
             try
             {
                 Color dominant = ThemeHelper.GetDominantColor(cover);
+                Color secondary = ThemeHelper.GetAdaptiveSecondaryColor(dominant);
+
+                if (!string.IsNullOrEmpty(config.CustomBackgroundPath))
+                {
+                    dominant.A = 0xCC;
+                    secondary.A = 0x66; 
+                }
 
                 var brush = new LinearGradientBrush
                 {
@@ -334,8 +344,6 @@ namespace QAMP
                 };
 
                 brush.GradientStops.Add(new GradientStop(dominant, 0));
-
-                Color secondary = ThemeHelper.GetAdaptiveSecondaryColor(dominant);
                 brush.GradientStops.Add(new GradientStop(secondary, 1));
 
                 UpperPanel.Background = brush;
@@ -343,6 +351,7 @@ namespace QAMP
             catch (Exception ex)
             {
                 App.LogException(ex, "GradientUpdate");
+                UpperPanel.Background = GetDefaultUpperPanelBrush(config);
             }
         }
 
@@ -353,33 +362,50 @@ namespace QAMP
         {
             try
             {
-                if (Application.Current.Resources["AccentBrush"] is SolidColorBrush accentBrush)
+                var config = SettingsManager.Instance.Config;
+
+                if (Application.Current.Resources["AccentBrush"] is SolidColorBrush accentBrush && config.UseAdaptiveGradients)
                 {
+                    Color primary = accentBrush.Color;
+                    Color secondary = ThemeHelper.GetAdaptiveSecondaryColor(primary);
+
+                    if (!string.IsNullOrEmpty(config.CustomBackgroundPath))
+                    {
+                        primary.A = 0xCC;
+                        secondary.A = 0x66;
+                    }
+
                     var brush = new LinearGradientBrush
                     {
                         StartPoint = new Point(0, 0),
                         EndPoint = new Point(0, 1)
                     };
 
-                    brush.GradientStops.Add(new GradientStop(accentBrush.Color, 0));
-
-                    Color secondary = ThemeHelper.GetAdaptiveSecondaryColor(accentBrush.Color);
+                    brush.GradientStops.Add(new GradientStop(primary, 0));
                     brush.GradientStops.Add(new GradientStop(secondary, 1));
 
                     UpperPanel.Background = brush;
                 }
                 else
                 {
-                    UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+                    UpperPanel.Background = GetDefaultUpperPanelBrush(config);
                 }
             }
             catch (Exception ex)
             {
                 App.LogException(ex, "FavoritesGradientUpdate");
-                UpperPanel.Background = (Brush)Application.Current.Resources["BackgroundBrush"];
+                UpperPanel.Background = GetDefaultUpperPanelBrush(SettingsManager.Instance.Config);
             }
         }
+        private Brush GetDefaultUpperPanelBrush(AppSettings config)
+        {
+            if (!string.IsNullOrEmpty(config.CustomBackgroundPath))
+            {
+                return Brushes.Transparent;
+            }
 
+            return (Brush)Application.Current.Resources["BackgroundBrush"];
+        }
         /// <summary>
         /// Обновляет градиент верхней панели при изменении настроек адаптивных градиентов
         /// </summary>

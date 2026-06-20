@@ -279,7 +279,7 @@ namespace QAMP.Windows
                 }
                 catch (Exception ex)
                 {
-                    string message = (string)Application.Current.FindResource("LngErorr");
+                    string message = (string)Application.Current.FindResource("LngError");
                     NotificationWindow.Show($"{message} {ex.Message}", this);
                 }
             }

@@ -9,7 +9,7 @@
         <Grid>
                 <Border x:Name="ToastBorder"
                         Background="{DynamicResource SecondaryBackgroundBrush}"
-                        CornerRadius="10"
+                        CornerRadius="{DynamicResource AppCornerRadius}"
                         BorderBrush="{DynamicResource BorderBrush}"
                         BorderThickness="1"
                         Padding="20,12"

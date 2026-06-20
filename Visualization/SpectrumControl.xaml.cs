@@ -102,30 +102,45 @@ namespace QAMP.Visualization
         }
         private void ApplyColors()
         {
+            var config = SettingsManager.Instance.Config;
 
-            if (Application.Current.Resources["TertiaryBackgroundBrush"] is System.Windows.Media.SolidColorBrush bgBrush)
+            if (!string.IsNullOrEmpty(config.CustomBackgroundPath))
             {
-                var c = bgBrush.Color;
-                SpectrumPlot.Plot.FigureBackground.Color = new Color(c.R, c.G, c.B);
-                SpectrumPlot.Plot.DataBackground.Color = new Color(c.R, c.G, c.B);
+                SpectrumPlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+                SpectrumPlot.Plot.DataBackground.Color = ScottPlot.Colors.Transparent;
             }
             else
             {
-                SpectrumPlot.Plot.FigureBackground.Color = Colors.Black;
-                SpectrumPlot.Plot.DataBackground.Color = Colors.Black;
+                if (Application.Current.Resources["TertiaryBackgroundBrush"] is System.Windows.Media.SolidColorBrush bgBrush)
+                {
+                    var c = bgBrush.Color;
+
+                    int argb = (c.A << 24) | (c.R << 16) | (c.G << 8) | c.B;
+
+                    SpectrumPlot.Plot.FigureBackground.Color = ScottPlot.Color.FromARGB(argb);
+                    SpectrumPlot.Plot.DataBackground.Color = ScottPlot.Color.FromARGB(argb);
+                }
+                else
+                {
+                    SpectrumPlot.Plot.FigureBackground.Color = Colors.Black;
+                    SpectrumPlot.Plot.DataBackground.Color = Colors.Black;
+                }
             }
 
             if (myBars != null)
             {
-                Color plotColor;
+                ScottPlot.Color plotColor;
 
                 if (Application.Current.Resources["AccentBrush"] is System.Windows.Media.SolidColorBrush accent)
                 {
-                    plotColor = new Color(accent.Color.R, accent.Color.G, accent.Color.B);
+                    var ac = accent.Color;
+                    int accentArgb = (ac.A << 24) | (ac.R << 16) | (ac.G << 8) | ac.B;
+
+                    plotColor = ScottPlot.Color.FromARGB(accentArgb);
                 }
                 else
                 {
-                    plotColor = Colors.LimeGreen;
+                    plotColor = ScottPlot.Colors.LimeGreen;
                 }
 
                 myBars.Color = plotColor;
@@ -140,6 +155,8 @@ namespace QAMP.Visualization
                     bar.LineStyle.Width = 0;
                 }
             }
+
+            SpectrumPlot.Refresh();
         }
 
         /// <summary>

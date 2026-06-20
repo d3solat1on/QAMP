@@ -14,6 +14,10 @@
                 <ResourceDictionary Source="Localization/LangRU.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+
+            <CornerRadius x:Key="AppCornerRadius">0</CornerRadius>
+
+
             <FontFamily x:Key="MainFont">pack://application:,,,/Resources/Fonts/GOST_TYPE_A.ttf#GOST type A</FontFamily>
 
             <Style TargetType="Window">

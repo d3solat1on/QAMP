@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              d:DesignHeight="*"
              d:DesignWidth="*"
-             Background="{DynamicResource TertiaryBackgroundBrush}">
+             Background="Transparent">
     <Grid>
         <sp:WpfPlot Name="SpectrumPlot"
                     BorderThickness="1"/>

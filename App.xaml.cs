@@ -180,7 +180,7 @@ ToolTipText = "QAMP",
             {
                 LanguageManager.ApplyLanguage(SettingsManager.Instance.Config.Language);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine($"{ex.Message}");
             }
@@ -189,6 +189,9 @@ ToolTipText = "QAMP",
 
             // Применяем автозапуск из конфига
             ApplyAutoLaunchFromConfig();
+            
+            var savedRound = SettingsManager.Instance.Config.CurrentRound;
+            Current.Resources["AppCornerRadius"] = new CornerRadius(savedRound);
 
             DispatcherUnhandledException += (s, ex) => LogException(ex.Exception, "UI Dispatcher");
 

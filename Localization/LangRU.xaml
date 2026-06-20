@@ -1,6 +1,23 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        
+        <System:String x:Key="LngRoundingEnter"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Введите значение для скругления углов у кнопок, окон и прочих объектов</System:String>
+        <System:String x:Key="LngRounding"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Закругление</System:String>
+        <System:String x:Key="LngErrorMessageRound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Целое неотрицательно число от 0 до 10</System:String>
+        <System:String x:Key="LngBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Задний фон</System:String>
+        <System:String x:Key="LngUseCustomBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Использовать кастомный задний фон</System:String>
+        <System:String x:Key="LngUseDefaultBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Использовать обычный задний фон</System:String>
+        <System:String x:Key="LngSuccessfullyBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Задний фон успешно заменен</System:String>
+        <System:String x:Key="LngReplaceBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Заменить фон</System:String>
         <System:String x:Key="LngFileNotFound"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Файл не найден</System:String>
         <System:String x:Key="LngFolderNotFound"

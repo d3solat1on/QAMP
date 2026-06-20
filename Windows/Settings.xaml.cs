@@ -219,7 +219,7 @@ namespace QAMP.Windows
 
                     // Автоматически выбираем добавленную тему
                     CustomThemesComboBox.SelectedItem = fileName;
-                    
+
                     string message = (string)Application.Current.FindResource("LngThemeAdded");
                     await SettingsInfoToast.ShowAsync(message);
                 }
@@ -310,6 +310,9 @@ namespace QAMP.Windows
             AccentColorTextBox.Text = config.AccentColor;
             UpdateColorPreview();
 
+            CurrentRoundTextBox.Text = config.CurrentRound.ToString();
+
+
             // Загружаем выбранное действие при закрытии
             CloseToTrayRadio.IsChecked = config.CloseToTray;
             CloseAppRadio.IsChecked = !config.CloseToTray;
@@ -321,6 +324,9 @@ namespace QAMP.Windows
             // Загружаем состояние автозапуска
             AutoLaunchEnabled.IsChecked = config.IsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !config.IsAutoLaunchEnabled;
+
+            UseCustomBGradio.IsChecked = config.UseCustomBackground;
+            NotUseCustomBGradio.IsChecked = !config.UseCustomBackground;
 
             // Язык
             if (config.Language == "en")
@@ -388,6 +394,23 @@ namespace QAMP.Windows
                 }
             }
         }
+
+        private void CheckUseCustomBG(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+
+            if (sender is RadioButton radio && radio.IsChecked == true)
+            {
+                bool useCustomBG = radio == UseCustomBGradio;
+
+                var config = SettingsManager.Instance.Config;
+                if (config.UseCustomBackground != useCustomBG)
+                {
+                    config.UseCustomBackground = useCustomBG;
+                }
+            }
+        }
+
         private void CloseAction_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
@@ -572,6 +595,80 @@ namespace QAMP.Windows
             }
         }
 
+
+        private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
+        private async void ReplaceBG_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Directory.Exists(BGFolderPath))
+            {
+                Directory.CreateDirectory(BGFolderPath);
+            }
+
+            OpenFileDialog openFileDialog = new();
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string selectedFilePath = openFileDialog.FileName;
+                string fileName = Path.GetFileName(selectedFilePath);
+                string destFilePath = Path.Combine(BGFolderPath, fileName);
+
+                try
+                {
+                    File.Copy(selectedFilePath, destFilePath, overwrite: true);
+
+                    var config = SettingsManager.Instance.Config;
+
+                    config.CustomBackgroundPath = destFilePath;
+
+                    string message = (string)Application.Current.FindResource("LngSuccessfullyBG");
+                    await SettingsInfoToast.ShowAsync(message);
+                    SettingsManager.Instance.Save();
+                    config.UseCustomBackground = true;
+                }
+                catch (Exception ex)
+                {
+                    string errorMessage = (string)Application.Current.FindResource("LngError");
+                    NotificationWindow.Show($"{errorMessage} {ex.Message}", this);
+                    Debug.WriteLine($"[DEBUG] {ex.Message}");
+                }
+            }
+        }
+
+        private void CurrentRound_TextChanged(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing || CurrentRoundTextBox == null) return;
+
+            var config = SettingsManager.Instance.Config;
+            string currentRoundText = CurrentRoundTextBox.Text;
+
+            if (string.IsNullOrWhiteSpace(currentRoundText)) return;
+
+            if (int.TryParse(currentRoundText, out int parsedRound))
+            {
+                if (parsedRound >= 0 && parsedRound <= 10)
+                {
+                    config.CurrentRound = parsedRound;
+                    SettingsManager.Instance.Save();
+
+                    Application.Current.Resources["AppCornerRadius"] = new CornerRadius(parsedRound);
+                }
+                else
+                {
+                    ShowRoundError();
+                }
+            }
+            else
+            {
+                ShowRoundError();
+            }
+        }
+
+        private void ShowRoundError()
+        {
+            string errorMessage = Application.Current.FindResource("LngErrorMessageRound") as string
+                                  ?? "Введите целое число от 0 до 10";
+            NotificationWindow.Show(errorMessage, this);
+        }
 
 
         private void CheckAutoLaunch(object? sender, RoutedEventArgs? e)

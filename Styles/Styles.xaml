@@ -13,7 +13,7 @@
                         <Border x:Name="TrackBackground"
                                 Height="4"
                                 Background="{DynamicResource BorderBrush}"
-                                CornerRadius="2"
+                                CornerRadius="{DynamicResource AppCornerRadius}"
                                 VerticalAlignment="Center"/>
 
                         <Track x:Name="PART_Track">
@@ -171,7 +171,7 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8">
+                            CornerRadius="{DynamicResource AppCornerRadius}">
                         <ItemsPresenter/>
                     </Border>
                 </ControlTemplate>
@@ -192,7 +192,7 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{DynamicResource AppCornerRadius}">
                         <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                     </Border>
                 </ControlTemplate>
@@ -209,7 +209,7 @@
                     <Grid x:Name="RootGrid">
                         <Border x:Name="Bg"
                                 Background="Transparent"
-                                CornerRadius="3"
+                                CornerRadius="{DynamicResource AppCornerRadius}"
                                 Margin="1">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -240,7 +240,7 @@
                                     <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="4"
+                                            CornerRadius="{DynamicResource AppCornerRadius}"
                                             Padding="1">
                                         <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                                     </Border>
@@ -399,7 +399,7 @@
         <Style.Resources>
             <Style TargetType="Border">
                 <Setter Property="CornerRadius"
-                        Value="3"/>
+                        Value="{DynamicResource AppCornerRadius}"/>
             </Style>
         </Style.Resources>
     </Style>

@@ -30,7 +30,7 @@
                         <Border Background="{DynamicResource AccentBrush}"
                                 Width="8"
                                 Height="16"
-                                CornerRadius="4"
+                                CornerRadius="{DynamicResource AppCornerRadius}"
                                 RenderOptions.EdgeMode="Aliased">
                             <Border.Effect>
                                 <DropShadowEffect Color="#000000"
@@ -54,7 +54,7 @@
                                     Background="{DynamicResource TertiaryBackgroundBrush}"
                                     Width="4"
                                     HorizontalAlignment="Center"
-                                    CornerRadius="2"
+                                    CornerRadius="{DynamicResource AppCornerRadius}"
                                     Opacity="0.6"/>
                             <Track x:Name="PART_Track">
                                 <Track.Thumb>
@@ -86,7 +86,7 @@
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
                       GlassFrameThickness="0"
-                      CornerRadius="0"/>
+                      CornerRadius="{DynamicResource AppCornerRadius}"/>
     </WindowChrome.WindowChrome>
 
     <Grid>
@@ -133,6 +133,8 @@
                       HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -351,7 +353,7 @@
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10"
-                        HorizontalAlignment="Left">
+                                HorizontalAlignment="Left">
                         <Button Style="{StaticResource ModernPlayerButton}"
                                 x:Name="DatabaseLocation"
                                 Margin="0,0,0,10"
@@ -362,13 +364,63 @@
                         </Button>
                         <Button Style="{StaticResource ModernPlayerButton}"
                                 x:Name="AppLocation"
+                                Margin="0,0,0,10"
                                 Width="Auto"
                                 Height="30"
                                 Content="{DynamicResource LngOpenAppLocation}"
                                 Click="OpenAppLocation_Click">
                         </Button>
+                        <Button Style="{StaticResource ModernPlayerButton}"
+                                x:Name="ReplaceBG"
+                                Width="Auto"
+                                Height="30"
+                                Content="{DynamicResource LngReplaceBG}"
+                                Click="ReplaceBG_Click">
+                        </Button>
                     </StackPanel>
                 </GroupBox>
+
+                <GroupBox x:Name="BG"
+                          Grid.Row="11"
+                          Header="{DynamicResource LngBG}"
+                          Margin="0,0,0,20"
+                          Foreground="{DynamicResource ForegroundBrush}">
+                    <StackPanel Margin="10">
+                        <RadioButton x:Name="NotUseCustomBGradio"
+                                     Content="{DynamicResource LngUseDefaultBG}"
+                                     GroupName="BgGroup"
+                                     Margin="0,0,0,10"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Checked="CheckUseCustomBG"/>
+                        <RadioButton x:Name="UseCustomBGradio"
+                                     Content="{DynamicResource LngUseCustomBG}"
+                                     GroupName="BgGroup"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Checked="CheckUseCustomBG"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox x:Name="CornerRadius"
+                          Grid.Row="12"
+                          Header="{DynamicResource LngRounding}"
+                          Margin="0,0,0,20"
+                          Foreground="{DynamicResource ForegroundBrush}">
+                    <StackPanel Margin="10">
+                        <TextBlock x:Name="SelectNumber"
+                                   Text="{DynamicResource LngRoundingEnter}"
+                                   ToolTip="{DynamicResource LngErrorMessageRound}"
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   Margin="0,0,0,5"/>
+                        <TextBox x:Name="CurrentRoundTextBox"
+                                 Width="200"
+                                 HorizontalAlignment="Left"
+                                 TextChanged="CurrentRound_TextChanged"
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                    </StackPanel>
+                </GroupBox>
+
                 <GroupBox x:Name="AutoLaunch"
                           Grid.Row="9"
                           Header="{DynamicResource LngAutoLauch}"

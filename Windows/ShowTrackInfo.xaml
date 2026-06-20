@@ -63,7 +63,7 @@
 
         <Grid>
                 <Border Background="{DynamicResource DataGridHeaderBackground}"
-                        CornerRadius="5"
+                        CornerRadius="{DynamicResource AppCornerRadius}"
                         BorderBrush="{DynamicResource AccentBrush}"
                         BorderThickness="1">
                         <Grid Margin="0">
@@ -112,7 +112,7 @@
                                                 <ToggleButton.Resources>
                                                         <Style TargetType="Border">
                                                                 <Setter Property="CornerRadius"
-                                                                        Value="2"/>
+                                                                        Value="{DynamicResource AppCornerRadius}"/>
                                                         </Style>
                                                 </ToggleButton.Resources>
                                         </ToggleButton>
@@ -127,7 +127,7 @@
                                                 <Button.Resources>
                                                         <Style TargetType="Border">
                                                                 <Setter Property="CornerRadius"
-                                                                        Value="2"/>
+                                                                        Value="{DynamicResource AppCornerRadius}"/>
                                                         </Style>
                                                 </Button.Resources>
                                         </Button>
@@ -142,7 +142,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel Grid.Column="0">
-                                                        <Border CornerRadius="10"
+                                                        <Border CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 ClipToBounds="True"
                                                                 Height="300"
                                                                 Width="300"
@@ -425,7 +425,7 @@
                                                                    Margin="0,10,0,5"/>
                                                                    <!-- p1zdec че за хуйня со цветом -->
                                                         <Border Background="{DynamicResource DataGridRowSelectedBackground}"
-                                                                CornerRadius="5"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 Padding="10"
                                                                 Margin="0,0,0,10">
                                                                 <TextBox Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
@@ -452,7 +452,7 @@
                                                                    Margin="0,10,0,5"/>
                                                         <Border x:Name="LyricsBorder"
                                                                 Background="{DynamicResource DataGridRowSelectedBackground}"
-                                                                CornerRadius="5"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 Padding="10"
                                                                 Margin="0,0,0,10"
                                                                 Cursor="Hand">
@@ -475,7 +475,7 @@
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
                                                         <Border Background="{DynamicResource CentralPanelCardBackground}"
-                                                                CornerRadius="5"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 Padding="10">
                                                                 <TextBlock x:Name="PlayCountTextBlock"
                                                                            Text="{Binding PlayCount}"
@@ -489,7 +489,7 @@
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
                                                         <Border Background="{DynamicResource CentralPanelCardBackground}"
-                                                                CornerRadius="5"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 Padding="10">
                                                                 <TextBlock Text="{Binding Size, StringFormat='{}{0:F3} MB'}"
                                                                            Foreground="{DynamicResource TextBrush}"
@@ -503,7 +503,7 @@
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
                                                         <Border Background="{DynamicResource CentralPanelCardBackground}"
-                                                                CornerRadius="5"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 Padding="10">
                                                                 <TextBlock x:Name="ExstensionFile"
                                                                            Text="{Binding DisplayExtension}"
@@ -517,7 +517,7 @@
                                                                    Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                                    Margin="0,10,0,5"/>
                                                         <Border Background="{DynamicResource CentralPanelCardBackground}"
-                                                                CornerRadius="5"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 Padding="10"
                                                                 Cursor="Hand">
                                                                 <TextBlock Text="{Binding Path}"

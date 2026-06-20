@@ -1,6 +1,23 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        
+        <System:String x:Key="LngRoundingEnter"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enter a value to round the corners of buttons, windows, and other objects</System:String>
+        <System:String x:Key="LngRounding"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Rounding</System:String>
+        <System:String x:Key="LngErrorMessageRound"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">А non-negative integer between 0 and 10</System:String>
+        <System:String x:Key="LngBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Background</System:String>
+        <System:String x:Key="LngUseCustomBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Use a custom background</System:String>
+        <System:String x:Key="LngUseDefaultBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Use a default background</System:String>
+        <System:String x:Key="LngSuccessfullyBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The background has been successfully replaced</System:String>
+        <System:String x:Key="LngReplaceBG"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Replace background</System:String>
         <System:String x:Key="LngFileNotFound"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">File not found</System:String>
         <System:String x:Key="LngFolderNotFound"

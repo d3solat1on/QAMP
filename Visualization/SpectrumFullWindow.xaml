@@ -31,7 +31,7 @@
             <Border x:Name="CoverBorder"
                     Width="80"
                     Height="80"
-                    CornerRadius="4"
+                    CornerRadius="{DynamicResource AppCornerRadius}"
                     Background="Transparent"
                     BorderBrush="{DynamicResource AccentBrush}"
                     BorderThickness="1">

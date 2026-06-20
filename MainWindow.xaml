@@ -23,7 +23,7 @@
         <WindowChrome.WindowChrome>
                 <WindowChrome CaptionHeight="30"
                               GlassFrameThickness="0"
-                              CornerRadius="0"/>
+                              CornerRadius="{DynamicResource AppCornerRadius}"/>
         </WindowChrome.WindowChrome>
 
         <Window.Resources>
@@ -33,8 +33,11 @@
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
                 <converters:PercentOfConverter x:Key="PercentOfConverter"/>
                 <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
+                <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
                 <converters:PlaylistNameLocalizationConverter x:Key="PlaylistNameLocalizationConverter"/>
                 <converters:PlaylistDescriptionLocalizationConverter x:Key="PlaylistDescriptionLocalizationConverter"/>
+                <converters:BackgroundBrushConverter x:Key="BackgroundBrushConverter"/>
+                <converters:ImageLoadConverter x:Key="ImageLoadConverter"/>
                 <converters:BindingProxy x:Key="Proxy"
                                          Data="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config}"/>
                 <ObjectDataProvider x:Key="HeartProvider"
@@ -498,13 +501,26 @@
                                         <ColumnDefinition Width="300"/>
                                 </Grid.ColumnDefinitions>
 
+                                <Image Source="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource ImageLoadConverter}}"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="3"
+                                       Stretch="UniformToFill"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.UseCustomBackground, Converter={StaticResource BoolToVisConverter}}">
+                                        <Image.Effect>
+                                                <BlurEffect Radius="3"
+                                                            KernelType="Box"/>
+                                        </Image.Effect>
+                                </Image>
+
                                 <!-- Левая колонка - плейлисты -->
                                 <Border x:Name="LeftZona"
                                         Grid.Column="0"
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="0,0,1,0"
                                         Margin="0,0,0,0"
-                                        Background="{DynamicResource TertiaryBackgroundBrush}">
+                                        Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}">
                                         <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto"/>
@@ -593,7 +609,7 @@
                                                                                                                 <Border Background="{TemplateBinding Background}"
                                                                                                                         BorderBrush="{TemplateBinding BorderBrush}"
                                                                                                                         BorderThickness="1"
-                                                                                                                        CornerRadius="8">
+                                                                                                                        CornerRadius="{DynamicResource AppCornerRadius}">
                                                                                                                         <StackPanel IsItemsHost="True"
                                                                                                                                     Margin="5"/>
                                                                                                                 </Border>
@@ -635,27 +651,27 @@
                                                                     Margin="8">
                                                                 <Border Height="45"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="45"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="45"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="45"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="45"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                         </StackPanel>
@@ -705,7 +721,7 @@
                                                                                                 Height="45"
                                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                                 BorderThickness="1"
-                                                                                                CornerRadius="4"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                                                 Background="{DynamicResource CentralPanelCardBackground}">
                                                                                                 <Grid>
                                                                                                         <!-- Изображение (если есть) -->
@@ -955,7 +971,7 @@
 
 
                                 <Grid Grid.Column="1"
-                                      Background="{DynamicResource TertiaryBackgroundBrush}">
+                                      Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}">
                                         <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
@@ -965,7 +981,7 @@
                                         <Border x:Name="UpperPanel"
                                                 Grid.Row="0"
                                                 Padding="20"
-                                                Background="{DynamicResource CentralPanelHeaderBackground}"
+                                                Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Header}"
                                                 BorderBrush="{DynamicResource GridHeaderSeperatorBrush}"
                                                 BorderThickness="0,0,0,1">
 
@@ -978,9 +994,9 @@
                                                         <Border Grid.Column="0"
                                                                 Width="150"
                                                                 Height="150"
-                                                                CornerRadius="4"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 VerticalAlignment="Top"
-                                                                Background="{DynamicResource CentralPanelCardBackground}"
+                                                                Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Header}"
                                                                 BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
                                                                 BorderThickness="1"
                                                                 Margin="0,0,20,0"
@@ -1101,7 +1117,7 @@
                                         <Border x:Name="ControlsPanel"
                                                 Grid.Row="1"
                                                 Padding="10"
-                                                Background="{DynamicResource CentralPanelHeaderBackground}"
+                                                Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Controls}"
                                                 BorderBrush="{DynamicResource GridHeaderSeperatorBrush}"
                                                 BorderThickness="0,0,0,1">
                                                 <StackPanel VerticalAlignment="Bottom"
@@ -1169,48 +1185,48 @@
                                                                     Margin="20">
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                                 <Border Height="35"
                                                                         Margin="0,5"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"/>
                                                         </StackPanel>
                                                 </Grid>
 
                                                 <DataGrid x:Name="TracksDataGrid"
+                                                          Background="Transparent"
                                                           AlternationCount="2"
                                                           AllowDrop="True"
                                                           MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
                                                           DragOver="MainGrid_DragOver">
-                                                        <!-- Drop="MainGrid_Drop"> -->
                                                         <DataGrid.ContextMenu>
                                                                 <ContextMenu Background="{DynamicResource ContextMenuBackground}"
                                                                              BorderBrush="{DynamicResource ContextMenuBorderBrush}"
@@ -1228,6 +1244,7 @@
                                                                                   Click="RemoveFromPlaylist_Click"/>
                                                                 </ContextMenu>
                                                         </DataGrid.ContextMenu>
+
                                                         <DataGrid.Resources>
                                                                 <Style TargetType="{x:Type DataGridRowHeader}">
                                                                         <Setter Property="Background"
@@ -1237,10 +1254,9 @@
                                                                         <Setter Property="Width"
                                                                                 Value="0"/>
                                                                 </Style>
-                                                                <!-- Стиль для заголовков колонок -->
                                                                 <Style TargetType="DataGridColumnHeader">
                                                                         <Setter Property="Background"
-                                                                                Value="{DynamicResource DataGridHeaderBackground}"/>
+                                                                                Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"/>
                                                                         <Setter Property="Foreground"
                                                                                 Value="{DynamicResource DataGridHeaderForeground}"/>
                                                                         <Setter Property="FontWeight"
@@ -1259,10 +1275,9 @@
                                                                                 Value="10,0,0,0"/>
                                                                 </Style>
 
-                                                                <!-- Стиль для ячеек -->
                                                                 <Style TargetType="DataGridCell">
                                                                         <Setter Property="Background"
-                                                                                Value="{DynamicResource DataGridCellBackground}"/>
+                                                                                Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"/>
                                                                         <Setter Property="Foreground"
                                                                                 Value="{DynamicResource DataGridCellForeground}"/>
                                                                         <Setter Property="BorderBrush"
@@ -1286,18 +1301,18 @@
                                                                         </Style.Triggers>
                                                                 </Style>
 
-                                                                <!-- Стиль для строк -->
                                                                 <Style TargetType="DataGridRow">
                                                                         <Setter Property="Background"
-                                                                                Value="{DynamicResource DataGridRowBackground}"/>
+                                                                                Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Row}"/>
                                                                         <Setter Property="MinHeight"
                                                                                 Value="35"/>
                                                                         <Style.Triggers>
                                                                                 <Trigger Property="AlternationIndex"
                                                                                          Value="1">
                                                                                         <Setter Property="Background"
-                                                                                                Value="{DynamicResource DataGridRowAltBackground}"/>
+                                                                                                Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=RowAlt}"/>
                                                                                 </Trigger>
+
                                                                                 <Trigger Property="IsSelected"
                                                                                          Value="True">
                                                                                         <Setter Property="Background"
@@ -1305,21 +1320,20 @@
                                                                                 </Trigger>
                                                                         </Style.Triggers>
                                                                 </Style>
-                                                        </DataGrid.Resources>
-                                                        <!-- Hz, ne rabotaet chet -->
-                                                        <DataGrid.Columns>
 
-                                                                <!-- В DataGrid.Columns, перед колонкой NAME -->
+                                                        </DataGrid.Resources>
+
+                                                        <DataGrid.Columns>
                                                                 <DataGridTemplateColumn Header=""
                                                                                         Visibility="{Binding Data.IsCompactMode, 
-                 Source={StaticResource Proxy}, 
-                 Converter={StaticResource InverseBoolToVisConverter}}"
+                                                                                                Source={StaticResource Proxy}, 
+                                                                                                Converter={StaticResource InverseBoolToVisConverter}}"
                                                                                         Width="75">
                                                                         <DataGridTemplateColumn.CellTemplate>
                                                                                 <DataTemplate>
                                                                                         <Border Width="75"
                                                                                                 Height="75"
-                                                                                                CornerRadius="4"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                                                 BorderThickness="1"
                                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                                 Background="{DynamicResource CentralPanelCardBackground}">
@@ -1468,7 +1482,7 @@
                                                 </DataGrid>
                                                 <Grid x:Name="LyricsOverlay"
                                                       Visibility="Collapsed"
-                                                      Background="{DynamicResource TertiaryBackgroundBrush}">
+                                                      Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}">
 
                                                         <ListBox x:Name="LyricsListBox"
                                                                  Margin="50,20"
@@ -1530,35 +1544,34 @@
                                 <!-- Правая колонка - NOW PLAYING -->
                                 <Border Grid.Column="2"
                                         HorizontalAlignment="Center"
-                                        Background="{DynamicResource TertiaryBackgroundBrush}"
+                                        Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}"
                                         BorderThickness="1,0,0,0"
                                         BorderBrush="{DynamicResource BorderBrush}">
 
                                         <Grid>
-
                                                 <Grid x:Name="NowPlayingLoadingPlaceholder"
                                                       Visibility="Collapsed"
                                                       Margin="20">
                                                         <StackPanel VerticalAlignment="Top">
                                                                 <Border Height="275"
                                                                         Width="275"
-                                                                        CornerRadius="8"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"
                                                                         Margin="0,15"
                                                                         HorizontalAlignment="Center"/>
                                                                 <Border Height="30"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"
                                                                         Margin="0,15"/>
                                                                 <Border Height="25"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"
                                                                         Margin="0,15"/>
                                                                 <Border Height="20"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
                                                                         Background="#333333"
                                                                         Opacity="0.5"
                                                                         Margin="0,15"/>
@@ -1575,7 +1588,7 @@
                                                                    Margin="0,0,0,20"/>
 
                                                         <Border x:Name="CurrentTrackImage1"
-                                                                CornerRadius="8"
+                                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 ClipToBounds="True"
                                                                 Height="275"
                                                                 Width="275"

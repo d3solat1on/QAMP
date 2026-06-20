@@ -150,7 +150,7 @@
                 <TextBox.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius"
-                                Value="3"/>
+                                Value="{DynamicResource AppCornerRadius}"/>
                     </Style>
                 </TextBox.Resources>
             </TextBox>

@@ -22,7 +22,7 @@
                         <Border Background="{DynamicResource AccentBrush}"
                                 Width="8"
                                 Height="16"
-                                CornerRadius="4"
+                                CornerRadius="{DynamicResource AppCornerRadius}"
                                 RenderOptions.EdgeMode="Aliased">
                             <Border.Effect>
                                 <DropShadowEffect Color="#000000"
@@ -46,7 +46,7 @@
                                     Background="{DynamicResource TertiaryBackgroundBrush}"
                                     Width="4"
                                     HorizontalAlignment="Center"
-                                    CornerRadius="2"
+                                    CornerRadius="{DynamicResource AppCornerRadius}"
                                     Opacity="0.6"/>
                             <Track x:Name="PART_Track">
                                 <Track.Thumb>
@@ -61,7 +61,7 @@
     </Window.Resources>
 
     <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-            CornerRadius="5"
+            CornerRadius="{DynamicResource AppCornerRadius}"
             BorderBrush="{DynamicResource AccentBrush}"
             BorderThickness="1">
         <Grid>

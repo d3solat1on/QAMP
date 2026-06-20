@@ -12,6 +12,7 @@ public class AppSettings : INotifyPropertyChanged
     public int VisualizerBarCount { get; set; } = 64; // Количество столбцов спектрограммы
     public string ColorScheme { get; set; } = "Dark"; // "Dark", "Light", "Custom"
     public string AccentColor { get; set; } = "#1db954"; // Главный цвет приложения
+    public int CurrentRound { get; set; } = 0;
     public double[] EqualizerGains { get; set; } = new double[10]; // Значения эквалайзера
     public double[] CurrentEqualizerValues { get; set; } = new double[10];
     public string EqualizerPreset { get; set; } = "Пользовательский"; // Текущий выбранный режим
@@ -40,13 +41,32 @@ public class AppSettings : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsCompactMode));
         }
     }
-    public double SpectrumFreqPower { get; set; } = 1.5;
-    public double SpectrumAmplitudeGain { get; set; } = 6.0;
-    public double SpectrumAmplitudePower { get; set; } = 0.7;
-    public double SpectrumAttackSpeed { get; set; } = 0.5;
-    public double SpectrumReleaseSpeed { get; set; } = 0.9;
+    private string? _customBackgroundPath;
+    public string CustomBackgroundPath
+    {
+        get => _customBackgroundPath;
+        set
+        {
+            _customBackgroundPath = value;
+            OnPropertyChanged(nameof(CustomBackgroundPath));
+        }
+    }
+    private bool _useCustomBackground;
+    public bool UseCustomBackground
+    {
+        get => _useCustomBackground;
+        set
+        {
+            if (_useCustomBackground != value)
+            {
+                _useCustomBackground = value;
+                OnPropertyChanged(nameof(UseCustomBackground));
+                OnPropertyChanged(nameof(CustomBackgroundPath));
+            }
+        }
+    }
     public PlaylistSortOrder CurrentPlaylistSort { get; set; } = PlaylistSortOrder.Manual;
-    public string Language { get; set; } = "ru";
+    public string Language { get; set; } = "eng";
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

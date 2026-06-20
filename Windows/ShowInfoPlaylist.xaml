@@ -23,7 +23,7 @@
                 </Style>
         </Window.Resources>
         <Border Background="{DynamicResource CentralPanelCardBackground}"
-                CornerRadius="5"
+                CornerRadius="{DynamicResource AppCornerRadius}"
                 BorderBrush="{DynamicResource AccentBrush}"
                 BorderThickness="1">
                 <Grid Margin="0">
@@ -52,7 +52,7 @@
                                         <Button.Resources>
                                                 <Style TargetType="Border">
                                                         <Setter Property="CornerRadius"
-                                                                Value="2"/>
+                                                                Value="{DynamicResource AppCornerRadius}"/>
                                                 </Style>
                                         </Button.Resources>
                                 </Button>
@@ -68,7 +68,7 @@
                                         <Border Grid.Column="0"
                                                 Width="320"
                                                 Height="320"
-                                                CornerRadius="10"
+                                                CornerRadius="{DynamicResource AppCornerRadius}"
                                                 Background="{DynamicResource CentralPanelCardBackground}"
                                                 Padding="8"
                                                 ClipToBounds="True">
