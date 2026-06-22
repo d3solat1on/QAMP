@@ -53,135 +53,101 @@ namespace QAMP
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+            var config = SettingsManager.Instance.Config;
+            if (config?.Hotkeys == null) return;
+
+            Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
+
+            var matchedHotkey = config.Hotkeys.FirstOrDefault(h => h.Key == pressedKey && h.Modifiers == Keyboard.Modifiers);
+
+            if (matchedHotkey == null) return;
+
+            if (matchedHotkey.Action == HotkeyAction.TogglePlayPause)
             {
                 var focusedElement = FocusManager.GetFocusedElement(this);
-                bool isTextInput = focusedElement is TextBox || focusedElement is PasswordBox || focusedElement is RichTextBox;
-                if (!isTextInput)
+                if (focusedElement is TextBox || focusedElement is PasswordBox || focusedElement is RichTextBox)
                 {
-                    TogglePlayPause();
-                    e.Handled = true;
+                    return;
                 }
             }
-            if (Keyboard.Modifiers == ModifierKeys.Control)
+
+            if (Player.CurrentTrack != null || matchedHotkey.Action == HotkeyAction.ToggleFocusGrid)
             {
-                switch (e.Key)
-                {
-                    case Key.Right:
-                        if (Player.CurrentTrack != null)
-                        {
-                            _playService.SeekRelative(5);
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.Left:
-                        if (Player.CurrentTrack != null)
-                        {
-                            _playService.SeekRelative(-5);
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.Up:
-                        if (Player.CurrentTrack != null)
-                        {
-                            _playService.Volume += 0.05;
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.Down:
-                        if (Player.CurrentTrack != null)
-                        {
-                            _playService.Volume -= 0.05;
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.N:
-                        if (Player.CurrentTrack != null)
-                        {
-                            _playService.PlayNextTrack();
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.B:
-                        if (Player.CurrentTrack != null)
-                        {
-                            _playService.PlayPreviousTrack();
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.L:
-                        if (Player.CurrentTrack != null)
-                        {
-                            ViewLyricsButton_Click(null, null);
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.I:
-                        if (Player.CurrentTrack != null)
-                        {
-                            var fullInfo = TagReader.GetFullTrackInfo(Player.CurrentTrack.Path);
-                            if (fullInfo != null)
-                            {
-                                fullInfo.PlayCount = Player.CurrentTrack.PlayCount;
-                                var infoWindow = new ShowTrackInfo(fullInfo)
-                                {
-                                    Owner = this
-                                };
-                                infoWindow.Show();
-                            }
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.R:
-                        if (Player.CurrentTrack != null)
-                        {
-                            RepeatButton_Click(null, null);
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.S:
-                        if (Player.CurrentTrack != null)
-                        {
-                            ShuffleButton_Click(null, null);
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.W:
-                        if (Player.CurrentTrack != null)
-                        {
-                            OpenSpectrumFullScreen();
-                            e.Handled = true;
-                        }
-                        break;
-                    case Key.Tab:
-                        if (PlaylistsListBox.IsFocused || PlaylistsListBox.IsKeyboardFocusWithin)
-                        {
-                            TracksDataGrid.Focus();
+                ExecuteHotkeyAction(matchedHotkey.Action);
+                e.Handled = true;
+            }
+        }
 
-                            if (TracksDataGrid.SelectedItem == null && TracksDataGrid.Items.Count > 0)
-                            {
-                                TracksDataGrid.SelectedIndex = 0;
-                            }
-                        }
-                        else
+        private void ExecuteHotkeyAction(HotkeyAction action)
+        {
+            switch (action)
+            {
+                case HotkeyAction.TogglePlayPause:
+                    TogglePlayPause();
+                    break;
+                case HotkeyAction.SeekForward:
+                    _playService.SeekRelative(5);
+                    break;
+                case HotkeyAction.SeekBackward:
+                    _playService.SeekRelative(-5);
+                    break;
+                case HotkeyAction.VolumeUp:
+                    _playService.Volume += 0.05;
+                    break;
+                case HotkeyAction.VolumeDown:
+                    _playService.Volume -= 0.05;
+                    break;
+                case HotkeyAction.NextTrack:
+                    _playService.PlayNextTrack();
+                    break;
+                case HotkeyAction.PreviousTrack:
+                    _playService.PlayPreviousTrack();
+                    break;
+                case HotkeyAction.ViewLyrics:
+                    ViewLyricsButton_Click(null, null);
+                    break;
+                case HotkeyAction.ShowTrackInfo:
+                    var fullInfo = TagReader.GetFullTrackInfo(Player.CurrentTrack.Path);
+                    if (fullInfo != null)
+                    {
+                        fullInfo.PlayCount = Player.CurrentTrack.PlayCount;
+                        var infoWindow = new ShowTrackInfo(fullInfo)
                         {
-                            PlaylistsListBox.Focus();
-
-                            if (PlaylistsListBox.SelectedItem == null && PlaylistsListBox.Items.Count > 0)
-                            {
-                                PlaylistsListBox.SelectedIndex = 0;
-                            }
-                        }
-                        e.Handled = true;
-                        break;
-                    case Key.F:
-                        if (Player.CurrentTrack != null)
+                            Owner = this
+                        };
+                        infoWindow.Show();
+                    }
+                    break;
+                case HotkeyAction.ToggleRepeat:
+                    RepeatButton_Click(null, null);
+                    break;
+                case HotkeyAction.ToggleShuffle:
+                    ShuffleButton_Click(null, null);
+                    break;
+                case HotkeyAction.OpenFullScreenSpectrum:
+                    OpenSpectrumFullScreen();
+                    break;
+                case HotkeyAction.ToggleFocusGrid:
+                    if (PlaylistsListBox.IsFocused || PlaylistsListBox.IsKeyboardFocusWithin)
+                    {
+                        TracksDataGrid.Focus();
+                        if (TracksDataGrid.SelectedItem == null && TracksDataGrid.Items.Count > 0)
                         {
-                            FavoriteButton_Click(null, null);
-                            e.Handled = true;
+                            TracksDataGrid.SelectedIndex = 0;
                         }
-                        break;
-                }
+                    }
+                    else
+                    {
+                        PlaylistsListBox.Focus();
+                        if (PlaylistsListBox.SelectedItem == null && PlaylistsListBox.Items.Count > 0)
+                        {
+                            PlaylistsListBox.SelectedIndex = 0;
+                        }
+                    }
+                    break;
+                case HotkeyAction.ToggleFavorite:
+                    FavoriteButton_Click(null, null);
+                    break;
             }
         }
 
@@ -341,26 +307,35 @@ namespace QAMP
 
                 TracksDataGrid.Visibility = Visibility.Collapsed;
                 PlaylistsListBox.Visibility = Visibility.Collapsed;
-                LeftZona.Visibility = Visibility.Collapsed;
+
                 ControlsPanel.Visibility = Visibility.Collapsed;
                 UpperPanel.Visibility = Visibility.Collapsed;
+
+                LibraryTextBlock.Visibility = Visibility.Collapsed;
+                SortByButton.Visibility = Visibility.Collapsed;
+                CreatePlaylistButton.Visibility = Visibility.Collapsed;
+                RemovePlaylistButton.Visibility = Visibility.Collapsed;
+                AddMusicButton.Visibility = Visibility.Collapsed;
+
                 LyricsOverlay.Visibility = Visibility.Visible;
 
-                // Установляем фокус на ListBox и выбираем первый элемент для навигации
                 LyricsListBox.SelectedIndex = 0;
                 LyricsListBox.Focus();
                 LyricsListBox.ScrollIntoView(LyricsListBox.SelectedItem);
-                // Cursor = Cursors.None; // Скрываем курсор в режиме отображения текста
             }
             else
             {
+                LibraryTextBlock.Visibility = Visibility.Visible;
+                SortByButton.Visibility = Visibility.Visible;
+                CreatePlaylistButton.Visibility = Visibility.Visible;
+                RemovePlaylistButton.Visibility = Visibility.Visible;
+                AddMusicButton.Visibility = Visibility.Visible;
                 TracksDataGrid.Visibility = Visibility.Visible;
                 PlaylistsListBox.Visibility = Visibility.Visible;
                 LeftZona.Visibility = Visibility.Visible;
                 ControlsPanel.Visibility = Visibility.Visible;
                 UpperPanel.Visibility = Visibility.Visible;
                 LyricsOverlay.Visibility = Visibility.Collapsed;
-                // Cursor = Cursors.Arrow; // Восстанавливаем курсор
             }
         }
         private static List<LrcLine> ParseLrc(string lrcText)

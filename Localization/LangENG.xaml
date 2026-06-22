@@ -1,7 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
-        
+        <System:String x:Key="Lng5SecForward"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Five sec forward</System:String>
+        <System:String x:Key="Lng5SecBack"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Five sec back</System:String>
         <System:String x:Key="LngRoundingEnter"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Enter a value to round the corners of buttons, windows, and other objects</System:String>
         <System:String x:Key="LngRounding"

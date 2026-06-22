@@ -376,13 +376,17 @@ namespace QAMP
                     {
                         CurrentTrackImage.Source = cover;
                         CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
+                        CurrentTrackImage.Margin = new Thickness(0);
                     }
                     else
                     {
                         CurrentTrackImage.Source = (System.Windows.Media.ImageSource)FindResource("default_coverDrawingImage");
-                        CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
-                        CurrentTrackImage.HorizontalAlignment = HorizontalAlignment.Center;
-                        CurrentTrackImage.VerticalAlignment = VerticalAlignment.Center;
+                        CurrentTrackImage.Stretch = System.Windows.Media.Stretch.Uniform; 
+
+                        CurrentTrackImage.Margin = new Thickness(10);
+
+                        CurrentTrackImage.HorizontalAlignment = HorizontalAlignment.Center; 
+                        CurrentTrackImage.VerticalAlignment = VerticalAlignment.Center; 
                     }
 
                     System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged Успешно: {track.Name}");

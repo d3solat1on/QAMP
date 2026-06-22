@@ -26,9 +26,20 @@ namespace QAMP.Windows
             Loaded += ShowTrackInfo_Loaded;
             KeyDown += (s, e) =>
             {
-                if (e.Key == Key.I && Keyboard.Modifiers == ModifierKeys.Control)
+                var config = SettingsManager.Instance.Config;
+                if (config?.Hotkeys == null) return;
+
+                var targetHotkey = config.Hotkeys.FirstOrDefault(h => h.Action == HotkeyAction.ShowTrackInfo);
+
+                if (targetHotkey != null)
                 {
-                    Close();
+                    Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
+
+                    if (pressedKey == targetHotkey.Key && Keyboard.Modifiers == targetHotkey.Modifiers)
+                    {
+                        Close();
+                        e.Handled = true;
+                    }
                 }
             };
         }

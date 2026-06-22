@@ -53,10 +53,20 @@ namespace QAMP.Visualization
 
         private void SpectrumFullWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape || (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.W))
+            var config = SettingsManager.Instance.Config;
+            if (config?.Hotkeys == null) return;
+
+            var targetHotkey = config.Hotkeys.FirstOrDefault(h => h.Action == HotkeyAction.OpenFullScreenSpectrum);
+
+            if (targetHotkey != null)
             {
-                Close();
-                e.Handled = true;
+                Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
+
+                if (pressedKey == targetHotkey.Key && Keyboard.Modifiers == targetHotkey.Modifiers)
+                {
+                    Close();
+                    e.Handled = true; 
+                }
             }
         }
     }

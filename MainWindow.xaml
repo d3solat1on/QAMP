@@ -534,6 +534,7 @@
                                                         </Grid.RowDefinitions>
 
                                                         <TextBlock Grid.Row="0"
+                                                                   x:Name="LibraryTextBlock"
                                                                    Text="LIBRARY"
                                                                    FontSize="28"
                                                                    FontWeight="Bold"
@@ -591,7 +592,8 @@
                                                                               VerticalAlignment="Center"/>
                                                                 </Button>
 
-                                                                <Button Style="{StaticResource IconButton}"
+                                                                <Button x:Name="AddMusicButton"
+                                                                        Style="{StaticResource IconButton}"
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
                                                                         Click="AddMusicButton_Click"
@@ -1543,11 +1545,11 @@
 
                                 <!-- Правая колонка - NOW PLAYING -->
                                 <Border Grid.Column="2"
-                                        HorizontalAlignment="Center"
+                                        Width="300"
+                                        HorizontalAlignment="Stretch"
                                         Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}"
                                         BorderThickness="1,0,0,0"
                                         BorderBrush="{DynamicResource BorderBrush}">
-
                                         <Grid>
                                                 <Grid x:Name="NowPlayingLoadingPlaceholder"
                                                       Visibility="Collapsed"
@@ -1579,6 +1581,7 @@
                                                 </Grid>
 
                                                 <StackPanel VerticalAlignment="Top"
+                                                            Margin="0,0,15,0"
                                                             x:Name="NowPlayingPanel">
                                                         <TextBlock x:Name="NowPlaying"
                                                                    Text=""
@@ -1588,15 +1591,20 @@
                                                                    Margin="0,0,0,20"/>
 
                                                         <Border x:Name="CurrentTrackImage1"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
                                                                 CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 ClipToBounds="True"
-                                                                Height="275"
-                                                                Width="275"
+                                                                Height="300"
+                                                                Width="300"
                                                                 Background="{DynamicResource CentralPanelCardBackground}"
                                                                 BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
-                                                                BorderThickness="1"
-                                                                Margin="0,0,0,10">
-                                                                <Image x:Name="CurrentTrackImage"/>
+                                                                BorderThickness="1">
+                                                                <Image x:Name="CurrentTrackImage"
+                                                                       HorizontalAlignment="Stretch"
+                                                                       VerticalAlignment="Stretch"
+                                                                       UseLayoutRounding="True"
+                                                                       RenderOptions.BitmapScalingMode="HighQuality"/>
                                                         </Border>
 
                                                         <TextBlock x:Name="CurrentTrackName"
@@ -1604,7 +1612,8 @@
                                                                    FontSize="22"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource CentralPanelHighlightForeground}"
-                                                                   TextWrapping="Wrap"/>
+                                                                   TextWrapping="Wrap"
+                                                                   Margin="0,5,0,0"/>
 
                                                         <TextBlock x:Name="CurrentTrackExecutor"
                                                                    Text=""

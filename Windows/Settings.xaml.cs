@@ -342,6 +342,8 @@ namespace QAMP.Windows
                 CompactModeRadio.IsChecked = true;
             else
                 DefaultModeRadio.IsChecked = true;
+
+            LoadCurrentHotkeys();    
             CheckAutoLaunch(null, null);
 
             isInitializing = false;
@@ -670,6 +672,98 @@ namespace QAMP.Windows
             NotificationWindow.Show(errorMessage, this);
         }
 
+        private void LoadCurrentHotkeys()
+        {
+            var config = SettingsManager.Instance.Config;
+            if (config?.Hotkeys == null) return;
+
+            UpdateHotkeyTextBox(TbKeyPlayPause, HotkeyAction.TogglePlayPause);
+            UpdateHotkeyTextBox(TbKeyNextTrack, HotkeyAction.NextTrack);
+            UpdateHotkeyTextBox(TbKeyPrevTrack, HotkeyAction.PreviousTrack);
+            UpdateHotkeyTextBox(TbLyricsMode, HotkeyAction.ViewLyrics);
+            UpdateHotkeyTextBox(TbFavoriteRemoveAdd, HotkeyAction.ToggleFavorite);
+            UpdateHotkeyTextBox(TbTrackInfo, HotkeyAction.ShowTrackInfo);
+            UpdateHotkeyTextBox(TbRepeatTrack, HotkeyAction.ToggleRepeat);
+            UpdateHotkeyTextBox(TbShuffleTrack, HotkeyAction.ToggleShuffle);
+            UpdateHotkeyTextBox(Tb5secForward, HotkeyAction.SeekForward);
+            UpdateHotkeyTextBox(Tb5secback, HotkeyAction.SeekBackward);
+            UpdateHotkeyTextBox(TbFullSpectr, HotkeyAction.OpenFullScreenSpectrum);
+
+        }
+
+        private void UpdateHotkeyTextBox(TextBox textBox, HotkeyAction action)
+        {
+            var config = SettingsManager.Instance.Config;
+            var hotkey = config.Hotkeys.FirstOrDefault(h => h.Action == action);
+
+            if (hotkey != null)
+            {
+                string modifiersText = hotkey.Modifiers != ModifierKeys.None ? $"{hotkey.Modifiers} + " : "";
+                textBox.Text = $"{modifiersText}{hotkey.Key}";
+            }
+            else
+            {
+                textBox.Text = "Не назначено";
+            }
+        }
+
+        private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (isInitializing) return;
+            if (sender is not TextBox currentTextBox) return;
+
+            if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl ||
+                e.Key == Key.LeftAlt || e.Key == Key.RightAlt ||
+                e.Key == Key.LeftShift || e.Key == Key.RightShift ||
+                e.Key == Key.LWin || e.Key == Key.RWin)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
+            ModifierKeys modifiers = Keyboard.Modifiers;
+
+            if (pressedKey == Key.Escape || pressedKey == Key.Delete)
+            {
+                // Логика сброса (опционально), пока оставим базовую перезапись
+            }
+
+            HotkeyAction targetAction;
+            if (currentTextBox == TbKeyPlayPause) targetAction = HotkeyAction.TogglePlayPause;
+            else if (currentTextBox == TbKeyNextTrack) targetAction = HotkeyAction.NextTrack;
+            else if (currentTextBox == TbKeyPrevTrack) targetAction = HotkeyAction.PreviousTrack;
+            else return;
+
+            var config = SettingsManager.Instance.Config;
+
+            // ПРОВЕРКА НА ДУБЛИКАТЫ (Очень важный UX! Чтобы не назначить одну кнопку на два действия)
+            var duplicate = config.Hotkeys.FirstOrDefault(h => h.Key == pressedKey && h.Modifiers == modifiers && h.Action != targetAction);
+            if (duplicate != null)
+            {
+                string errorMsg = $"Это сочетание уже используется для действия: {duplicate.Action}";
+                Dialogs.NotificationWindow.Show(errorMsg, this);
+                e.Handled = true;
+                return;
+            }
+
+            var hotkeyToUpdate = config.Hotkeys.FirstOrDefault(h => h.Action == targetAction);
+            if (hotkeyToUpdate != null)
+            {
+                hotkeyToUpdate.Key = pressedKey;
+                hotkeyToUpdate.Modifiers = modifiers;
+            }
+            else
+            {
+                config.Hotkeys.Add(new HotkeyItem(targetAction, pressedKey, modifiers));
+            }
+
+            SettingsManager.Instance.Save();
+
+            UpdateHotkeyTextBox(currentTextBox, targetAction);
+
+            e.Handled = true;
+        }
 
         private void CheckAutoLaunch(object? sender, RoutedEventArgs? e)
         {

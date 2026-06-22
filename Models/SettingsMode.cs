@@ -1,12 +1,17 @@
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
+using System.Windows.Input;
 using QAMP.Services;
 
 namespace QAMP.Models;
 
 public class AppSettings : INotifyPropertyChanged
 {
+    public AppSettings()
+    {
+        if (Hotkeys == null || Hotkeys.Count == 0) InitializeDefaultHotkeys();
+    }
     public bool CloseToTray { get; set; } = true;
     public bool IsVisualizerEnabled { get; set; } = true;
     public int VisualizerBarCount { get; set; } = 64; // Количество столбцов спектрограммы
@@ -67,6 +72,28 @@ public class AppSettings : INotifyPropertyChanged
     }
     public PlaylistSortOrder CurrentPlaylistSort { get; set; } = PlaylistSortOrder.Manual;
     public string Language { get; set; } = "eng";
+    public List<HotkeyItem> Hotkeys { get; set; } = [];
+    public void InitializeDefaultHotkeys()
+    {
+        Hotkeys =
+        [
+            new HotkeyItem(HotkeyAction.TogglePlayPause, Key.Space, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.SeekForward, Key.Right, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.SeekBackward, Key.Left, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.VolumeUp, Key.Up, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.VolumeDown, Key.Down, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.NextTrack, Key.N, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.PreviousTrack, Key.B, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.ViewLyrics, Key.L, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.ShowTrackInfo, Key.I, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.ToggleRepeat, Key.R, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.ToggleShuffle, Key.S, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.OpenFullScreenSpectrum, Key.W, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.ToggleFocusGrid, Key.Tab, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.ToggleFavorite, Key.F, ModifierKeys.Control)
+        ];
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -97,7 +124,12 @@ public class SettingsManager
 
     public void Save()
     {
-        string json = JsonSerializer.Serialize(Config);
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
+
+        string json = JsonSerializer.Serialize(Config, options);
         File.WriteAllText(_path, json);
     }
 }
