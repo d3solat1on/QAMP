@@ -317,27 +317,6 @@ public class DatabaseService
             return false;
         }
     }
-
-    public static void AddPlaylist(string name, string description, byte[]? cover)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        var command = connection.CreateCommand();
-
-        command.CommandText = @"
-        INSERT INTO Playlists (Name, Description, CoverImage, CreatedDate) 
-        VALUES ($name, $description, $coverimage, $date)";
-
-        command.Parameters.AddWithValue("$name", name ?? "");
-        command.Parameters.AddWithValue("$description",
-            string.IsNullOrEmpty(description) ? DBNull.Value : description);
-        command.Parameters.AddWithValue("$coverimage",
-            cover ?? (object)DBNull.Value);
-        command.Parameters.AddWithValue("$date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-
-        command.ExecuteNonQuery();
-    }
-
     public static void UpdatePlaylist(int id, string name, string description, byte[]? cover)
     {
         using var connection = new SqliteConnection(_connectionString);
@@ -397,24 +376,6 @@ public class DatabaseService
         long? count = (long?)command.ExecuteScalar();
         return count > 0;
     }
-
-    public static void AddFolderToPlaylist(int playlistId, string folderPath)
-    {
-        var files = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories)
-            .Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".flac"))
-            .ToArray();
-
-        var tracks = TagReader.ReadTracksFromFiles(files);
-
-        foreach (var track in tracks)
-        {
-            if (track != null)
-            {
-                SaveTrackToPlaylist(playlistId, track);
-            }
-        }
-    }
-
     public static bool PlaylistExists(string name, int excludeId)
     {
         using var connection = new SqliteConnection(_connectionString);
@@ -426,102 +387,6 @@ public class DatabaseService
 
         long? count = (long?)command.ExecuteScalar();
         return count > 0;
-    }
-
-    public static List<Playlist> GetPlaylists()
-    {
-        var playlists = new List<Playlist>();
-
-        using (var connection = new SqliteConnection(_connectionString))
-        {
-            connection.Open();
-            var command = connection.CreateCommand();
-
-            try
-            {
-                // Проверяем наличие колонки IsSystemPlaylist
-                bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
-
-                string selectQuery = hasIsSystemPlaylist
-                    ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC"
-                    : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
-
-                command.CommandText = selectQuery;
-                using var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    var playlist = new Playlist
-                    {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                        CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
-                        IsPinned = !reader.IsDBNull(4) && reader.GetInt32(4) != 0
-                    };
-
-                    // Сортировка (SortOrder)
-                    if (!reader.IsDBNull(5))
-                    {
-                        playlist.SortOrder = reader.GetInt32(5);
-                    }
-
-                    // Дата создания (CreatedDate)
-                    if (!reader.IsDBNull(6))
-                    {
-                        string dateString = reader.GetString(6);
-                        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None,
-                            out DateTime parsedDate))
-                        {
-                            playlist.CreatedDate = parsedDate;
-                        }
-                        else if (DateTime.TryParse(dateString, out DateTime secondTry))
-                        {
-                            playlist.CreatedDate = secondTry;
-                        }
-                        else
-                        {
-                            playlist.CreatedDate = DateTime.Now;
-                        }
-                    }
-                    else
-                    {
-                        playlist.CreatedDate = DateTime.Now;
-                    }
-
-                    // Тип сортировки (SortType)
-                    if (!reader.IsDBNull(7))
-                    {
-                        playlist.SortType = (TrackSortType)reader.GetInt32(7);
-                    }
-
-                    // Флаг системного плейлиста (IsSystemPlaylist) - только если колонка есть
-                    if (hasIsSystemPlaylist && !reader.IsDBNull(8))
-                    {
-                        playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
-                    }
-
-                    // Загружаем треки для этого плейлиста
-                    var tracks = GetTracksForPlaylist(playlist.Id);
-                    System.Diagnostics.Debug.WriteLine($"Загружаем треки для плейлиста '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков, pinned={playlist.IsPinned}, isSystem={playlist.IsSystemPlaylist}");
-
-                    foreach (var track in tracks)
-                    {
-                        playlist.Tracks.Add(track);
-                    }
-
-                    playlists.Add(playlist);
-                }
-            }
-            catch (SqliteException ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлистов: {ex.Message}");
-            }
-        }
-
-        System.Diagnostics.Debug.WriteLine($"Всего загружено плейлистов: {playlists.Count}");
-        return playlists;
     }
 
     /// <summary>
@@ -1041,65 +906,6 @@ public class DatabaseService
         }
     }
 
-    public static void DebugDirectDatabaseCheck()
-    {
-        System.Diagnostics.Debug.WriteLine("=== ПРЯМАЯ ПРОВЕРКА БД ===");
-
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-
-        // Проверяем все треки в Tracks
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM Tracks";
-        long? totalTracks = (long?)cmd.ExecuteScalar();
-        System.Diagnostics.Debug.WriteLine($"Всего треков в Tracks: {totalTracks ?? 0}");
-
-        // Выводим первые 5 треков
-        cmd.CommandText = "SELECT Id, Path, Name FROM Tracks LIMIT 5";
-        using var reader = cmd.ExecuteReader();
-        System.Diagnostics.Debug.WriteLine("Первые 5 треков в Tracks:");
-        while (reader.Read())
-        {
-            System.Diagnostics.Debug.WriteLine($"  ID={reader.GetInt32(0)}, Path={reader.GetString(1)}, Name={(reader.IsDBNull(2) ? "NULL" : reader.GetString(2))}");
-        }
-
-        // Проверяем все плейлисты
-        cmd.CommandText = "SELECT Id, Name FROM Playlists";
-        using var playlistReader = cmd.ExecuteReader();
-        System.Diagnostics.Debug.WriteLine("Плейлисты:");
-        while (playlistReader.Read())
-        {
-            int playlistId = playlistReader.GetInt32(0);
-            string playlistName = playlistReader.GetString(1);
-
-            // Считаем связи для этого плейлиста
-            var linkCmd = connection.CreateCommand();
-            linkCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $id";
-            linkCmd.Parameters.AddWithValue("$id", playlistId);
-            long? linkCount = (long?)linkCmd.ExecuteScalar();
-
-            System.Diagnostics.Debug.WriteLine($"  {playlistName} (ID={playlistId}): {linkCount ?? 0} связей");
-
-            // Выводим треки для этого плейлиста
-            if (linkCount > 0)
-            {
-                var trackCmd = connection.CreateCommand();
-                trackCmd.CommandText = @"
-                SELECT t.Name, t.Executor 
-                FROM Tracks t
-                JOIN PlaylistTracks pt ON t.Id = pt.TrackId
-                WHERE pt.PlaylistId = $id";
-                trackCmd.Parameters.AddWithValue("$id", playlistId);
-
-                using var trackReader = trackCmd.ExecuteReader();
-                while (trackReader.Read())
-                {
-                    System.Diagnostics.Debug.WriteLine($"    - {trackReader.GetString(0)} by {trackReader.GetString(1)}");
-                }
-            }
-        }
-    }
-
     /// <summary>
     /// Обновляет тип сортировки для плейлиста
     /// </summary>
@@ -1486,31 +1292,45 @@ public class DatabaseService
         return await Task.Run(() => GetTracksForPlaylist(playlistId));
     }
 
-    /// <summary>
-    /// Загружает все плейлисты с треками асинхронно, постепенно
-    /// </summary>
-    public static async Task<List<Playlist>> GetAllPlaylistsWithTracksAsync(Func<int, int, Task>? onPlaylistLoaded = null)
+    public static bool IsTrackInOtherPlaylists(int trackId, int excludePlaylistId)
     {
-        var playlists = await GetPlaylistsAsync();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+        SELECT COUNT(*) 
+        FROM PlaylistTracks 
+        WHERE TrackId = $trackId AND PlaylistId != $excludePlaylistId";
 
-        // Загружаем треки для каждого плейлиста последовательно
-        for (int i = 0; i < playlists.Count; i++)
-        {
-            var tracks = await GetTracksForPlaylistAsync(playlists[i].Id);
-            foreach (var track in tracks)
-            {
-                playlists[i].Tracks.Add(track);
-            }
+        cmd.Parameters.AddWithValue("$trackId", trackId);
+        cmd.Parameters.AddWithValue("$excludePlaylistId", excludePlaylistId);
 
-            System.Diagnostics.Debug.WriteLine($"Загружены треки для плейлиста {i + 1}/{playlists.Count}: '{playlists[i].Name}' ({tracks.Count} треков)");
+        int count = Convert.ToInt32(cmd.ExecuteScalar());
+        return count > 0;
+    }
 
-            // Вызываем callback для уведомления о прогрессе
-            if (onPlaylistLoaded != null)
-            {
-                await onPlaylistLoaded(i + 1, playlists.Count);
-            }
-        }
+    public static void DeleteTrackCompletely(int trackId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
 
-        return playlists;
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM PlaylistTracks WHERE TrackId = $trackId";
+        cmd.Parameters.AddWithValue("$trackId", trackId);
+        cmd.ExecuteNonQuery();
+
+        cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM Tracks WHERE Id = $trackId";
+        cmd.Parameters.AddWithValue("$trackId", trackId);
+        cmd.ExecuteNonQuery();
+    }
+    public static void OnStatisticsChanged()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = "UPDATE Settings SET Value = $value WHERE Key = 'StatisticsChanged'";
+        cmd.Parameters.AddWithValue("$value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        cmd.ExecuteNonQuery();
     }
 }

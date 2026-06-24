@@ -10,9 +10,6 @@ namespace QAMP.ViewModels
         private static MusicLibrary? _instance;
         public static MusicLibrary Instance => _instance ??= new MusicLibrary();
 
-        // Доступ к PlayerService для привязок в UI
-        public static PlayerService PlayService => PlayerService.Instance;
-
         // Коллекция плейлистов
         private ObservableCollection<Playlist> _playlists = [];
         public ObservableCollection<Playlist> Playlists
@@ -41,8 +38,6 @@ namespace QAMP.ViewModels
                     if (value != null)
                     {
                         _ = DatabaseService.SaveSetting("LastPlaylistId", value.Id.ToString());
-                        // При смене плейлиста обновляем очередь воспроизведения
-                        // UpdatePlaybackQueue();
                     }
                     OnPropertyChanged(nameof(CurrentPlaylist));
                 }

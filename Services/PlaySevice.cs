@@ -17,8 +17,6 @@ namespace QAMP.Services
     {
         private static PlayerService? _instance;
         public static PlayerService Instance => _instance ??= new PlayerService();
-
-        // private int _streamHandle = 0;
         private int _currentStream = 0;
         private bool _isInitialized = false;
 
@@ -37,12 +35,11 @@ namespace QAMP.Services
         private bool _playCountIncremented = false;
 
         public List<SpectrumControl> SpectrumControls { get; } = [];
-        public SpectrumControl? SpectrumControl => SpectrumControls.FirstOrDefault();
 
         // Таймер для обновления позиции и спектра
         private readonly DispatcherTimer _positionTimer = new();
         private readonly DispatcherTimer _spectrumTimer = new();
-        
+
         // Buffer
         private readonly float[] _nativeSpectrumBuffer = new float[128];
         private readonly float[] _nativePeakBuffer = new float[128];
@@ -122,18 +119,6 @@ namespace QAMP.Services
             }
         }
         public event Action<RepeatMode>? RepeatModeChanged;
-
-        private bool _isShuffle = false;
-        public bool IsShuffle
-        {
-            get => _isShuffle;
-            set
-            {
-                _isShuffle = value;
-                ShuffleChanged?.Invoke(value);
-            }
-        }
-        public event Action<bool>? ShuffleChanged;
 
         private string? _tempFilePath;
         public List<Track> _actualPlayingQueue = [];
@@ -237,6 +222,10 @@ namespace QAMP.Services
                     long length = Bass.BASS_ChannelGetLength(_currentStream, BASSMode.BASS_POS_BYTE);
                     _duration = Bass.BASS_ChannelBytes2Seconds(_currentStream, length);
 
+                    int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
+
+                    Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+
                     // Устанавливаем синхронизацию для окончания трека
                     if (_endSyncProc != null)
                     {
@@ -268,8 +257,7 @@ namespace QAMP.Services
         private static int CreateStreamFromFile(string filePath)
         {
             string extension = Path.GetExtension(filePath).ToLowerInvariant();
-            int stream = 0;
-
+            int stream;
             if (extension == ".flac")
             {
                 // Используем FLAC аддон для воспроизводимого потока
@@ -484,7 +472,6 @@ namespace QAMP.Services
                 Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, balance);
             }
         }
-
         public static List<OutputDeviceInfo> GetOutputDevices()
         {
             var devices = new List<OutputDeviceInfo>();
@@ -508,10 +495,20 @@ namespace QAMP.Services
 
             if (_isInitialized)
             {
+                if (!Bass.BASS_Init(deviceId, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero)
+                    && Bass.BASS_ErrorGetCode() != BASSError.BASS_ERROR_ALREADY)
+                {
+                    return;
+                }
                 Bass.BASS_SetDevice(deviceId);
+
+                if (_currentStream != 0 && Bass.BASS_ChannelIsActive(_currentStream) != BASSActive.BASS_ACTIVE_STOPPED)
+                {
+                    Bass.BASS_ChannelSetDevice(_currentStream, deviceId);
+                }
             }
         }
-
+        
         private void EndSyncCallback(int handle, int channel, int data, IntPtr user)
         {
             Application.Current.Dispatcher.BeginInvoke(() =>
@@ -603,7 +600,7 @@ namespace QAMP.Services
                     int barsCount = control.BarCount;
                     if (barsCount > 128) barsCount = 128;
 
-                    if (QampCoreNative.GetSpectrumDataAdvanced(_currentStream, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
+                    if (Native.QampCoreNative.GetSpectrumDataAdvanced(_currentStream, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
                     {
                         for (int i = 0; i < barsCount; i++)
                         {
@@ -776,7 +773,7 @@ namespace QAMP.Services
 
         public void PlayNextTrack()
         {
-            QampCoreNative.ResetCorePeaks();
+            Native.QampCoreNative.ResetCorePeaks();
             if (CurrentTrack == null)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: CurrentTrack == null");

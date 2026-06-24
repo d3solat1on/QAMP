@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace QAMP;
+namespace QAMP.Native;
 public static class QampCoreNative
 {
     private const string DllName = "QampCore.dll";

@@ -6,6 +6,7 @@ using System.Windows.Shapes;
 using QAMP.Models;
 using QAMP.Services;
 using QAMP.ViewModels;
+using Un4seen.Bass;
 
 namespace QAMP.Windows
 {
@@ -83,6 +84,19 @@ namespace QAMP.Windows
             else if (OutputDeviceComboBox.Items.Count > 0)
             {
                 OutputDeviceComboBox.SelectedIndex = 0;
+            }
+        }
+
+        private void OutputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (isInitializing) return;
+            if (OutputDeviceComboBox.SelectedItem is OutputDeviceInfo device)
+            {
+                var config = SettingsManager.Instance.Config;
+                config.OutputDeviceId = device.Id;
+                config.OutputDeviceName = device.Name;
+                SettingsManager.Instance.Save();
+                _player.SetOutputDevice(device.Id);
             }
         }
 
@@ -244,19 +258,6 @@ namespace QAMP.Windows
             BalanceText.Text = $"{e.NewValue:F2}";
             SettingsManager.Instance.Save();
             _player.SetBalance((float)e.NewValue);
-        }
-
-        private void OutputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (isInitializing) return;
-            if (OutputDeviceComboBox.SelectedItem is OutputDeviceInfo device)
-            {
-                var config = SettingsManager.Instance.Config;
-                config.OutputDeviceId = device.Id;
-                config.OutputDeviceName = device.Name;
-                SettingsManager.Instance.Save();
-                _player.SetOutputDevice(device.Id);
-            }
         }
 
         private void ResetEq_Click(object sender, RoutedEventArgs e)

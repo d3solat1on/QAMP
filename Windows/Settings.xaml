@@ -21,68 +21,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Loaded="Window_Loaded">
-    <Window.Resources>
-        <Style x:Key="EqSliderThumbStyle"
-               TargetType="Thumb">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Thumb">
-                        <Border Background="{DynamicResource AccentBrush}"
-                                Width="8"
-                                Height="16"
-                                CornerRadius="{DynamicResource AppCornerRadius}"
-                                RenderOptions.EdgeMode="Aliased">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#000000"
-                                                  BlurRadius="6"
-                                                  ShadowDepth="1"
-                                                  Opacity="0.8"/>
-                            </Border.Effect>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="CustomSliderStyle"
-               TargetType="Slider">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Slider">
-                        <Grid>
-                            <Border x:Name="TrackBackground"
-                                    Background="{DynamicResource TertiaryBackgroundBrush}"
-                                    Width="4"
-                                    HorizontalAlignment="Center"
-                                    CornerRadius="{DynamicResource AppCornerRadius}"
-                                    Opacity="0.6"/>
-                            <Track x:Name="PART_Track">
-                                <Track.Thumb>
-                                    <Thumb Style="{StaticResource EqSliderThumbStyle}"/>
-                                </Track.Thumb>
-                            </Track>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="DarkComboBox"
-               TargetType="ComboBox">
-            <Setter Property="Background"
-                    Value="Black"/>
-            <Setter Property="Foreground"
-                    Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="ItemsPanel">
-                <Setter.Value>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel Background="Black"/>
-                    </ItemsPanelTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
+    
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
                       GlassFrameThickness="0"

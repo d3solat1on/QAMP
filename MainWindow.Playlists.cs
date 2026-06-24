@@ -174,7 +174,7 @@ namespace QAMP
                     TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                 }
                 UpdateNextTrackUI();
-                string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено {0} треков";
+                string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
                 string toastMessage = string.Format(toastTemplate, addedCount);
 
                 await MyToast.ShowAsync(toastMessage);
@@ -397,7 +397,7 @@ namespace QAMP
                 UpperPanel.Background = GetDefaultUpperPanelBrush(SettingsManager.Instance.Config);
             }
         }
-        private Brush GetDefaultUpperPanelBrush(AppSettings config)
+        private static Brush GetDefaultUpperPanelBrush(AppSettings config)
         {
             if (!string.IsNullOrEmpty(config.CustomBackgroundPath))
             {

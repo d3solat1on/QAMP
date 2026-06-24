@@ -14,7 +14,6 @@
         MouseDown="Window_MouseDown">
 
         <Window.Resources>
-                <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
                 <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 

@@ -11,8 +11,6 @@
         Height="550"
         Title="{DynamicResource LngCreatePlaylist}"
         WindowStartupLocation="CenterOwner">
-
-
         <Border
                 Background="{DynamicResource SecondaryBackgroundBrush}"
                 CornerRadius="{DynamicResource AppCornerRadius}"

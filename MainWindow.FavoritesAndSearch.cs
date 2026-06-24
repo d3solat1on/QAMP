@@ -47,12 +47,22 @@ namespace QAMP
                 {
                     foreach (var track in selectedTracks)
                     {
+                        bool isUsedElsewhere = DatabaseService.IsTrackInOtherPlaylists(track.Id, selectedPlaylist.Id);
+
                         DatabaseService.RemoveTrackFromPlaylist(selectedPlaylist.Id, track.Id);
+
+                        if (!isUsedElsewhere)
+                        {
+                            DatabaseService.DeleteTrackCompletely(track.Id);
+                        }
+
                         selectedPlaylist.Tracks.Remove(track);
                     }
                     TracksDataGrid.ItemsSource = null;
                     TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     UpdateNextTrackUI();
+                    DatabaseService.OnStatisticsChanged();
+
                 }
             }
         }
@@ -316,9 +326,13 @@ namespace QAMP
         {
             if (TracksDataGrid.SelectedItem is Track selectedTrack)
             {
-                App.LogInfo($"PlayTrack (ContextMenu): {selectedTrack.Executor} - {selectedTrack.Name}");
-                _ = Player.PlayTrack(selectedTrack);
-                UpdateNextTrackUI();
+                if (PlaylistsListBox.SelectedItem is Playlist currentPlaylist)
+                {
+                    App.LogInfo($"PlayTrack (ContextMenu): {selectedTrack.Executor} - {selectedTrack.Name}");
+                    var displayOrder = TracksDataGrid.ItemsSource as IEnumerable<Track>;
+                    MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, currentPlaylist, displayOrder);
+                    UpdateNextTrackUI();
+                }
             }
         }
 

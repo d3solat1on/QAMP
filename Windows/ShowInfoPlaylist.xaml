@@ -12,7 +12,6 @@
         WindowStartupLocation="CenterOwner">
         <Window.Resources>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
-                <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
                 <Style TargetType="ScrollViewer">
                         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
                                 Value="Disabled"/>

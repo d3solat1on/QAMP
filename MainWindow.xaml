@@ -28,10 +28,7 @@
 
         <Window.Resources>
                 <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
-                <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter"/>
-                <converters:NotNullConverter x:Key="NotNullConverter"/>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
-                <converters:PercentOfConverter x:Key="PercentOfConverter"/>
                 <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
                 <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
                 <converters:PlaylistNameLocalizationConverter x:Key="PlaylistNameLocalizationConverter"/>
@@ -581,8 +578,7 @@
                                                                         Background="Transparent"
                                                                         BorderBrush="Transparent"
                                                                         Click="RemovePlaylist_Click"
-                                                                        ToolTip="{DynamicResource LngRemovePlaylist}"
-                                                                        IsEnabled="{Binding ElementName=PlaylistsListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}">
+                                                                        ToolTip="{DynamicResource LngRemovePlaylist}">
                                                                         <Path Data="{StaticResource playlist_removeGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"

@@ -1,4 +1,10 @@
 # CHANGELOG
+## (24.06.2026) Verison 1.7.9:
+    - Fixed a bug with the "Play Track" item in the DataGrid context menu.  
+    - The project was cleaned of old files and converters.  
+    - Now, if a user deletes a track from a playlist and that track isn't stored in any other playlists, it is completely removed from the database.  
+    - The "Select device for audio output" function now functions correctly.  
+
 ## (23.06.2026) Version 1.7.8:
     - Added the ability to change hotkeys.  
     - Minor GUI fixes.  

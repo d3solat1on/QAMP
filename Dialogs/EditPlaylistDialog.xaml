@@ -14,9 +14,6 @@
         Title="{DynamicResource LngEditPlaylist}"
         WindowStartupLocation="CenterOwner">
         <Window.Resources>
-                <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
-                <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter"/>
-                <converters:NotNullConverter x:Key="NotNullConverter"/>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
         </Window.Resources>
 
