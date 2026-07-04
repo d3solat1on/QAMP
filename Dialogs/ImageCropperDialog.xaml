@@ -11,13 +11,13 @@
         <Style x:Key="CustomSliderStyle"
                TargetType="Slider">
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                    Value="{StaticResource SecondaryBackgroundBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Slider">
                         <Grid>
                             <Border Height="4"
-                                    Background="{DynamicResource SecondaryBackgroundBrush}"
+                                    Background="{StaticResource SecondaryBackgroundBrush}"
                                     CornerRadius="{DynamicResource AppCornerRadius}"
                                     VerticalAlignment="Center"/>
                             <Track x:Name="PART_Track">
@@ -38,7 +38,7 @@
                                             <ControlTemplate TargetType="Thumb">
                                                 <Ellipse Width="14"
                                                          Height="14"
-                                                         Fill="{DynamicResource TextBrush}"/>
+                                                         Fill="{StaticResource TextBrush}"/>
                                             </ControlTemplate>
                                         </Thumb.Template>
                                     </Thumb>
@@ -50,9 +50,9 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-            CornerRadius="15"
-            BorderBrush="{DynamicResource BorderBrush}"
+    <Border Background="{StaticResource SecondaryBackgroundBrush}"
+            CornerRadius="{DynamicResource AppCornerRadius}"
+            BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1">
         <Grid Margin="20">
             <Grid.RowDefinitions>
@@ -63,7 +63,7 @@
 
             <TextBlock x:Name="CropCover"
                        Text="{DynamicResource LngCropCover}"
-                       Foreground="{DynamicResource TextBrush}"
+                       Foreground="{StaticResource TextBrush}"
                        FontSize="20"
                        FontWeight="Bold"
                        HorizontalAlignment="Center"
@@ -99,7 +99,7 @@
                         Margin="0,0,0,-25">
                 <TextBlock x:Name="Scale"
                            Text="{DynamicResource LngScale}"
-                           Foreground="{DynamicResource SecondaryForegroundBrush}"
+                           Foreground="{StaticResource SecondaryForegroundBrush}"
                            HorizontalAlignment="Center"
                            FontSize="10"/>
                 <Slider x:Name="ZoomSlider"

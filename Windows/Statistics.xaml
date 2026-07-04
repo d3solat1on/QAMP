@@ -10,8 +10,8 @@
         MinWidth="800"
         MinHeight="600"
         Title="{DynamicResource LngStatistics}"
-        Background="{DynamicResource BackgroundBrush}"
-        Foreground="{DynamicResource ForegroundBrush}"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource ForegroundBrush}"
         WindowStartupLocation="CenterOwner">
 
     <Grid>
@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
-              Background="{DynamicResource SecondaryBackgroundBrush}"
+              Background="{StaticResource SecondaryBackgroundBrush}"
               Height="50">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
@@ -29,7 +29,7 @@
                         Margin="10,0,0,0"
                         WindowChrome.IsHitTestVisibleInChrome="True">
                 <TextBlock Text="{DynamicResource LngStatisticsQAMP}"
-                           Foreground="{DynamicResource ForegroundBrush}"
+                           Foreground="{StaticResource ForegroundBrush}"
                            FontWeight="Bold"
                            FontSize="16"/>
             </StackPanel>
@@ -79,15 +79,15 @@
                     <StackPanel Margin="10">
                         <TextBlock x:Name="MostListenedTrackText"
                                    Margin="0,0,0,10"
-                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   Foreground="{StaticResource ForegroundBrush}"
                                    TextWrapping="Wrap"/>
                         <TextBlock x:Name="MostListenedArtistText"
                                    Margin="0,0,0,10"
-                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   Foreground="{StaticResource ForegroundBrush}"
                                    TextWrapping="Wrap"/>
                         <TextBlock x:Name="TracksWithoutListening"
                                    Margin="0,0,0,10"
-                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   Foreground="{StaticResource ForegroundBrush}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </GroupBox>

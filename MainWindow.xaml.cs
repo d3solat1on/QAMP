@@ -45,7 +45,6 @@ namespace QAMP
             DatabaseService.EnsureDatabaseCreated();
 
             System.Diagnostics.Debug.WriteLine($"База данных существует: {File.Exists(DatabaseService.DatabasePath)}");
-            LoadApplicationSettings();
             DataContext = MusicLibrary.Instance;
 
             Player.TrackChanged += OnTrackChanged;
@@ -286,11 +285,6 @@ namespace QAMP
             }
         }
 
-        private static void LoadApplicationSettings()
-        {
-            ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);
-        }
-
         private void OnDurationChanged()
         {
             Dispatcher.Invoke(() => { TotalTimeText.Text = FormatTime(Player.Duration); });
@@ -322,6 +316,8 @@ namespace QAMP
                     if (track == null)
                     {
                         CurrentTrackImage.Source = null;
+                        CurrentTrackImage.Visibility = Visibility.Collapsed;
+                        DefaultCoverPath.Visibility = Visibility.Visible;
                         FavoriteButton1Grid.Visibility = Visibility.Collapsed;
 
                         CurrentTrackName.Text = string.Empty;
@@ -375,18 +371,16 @@ namespace QAMP
                     if (_imageConverter.Convert(track.CoverImage, typeof(System.Windows.Media.Imaging.BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is System.Windows.Media.ImageSource cover)
                     {
                         CurrentTrackImage.Source = cover;
+                        CurrentTrackImage.Visibility = Visibility.Visible;
+                        DefaultCoverPath.Visibility = Visibility.Collapsed;
                         CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
                         CurrentTrackImage.Margin = new Thickness(0);
                     }
                     else
                     {
-                        CurrentTrackImage.Source = (System.Windows.Media.ImageSource)FindResource("default_coverDrawingImage");
-                        CurrentTrackImage.Stretch = System.Windows.Media.Stretch.Uniform; 
-
-                        CurrentTrackImage.Margin = new Thickness(10);
-
-                        CurrentTrackImage.HorizontalAlignment = HorizontalAlignment.Center; 
-                        CurrentTrackImage.VerticalAlignment = VerticalAlignment.Center; 
+                        CurrentTrackImage.Source = null;
+                        CurrentTrackImage.Visibility = Visibility.Collapsed;
+                        DefaultCoverPath.Visibility = Visibility.Visible;
                     }
 
                     System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged Успешно: {track.Name}");

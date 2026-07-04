@@ -1,4 +1,11 @@
 # CHANGELOG
+## (04.07.2026) Version 1.8.0:
+    - The Settings window has been redesigned.  
+    - To improve performance, track and playlist artwork is now cached.  
+    - Most app elements now use StaticResource instead of DynamicResource. There were too many issues with on-the-fly theme switching and custom backgrounds.  
+    - The audio engine has been improved.  
+    - Localization files have been updated.
+
 ## (24.06.2026) Verison 1.7.9:
     - Fixed a bug with the "Play Track" item in the DataGrid context menu.  
     - The project was cleaned of old files and converters.  

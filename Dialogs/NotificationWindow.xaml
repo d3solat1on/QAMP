@@ -8,9 +8,9 @@
         WindowStartupLocation="Manual">
         <Grid>
                 <Border x:Name="ToastBorder"
-                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                        Background="{StaticResource SecondaryBackgroundBrush}"
                         CornerRadius="{DynamicResource AppCornerRadius}"
-                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1"
                         Padding="20,12"
                         HorizontalAlignment="Center"
@@ -24,7 +24,7 @@
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center">
                                 <TextBlock x:Name="MessageText"
-                                           Foreground="{DynamicResource TextBrush}"
+                                           Foreground="{StaticResource TextBrush}"
                                            FontSize="14"
                                            FontWeight="SemiBold"
                                            VerticalAlignment="Center"

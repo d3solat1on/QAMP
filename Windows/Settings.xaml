@@ -15,13 +15,13 @@
         ResizeMode="CanMinimize"
         Height="900"
         Width="1100"
-        Background="{DynamicResource BackgroundBrush}"
-        Foreground="{DynamicResource ForegroundBrush}"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource ForegroundBrush}"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
         Loaded="Window_Loaded">
-    
+
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
                       GlassFrameThickness="0"
@@ -35,20 +35,17 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Строка заголовка -->
         <Grid Grid.Row="0"
-              Background="{DynamicResource SecondaryBackgroundBrush}">
+              Background="{StaticResource SecondaryBackgroundBrush}">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Margin="10,0,0,0"
                         WindowChrome.IsHitTestVisibleInChrome="True">
-                <TextBlock
-                    Text="{DynamicResource LngSettingsQAMP}"
-                    Foreground="{DynamicResource ForegroundBrush}"
-                    FontWeight="Bold"/>
+                <TextBlock Text="{DynamicResource LngSettingsQAMP}"
+                           Foreground="{StaticResource ForegroundBrush}"
+                           FontWeight="Bold"/>
             </StackPanel>
-
 
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"
@@ -78,315 +75,324 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock
-                    Text="{DynamicResource LngSettingsTitle}"
-                    FontSize="24"
-                    FontWeight="Bold"
-                    Grid.Row="0"
-                    Margin="0,0,0,20"/>
+                <TextBlock Grid.Row="0"
+                           Text="{DynamicResource LngSettingsTitle}"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Margin="0,0,0,20"/>
 
-                <!-- Выбор темы -->
-                <GroupBox x:Name="Theme"
-                          Header="{DynamicResource LngTheme}"
-                          Grid.Row="1"
+                <GroupBox Grid.Row="1"
+                          Header="{DynamicResource LngInterface}"
                           Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
+                          Foreground="{StaticResource ForegroundBrush}">
                     <StackPanel Margin="10">
-                        <RadioButton x:Name="DarkThemeRadio"
-                                     Content="{DynamicResource LngDarkTheme}"
-                                     GroupName="Theme"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="StandardThemeRadio_Checked"/>
 
-                        <RadioButton x:Name="LightThemeRadio"
-                                     Content="{DynamicResource LngLightTheme}"
-                                     GroupName="Theme"
-                                     Margin="0,0,0,15"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="StandardThemeRadio_Checked"/>
+                        <GroupBox Header="{DynamicResource LngTheme}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="DarkThemeRadio"
+                                             Content="{DynamicResource LngDarkTheme}"
+                                             GroupName="Theme"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="StandardThemeRadio_Checked"/>
 
-                        <RadioButton x:Name="CustomThemeRadio"
-                                     Content="{DynamicResource LngCustomTheme}"
-                                     GroupName="Theme"
-                                     Margin="0,0,0,15"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CustomThemeRadio_Checked"/>
+                                <RadioButton x:Name="LightThemeRadio"
+                                             Content="{DynamicResource LngLightTheme}"
+                                             GroupName="Theme"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="StandardThemeRadio_Checked"/>
 
-                        <TextBlock x:Name="CustomThemeRadio1"
-                                   Text="{DynamicResource LngCustomThemes}"
-                                   Margin="0,0,0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontSize="11"
-                                   Opacity="0.7"/>
+                                <RadioButton x:Name="CustomThemeRadio"
+                                             Content="{DynamicResource LngCustomTheme}"
+                                             GroupName="Theme"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CustomThemeRadio_Checked"/>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                                <GroupBox Header="{DynamicResource LngCustomThemes}"
+                                          Margin="0,5,0,0"
+                                          Foreground="{StaticResource ForegroundBrush}">
+                                    <Grid Margin="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                            <ComboBox x:Name="CustomThemesComboBox"
-                                      Grid.Column="0"
-                                      Margin="0,0,10,0"
-                                      Height="25"
-                                      VerticalContentAlignment="Center"
-                                      SelectionChanged="CustomThemesComboBox_SelectionChanged">
-                                <ComboBox.ItemContainerStyle>
-                                    <Style TargetType="ComboBoxItem">
-                                        <Setter Property="Foreground"
-                                                Value="{DynamicResource ForegroundBrush}"/>
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                    </Style>
-                                </ComboBox.ItemContainerStyle>
-                            </ComboBox>
+                                        <ComboBox x:Name="CustomThemesComboBox"
+                                                  Grid.Column="0"
+                                                  Margin="0,0,10,0"
+                                                  Height="25"
+                                                  VerticalContentAlignment="Center"
+                                                  SelectionChanged="CustomThemesComboBox_SelectionChanged">
+                                            <ComboBox.ItemContainerStyle>
+                                                <Style TargetType="ComboBoxItem">
+                                                    <Setter Property="Foreground"
+                                                            Value="{StaticResource ForegroundBrush}"/>
+                                                    <Setter Property="Background"
+                                                            Value="{StaticResource SecondaryBackgroundBrush}"/>
+                                                </Style>
+                                            </ComboBox.ItemContainerStyle>
+                                        </ComboBox>
 
-                            <Button x:Name="AddThemeButton"
-                                    Grid.Column="1"
-                                    Style="{StaticResource ModernPlayerButton}"
-                                    Content="{DynamicResource LngAddTheme}"
-                                    Padding="10,0"
-                                    Height="25"
-                                    Click="AddThemeButton_Click"/>
-                        </Grid>
+                                        <Button x:Name="AddThemeButton"
+                                                Grid.Column="1"
+                                                Style="{StaticResource ModernPlayerButton}"
+                                                Content="{DynamicResource LngAddTheme}"
+                                                Padding="10,0"
+                                                Height="25"
+                                                Click="AddThemeButton_Click"/>
+                                    </Grid>
+                                </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource AccentColor}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <TextBlock x:Name="SelectColor"
+                                           Text="{DynamicResource LngMainColor}"
+                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="AccentColorTextBox"
+                                         Width="200"
+                                         HorizontalAlignment="Left"
+                                         TextChanged="AccentColorTextBox_TextChanged"
+                                         Foreground="{StaticResource ForegroundBrush}"
+                                         Background="{StaticResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{StaticResource BorderBrush}"/>
+                                <TextBlock x:Name="ColorPreview"
+                                           Margin="0,10,0,0"
+                                           FontSize="14"
+                                           Foreground="{StaticResource ForegroundBrush}"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource LngRounding}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <TextBlock x:Name="SelectNumber"
+                                           Text="{DynamicResource LngRoundingEnter}"
+                                           ToolTip="{DynamicResource LngErrorMessageRound}"
+                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="CurrentRoundTextBox"
+                                         Width="200"
+                                         HorizontalAlignment="Left"
+                                         TextChanged="CurrentRound_TextChanged"
+                                         Foreground="{StaticResource ForegroundBrush}"
+                                         Background="{StaticResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{StaticResource BorderBrush}"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource LngLanguage}"
+                                  Margin="0,0,0,0"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="LanguageRuRadio"
+                                             Content="{DynamicResource LngLanguageRussian}"
+                                             GroupName="Language"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Margin="0,0,0,10"
+                                             Checked="LanguageRadio_Checked"/>
+                                <RadioButton x:Name="LanguageEnRadio"
+                                             Content="{DynamicResource LngLanguageEnglish}"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             GroupName="Language"
+                                             Checked="LanguageRadio_Checked"/>
+                            </StackPanel>
+                        </GroupBox>
+
                     </StackPanel>
                 </GroupBox>
 
-                <!-- Настройка акцентного цвета -->
+                <GroupBox Grid.Row="2"
+                          Header="{DynamicResource LngGraphics}"
+                          Margin="0,0,0,20"
+                          Foreground="{StaticResource ForegroundBrush}">
+                    <StackPanel Margin="10">
 
-                <!-- Language selection -->
-                <GroupBox x:Name="LanguageGroup"
-                          Grid.Row="6"
-                          Header="{DynamicResource LngLanguage}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <RadioButton x:Name="LanguageRuRadio"
-                                     Content="{DynamicResource LngLanguageRussian}"
-                                     GroupName="Language"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Margin="0,0,0,10"
-                                     Checked="LanguageRadio_Checked"/>
-                        <RadioButton x:Name="LanguageEnRadio"
-                                     Content="{DynamicResource LngLanguageEnglish}"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     GroupName="Language"
-                                     Checked="LanguageRadio_Checked"/>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox x:Name="MainColor"
-                          Header="{DynamicResource AccentColor}"
-                          Grid.Row="2"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <TextBlock x:Name="SelectColor"
-                                   Text="{DynamicResource LngMainColor}"
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   Margin="0,0,0,5"/>
-                        <TextBox x:Name="AccentColorTextBox"
-                                 Width="200"
-                                 HorizontalAlignment="Left"
-                                 TextChanged="AccentColorTextBox_TextChanged"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
-                        <TextBlock x:Name="ColorPreview"
-                                   Margin="0,10,0,0"
-                                   FontSize="14"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox x:Name="Spectrum"
-                          Header="{DynamicResource LngSpectrum}"
-                          Grid.Row="3"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <RadioButton x:Name="VisualizerEnabled"
-                                     Content="{DynamicResource LngVisualizerEnabled}"
-                                     GroupName="Visualizer"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="VisualizerToggle_Changed"/>
-                        <RadioButton x:Name="VisualizerDisabled"
-                                     Content="{DynamicResource LngVisualizerDisabled}"
-                                     GroupName="Visualizer"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="VisualizerToggle_Changed"/>
-                    </StackPanel>
-                </GroupBox>
+                        <!-- Спектр -->
+                        <GroupBox Header="{DynamicResource LngSpectrum}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="VisualizerEnabled"
+                                             Content="{DynamicResource LngVisualizerEnabled}"
+                                             GroupName="Visualizer"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="VisualizerToggle_Changed"/>
+                                <RadioButton x:Name="VisualizerDisabled"
+                                             Content="{DynamicResource LngVisualizerDisabled}"
+                                             GroupName="Visualizer"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="VisualizerToggle_Changed"/>
+                            </StackPanel>
+                        </GroupBox>
 
+                        <GroupBox Header="{DynamicResource LngFormatLibrary}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="DefaultModeRadio"
+                                             Content="{DynamicResource LngDefaultMode}"
+                                             GroupName="Format"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="Format_Checked"/>
+                                <RadioButton x:Name="CompactModeRadio"
+                                             Content="{DynamicResource LngCompactMode}"
+                                             GroupName="Format"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="Format_Checked"/>
+                            </StackPanel>
+                        </GroupBox>
 
-                <GroupBox x:Name="FormatLibrary"
-                          Grid.Row="5"
-                          Header="{DynamicResource LngFormatLibrary}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <RadioButton x:Name="DefaultModeRadio"
-                                     Content="{DynamicResource LngDefaultMode}"
-                                     GroupName="Format"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="Format_Checked"/>
-                        <RadioButton x:Name="CompactModeRadio"
-                                     Content="{DynamicResource LngCompactMode}"
-                                     GroupName="Format"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="Format_Checked"/>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox x:Name="SystemSettings"
-                          Grid.Row="8"
-                          Header="{DynamicResource LngSystemSettings}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <RadioButton x:Name="CloseAppRadio"
-                                     Content="{DynamicResource LngCloseApp}"
-                                     GroupName="CloseAction"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CloseAction_Checked"/>
-                        <RadioButton x:Name="CloseToTrayRadio"
-                                     Content="{DynamicResource LngCloseToTrayApp}"
-                                     GroupName="CloseAction"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CloseAction_Checked"/>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox x:Name="Dopolnitelno"
-                          Grid.Row="7"
-                          Header="{DynamicResource LngDopolnitelno}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <RadioButton x:Name="AdaptiveGradientsRadio"
-                                     Content="{DynamicResource LngAdaptiveGradients}"
-                                     GroupName="AdaptiveGradients"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="AdaptiveGradients_Checked"/>
-                        <RadioButton x:Name="StaticGradientsRadio"
-                                     Content="{DynamicResource LngStaticGradients}"
-                                     GroupName="AdaptiveGradients"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="AdaptiveGradients_Checked"/>
+                        <GroupBox Header="{DynamicResource LngBG}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="NotUseCustomBGradio"
+                                             Content="{DynamicResource LngUseDefaultBG}"
+                                             GroupName="BgGroup"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CheckUseCustomBG"/>
+                                <RadioButton x:Name="UseCustomBGradio"
+                                             Content="{DynamicResource LngUseCustomBG}"
+                                             GroupName="BgGroup"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CheckUseCustomBG"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource LngDopolnitelno}"
+                                  Margin="0,0,0,0"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="AdaptiveGradientsRadio"
+                                             Content="{DynamicResource LngAdaptiveGradients}"
+                                             GroupName="AdaptiveGradients"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="AdaptiveGradients_Checked"/>
+                                <RadioButton x:Name="StaticGradientsRadio"
+                                             Content="{DynamicResource LngStaticGradients}"
+                                             GroupName="AdaptiveGradients"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="AdaptiveGradients_Checked"/>
+                            </StackPanel>
+                        </GroupBox>
 
                     </StackPanel>
                 </GroupBox>
-                <GroupBox x:Name="SystemGroupBox"
-                          Grid.Row="10"
+
+                <GroupBox Grid.Row="3"
                           Header="{DynamicResource LngSystem}"
                           Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10"
-                                HorizontalAlignment="Left">
-                        <Button Style="{StaticResource ModernPlayerButton}"
-                                x:Name="DatabaseLocation"
-                                Margin="0,0,0,10"
-                                Width="Auto"
-                                Height="30"
-                                Content="{DynamicResource LngOpenDataBase}"
-                                Click="OpenDatabaseLocation_Click">
-                        </Button>
-                        <Button Style="{StaticResource ModernPlayerButton}"
-                                x:Name="AppLocation"
-                                Margin="0,0,0,10"
-                                Width="Auto"
-                                Height="30"
-                                Content="{DynamicResource LngOpenAppLocation}"
-                                Click="OpenAppLocation_Click">
-                        </Button>
-                        <Button Style="{StaticResource ModernPlayerButton}"
-                                x:Name="ReplaceBG"
-                                Width="Auto"
-                                Height="30"
-                                Content="{DynamicResource LngReplaceBG}"
-                                Click="ReplaceBG_Click">
-                        </Button>
-                    </StackPanel>
-                </GroupBox>
-
-                <GroupBox x:Name="BG"
-                          Grid.Row="11"
-                          Header="{DynamicResource LngBG}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
+                          Foreground="{StaticResource ForegroundBrush}">
                     <StackPanel Margin="10">
-                        <RadioButton x:Name="NotUseCustomBGradio"
-                                     Content="{DynamicResource LngUseDefaultBG}"
-                                     GroupName="BgGroup"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CheckUseCustomBG"/>
-                        <RadioButton x:Name="UseCustomBGradio"
-                                     Content="{DynamicResource LngUseCustomBG}"
-                                     GroupName="BgGroup"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CheckUseCustomBG"/>
+
+                        <!-- Действие при закрытии -->
+                        <GroupBox Header="{DynamicResource LngSystemSettings}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="CloseAppRadio"
+                                             Content="{DynamicResource LngCloseApp}"
+                                             GroupName="CloseAction"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CloseAction_Checked"/>
+                                <RadioButton x:Name="CloseToTrayRadio"
+                                             Content="{DynamicResource LngCloseToTrayApp}"
+                                             GroupName="CloseAction"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CloseAction_Checked"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource LngAutoLauch}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="AutoLaunchEnabled"
+                                             Content="{DynamicResource LngAutoLaunchOn}"
+                                             GroupName="AutoLaunch"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CheckAutoLaunch"/>
+                                <RadioButton x:Name="AutoLaunchDisabled"
+                                             Content="{DynamicResource LngAutoLaunchOff}"
+                                             GroupName="AutoLaunch"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CheckAutoLaunch"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource LngCoverCache}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="UseCoverCache"
+                                             Content="{DynamicResource LngEnableCoverCache}"
+                                             GroupName="CoverCache"
+                                             Margin="0,0,0,10"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CheckUseCoverCache"/>
+                                <RadioButton x:Name="NotUseCoverCache"
+                                             Content="{DynamicResource LngDisableCoverCache}"
+                                             GroupName="CoverCache"
+                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Checked="CheckUseCoverCache"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource LngSystem}"
+                                  Margin="0,0,0,0"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel Margin="10"
+                                    HorizontalAlignment="Left">
+                                <Button Style="{StaticResource ModernPlayerButton}"
+                                        x:Name="DatabaseLocation"
+                                        Margin="0,0,0,10"
+                                        Width="Auto"
+                                        Height="30"
+                                        Content="{DynamicResource LngOpenDataBase}"
+                                        Click="OpenDatabaseLocation_Click"/>
+
+                                <Button Style="{StaticResource ModernPlayerButton}"
+                                        x:Name="AppLocation"
+                                        Margin="0,0,0,10"
+                                        Width="Auto"
+                                        Height="30"
+                                        Content="{DynamicResource LngOpenAppLocation}"
+                                        Click="OpenAppLocation_Click"/>
+
+                                <Button Style="{StaticResource ModernPlayerButton}"
+                                        x:Name="ReplaceBG"
+                                        Width="Auto"
+                                        Height="30"
+                                        Content="{DynamicResource LngReplaceBG}"
+                                        Click="ReplaceBG_Click"/>
+                            </StackPanel>
+                        </GroupBox>
+
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox x:Name="CornerRadius"
-                          Grid.Row="12"
-                          Header="{DynamicResource LngRounding}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <TextBlock x:Name="SelectNumber"
-                                   Text="{DynamicResource LngRoundingEnter}"
-                                   ToolTip="{DynamicResource LngErrorMessageRound}"
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   Margin="0,0,0,5"/>
-                        <TextBox x:Name="CurrentRoundTextBox"
-                                 Width="200"
-                                 HorizontalAlignment="Left"
-                                 TextChanged="CurrentRound_TextChanged"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
-                    </StackPanel>
-                </GroupBox>
-
-                <GroupBox x:Name="AutoLaunch"
-                          Grid.Row="9"
-                          Header="{DynamicResource LngAutoLauch}"
-                          Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    <StackPanel Margin="10">
-                        <RadioButton x:Name="AutoLaunchEnabled"
-                                     Content="{DynamicResource LngAutoLaunchOn}"
-                                     GroupName="AutoLaunch"
-                                     Margin="0,0,0,10"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CheckAutoLaunch"/>
-                        <RadioButton x:Name="AutoLaunchDisabled"
-                                     Content="{DynamicResource LngAutoLaunchOff}"
-                                     GroupName="AutoLaunch"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Checked="CheckAutoLaunch"/>
-                    </StackPanel>
-                </GroupBox>
-
-                <GroupBox x:Name="HotKeysGroupBox"
-                          Grid.Row="13"
+                <GroupBox Grid.Row="4"
                           Header="{DynamicResource LngHotKeys}"
                           Margin="0,0,0,20"
-                          Foreground="{DynamicResource ForegroundBrush}">
-
+                          Foreground="{StaticResource ForegroundBrush}">
                     <Grid Margin="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
@@ -407,249 +413,262 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngPlayPause}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="0"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbKeyPlayPause"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 IsUndoEnabled="False"
+                                IsUndoEnabled="False"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="1"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngNext}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="1"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbKeyNextTrack"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="2"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngPrev}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="2"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbKeyPrevTrack"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
                         <TextBlock Grid.Row="3"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngViewLyrics}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="3"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbLyricsMode"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
                         <TextBlock Grid.Row="4"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngFavorite}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="4"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbFavoriteRemoveAdd"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
                         <TextBlock Grid.Row="5"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngInfoTrack}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="5"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbTrackInfo"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
                         <TextBlock Grid.Row="6"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngRepeat}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="6"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbRepeatTrack"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
+                        <!-- Shuffle -->
                         <TextBlock Grid.Row="7"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngShuffle}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="7"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbShuffleTrack"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
+                        <!-- 5s Forward -->
                         <TextBlock Grid.Row="8"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource Lng5SecForward}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="8"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="Tb5secForward"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
+                        <!-- 5s Backward -->
                         <TextBlock Grid.Row="9"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource Lng5SecBack}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="9"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="Tb5secback"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
+
+                        <!-- Fullscreen Spectrum -->
                         <TextBlock Grid.Row="10"
-                                   Grid.Column="0"
+                                Grid.Column="0"
                                    Text="{DynamicResource LngFullSpectrumWindow}"
                                    VerticalAlignment="Center"
-                                   Margin="0,5"
-                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                Margin="0,5"
+                                   Foreground="{StaticResource ForegroundBrush}"/>
                         <TextBox Grid.Row="10"
-                                 Grid.Column="1"
+                                Grid.Column="1"
                                  x:Name="TbFullSpectr"
-                                 Width="200"
+                                Width="200"
                                  HorizontalAlignment="Left"
-                                 Margin="0,5"
+                                Margin="0,5"
                                  IsReadOnly="True"
-                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{DynamicResource ForegroundBrush}"
-                                 Background="{DynamicResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource BorderBrush}"/>
-
+                                PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 Background="{StaticResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{StaticResource BorderBrush}"/>
                     </Grid>
                 </GroupBox>
 
             </Grid>
         </ScrollViewer>
+
         <Grid Grid.Row="2"
-              Background="{DynamicResource SecondaryBackgroundBrush}">
-            <StackPanel
-                Orientation="Horizontal"
-                HorizontalAlignment="Right">
+              Background="{StaticResource SecondaryBackgroundBrush}">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,10,0">
+
                 <TextBlock x:Name="usingRAM"
                            Text=""
                            Width="250"
                            Margin="0,0,10,0"
                            VerticalAlignment="Center"
                            Background="Transparent"
-                           Foreground="{DynamicResource ForegroundBrush}"
+                           Foreground="{StaticResource ForegroundBrush}"
                            FontWeight="Bold"
                            Visibility="Collapsed"/>
+
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="Statistics"
                         Content="{DynamicResource LngStatistics}"
                         Margin="5,0,0,0"
                         Click="StatisticsButton_Click"
                         Width="100"
-                        Height="35">
-                </Button>
+                        Height="35"/>
+
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="HelpWindowButton"
                         Content="{DynamicResource LngOpenHelpWindow}"
                         Margin="5,0,0,0"
                         Click="HelpWindowButton_Click"
                         Width="100"
-                        Height="35">
-                </Button>
+                        Height="35"/>
+
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="CancelButton"
                         Content="{DynamicResource LngCancelButton}"
                         Click="CancelButton_Click"
                         Margin="5,0,0,0"
                         Width="100"
-                        Height="35">
+                        Height="35"/>
 
-                </Button>
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="SaveButton"
                         Content="{DynamicResource LngSaveButton}"
                         Width="100"
                         Height="35"
                         Margin="5,0,0,0"
-                        Click="SaveButton_Click">
-                </Button>
+                        Click="SaveButton_Click"/>
             </StackPanel>
+
             <dialogs:ModernNotice x:Name="SettingsInfoToast"
                                   VerticalAlignment="Bottom"
                                   HorizontalAlignment="Center"

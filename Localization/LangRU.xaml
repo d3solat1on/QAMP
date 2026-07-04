@@ -1,6 +1,11 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngGraphics">Графика</System:String>
+        <System:String x:Key="LngInterface">Внешний вид</System:String>
+        <System:String x:Key="LngThemeRestartRequired">Для применения темы необходимо перезапустить приложение</System:String>
+        <System:String x:Key="LngRestartNow">Перезапустить сейчас</System:String>
+        <System:String x:Key="LngRestartLater">Перезапустить позже</System:String>
         <System:String x:Key="Lng5SecForward"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Пять секунд вперед</System:String>
         <System:String x:Key="Lng5SecBack"
@@ -385,6 +390,12 @@ FN+F3 - Пред. трек
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Справка</System:String>
         <System:String x:Key="LngCancelButton"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Отмена</System:String>
+        <System:String x:Key="LngEnableCoverCache"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Включить кэш обложек</System:String>
+        <System:String x:Key="LngDisableCoverCache"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Выключить кэш обложек</System:String>
+        <System:String x:Key="LngCoverCache"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Кэш обложек</System:String>
         <!-- SettingsAudio -->
         <System:String x:Key="LngSettingsAudioTitle"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Настройки звука</System:String>
@@ -394,6 +405,8 @@ FN+F3 - Пред. трек
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Пользовательский</System:String>
         <System:String x:Key="LngResetEQ"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Сбросить</System:String>
+        <System:String x:Key="LngResetAudioSettings"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Сбросить всё</System:String>
         <System:String x:Key="LngEffectsSound"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Эффекты и обработка звука</System:String>
         <System:String x:Key="LngReverb"

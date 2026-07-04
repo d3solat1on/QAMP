@@ -1,7 +1,6 @@
 using System.Globalization;
-using System.IO;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
+using QAMP.Services;
 
 namespace QAMP.Converters
 {
@@ -11,23 +10,10 @@ namespace QAMP.Converters
         {
             if (value is byte[] bytes && bytes.Length > 0)
             {
-                using var ms = new MemoryStream(bytes);
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-
-                // ОГРАНИЧИВАЕМ РАЗМЕР ДЕКОДИРОВАНИЯ
-                // Это заставит WPF не грузить картинку целиком, а взять только 300 пикселей
-                image.DecodePixelWidth = 200;
-
-                image.StreamSource = ms;
-                image.EndInit();
-                image.Freeze(); // Важно для производительности
-                return image;
+                return CoverImageCacheService.GetImage(bytes, 200);
             }
-            return null; // Или стандартная иконка
+            return null;
         }
-
         public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => null;
     }
 }

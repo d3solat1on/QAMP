@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -7,54 +8,78 @@ namespace QAMP.Services
 {
     public static class ThemeManager
     {
-        public static void ApplyTheme(string themeName)
+        public static void LoadThemeFromConfig()
         {
-            var app = Application.Current;
-            var resources = app.Resources.MergedDictionaries;
+            var config = SettingsManager.Instance.Config;
+            string themeName = config.ColorScheme ?? "Dark";
 
-            Uri themeUri;
-            if (themeName.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
+            if (!themeName.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
             {
-                string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes", themeName);
-                themeUri = new Uri(fullPath, UriKind.Absolute);
-            }
-            else
-            {
-                themeUri = new Uri($"Themes/{themeName}Theme.xaml", UriKind.Relative);
+                themeName = $"{themeName}Theme.xaml";
             }
 
-            // Попытка подгрузить новую тему, прежде чем убрать старую, чтобы не было провалов в ресурсах
+            string themePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes", themeName);
+
+            if (!File.Exists(themePath))
+            {
+                themePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes", "DarkTheme.xaml");
+                if (!File.Exists(themePath))
+                {
+                    System.Diagnostics.Debug.WriteLine("ThemeManager: Тема не найдена!");
+                    return;
+                }
+            }
+
             try
             {
-                var newTheme = new ResourceDictionary { Source = themeUri };
-                resources.Add(newTheme);
+                var themeDict = new ResourceDictionary
+                {
+                    Source = new Uri(themePath, UriKind.Absolute)
+                };
+
+                var app = Application.Current;
+
+                var oldThemes = app.Resources.MergedDictionaries
+                    .Where(d => d.Source != null &&
+                               (d.Source.ToString().Contains("Theme") ||
+                                d.Source.ToString().Contains("Themes/")))
+                    .ToList();
+
+                foreach (var old in oldThemes)
+                {
+                    app.Resources.MergedDictionaries.Remove(old);
+                }
+
+                app.Resources.MergedDictionaries.Insert(0, themeDict);
+
+                UpdateAccentColor(config.AccentColor);
+
+                System.Diagnostics.Debug.WriteLine($"ThemeManager: Загружена тема {themeName}");
             }
             catch (Exception ex)
             {
-                // если тема не найдена, оставляем текущую
-                System.Diagnostics.Debug.WriteLine($"ThemeManager: Не удалось загрузить тему {themeName}: {ex.Message}");
-                return;
-            }
-
-            // Удалить старую тему (если есть)
-            var currentTheme = resources.FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("Theme") && !d.Source.OriginalString.EndsWith($"{themeName}Theme.xaml", StringComparison.OrdinalIgnoreCase));
-            if (currentTheme != null)
-            {
-                resources.Remove(currentTheme);
-            }
-
-            // Обновить AccentBrush
-            try
-            {
-                var accentBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(SettingsManager.Instance.Config.AccentColor));
-                app.Resources["AccentBrush"] = accentBrush;
-            }
-            catch
-            {
-                // некорректный цвет акцента не критично
+                System.Diagnostics.Debug.WriteLine($"ThemeManager: Ошибка загрузки темы: {ex.Message}");
             }
         }
 
+        public static void SetTheme(string themeName)
+        {
+            var config = SettingsManager.Instance.Config;
+
+            if (themeName.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
+            {
+                config.ColorScheme = themeName;
+            }
+            else
+            {
+                config.ColorScheme = themeName;
+            }
+
+            SettingsManager.Instance.Save();
+
+            System.Diagnostics.Debug.WriteLine($"ThemeManager: Тема сохранена в конфиг: {themeName}");
+
+        }
         public static void UpdateAccentColor(string colorHex)
         {
             try
@@ -64,13 +89,10 @@ namespace QAMP.Services
                 var app = Application.Current;
                 var color = (Color)ColorConverter.ConvertFromString(colorHex);
                 var accentBrush = new SolidColorBrush(color);
-
                 accentBrush.Freeze();
                 app.Resources["AccentBrush"] = accentBrush;
             }
-            catch
-            {
-            }
+            catch { }
         }
     }
     public class ThemeHelper

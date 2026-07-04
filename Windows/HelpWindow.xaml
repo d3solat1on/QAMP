@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:QAMP"
         Title="{DynamicResource LngHelpAndSupport}"
         SizeToContent="WidthAndHeight"
-        Background="{DynamicResource BackgroundBrush}"
-        Foreground="{DynamicResource ForegroundBrush}"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource ForegroundBrush}"
         WindowStyle="None"
         AllowsTransparency="True"
         WindowStartupLocation="CenterOwner">
@@ -21,7 +21,7 @@
         <TextBlock x:Name="HelpAndSupport"
             Text="{DynamicResource LngHelpAndSupport}"
                    FontSize="24"
-                   Foreground="{DynamicResource ForegroundBrush}"
+                   Foreground="{StaticResource ForegroundBrush}"
                    Margin="0,0,0,15"/>
         <!-- Стрелка вправо - 5 сек вперед -->
         <!-- Стрелка влево - 5 сек назад -->
@@ -35,41 +35,41 @@
             <StackPanel>
                 <GroupBox x:Name="HotKeys"
                           Header="{DynamicResource LngHotKeys}"
-                          Foreground="{DynamicResource ForegroundBrush}"
+                          Foreground="{StaticResource ForegroundBrush}"
                           Margin="0,10">
                     <TextBlock x:Name="HotKeysTextBlock"
                                Text="{DynamicResource LngHotKeysTextBlock}"
                                Margin="10"
-                               Foreground="{DynamicResource ForegroundBrush}"/>
+                               Foreground="{StaticResource ForegroundBrush}"/>
                 </GroupBox>
 
                 <GroupBox x:Name="AboutProgramm"
                           Header="{DynamicResource LngAboutProgramm}"
-                          Foreground="{DynamicResource ForegroundBrush}"
+                          Foreground="{StaticResource ForegroundBrush}"
                           Margin="0,10">
                     <TextBlock TextWrapping="Wrap"
                                Margin="10"
-                               Foreground="{DynamicResource ForegroundBrush}"
+                               Foreground="{StaticResource ForegroundBrush}"
                                Text="{DynamicResource LngDescQAMP}">
                     </TextBlock>
                 </GroupBox>
                 <GroupBox x:Name="Support"
                           Header="{DynamicResource LngSupport}"
-                          Foreground="{DynamicResource ForegroundBrush}"
+                          Foreground="{StaticResource ForegroundBrush}"
                           Margin="0,10">
                     <TextBlock TextWrapping="Wrap"
                                Margin="10"
-                               Foreground="{DynamicResource ForegroundBrush}"
+                               Foreground="{StaticResource ForegroundBrush}"
                                Text="{DynamicResource LngHelpGitHub}">
                     </TextBlock>
                 </GroupBox>
                 <GroupBox x:Name="LibrariesUsed"
                           Header="{DynamicResource LngLibrariesUsed}"
-                          Foreground="{DynamicResource ForegroundBrush}"
+                          Foreground="{StaticResource ForegroundBrush}"
                           Margin="0,10">
                     <StackPanel Margin="10">
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                         <Run x:Name="Visualization"
                              Text="{DynamicResource LngVisualization}"/>
                         <Hyperlink NavigateUri="https://scottplot.net/"
@@ -78,7 +78,7 @@
                         </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                         <Run x:Name="Audio"
                              Text="{DynamicResource LngAudio}"/>
                         <Hyperlink NavigateUri="http://www.un4seen.com"
@@ -87,7 +87,7 @@
                         </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                             <Run x:Name="Metadata"
                                  Text="{DynamicResource LngMetaData}"/>
                             <Hyperlink NavigateUri="https://github.com/mono/taglib-sharp"
@@ -96,7 +96,7 @@
                             </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                             <Run x:Name="Icons"
                                  Text="{DynamicResource LngIcons}"/>
                             <Hyperlink NavigateUri="https://fonts.google.com/icons"
@@ -105,7 +105,7 @@
                             </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                             <Run x:Name="GraphicsUI"
                                  Text="{DynamicResource LngGraphicsUI}"/>
                             <Hyperlink NavigateUri="https://github.com/KSemenenko/ColorThief"
@@ -114,7 +114,7 @@
                             </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                             <Run x:Name="Lirycs"
                                  Text="{DynamicResource LngLirycs}"/>
                             <Hyperlink NavigateUri="https://lrclib.net/"
@@ -123,7 +123,7 @@
                             </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource ForegroundBrush}">
+                                   Foreground="{StaticResource ForegroundBrush}">
                             <Run x:Name="DataBase"
                                  Text="{DynamicResource LngDataBase}"/>
                             <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=net-cli"
@@ -145,7 +145,7 @@
                      Width="100"
                      Height="35"
                      Background="{DynamicResource AccentBrush}"
-                     Foreground="{DynamicResource BackgroundBrush}"
+                     Foreground="{StaticResource BackgroundBrush}"
                      FontWeight="Bold">
                 <TextBox.Resources>
                     <Style TargetType="Border">

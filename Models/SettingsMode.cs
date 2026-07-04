@@ -36,6 +36,7 @@ public class AppSettings : INotifyPropertyChanged
     public string OutputDeviceName { get; set; } = string.Empty;
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
+    public bool EnableCoverCache { get; set; } = true;
     public bool IsAutoLaunchEnabled { get; set; } = false; // Автозапуск приложения
     public bool IsCompactMode
     {
@@ -104,8 +105,27 @@ public class SettingsManager
     public static SettingsManager Instance => _instance ??= new SettingsManager();
 
     private readonly string _path = AppDataManager.SettingsPath;
-    public AppSettings Config { get; set; } = new AppSettings();
+    private AppSettings _config = new();
 
+    public AppSettings Config
+    {
+        get => _config;
+        set
+        {
+            _config = value;
+            OnPropertyChanged(nameof(Config));
+        }
+    }
+    public event EventHandler? ThemeChanged;
+    public void NotifyThemeChanged()
+    {
+        ThemeChanged?.Invoke(this, EventArgs.Empty);
+        OnPropertyChanged(nameof(Config)); // Принудительное обновление привязок
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     public SettingsManager()
     {
         // Гарантируем существование папки AppData

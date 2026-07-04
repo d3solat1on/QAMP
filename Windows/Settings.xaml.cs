@@ -24,6 +24,8 @@ namespace QAMP.Windows
         private bool originalIsAutoLaunchEnabled;
         private readonly PlayerService _player;
         private DispatcherTimer? _memoryTimer;
+        private bool _themeChanged = false;
+
         public Settings(PlayerService player)
         {
             InitializeComponent();
@@ -60,7 +62,7 @@ namespace QAMP.Windows
                 DarkThemeRadio.IsChecked = false;
                 LightThemeRadio.IsChecked = false;
                 CustomThemesComboBox.SelectedIndex = -1;
-                // Проверяем, что записано в настройках
+
                 if (appSettings.ColorScheme != null)
                 {
                     string currentTheme = appSettings.ColorScheme;
@@ -76,16 +78,11 @@ namespace QAMP.Windows
                     }
                     else
                     {
-                        // Если это кастомный файл темы, выбираем его в списке
                         if (CustomThemesComboBox.Items.Contains(currentTheme))
                         {
                             CustomThemesComboBox.SelectedItem = currentTheme;
                         }
                     }
-                }
-                else
-                {
-                    Debug.WriteLine("[QAMP Theme Debug] Предупреждение: SettingsManager или CurrentTheme равны null.");
                 }
             }
             catch (Exception ex)
@@ -97,46 +94,27 @@ namespace QAMP.Windows
             CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
             Debug.WriteLine("[QAMP Theme Debug] ---------------------------------------------");
         }
+
         private void RefreshThemesList()
         {
             Debug.WriteLine("[QAMP Theme Debug] --- Обновление списка тем в ComboBox ---");
 
-            // 1. Отключаем событие
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
-            Debug.WriteLine("[QAMP Theme Debug] Событие SelectionChanged временно отключено.");
-
-            // 2. Очищаем элементы
             CustomThemesComboBox.Items.Clear();
-            Debug.WriteLine("[QAMP Theme Debug] Элементы ComboBox очищены.");
 
             if (Directory.Exists(ThemesFolderPath))
             {
-                // 3. Ищем файлы
                 var xamlFiles = Directory.GetFiles(ThemesFolderPath, "*.xaml")
-                                         .Select(System.IO.Path.GetFileName)
+                                         .Select(Path.GetFileName)
                                          .ToList();
-
-                Debug.WriteLine($"[QAMP Theme Debug] Найдено файлов .xaml в папке: {xamlFiles.Count}");
 
                 foreach (var file in xamlFiles)
                 {
                     CustomThemesComboBox.Items.Add(file);
-                    Debug.WriteLine($"[QAMP Theme Debug] Добавлен в ComboBox: {file}");
                 }
             }
-            else
-            {
-                Debug.WriteLine("[QAMP Theme Debug] Ошибка: Папка Themes не существует на момент вызова RefreshThemesList.");
-            }
 
-            // 4. Возвращаем событие
             CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
-            Debug.WriteLine("[QAMP Theme Debug] Событие SelectionChanged снова подключено.");
-
-            // На всякий случай выведем итоговое количество элементов в самом контроле
-            Debug.WriteLine($"[QAMP Theme Debug] Итоговое количество Items в ComboBox: {CustomThemesComboBox.Items.Count}");
-
-            // Принудительно заставляем UI перерисоваться
             CustomThemesComboBox.UpdateLayout();
         }
 
@@ -145,7 +123,6 @@ namespace QAMP.Windows
             errorMessage = string.Empty;
             try
             {
-                // 1. Быстрая проверка размера файла
                 var fileInfo = new FileInfo(filePath);
                 if (fileInfo.Length > 1024 * 1024)
                 {
@@ -153,7 +130,6 @@ namespace QAMP.Windows
                     return false;
                 }
 
-                // 2. Пытаемся распарсить кастомный XAML
                 ResourceDictionary? customDict;
                 using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
@@ -166,11 +142,9 @@ namespace QAMP.Windows
                     return false;
                 }
 
-                // 3. Загружаем нашу стандартную Темную тему как эталон для сверки
                 var defaultThemeUri = new Uri(";component/Themes/DarkTheme.xaml", UriKind.RelativeOrAbsolute);
                 var baseThemeDict = new ResourceDictionary { Source = defaultThemeUri };
 
-                // 4. Проверяем, что в новой теме есть все ключи из базовой
                 foreach (var key in baseThemeDict.Keys)
                 {
                     if (!customDict.Contains(key))
@@ -198,10 +172,9 @@ namespace QAMP.Windows
             if (openFileDialog.ShowDialog() == true)
             {
                 string selectedFilePath = openFileDialog.FileName;
-                string fileName = System.IO.Path.GetFileName(selectedFilePath);
-                string destFilePath = System.IO.Path.Combine(ThemesFolderPath, fileName);
+                string fileName = Path.GetFileName(selectedFilePath);
+                string destFilePath = Path.Combine(ThemesFolderPath, fileName);
 
-                // Валидация файла
                 if (!IsThemeValid(selectedFilePath, out string error))
                 {
                     string message = (string)Application.Current.FindResource("LngFailedImportTheme");
@@ -211,13 +184,8 @@ namespace QAMP.Windows
 
                 try
                 {
-                    // Копируем в папку приложения
                     File.Copy(selectedFilePath, destFilePath, overwrite: true);
-
-                    // Обновляем список в ComboBox
                     RefreshThemesList();
-
-                    // Автоматически выбираем добавленную тему
                     CustomThemesComboBox.SelectedItem = fileName;
 
                     string message = (string)Application.Current.FindResource("LngThemeAdded");
@@ -233,35 +201,38 @@ namespace QAMP.Windows
 
         private void StandardThemeRadio_Checked(object sender, RoutedEventArgs e)
         {
+            if (isInitializing) return;
             if (CustomThemesComboBox == null) return;
 
-            // Сбрасываем выбор в кастомных темах
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
             CustomThemesComboBox.SelectedIndex = -1;
             CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
 
             string themeName = (sender == DarkThemeRadio) ? "Dark" : "Light";
-            SettingsManager.Instance.Config.ColorScheme = themeName;
-            ThemeManager.ApplyTheme(themeName);
+            
+            ThemeManager.SetTheme(themeName);
+            
+            _themeChanged = true;
         }
 
         private void CustomThemeRadio_Checked(object sender, RoutedEventArgs e)
         {
+            if (isInitializing) return;
             if (CustomThemesComboBox == null) return;
 
             if (CustomThemesComboBox.SelectedItem is string selectedThemeFile)
             {
-                SettingsManager.Instance.Config.ColorScheme = selectedThemeFile;
-                ThemeManager.ApplyTheme(selectedThemeFile);
+                ThemeManager.SetTheme(selectedThemeFile);
+                _themeChanged = true;
             }
         }
 
-        // Выбор кастомной темы из ComboBox
         private void CustomThemesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (isInitializing) return;
+            
             if (CustomThemesComboBox.SelectedItem is string selectedThemeFile)
             {
-                // Снимаем флажки со стандартных радио-кнопок
                 DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
                 LightThemeRadio.Checked -= StandardThemeRadio_Checked;
 
@@ -271,10 +242,21 @@ namespace QAMP.Windows
                 DarkThemeRadio.Checked += StandardThemeRadio_Checked;
                 LightThemeRadio.Checked += StandardThemeRadio_Checked;
 
-                SettingsManager.Instance.Config.ColorScheme = selectedThemeFile;
-                ThemeManager.ApplyTheme(selectedThemeFile);
+                ThemeManager.SetTheme(selectedThemeFile);
+                _themeChanged = true;
             }
         }
+
+        private async void ShowRestartNotificationIfNeeded()
+        {
+            if (_themeChanged)
+            {
+                string message = (string)Application.Current.FindResource("LngThemeRestartRequired") ??
+                                 "Для применения темы необходимо перезапустить приложение.";
+                NotificationWindow.Show(message, this);
+            }
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             isInitializing = true;
@@ -288,12 +270,9 @@ namespace QAMP.Windows
             originalUseAdaptiveGradients = config.UseAdaptiveGradients;
             originalIsAutoLaunchEnabled = config.IsAutoLaunchEnabled;
 
-            // Установить параметры спектрограммы
             VisualizerEnabled.IsChecked = config.IsVisualizerEnabled;
             VisualizerDisabled.IsChecked = !config.IsVisualizerEnabled;
-            // SetBarCountComboValue(config.VisualizerBarCount);
 
-            // Установить выбранную тему
             switch (config.ColorScheme)
             {
                 case "Dark":
@@ -306,29 +285,27 @@ namespace QAMP.Windows
                     CustomThemeRadio.IsChecked = true;
                     break;
             }
-            // Установить акцентный цвет
+
             AccentColorTextBox.Text = config.AccentColor;
             UpdateColorPreview();
 
             CurrentRoundTextBox.Text = config.CurrentRound.ToString();
 
-
-            // Загружаем выбранное действие при закрытии
             CloseToTrayRadio.IsChecked = config.CloseToTray;
             CloseAppRadio.IsChecked = !config.CloseToTray;
 
-            // Загружаем состояние адаптивных градиентов
             AdaptiveGradientsRadio.IsChecked = config.UseAdaptiveGradients;
             StaticGradientsRadio.IsChecked = !config.UseAdaptiveGradients;
 
-            // Загружаем состояние автозапуска
             AutoLaunchEnabled.IsChecked = config.IsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !config.IsAutoLaunchEnabled;
 
             UseCustomBGradio.IsChecked = config.UseCustomBackground;
             NotUseCustomBGradio.IsChecked = !config.UseCustomBackground;
 
-            // Язык
+            UseCoverCache.IsChecked = config.EnableCoverCache;
+            NotUseCoverCache.IsChecked = !config.EnableCoverCache;
+
             if (config.Language == "en")
             {
                 LanguageEnRadio.IsChecked = true;
@@ -343,7 +320,8 @@ namespace QAMP.Windows
             else
                 DefaultModeRadio.IsChecked = true;
 
-            LoadCurrentHotkeys();    
+            LoadCurrentHotkeys();
+            
             CheckAutoLaunch(null, null);
 
             isInitializing = false;
@@ -361,7 +339,6 @@ namespace QAMP.Windows
         private void LanguageRadio_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
-
             if (sender is not RadioButton radio) return;
 
             string lang = radio == LanguageEnRadio ? "en" : "ru";
@@ -371,7 +348,6 @@ namespace QAMP.Windows
             config.Language = lang;
             SettingsManager.Instance.Save();
 
-            // Apply immediately
             try
             {
                 LanguageManager.ApplyLanguage(lang);
@@ -382,11 +358,9 @@ namespace QAMP.Windows
         private void Format_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
-
             if (sender is RadioButton radio && radio.IsChecked == true)
             {
                 bool isCompact = radio == CompactModeRadio;
-
                 var config = SettingsManager.Instance.Config;
 
                 if (config.IsCompactMode != isCompact)
@@ -400,11 +374,9 @@ namespace QAMP.Windows
         private void CheckUseCustomBG(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
-
             if (sender is RadioButton radio && radio.IsChecked == true)
             {
                 bool useCustomBG = radio == UseCustomBGradio;
-
                 var config = SettingsManager.Instance.Config;
                 if (config.UseCustomBackground != useCustomBG)
                 {
@@ -413,10 +385,23 @@ namespace QAMP.Windows
             }
         }
 
+        private void CheckUseCoverCache(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+            if (sender is RadioButton radio && radio.IsChecked == true)
+            {
+                bool useCoverCache = radio == UseCoverCache;
+                var config = SettingsManager.Instance.Config;
+                if (config.EnableCoverCache != useCoverCache)
+                {
+                    config.EnableCoverCache = useCoverCache;
+                }
+            }
+        }
+
         private void CloseAction_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
-
             if (sender is not RadioButton radio) return;
 
             bool closeToTray = radio.Name == "CloseToTrayRadio";
@@ -428,7 +413,6 @@ namespace QAMP.Windows
             var config = SettingsManager.Instance.Config;
             config.AccentColor = AccentColorTextBox.Text;
             ThemeManager.UpdateAccentColor(config.AccentColor);
-            // Обновляем цвета спектра при смене цвета акцента
             PlayerService.Instance.RefreshSpectrumControls();
             UpdateColorPreview();
         }
@@ -454,6 +438,8 @@ namespace QAMP.Windows
         {
             SettingsManager.Instance.Save();
 
+            ShowRestartNotificationIfNeeded();
+
             if (Application.Current.MainWindow is MainWindow mainWindow)
             {
                 mainWindow.RefreshAdaptiveGradients();
@@ -472,62 +458,29 @@ namespace QAMP.Windows
         {
             var config = SettingsManager.Instance.Config;
 
-            // Восстановить оригинальные настройки для темы
             if (originalColorScheme != null)
                 config.ColorScheme = originalColorScheme;
             if (originalAccentColor != null)
                 config.AccentColor = originalAccentColor;
 
-
-            // Восстановить оригинальные значения спектрограммы
             config.IsVisualizerEnabled = originalVisualizerEnabled;
             config.VisualizerBarCount = originalBarCount;
-
-            // Восстановить оригинальное значение "Сворачивать в трей"
             config.CloseToTray = originalCloseToTray;
-
-            // Восстановить оригинальное значение адаптивных градиентов
             config.UseAdaptiveGradients = originalUseAdaptiveGradients;
-
-            // Восстановить оригинальное значение автозапуска
             config.IsAutoLaunchEnabled = originalIsAutoLaunchEnabled;
 
-            // Обновляем RadioButton при восстановлении
-            if (originalCloseToTray)
-            {
-                CloseToTrayRadio.IsChecked = true;
-            }
-            else
-            {
-                CloseAppRadio.IsChecked = true;
-            }
+            CloseToTrayRadio.IsChecked = originalCloseToTray;
+            CloseAppRadio.IsChecked = !originalCloseToTray;
 
-            // Обновляем RadioButton адаптивных градиентов при восстановлении
-            if (originalUseAdaptiveGradients)
-            {
-                AdaptiveGradientsRadio.IsChecked = true;
-            }
-            else
-            {
-                StaticGradientsRadio.IsChecked = true;
-            }
+            AdaptiveGradientsRadio.IsChecked = originalUseAdaptiveGradients;
+            StaticGradientsRadio.IsChecked = !originalUseAdaptiveGradients;
 
-            // Обновляем RadioButton автозапуска при восстановлении
-            if (originalIsAutoLaunchEnabled)
-            {
-                AutoLaunchEnabled.IsChecked = true;
-            }
-            else
-            {
-                AutoLaunchDisabled.IsChecked = true;
-            }
+            AutoLaunchEnabled.IsChecked = originalIsAutoLaunchEnabled;
+            AutoLaunchDisabled.IsChecked = !originalIsAutoLaunchEnabled;
 
-            if (originalColorScheme != null)
-                ThemeManager.ApplyTheme(originalColorScheme);
             if (originalAccentColor != null)
                 ThemeManager.UpdateAccentColor(originalAccentColor);
 
-            // Обновляем цвета спектра при отмене настроек
             PlayerService.Instance.RefreshSpectrumControls();
 
             DialogResult = false;
@@ -535,7 +488,6 @@ namespace QAMP.Windows
             Close();
             MemoryOptimizer.RunAsync(Dispatcher);
         }
-
 
         private void VisualizerToggle_Changed(object sender, RoutedEventArgs e)
         {
@@ -547,42 +499,38 @@ namespace QAMP.Windows
             spectrumControls.ClearSpectrum();
             SettingsManager.Instance.Save();
         }
+
         private void HelpWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            var helpWindow = new HelpWindow()
-            {
-                Owner = this
-            };
-
+            var helpWindow = new HelpWindow() { Owner = this };
             helpWindow.ShowHelpWindow();
         }
+
         private void StatisticsButton_Click(object sender, RoutedEventArgs e)
         {
-            var statisticsWindow = new Statistics()
-            {
-                Owner = this
-            };
+            var statisticsWindow = new Statistics() { Owner = this };
             statisticsWindow.Show();
         }
+
         private void OpenDatabaseLocation_Click(object sender, RoutedEventArgs e)
         {
             string path = AppDataManager.AppDataPath;
             Process.Start("explorer.exe", path);
         }
+
         private void OpenAppLocation_Click(object sender, RoutedEventArgs e)
         {
             string path = AppContext.BaseDirectory;
             Process.Start("explorer.exe", path);
         }
+
         private void StartMemoryTicking()
         {
-            _memoryTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
+            _memoryTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _memoryTimer.Tick += (s, e) => UsingRam();
             _memoryTimer.Start();
         }
+
         private void UsingRam()
         {
             if (Keyboard.IsKeyDown(Key.I) && Keyboard.Modifiers == ModifierKeys.Control)
@@ -597,8 +545,8 @@ namespace QAMP.Windows
             }
         }
 
-
         private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
+
         private async void ReplaceBG_Click(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(BGFolderPath))
@@ -619,7 +567,6 @@ namespace QAMP.Windows
                     File.Copy(selectedFilePath, destFilePath, overwrite: true);
 
                     var config = SettingsManager.Instance.Config;
-
                     config.CustomBackgroundPath = destFilePath;
 
                     string message = (string)Application.Current.FindResource("LngSuccessfullyBG");
@@ -651,7 +598,6 @@ namespace QAMP.Windows
                 {
                     config.CurrentRound = parsedRound;
                     SettingsManager.Instance.Save();
-
                     Application.Current.Resources["AppCornerRadius"] = new CornerRadius(parsedRound);
                 }
                 else
@@ -688,7 +634,6 @@ namespace QAMP.Windows
             UpdateHotkeyTextBox(Tb5secForward, HotkeyAction.SeekForward);
             UpdateHotkeyTextBox(Tb5secback, HotkeyAction.SeekBackward);
             UpdateHotkeyTextBox(TbFullSpectr, HotkeyAction.OpenFullScreenSpectrum);
-
         }
 
         private void UpdateHotkeyTextBox(TextBox textBox, HotkeyAction action)
@@ -724,25 +669,28 @@ namespace QAMP.Windows
             Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
             ModifierKeys modifiers = Keyboard.Modifiers;
 
-            if (pressedKey == Key.Escape || pressedKey == Key.Delete)
-            {
-                // Логика сброса (опционально), пока оставим базовую перезапись
-            }
-
             HotkeyAction targetAction;
             if (currentTextBox == TbKeyPlayPause) targetAction = HotkeyAction.TogglePlayPause;
             else if (currentTextBox == TbKeyNextTrack) targetAction = HotkeyAction.NextTrack;
             else if (currentTextBox == TbKeyPrevTrack) targetAction = HotkeyAction.PreviousTrack;
+            else if (currentTextBox == TbLyricsMode) targetAction = HotkeyAction.ViewLyrics;
+            else if (currentTextBox == TbFavoriteRemoveAdd) targetAction = HotkeyAction.ToggleFavorite;
+            else if (currentTextBox == TbTrackInfo) targetAction = HotkeyAction.ShowTrackInfo;
+            else if (currentTextBox == TbRepeatTrack) targetAction = HotkeyAction.ToggleRepeat;
+            else if (currentTextBox == TbShuffleTrack) targetAction = HotkeyAction.ToggleShuffle;
+            else if (currentTextBox == Tb5secForward) targetAction = HotkeyAction.SeekForward;
+            else if (currentTextBox == Tb5secback) targetAction = HotkeyAction.SeekBackward;
+            else if (currentTextBox == TbFullSpectr) targetAction = HotkeyAction.OpenFullScreenSpectrum;
             else return;
 
             var config = SettingsManager.Instance.Config;
 
-            // ПРОВЕРКА НА ДУБЛИКАТЫ (Очень важный UX! Чтобы не назначить одну кнопку на два действия)
+            // Проверка на дубликаты
             var duplicate = config.Hotkeys.FirstOrDefault(h => h.Key == pressedKey && h.Modifiers == modifiers && h.Action != targetAction);
             if (duplicate != null)
             {
                 string errorMsg = $"Это сочетание уже используется для действия: {duplicate.Action}";
-                Dialogs.NotificationWindow.Show(errorMsg, this);
+                NotificationWindow.Show(errorMsg, this);
                 e.Handled = true;
                 return;
             }
@@ -759,7 +707,6 @@ namespace QAMP.Windows
             }
 
             SettingsManager.Instance.Save();
-
             UpdateHotkeyTextBox(currentTextBox, targetAction);
 
             e.Handled = true;
@@ -777,6 +724,7 @@ namespace QAMP.Windows
             string keyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
             string appName = "QAMP";
             string appPath = AppContext.BaseDirectory;
+
             if (isEnabled)
             {
                 try
@@ -797,7 +745,7 @@ namespace QAMP.Windows
             {
                 try
                 {
-                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyName, true);
+                    using var key = Registry.CurrentUser.OpenSubKey(keyName, true);
                     key?.DeleteValue(appName, false);
                 }
                 catch

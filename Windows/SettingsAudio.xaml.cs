@@ -266,6 +266,82 @@ namespace QAMP.Windows
             PresetComboBox.SelectedIndex = 0;
         }
 
+        private void ResetAllAudioSettings_Click(object sender, RoutedEventArgs e)
+        {
+            isInitializing = true;
+            try
+            {
+                var config = SettingsManager.Instance.Config;
+
+                for (int i = 0; i < config.EqualizerGains.Length; i++)
+                {
+                    config.EqualizerGains[i] = 0.0;
+                }
+
+                config.EqualizerPreset = "Пользовательский";
+                config.ReverbEnabled = false;
+                config.ReverbLevel = 50.0;
+                config.EchoEnabled = false;
+                config.EchoDelay = 300.0;
+                config.VocalEnhancementEnabled = false;
+                config.LoudnessEnabled = false;
+                config.CompressorEnabled = false;
+                config.CompressorThreshold = 0.5;
+                config.Balance = 0.0;
+                config.Tempo = 1.0;
+                config.Pitch = 1.0;
+                SettingsManager.Instance.Save();
+
+                if (_bands != null)
+                {
+                    for (int i = 0; i < _bands.Count; i++)
+                    {
+                        _bands[i].Gain = 0f;
+                    }
+                }
+
+                for (int i = 0; i < _player.EqGains.Length; i++)
+                {
+                    _player.EqGains[i] = 0f;
+                }
+
+                ReverbEnabled.IsChecked = false;
+                ReverbLevelSlider.Value = 50.0;
+                ReverbLevelText.Text = "50%";
+
+                EchoEnabled.IsChecked = false;
+                EchoDelaySlider.Value = 300.0;
+                EchoDelayText.Text = "300 ms";
+
+                VocalEnhancementEnabled.IsChecked = false;
+                LoudnessEnabled.IsChecked = false;
+
+                CompressorEnabled.IsChecked = false;
+                CompressorThresholdSlider.Value = 0.5;
+                CompressorThresholdText.Text = "0.50";
+
+                BalanceSlider.Value = 0.0;
+                BalanceText.Text = "0.00";
+
+                TempoSlider.Value = 1.0;
+                TempoText.Text = "1.00x";
+                PitchSlider.Value = 1.0;
+                PitchText.Text = "1.00x";
+
+                PresetComboBox.SelectedIndex = 0;
+
+                _player.ApplyAudioEffects();
+                _player.SetBalance(0f);
+                _player.ApplyPlaybackRate(1.0, 1.0);
+                _player.ApplyCurrentEqGains();
+                DrawEqGraph();
+            }
+            finally
+            {
+                isInitializing = false;
+            }
+        }
+
         private void ApplySavedGains()
         {
             if (_player == null) return;

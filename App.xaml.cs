@@ -184,12 +184,11 @@ ToolTipText = "QAMP",
             {
                 Debug.WriteLine($"{ex.Message}");
             }
-
-            ThemeManager.ApplyTheme(SettingsManager.Instance.Config.ColorScheme);
-
+            ThemeManager.UpdateAccentColor(SettingsManager.Instance.Config.AccentColor);
+            ThemeManager.LoadThemeFromConfig();
             // Применяем автозапуск из конфига
             ApplyAutoLaunchFromConfig();
-            
+
             var savedRound = SettingsManager.Instance.Config.CurrentRound;
             Current.Resources["AppCornerRadius"] = new CornerRadius(savedRound);
 

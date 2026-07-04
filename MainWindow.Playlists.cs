@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using QAMP.Converters;
 using QAMP.Dialogs;
@@ -21,6 +22,7 @@ namespace QAMP
         private readonly SettingsManager _settingsManager = SettingsManager.Instance;
         private AppSettings AppSettings => _settingsManager.Config;
         private readonly LargeTrackImageConverter _imageConverter = new();
+        private DispatcherTimer? _scrollCleanupTimer;  
         private void AddMusicButton_Click(object sender, RoutedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
@@ -117,7 +119,7 @@ namespace QAMP
                     }
                     UpdateNextTrackUI();
 
-                    string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено {0} треков";
+                    string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
                     string toastMessage = string.Format(toastTemplate, addedCount);
 
                     await MyToast.ShowAsync(toastMessage);
@@ -258,6 +260,18 @@ namespace QAMP
                     UpdateNextTrackUI();
                 }
             }
+        }
+
+        private void TracksDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _scrollCleanupTimer?.Stop();
+            _scrollCleanupTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+            _scrollCleanupTimer.Tick += (s, args) =>
+            {
+                _scrollCleanupTimer?.Stop();
+                CoverImageCacheService.ForceGarbageCollection();
+            };
+            _scrollCleanupTimer.Start();
         }
 
         private void UpdateNowPlayingInfo(Track? track)

@@ -224,6 +224,7 @@ namespace QAMP
                 {
                     e.Cancel = true; // ГОВОРИМ WINDOWS: НЕ ЗАКРЫВАЙ ОКНО
                     this.Hide();     // Просто скрываем его с глаз
+                    MemoryOptimizer.RunAsync(this.Dispatcher);
                     App.LogInfo("OnClosing: App hidden to tray instead of closing.");
                     return;          // ВАЖНО: выходим из метода здесь
                 }
@@ -233,6 +234,7 @@ namespace QAMP
                 App.LogInfo("=== OnClosing FULL EXIT START ===");
 
                 _playService.Dispose();
+                CoverImageCacheService.ClearMemoryCache();
 
                 // Сохранение данных
                 var volumeStr = _playService.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -413,7 +415,7 @@ namespace QAMP
             else
             {
                 // Текст без таймкодов - разбиваем на отдельные строки для навигации
-                string textToDisplay = string.IsNullOrEmpty(finalLyrics) ? "Текст не найден." : finalLyrics;
+                string textToDisplay = string.IsNullOrEmpty(finalLyrics) ? "Lyrics are missing" : finalLyrics;
                 _parsedLyrics = CreatePlainTextLines(textToDisplay);
                 LyricsListBox.ItemsSource = _parsedLyrics;
             }

@@ -276,7 +276,7 @@ namespace QAMP.Models
             get => _BPM;
             set
             {
-                if(_BPM != value)
+                if (_BPM != value)
                 {
                     _BPM = value;
                     OnPropertyChanged(nameof(BPM));

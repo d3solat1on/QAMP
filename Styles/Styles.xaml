@@ -3,7 +3,7 @@
     <Style x:Key="ModernSliderStyle"
            TargetType="Slider">
         <Setter Property="Background"
-                Value="{DynamicResource BorderBrush}"/>
+                Value="{StaticResource BorderBrush}"/>
         <Setter Property="VerticalAlignment"
                 Value="Center"/>
         <Setter Property="Template">
@@ -12,7 +12,7 @@
                     <Grid>
                         <Border x:Name="TrackBackground"
                                 Height="4"
-                                Background="{DynamicResource BorderBrush}"
+                                Background="{StaticResource BorderBrush}"
                                 CornerRadius="{DynamicResource AppCornerRadius}"
                                 VerticalAlignment="Center"/>
 
@@ -35,7 +35,7 @@
                                         <ControlTemplate TargetType="Thumb">
                                             <Ellipse Width="14"
                                                      Height="14"
-                                                     Fill="{DynamicResource ForegroundBrush}">
+                                                     Fill="{StaticResource ForegroundBrush}">
                                                 <Ellipse.Effect>
                                                     <DropShadowEffect BlurRadius="5"
                                                                       ShadowDepth="0"
@@ -86,12 +86,12 @@
                         <Trigger Property="IsMouseOver"
                                  Value="True">
                             <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                    Value="{StaticResource SecondaryBackgroundBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed"
                                  Value="True">
                             <Setter Property="Background"
-                                    Value="{DynamicResource TertiaryBackgroundBrush}"/>
+                                    Value="{StaticResource TertiaryBackgroundBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -131,12 +131,12 @@
                         <Trigger Property="IsMouseOver"
                                  Value="True">
                             <Setter Property="Background"
-                                    Value="{DynamicResource BorderBrush}"/>
+                                    Value="{StaticResource BorderBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed"
                                  Value="True">
                             <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                    Value="{StaticResource SecondaryBackgroundBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -158,9 +158,9 @@
     <Style x:Key="ModernContextMenu"
            TargetType="ContextMenu">
         <Setter Property="Background"
-                Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                Value="{StaticResource SecondaryBackgroundBrush}"/>
         <Setter Property="BorderBrush"
-                Value="{DynamicResource BorderBrush}"/>
+                Value="{StaticResource BorderBrush}"/>
         <Setter Property="BorderThickness"
                 Value="1"/>
         <Setter Property="Padding"
@@ -181,9 +181,9 @@
 
     <Style TargetType="ContextMenu">
         <Setter Property="Background"
-                Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                Value="{StaticResource SecondaryBackgroundBrush}"/>
         <Setter Property="BorderBrush"
-                Value="{DynamicResource BorderBrush}"/>
+                Value="{StaticResource BorderBrush}"/>
         <Setter Property="BorderThickness"
                 Value="1"/>
         <Setter Property="Template">
@@ -225,7 +225,7 @@
                                 <Path x:Name="Arrow"
                                       Grid.Column="1"
                                       Data="M 0,0 L 4,3.5 L 0,7 Z"
-                                      Fill="{DynamicResource ForegroundBrush}"
+                                      Fill="{StaticResource ForegroundBrush}"
                                       Margin="10,0,10,0"
                                       VerticalAlignment="Center"
                                       Visibility="Collapsed"/>
@@ -237,8 +237,8 @@
                                        Placement="Right"
                                        HorizontalOffset="-2"
                                        PopupAnimation="Fade">
-                                    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                            BorderBrush="{DynamicResource BorderBrush}"
+                                    <Border Background="{StaticResource SecondaryBackgroundBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1"
                                             CornerRadius="{DynamicResource AppCornerRadius}"
                                             Padding="1">
@@ -253,7 +253,7 @@
                                  Value="True">
                             <Setter TargetName="Bg"
                                     Property="Background"
-                                    Value="{DynamicResource TertiaryBackgroundBrush}"/>
+                                    Value="{StaticResource TertiaryBackgroundBrush}"/>
                         </Trigger>
                         <Trigger Property="HasItems"
                                  Value="True">
@@ -393,7 +393,7 @@
         <Setter Property="Background"
                 Value="{DynamicResource AccentBrush}"/>
         <Setter Property="Foreground"
-                Value="{DynamicResource TextBrush}"/>
+                Value="{StaticResource TextBrush}"/>
         <Setter Property="FontWeight"
                 Value="Bold"/>
         <Style.Resources>
@@ -444,5 +444,31 @@
                 Value="True"/>
         <Setter Property="ScrollViewer.IsDeferredScrollingEnabled"
                 Value="False"/>
+    </Style>
+    <Style TargetType="ToolTip">
+        <Setter Property="Background"
+                Value="{StaticResource SecondaryBackgroundBrush}"/>
+        <Setter Property="Foreground"
+                Value="{StaticResource ForegroundBrush}"/>
+        <Setter Property="BorderBrush"
+                Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness"
+                Value="1"/>
+        <Setter Property="Padding"
+                Value="5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{DynamicResource AppCornerRadius}">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

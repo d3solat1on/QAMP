@@ -24,7 +24,8 @@ namespace QAMP.Services
         private readonly BASS_CHANNELINFO _channelInfo = new();
         private int _sampleRate = 44100;
         private readonly SYNCPROC? _endSyncProc;
-
+        private readonly SemaphoreSlim _playSemaphore = new(1, 1);
+        private int _endSyncHandle = 0;
         public float[] EqGains { get; set; } = new float[10];
         private readonly int[] _eqFxHandles = new int[10];
         private int _reverbFxHandle = 0;
@@ -179,61 +180,60 @@ namespace QAMP.Services
 
         public async Task PlayTrack(Track track, bool isNewQueue = false)
         {
-            if (isNewQueue || _actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
-            {
-                if (MusicLibrary.Instance.CurrentPlaylist != null)
-                {
-                    _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
-                    System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь инициализирована: {_actualPlayingQueue.Count} треков");
-                }
-            }
-
+            await _playSemaphore.WaitAsync();
             try
             {
-                Stop();
+                if (isNewQueue || _actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
+                {
+                    if (MusicLibrary.Instance.CurrentPlaylist != null)
+                    {
+                        _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
+                        System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь... {_actualPlayingQueue.Count}");
+                    }
+                }
+
+                StopInternal();
                 CurrentTrack = track;
                 _playCountIncremented = false;
 
+                int stream = 0;
+
                 await Task.Run(() =>
                 {
-                    // Создаем стрим для файла
-                    int stream = CreateStreamFromFile(track.Path);
-
+                    stream = CreateStreamFromFile(track.Path);
                     if (stream == 0)
                     {
                         int error = (int)Bass.BASS_ErrorGetCode();
                         throw new Exception($"Failed to create stream. BASS error: {error}");
                     }
 
-                    _currentStream = stream;
-
-                    // Получаем информацию о канале
-                    Bass.BASS_ChannelGetInfo(_currentStream, _channelInfo);
+                    Bass.BASS_ChannelGetInfo(stream, _channelInfo);
                     _sampleRate = _channelInfo.freq;
 
-                    // Устанавливаем громкость
                     float linearVolume = (float)(_volume * _masterGain);
-                    Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                    Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
 
-                    // Применяем эквалайзер, если есть
                     ApplyEqualizerToStream();
 
-                    // Получаем длительность
-                    long length = Bass.BASS_ChannelGetLength(_currentStream, BASSMode.BASS_POS_BYTE);
-                    _duration = Bass.BASS_ChannelBytes2Seconds(_currentStream, length);
+                    long length = Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE);
+                    _duration = Bass.BASS_ChannelBytes2Seconds(stream, length);
 
                     int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
-
                     Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
 
-                    // Устанавливаем синхронизацию для окончания трека
                     if (_endSyncProc != null)
                     {
-                        Bass.BASS_ChannelSetSync(_currentStream, BASSSync.BASS_SYNC_END, 0, _endSyncProc, IntPtr.Zero);
+                        _endSyncHandle = Bass.BASS_ChannelSetSync(stream, BASSSync.BASS_SYNC_END, 0, _endSyncProc, IntPtr.Zero);
                     }
                 });
 
-                // Запускаем воспроизведение
+                if (_currentStream != 0 && _currentStream != stream)
+                {
+                    RemoveEffectsFromStream(_currentStream);
+                }
+
+                _currentStream = stream;
+
                 if (!Bass.BASS_ChannelPlay(_currentStream, false))
                 {
                     throw new Exception($"Failed to play stream. Error: {Bass.BASS_ErrorGetCode()}");
@@ -250,7 +250,11 @@ namespace QAMP.Services
             {
                 _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Ошибка в PlayTrack: {ex.Message}");
-                Stop();
+                StopInternal();
+            }
+            finally
+            {
+                _playSemaphore.Release();
             }
         }
 
@@ -277,6 +281,36 @@ namespace QAMP.Services
             return stream;
         }
 
+        private void RemoveEffectsFromStream(int stream)
+        {
+            if (stream == 0) return;
+
+            for (int i = 0; i < _eqFxHandles.Length; i++)
+            {
+                if (_eqFxHandles[i] != 0)
+                {
+                    Bass.BASS_ChannelRemoveFX(stream, _eqFxHandles[i]);
+                    _eqFxHandles[i] = 0;
+                }
+            }
+
+            if (_reverbFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(stream, _reverbFxHandle);
+                _reverbFxHandle = 0;
+            }
+            if (_echoFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(stream, _echoFxHandle);
+                _echoFxHandle = 0;
+            }
+            if (_compressorFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(stream, _compressorFxHandle);
+                _compressorFxHandle = 0;
+            }
+        }
+
         private void ApplyEqualizerToStream()
         {
             if (_currentStream == 0) return;
@@ -291,6 +325,8 @@ namespace QAMP.Services
             }
 
             var config = SettingsManager.Instance.Config;
+            Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, (float)config.Balance);
+
             float[] effectiveGains = new float[EqGains.Length];
             EqGains.CopyTo(effectiveGains, 0);
 
@@ -508,7 +544,7 @@ namespace QAMP.Services
                 }
             }
         }
-        
+
         private void EndSyncCallback(int handle, int channel, int data, IntPtr user)
         {
             Application.Current.Dispatcher.BeginInvoke(() =>
@@ -674,8 +710,28 @@ namespace QAMP.Services
 
         public void Stop()
         {
+            _playSemaphore.Wait();
+            try
+            {
+                StopInternal();
+            }
+            finally
+            {
+                _playSemaphore.Release();
+            }
+        }
+        private void StopInternal()
+        {
             if (_currentStream != 0)
             {
+                RemoveEffectsFromStream(_currentStream);
+
+                if (_endSyncHandle != 0)
+                {
+                    Bass.BASS_ChannelRemoveSync(_currentStream, _endSyncHandle);
+                    _endSyncHandle = 0;
+                }
+
                 Bass.BASS_ChannelStop(_currentStream);
                 Bass.BASS_StreamFree(_currentStream);
                 _currentStream = 0;
@@ -683,23 +739,14 @@ namespace QAMP.Services
 
             _positionTimer?.Stop();
             _spectrumTimer?.Stop();
-
             IsPlaying = false;
 
-            // Очищаем эффекты
-            for (int i = 0; i < _eqFxHandles.Length; i++)
-            {
-                _eqFxHandles[i] = 0;
-            }
-
-            // Удаляем временный файл, если он создавался ранее
             if (!string.IsNullOrEmpty(_tempFilePath) && File.Exists(_tempFilePath))
             {
                 try { File.Delete(_tempFilePath); } catch { }
                 _tempFilePath = null;
             }
         }
-
         public void Seek(double seconds)
         {
             if (_currentStream != 0 && CurrentTrack != null)

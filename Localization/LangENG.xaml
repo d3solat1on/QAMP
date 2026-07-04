@@ -1,6 +1,11 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngGraphics">Graphics</System:String>
+        <System:String x:Key="LngInterface">Interface</System:String>
+        <System:String x:Key="LngThemeRestartRequired">Application restart required to apply theme</System:String>
+        <System:String x:Key="LngRestartNow">Restart now</System:String>
+        <System:String x:Key="LngRestartLater">Restart later</System:String>
         <System:String x:Key="Lng5SecForward"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Five sec forward</System:String>
         <System:String x:Key="Lng5SecBack"
@@ -425,6 +430,12 @@ FN+F3 - Previous track
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Help</System:String>
         <System:String x:Key="LngCancelButton"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Cancel</System:String>
+        <System:String x:Key="LngEnableCoverCache"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Enable cover cache</System:String>
+        <System:String x:Key="LngDisableCoverCache"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Disable cover cache</System:String>
+        <System:String x:Key="LngCoverCache"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Cover cache</System:String>
 
         <System:String x:Key="LngSettingsAudioTitle"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Audio Settings</System:String>
@@ -434,6 +445,8 @@ FN+F3 - Previous track
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Custom</System:String>
         <System:String x:Key="LngResetEQ"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Reset</System:String>
+        <System:String x:Key="LngResetAudioSettings"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Reset All</System:String>
         <System:String x:Key="LngEffectsSound"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Sound Processing &amp; Effects</System:String>
         <System:String x:Key="LngReverb"

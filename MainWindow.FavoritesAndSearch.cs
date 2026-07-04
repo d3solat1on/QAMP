@@ -34,7 +34,7 @@ namespace QAMP
                     ? $"\"{selectedTracks[0].Name}\""
                     : $"{selectedTracks.Count} " + (Application.Current.Resources["LngTitlePlaylist"] as string ?? "треков");
 
-                var confirmMessage = (Application.Current.Resources["LngRemoveFromPlaylistConfirm"] as string ?? "Удалить {0} из плейлиста \"{1}\"?")
+                var confirmMessage = (Application.Current.Resources["LngRemoveFromPlaylistConfirm"] as string ?? "Удалить \"{0}\" из плейлиста \"{1}\"?")
                     .Replace("{0}", trackName)
                     .Replace("{1}", selectedPlaylist.Name);
 
@@ -489,7 +489,7 @@ namespace QAMP
             string namePL = Application.Current.FindResource("LngSearchResults") as string ?? "Результаты поиска";
 
             string descriptionTemplate = Application.Current.FindResource("LngSearchDescription") as string
-                                         ?? "По запросу: \"{0}\" найдено {1} треков";
+                                         ?? "По запросу: \"{0}\" найдено \"{1}\" треков";
 
             string formattedDescription = string.Format(descriptionTemplate, searchQuery, results.Count);
 

@@ -17,6 +17,8 @@
     
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <GarbageCollectionAdaptation>1</GarbageCollectionAdaptation>
+    <GCConserveMemory>9</GCConserveMemory>
+    <GCHeapHardLimit>104857600 </GCHeapHardLimit>
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 

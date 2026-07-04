@@ -17,8 +17,8 @@
         WindowStartupLocation="CenterScreen"
         FontFamily="GOST type A"
         Loaded="MainWindow_Loaded"
-        Background="{DynamicResource BackgroundBrush}"
-        Foreground="{DynamicResource ForegroundBrush}">
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource ForegroundBrush}">
 
         <WindowChrome.WindowChrome>
                 <WindowChrome CaptionHeight="30"
@@ -52,7 +52,7 @@
 
                 <!-- Строка заголовка -->
                 <Grid Grid.Row="0"
-                      Background="{DynamicResource SecondaryBackgroundBrush}">
+                      Background="{StaticResource SecondaryBackgroundBrush}">
                         <!-- Название приложения слева (опционально) -->
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Left"
@@ -60,7 +60,7 @@
                                     Margin="10,0,0,0"
                                     WindowChrome.IsHitTestVisibleInChrome="True">
                                 <TextBlock Text="QAMP"
-                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           Foreground="{StaticResource ForegroundBrush}"
                                            FontWeight="Bold"/>
                         </StackPanel>
 
@@ -73,9 +73,9 @@
                                          Width="300"
                                          Height="30"
                                          Padding="8,4"
-                                         Background="{DynamicResource TertiaryBackgroundBrush}"
-                                         Foreground="{DynamicResource ForegroundBrush}"
-                                         BorderBrush="{DynamicResource BorderBrush}"
+                                         Background="{StaticResource TertiaryBackgroundBrush}"
+                                         Foreground="{StaticResource ForegroundBrush}"
+                                         BorderBrush="{StaticResource BorderBrush}"
                                          BorderThickness="1"
                                          VerticalContentAlignment="Center"
                                          Text=""
@@ -182,8 +182,8 @@
                         <Border DockPanel.Dock="Bottom"
                                 ClipToBounds="False"
                                 Height="100"
-                                Background="{DynamicResource SecondaryBackgroundBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
+                                Background="{StaticResource SecondaryBackgroundBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="0,1,0,0"
                                 Padding="15,0">
                                 <Grid>
@@ -227,12 +227,12 @@
                                                 <StackPanel>
                                                         <TextBlock x:Name="LastTrackName"
                                                                    Text=""
-                                                                   Foreground="{DynamicResource ForegroundBrush}"
+                                                                   Foreground="{StaticResource ForegroundBrush}"
                                                                    FontSize="14"
                                                                    FontWeight="Bold"/>
                                                         <TextBlock x:Name="LastTrackExecutor"
                                                                    Text=""
-                                                                   Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                                                   Foreground="{StaticResource SecondaryForegroundBrush}"
                                                                    FontSize="12"/>
                                                 </StackPanel>
                                         </StackPanel>
@@ -408,7 +408,7 @@
                                                         <TextBlock x:Name="CurrentTimeText"
                                                                    Grid.Column="0"
                                                                    Text="0:00"
-                                                                   Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                                                   Foreground="{StaticResource SecondaryForegroundBrush}"
                                                                    FontSize="12"
                                                                    FontFamily="Segoe UI"
                                                                    VerticalAlignment="Center"
@@ -432,7 +432,7 @@
                                                         <TextBlock x:Name="TotalTimeText"
                                                                    Grid.Column="2"
                                                                    Text="0:00"
-                                                                   Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                                                   Foreground="{StaticResource SecondaryForegroundBrush}"
                                                                    FontSize="12"
                                                                    FontFamily="Segoe UI"
                                                                    VerticalAlignment="Center"
@@ -479,7 +479,7 @@
 
                                                 <!-- Процент громкости -->
                                                 <TextBlock x:Name="VolumePercentage"
-                                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                                           Foreground="{StaticResource SecondaryForegroundBrush}"
                                                            FontSize="11"
                                                            FontFamily="Segoe UI"
                                                            Width="35"
@@ -514,7 +514,7 @@
                                 <!-- Левая колонка - плейлисты -->
                                 <Border x:Name="LeftZona"
                                         Grid.Column="0"
-                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
                                         BorderThickness="0,0,1,0"
                                         Margin="0,0,0,0"
                                         Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}">
@@ -535,7 +535,7 @@
                                                                    Text="LIBRARY"
                                                                    FontSize="28"
                                                                    FontWeight="Bold"
-                                                                   Foreground="{DynamicResource ForegroundBrush}"
+                                                                   Foreground="{StaticResource ForegroundBrush}"
                                                                    HorizontalAlignment="Center"
                                                                    Margin="0,0,0,12"/>
 
@@ -679,7 +679,7 @@
                                                          x:Name="PlaylistsListBox"
                                                          Background="Transparent"
                                                          BorderThickness="0"
-                                                         Foreground="White"
+                                                         Foreground="{StaticResource ForegroundBrush}"
                                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                          SelectionChanged="PlaylistsListBox_SelectionChanged"
                                                          Height="Auto"
@@ -717,10 +717,10 @@
                                                                                                 Grid.Column="0"
                                                                                                 Width="45"
                                                                                                 Height="45"
-                                                                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                                                                BorderBrush="{StaticResource BorderBrush}"
                                                                                                 BorderThickness="1"
                                                                                                 CornerRadius="{DynamicResource AppCornerRadius}"
-                                                                                                Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                Background="{StaticResource CentralPanelCardBackground}">
                                                                                                 <Grid>
                                                                                                         <!-- Изображение (если есть) -->
                                                                                                         <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
@@ -809,9 +809,9 @@
 
                                                                                                 <StackPanel.ContextMenu>
 
-                                                                                                        <ContextMenu Background="{DynamicResource ContextMenuBackground}"
-                                                                                                                     Foreground="{DynamicResource ForegroundBrush}"
-                                                                                                                     BorderBrush="{DynamicResource ContextMenuBorderBrush}">
+                                                                                                        <ContextMenu Background="{StaticResource ContextMenuBackground}"
+                                                                                                                     Foreground="{StaticResource ForegroundBrush}"
+                                                                                                                     BorderBrush="{StaticResource ContextMenuBorderBrush}">
                                                                                                                 <ContextMenu.Resources>
                                                                                                                         <!-- 1. Убираем колонку иконок в самом ContextMenu -->
                                                                                                                         <Style TargetType="ContextMenu">
@@ -923,12 +923,12 @@
                                                                                                                 Text="{Binding Converter={StaticResource PlaylistNameLocalizationConverter}}"
                                                                                                                 FontWeight="Bold"
                                                                                                                 FontSize="14"
-                                                                                                                Foreground="{DynamicResource ForegroundBrush}"
+                                                                                                                Foreground="{StaticResource ForegroundBrush}"
                                                                                                                 TextTrimming="CharacterEllipsis"/>
                                                                                                 </StackPanel>
                                                                                                 <TextBlock x:Name="SubText"
                                                                                                            FontSize="10"
-                                                                                                           Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"
                                                                                                            Margin="0,2,0,0">
                                                                                                                 <Run Text="{Binding TrackCount, Mode=OneWay}"/>
                                                                                                                 <Run Text=""/>
@@ -980,7 +980,7 @@
                                                 Grid.Row="0"
                                                 Padding="20"
                                                 Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Header}"
-                                                BorderBrush="{DynamicResource GridHeaderSeperatorBrush}"
+                                                BorderBrush="{StaticResource GridHeaderSeperatorBrush}"
                                                 BorderThickness="0,0,0,1">
 
                                                 <Grid Height="160">
@@ -995,7 +995,7 @@
                                                                 CornerRadius="{DynamicResource AppCornerRadius}"
                                                                 VerticalAlignment="Top"
                                                                 Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Header}"
-                                                                BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
+                                                                BorderBrush="{StaticResource CentralPanelCardBorderBrush}"
                                                                 BorderThickness="1"
                                                                 Margin="0,0,20,0"
                                                                 ClipToBounds="True">
@@ -1014,7 +1014,7 @@
                                                                                                              Value="{x:Null}">
                                                                                                         <Setter Property="Content">
                                                                                                                 <Setter.Value>
-                                                                                                                        <Grid Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                                        <Grid Background="{StaticResource CentralPanelCardBackground}">
                                                                                                                                 <Path Data="{StaticResource PlugForTheCoverPlaylistGeometry}"
                                                                                                                                       Fill="{DynamicResource AccentBrush}"
                                                                                                                                       Opacity="1"
@@ -1031,7 +1031,7 @@
                                                                                                              Value="1">
                                                                                                         <Setter Property="Content">
                                                                                                                 <Setter.Value>
-                                                                                                                        <Grid Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                                        <Grid Background="{StaticResource CentralPanelCardBackground}">
                                                                                                                                 <Path Data="{Binding Source={StaticResource HeartProvider}}"
                                                                                                                                       Fill="{DynamicResource AccentBrush}"
                                                                                                                                       Stretch="Uniform"
@@ -1065,14 +1065,14 @@
                                                                 <TextBlock x:Name="PlaylistRS"
                                                                            Grid.Row="0"
                                                                            Text="{DynamicResource LngPlaylistRS}"
-                                                                           Foreground="{DynamicResource CentralPanelHighlightForeground}"
+                                                                           Foreground="{StaticResource CentralPanelHighlightForeground}"
                                                                            FontSize="12"
                                                                            FontWeight="Bold"
                                                                            Margin="0,0,0,2"/>
 
                                                                 <TextBlock Grid.Row="1"
                                                                            Text="{Binding CurrentPlaylist, Converter={StaticResource PlaylistNameLocalizationConverter}}"
-                                                                           Foreground="{DynamicResource CentralPanelHighlightForeground}"
+                                                                           Foreground="{StaticResource CentralPanelHighlightForeground}"
                                                                            FontSize="44"
                                                                            FontWeight="Black"
                                                                            Margin="0,0,0,5"
@@ -1080,7 +1080,7 @@
 
                                                                 <TextBlock Grid.Row="2"
                                                                            Text="{Binding CurrentPlaylist, Converter={StaticResource PlaylistDescriptionLocalizationConverter}}"
-                                                                           Foreground="{DynamicResource CentralPanelSecondaryForeground}"
+                                                                           Foreground="{StaticResource CentralPanelSecondaryForeground}"
                                                                            FontSize="14"
                                                                            TextWrapping="Wrap"
                                                                            VerticalAlignment="Top"
@@ -1092,21 +1092,21 @@
                                                                             Orientation="Horizontal"
                                                                             VerticalAlignment="Bottom">
                                                                         <TextBlock
-                                                                                Foreground="{DynamicResource TextBrush}"
+                                                                                Foreground="{StaticResource TextBrush}"
                                                                                 FontSize="13">
                                                                                 <Run Text="{Binding CurrentPlaylist.TrackCountDisplay, Mode=OneWay}"/>
                                                                                 <Run Text=""/>
                                                                                 <Run Text="{DynamicResource LngTracksForLeftSide}"/>
                                                                         </TextBlock>
                                                                         <TextBlock Text=" • "
-                                                                                   Foreground="{DynamicResource TextBrush}"/>
+                                                                                   Foreground="{StaticResource TextBrush}"/>
                                                                         <TextBlock Text="{Binding CurrentPlaylist.TotalDurationDisplay}"
-                                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                                   Foreground="{StaticResource TextBrush}"
                                                                                    FontSize="13"/>
                                                                         <TextBlock Text=" • "
-                                                                                   Foreground="{DynamicResource TextBrush}"/>
+                                                                                   Foreground="{StaticResource TextBrush}"/>
                                                                         <TextBlock Text="{Binding CurrentPlaylist.CreatedDate, StringFormat=\{0:dd\\.MM\\.yyyy\}}"
-                                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                                   Foreground="{StaticResource TextBrush}"
                                                                                    FontSize="13"/>
                                                                 </StackPanel>
                                                         </Grid>
@@ -1116,7 +1116,7 @@
                                                 Grid.Row="1"
                                                 Padding="10"
                                                 Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Controls}"
-                                                BorderBrush="{DynamicResource GridHeaderSeperatorBrush}"
+                                                BorderBrush="{StaticResource GridHeaderSeperatorBrush}"
                                                 BorderThickness="0,0,0,1">
                                                 <StackPanel VerticalAlignment="Bottom"
                                                             Orientation="Horizontal"
@@ -1224,10 +1224,11 @@
                                                           AlternationCount="2"
                                                           AllowDrop="True"
                                                           MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
+                                                          SelectionChanged="TracksDataGrid_SelectionChanged"
                                                           DragOver="MainGrid_DragOver">
                                                         <DataGrid.ContextMenu>
-                                                                <ContextMenu Background="{DynamicResource ContextMenuBackground}"
-                                                                             BorderBrush="{DynamicResource ContextMenuBorderBrush}"
+                                                                <ContextMenu Background="{StaticResource ContextMenuBackground}"
+                                                                             BorderBrush="{StaticResource ContextMenuBorderBrush}"
                                                                              Opened="ContextMenu_Opened">
                                                                         <MenuItem x:Name="PlayTrackMenu"
                                                                                   Header="{DynamicResource LngPlayTrackMenu}"
@@ -1256,7 +1257,7 @@
                                                                         <Setter Property="Background"
                                                                                 Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"/>
                                                                         <Setter Property="Foreground"
-                                                                                Value="{DynamicResource DataGridHeaderForeground}"/>
+                                                                                Value="{StaticResource DataGridHeaderForeground}"/>
                                                                         <Setter Property="FontWeight"
                                                                                 Value="Bold"/>
                                                                         <Setter Property="FontSize"
@@ -1264,7 +1265,7 @@
                                                                         <Setter Property="Height"
                                                                                 Value="40"/>
                                                                         <Setter Property="BorderBrush"
-                                                                                Value="{DynamicResource GridHeaderSeperatorBrush}"/>
+                                                                                Value="{StaticResource GridHeaderSeperatorBrush}"/>
                                                                         <Setter Property="BorderThickness"
                                                                                 Value="0,0,1,1"/>
                                                                         <Setter Property="HorizontalContentAlignment"
@@ -1277,7 +1278,7 @@
                                                                         <Setter Property="Background"
                                                                                 Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"/>
                                                                         <Setter Property="Foreground"
-                                                                                Value="{DynamicResource DataGridCellForeground}"/>
+                                                                                Value="{StaticResource DataGridCellForeground}"/>
                                                                         <Setter Property="BorderBrush"
                                                                                 Value="Transparent"/>
                                                                         <Setter Property="VerticalAlignment"
@@ -1290,11 +1291,11 @@
                                                                                 <Trigger Property="IsSelected"
                                                                                          Value="True">
                                                                                         <Setter Property="Background"
-                                                                                                Value="{DynamicResource DataGridRowSelectedBackground}"/>
+                                                                                                Value="{StaticResource DataGridRowSelectedBackground}"/>
                                                                                         <Setter Property="Foreground"
-                                                                                                Value="{DynamicResource DataGridCellSelectedForeground}"/>
+                                                                                                Value="{StaticResource DataGridCellSelectedForeground}"/>
                                                                                         <Setter Property="BorderBrush"
-                                                                                                Value="{DynamicResource DataGridSelectionBorderBrush}"/>
+                                                                                                Value="{StaticResource DataGridSelectionBorderBrush}"/>
                                                                                 </Trigger>
                                                                         </Style.Triggers>
                                                                 </Style>
@@ -1314,7 +1315,7 @@
                                                                                 <Trigger Property="IsSelected"
                                                                                          Value="True">
                                                                                         <Setter Property="Background"
-                                                                                                Value="{DynamicResource DataGridRowSelectedBackground}"/>
+                                                                                                Value="{StaticResource DataGridRowSelectedBackground}"/>
                                                                                 </Trigger>
                                                                         </Style.Triggers>
                                                                 </Style>
@@ -1333,8 +1334,8 @@
                                                                                                 Height="75"
                                                                                                 CornerRadius="{DynamicResource AppCornerRadius}"
                                                                                                 BorderThickness="1"
-                                                                                                BorderBrush="{DynamicResource BorderBrush}"
-                                                                                                Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                BorderBrush="{StaticResource BorderBrush}"
+                                                                                                Background="{StaticResource CentralPanelCardBackground}">
                                                                                                 <Grid>
                                                                                                         <Path Data="{DynamicResource default_coverGeometry}"
                                                                                                               Fill="{DynamicResource AccentBrush}"
@@ -1377,7 +1378,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource DataGridCellForeground}"/>
+                                                                                                Value="{StaticResource DataGridCellForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -1392,7 +1393,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -1407,7 +1408,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -1422,7 +1423,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -1440,7 +1441,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -1457,7 +1458,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                 </Style>
@@ -1470,7 +1471,7 @@
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
                                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                                Value="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
                                                                                         <Setter Property="TextBlock.Margin"
                                                                                                 Value="10,0,0,0"/>
                                                                                 </Style>
@@ -1515,14 +1516,14 @@
                                                                                         <TextBlock.Style>
                                                                                                 <Style TargetType="TextBlock">
                                                                                                         <Setter Property="Foreground"
-                                                                                                                Value="Gray"/>
+                                                                                                                Value="{StaticResource ForegroundBrush}"/>
                                                                                                         <Setter Property="Opacity"
                                                                                                                 Value="0.6"/>
                                                                                                         <Style.Triggers>
                                                                                                                 <DataTrigger Binding="{Binding IsActive}"
                                                                                                                              Value="True">
                                                                                                                         <Setter Property="Foreground"
-                                                                                                                                Value="White"/>
+                                                                                                                                Value="{StaticResource TextBrush}"/>
                                                                                                                         <Setter Property="Opacity"
                                                                                                                                 Value="1.0"/>
                                                                                                                         <Setter Property="FontWeight"
@@ -1545,7 +1546,7 @@
                                         HorizontalAlignment="Stretch"
                                         Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}"
                                         BorderThickness="1,0,0,0"
-                                        BorderBrush="{DynamicResource BorderBrush}">
+                                        BorderBrush="{StaticResource BorderBrush}">
                                         <Grid>
                                                 <Grid x:Name="NowPlayingLoadingPlaceholder"
                                                       Visibility="Collapsed"
@@ -1581,7 +1582,7 @@
                                                             x:Name="NowPlayingPanel">
                                                         <TextBlock x:Name="NowPlaying"
                                                                    Text=""
-                                                                   Foreground="{DynamicResource ForegroundBrush}"
+                                                                   Foreground="{StaticResource ForegroundBrush}"
                                                                    FontSize="20"
                                                                    FontWeight="Bold"
                                                                    Margin="0,0,0,20"/>
@@ -1593,62 +1594,75 @@
                                                                 ClipToBounds="True"
                                                                 Height="300"
                                                                 Width="300"
-                                                                Background="{DynamicResource CentralPanelCardBackground}"
-                                                                BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
+                                                                Background="{StaticResource CentralPanelCardBackground}"
+                                                                BorderBrush="{StaticResource CentralPanelCardBorderBrush}"
                                                                 BorderThickness="1">
-                                                                <Image x:Name="CurrentTrackImage"
-                                                                       HorizontalAlignment="Stretch"
-                                                                       VerticalAlignment="Stretch"
-                                                                       UseLayoutRounding="True"
-                                                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                                <Grid>
+                                                                        <Path x:Name="DefaultCoverPath"
+                                                                              Data="{StaticResource default_coverGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"
+                                                                              Width="275"
+                                                                              Height="275"
+                                                                              Visibility="Visible"/>
+
+                                                                        <Image x:Name="CurrentTrackImage"
+                                                                               HorizontalAlignment="Stretch"
+                                                                               VerticalAlignment="Stretch"
+                                                                               UseLayoutRounding="True"
+                                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                                               Visibility="Collapsed"/>
+                                                                </Grid>
                                                         </Border>
 
                                                         <TextBlock x:Name="CurrentTrackName"
                                                                    Text=""
                                                                    FontSize="22"
                                                                    FontWeight="Bold"
-                                                                   Foreground="{DynamicResource CentralPanelHighlightForeground}"
+                                                                   Foreground="{StaticResource CentralPanelHighlightForeground}"
                                                                    TextWrapping="Wrap"
                                                                    Margin="0,5,0,0"/>
 
                                                         <TextBlock x:Name="CurrentTrackExecutor"
                                                                    Text=""
                                                                    FontSize="20"
-                                                                   Foreground="{DynamicResource CentralPanelSecondaryForeground}"
+                                                                   Foreground="{StaticResource CentralPanelSecondaryForeground}"
                                                                    Margin="0,5"/>
 
                                                         <TextBlock x:Name="CurrentTrackAlbum"
                                                                    Text=""
                                                                    FontSize="20"
-                                                                   Foreground="{DynamicResource CentralPanelSecondaryForeground}"/>
+                                                                   Foreground="{StaticResource CentralPanelSecondaryForeground}"/>
 
                                                         <TextBlock x:Name="CurrentTrackData"
                                                                    Text=""
                                                                    FontSize="16"
-                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                   Foreground="{StaticResource CentralPanelMutedForeground}"
                                                                    Margin="0,20,0,0"/>
 
                                                         <TextBlock x:Name="CurrentTrackExtension"
                                                                    Text=""
                                                                    FontSize="16"
-                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                   Foreground="{StaticResource CentralPanelMutedForeground}"/>
 
                                                         <TextBlock x:Name="CurrentTrackYear"
                                                                    Text=""
                                                                    FontSize="16"
-                                                                   Foreground="{DynamicResource CentralPanelMutedForeground}"/>
+                                                                   Foreground="{StaticResource CentralPanelMutedForeground}"/>
 
                                                         <StackPanel x:Name="NextTrackPanel"
                                                                     Margin="0,20,0,0">
                                                                 <TextBlock x:Name="NextTrack"
                                                                            Text=""
                                                                            FontSize="12"
-                                                                           Foreground="{DynamicResource CentralPanelSecondaryForeground}"
+                                                                           Foreground="{StaticResource CentralPanelSecondaryForeground}"
                                                                            FontWeight="Bold"/>
                                                                 <TextBlock x:Name="NextTrackName"
                                                                            Text=""
                                                                            FontSize="14"
-                                                                           Foreground="{DynamicResource ForegroundBrush}"
+                                                                           Foreground="{StaticResource ForegroundBrush}"
                                                                            TextWrapping="Wrap"/>
                                                         </StackPanel>
 
