@@ -167,7 +167,11 @@ namespace QAMP.Windows
 
         private async void AddThemeButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new();
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "XAML |*.xaml"
+
+            };
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -209,9 +213,9 @@ namespace QAMP.Windows
             CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
 
             string themeName = (sender == DarkThemeRadio) ? "Dark" : "Light";
-            
+
             ThemeManager.SetTheme(themeName);
-            
+
             _themeChanged = true;
         }
 
@@ -230,7 +234,7 @@ namespace QAMP.Windows
         private void CustomThemesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (isInitializing) return;
-            
+
             if (CustomThemesComboBox.SelectedItem is string selectedThemeFile)
             {
                 DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
@@ -321,7 +325,7 @@ namespace QAMP.Windows
                 DefaultModeRadio.IsChecked = true;
 
             LoadCurrentHotkeys();
-            
+
             CheckAutoLaunch(null, null);
 
             isInitializing = false;
@@ -413,6 +417,10 @@ namespace QAMP.Windows
             var config = SettingsManager.Instance.Config;
             config.AccentColor = AccentColorTextBox.Text;
             ThemeManager.UpdateAccentColor(config.AccentColor);
+            if (Application.Current.MainWindow is MainWindow mainWin)
+            {
+                mainWin.UpdateIcons();
+            }
             PlayerService.Instance.RefreshSpectrumControls();
             UpdateColorPreview();
         }

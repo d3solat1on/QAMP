@@ -83,45 +83,37 @@ namespace QAMP
 
                 if (NotificationWindow.Show(confirmMessage, this, NotificationMode.Confirm) == true)
                 {
-                    // КРИТИЧНО: Сохраняем какой плейлист был выбран ДО удаления
                     var previouslySelectedPlaylist = MusicLibrary.Instance.CurrentPlaylist;
 
                     DatabaseService.DeletePlaylist(selectedPlaylist.Id);
 
-                    // Удаляем плейлист из коллекции
                     var playlistToRemove = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
                     if (playlistToRemove != null)
                     {
                         MusicLibrary.Instance.Playlists.Remove(playlistToRemove);
                     }
 
-                    // ПОСЛЕ удаления: восстанавливаем правильный выбор в ListBox
-                    // Проверяем, существует ли плейлист, который был выбран ранее
                     if (previouslySelectedPlaylist != null)
                     {
                         var stillExistsPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == previouslySelectedPlaylist.Id);
                         if (stillExistsPlaylist != null)
                         {
-                            // Ранее выбранный плейлист еще существует - восстанавливаем его
                             PlaylistsListBox.SelectedItem = stillExistsPlaylist;
                         }
                         else
                         {
-                            // Ранее выбранный был удален - выбираем первый доступный
                             if (MusicLibrary.Instance.Playlists.Count > 0)
                             {
                                 PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
                             }
                             else
                             {
-                                // Нет других плейлистов, очищаем UI
                                 MusicLibrary.Instance.CurrentPlaylist = null;
                             }
                         }
                     }
                     else
                     {
-                        // Раньше ничего не было выбрано - выбираем первый доступный
                         if (MusicLibrary.Instance.Playlists.Count > 0)
                         {
                             PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
@@ -211,11 +203,9 @@ namespace QAMP
                 DatabaseService.UpdatePlaylistPinnedState(selectedPlaylist.Id, newPinnedState);
                 selectedPlaylist.IsPinned = newPinnedState;
 
-                // Вместо полной перезагрузки просто обновляем наш View!
                 ICollectionView view = CollectionViewSource.GetDefaultView(MusicLibrary.Instance.Playlists);
                 view?.Refresh();
 
-                // Возвращаем фокус на измененный плейлист
                 PlaylistsListBox.SelectedItem = selectedPlaylist;
 
                 var message = newPinnedState ? (Application.Current.Resources["LngPinnedPlaylist"] as string ?? "Плейсит закреплен")
@@ -232,7 +222,7 @@ namespace QAMP
             }
         }
 
-        private void Playlist_Drop(object sender, DragEventArgs e)
+        private void Playlist_Drop(object sender, DragEventArgs e) //???
         {
             // 1. Проверяем, что сейчас включен именно кастомный/ручной режим сортировки.
             // Если включен "По алфавиту", таскать элементы UI запрещено, иначе начнется хаос.
@@ -282,7 +272,6 @@ namespace QAMP
 
                 if (dialog.ShowDialog() == true)
                 {
-                    // Вместо RefreshPlaylists() используем RefreshSinglePlaylist для оптимизации
                     MusicLibrary.Instance.RefreshSinglePlaylist(selectedPlaylist.Id);
                     PlaylistsListBox.SelectionChanged -= PlaylistsListBox_SelectionChanged;
                     var updatedPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
@@ -328,7 +317,6 @@ namespace QAMP
             {
                 if (PlaylistsListBox.SelectedItem is Playlist currentPlaylist)
                 {
-                    App.LogInfo($"PlayTrack (ContextMenu): {selectedTrack.Executor} - {selectedTrack.Name}");
                     var displayOrder = TracksDataGrid.ItemsSource as IEnumerable<Track>;
                     MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, currentPlaylist, displayOrder);
                     UpdateNextTrackUI();
@@ -402,8 +390,6 @@ namespace QAMP
             else if (track != null)
             {
                 var favoritePlaylist = Library.Playlists.FirstOrDefault(p => p.Name == MusicLibrary.FavoritesName);
-                // Проверяем по ID вместо Contains(), так как Contains() сравнивает по ссылкам объектов
-                // Если трек загружен из разных источников - это разные объекты, хоть ID одинаковые
                 isFavorite = favoritePlaylist?.Tracks.Any(t => t.Path == track.Path) ?? false;
             }
             else
@@ -419,6 +405,13 @@ namespace QAMP
             FavoriteIcon.Fill = (Brush)Application.Current.Resources["AccentBrush"];
         }
 
+        public void UpdateIcons()
+        {
+            FavoriteIcon.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, "AccentBrush");
+            ShuffleImage.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, "AccentBrush");
+            ShuffleImageContorlPanel.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, "AccentBrush");
+        }
+        
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
             PerformSearch();

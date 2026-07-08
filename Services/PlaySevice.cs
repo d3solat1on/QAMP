@@ -31,7 +31,8 @@ namespace QAMP.Services
         private int _reverbFxHandle = 0;
         private int _echoFxHandle = 0;
         private int _compressorFxHandle = 0;
-
+        private long _savedPositionBytes = 0;
+        private bool _wasPlayingBeforeEdit = false;
         private bool _disposed = false;
         private bool _playCountIncremented = false;
 
@@ -152,7 +153,6 @@ namespace QAMP.Services
         private void InitializeBass()
         {
             _isInitialized = true;
-            App.LogInfo("BASS initialized successfully");
         }
 
         public void AddSpectrumControl(SpectrumControl control)
@@ -244,12 +244,12 @@ namespace QAMP.Services
                 _spectrumTimer.Start();
 
                 TrackChanged?.Invoke(track);
-                App.LogInfo($"Start track: {track.Name}");
             }
             catch (Exception ex)
             {
                 _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Ошибка в PlayTrack: {ex.Message}");
+                App.LogException(ex, "PlayTrack");
                 StopInternal();
             }
             finally
@@ -257,7 +257,85 @@ namespace QAMP.Services
                 _playSemaphore.Release();
             }
         }
+        public void PrepareForTagEdit()
+        {
+            if (_currentStream == 0) return;
 
+            _playSemaphore.Wait();
+            try
+            {
+                _savedPositionBytes = Bass.BASS_ChannelGetPosition(_currentStream, BASSMode.BASS_POS_BYTE);
+
+                _wasPlayingBeforeEdit = IsPlaying;
+
+                _positionTimer.Stop();
+                _spectrumTimer.Stop();
+
+                StopInternal();
+            }
+            finally
+            {
+                _playSemaphore.Release();
+            }
+        }
+        public void ResumeAfterTagEdit(Track track)
+        {
+            if (track == null) return;
+
+            _playSemaphore.Wait();
+            try
+            {
+                CurrentTrack = track;
+
+                int stream = CreateStreamFromFile(track.Path);
+                if (stream == 0) return;
+
+                Bass.BASS_ChannelGetInfo(stream, _channelInfo);
+                _sampleRate = _channelInfo.freq;
+
+                float linearVolume = (float)(_volume * _masterGain);
+                Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+
+                ApplyEqualizerToStream();
+
+                long length = Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE);
+                _duration = Bass.BASS_ChannelBytes2Seconds(stream, length);
+
+                int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
+                Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+
+                if (_endSyncProc != null)
+                {
+                    _endSyncHandle = Bass.BASS_ChannelSetSync(stream, BASSSync.BASS_SYNC_END, 0, _endSyncProc, IntPtr.Zero);
+                }
+
+                _currentStream = stream;
+
+                Bass.BASS_ChannelSetPosition(_currentStream, _savedPositionBytes, BASSMode.BASS_POS_BYTE);
+
+                if (_wasPlayingBeforeEdit)
+                {
+                    Bass.BASS_ChannelPlay(_currentStream, false);
+                    IsPlaying = true;
+                    _positionTimer.Start();
+                    _spectrumTimer.Start();
+                }
+                else
+                {
+                    IsPlaying = false;
+                }
+
+                TrackChanged?.Invoke(track);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error huerror: {ex.Message}");
+            }
+            finally
+            {
+                _playSemaphore.Release();
+            }
+        }
         private static int CreateStreamFromFile(string filePath)
         {
             string extension = Path.GetExtension(filePath).ToLowerInvariant();

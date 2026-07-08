@@ -11,6 +11,7 @@ using QAMP.Models;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Flac;
+using QAMP.Services;
 
 
 namespace QAMP.Windows
@@ -194,6 +195,14 @@ namespace QAMP.Windows
         {
             try
             {
+                string messageSavingTags = (string)Application.Current.FindResource("LngSavingTags");
+                TrackInfoToast.StartLoading(messageSavingTags);
+                SaveButton.IsEnabled = false;
+                bool isCurrentTrack = PlayerService.Instance.CurrentTrack?.Path == _track.Path;
+                if (isCurrentTrack)
+                {
+                    PlayerService.Instance.PrepareForTagEdit();
+                }
                 using var fileStream = new FileStream(_track.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                 var fileAbstraction = new StreamFileAbstraction(_track.Path, fileStream, fileStream);
                 using var file = TagLib.File.Create(fileAbstraction);
@@ -214,7 +223,12 @@ namespace QAMP.Windows
 
                 file.Save();
 
-                Services.DatabaseService.UpdateTrackMetadata(_track);
+                DatabaseService.UpdateTrackMetadata(_track);
+
+                if (isCurrentTrack)
+                {
+                    PlayerService.Instance.ResumeAfterTagEdit(_track);
+                }
 
                 string message = (string)Application.Current.FindResource("LngTagsSaved");
                 await TrackInfoToast.ShowAsync(message);
@@ -225,6 +239,12 @@ namespace QAMP.Windows
                 string message = (string)Application.Current.FindResource("LngError");
                 NotificationWindow.Show($"{message} {ex.Message}", this, NotificationWindow.NotificationMode.Info);
                 System.Diagnostics.Debug.WriteLine($"Error saving tags: {ex}");
+                App.LogException(ex, "SaveClickShowTrackInfo");
+            }
+            finally
+            {
+                SaveButton.IsEnabled = true;
+                await TrackInfoToast.StopLoadingAsync();
             }
         }
 
@@ -260,6 +280,7 @@ namespace QAMP.Windows
                 {
                     string message = (string)Application.Current.FindResource("LngError");
                     NotificationWindow.Show($"{message} {ex.Message}", this);
+                    App.LogException(ex, "ExtractCover_Click");
                 }
             }
         }
@@ -303,7 +324,7 @@ namespace QAMP.Windows
             {
                 var lyricsWindow = new LyricsWindow(_track)
                 {
-                    Owner = this // Чтобы окно центрировалось относительно родителя
+                    Owner = this
                 };
                 lyricsWindow.ShowDialog();
             }
@@ -346,23 +367,23 @@ namespace QAMP.Windows
                             tb.Text = lyrics;
                         });
                     }
-                    try
-                    {
-                        using (var file = TagLib.File.Create(track.Path))
-                        {
-                            file.Tag.Lyrics = lyrics;
-                            file.Save();
-                        }
-                        string message = (string)Application.Current.FindResource("LngTextSaved");
-                        await TrackInfoToast.ShowAsync(message);
-                        await TrackInfoToast.StopLoadingAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        await TrackInfoToast.StopLoadingAsync();
-                        string message = (string)Application.Current.FindResource("LngErrorFile");
-                        NotificationWindow.Show($"{message} {ex.Message}", this);
-                    }
+                    // try
+                    // {
+                    //     using (var file = TagLib.File.Create(track.Path))
+                    //     {
+                    //         file.Tag.Lyrics = lyrics;
+                    //         file.Save();
+                    //     }
+                    //     string message = (string)Application.Current.FindResource("LngTextSaved");
+                    //     await TrackInfoToast.ShowAsync(message);
+                    //     await TrackInfoToast.StopLoadingAsync();
+                    // }
+                    // catch (Exception ex)
+                    // {
+                    //     await TrackInfoToast.StopLoadingAsync();
+                    //     string message = (string)Application.Current.FindResource("LngErrorFile");
+                    //     NotificationWindow.Show($"{message} {ex.Message}", this);
+                    // }
                 }
                 else
                 {
@@ -373,7 +394,7 @@ namespace QAMP.Windows
             catch (Exception ex)
             {
                 await TrackInfoToast.StopLoadingAsync();
-                string message = (string)Application.Current.FindResource("LngErorr");
+                string message = (string)Application.Current.FindResource("LngError");
                 NotificationWindow.Show($"{message} {ex.Message}", this);
             }
             finally

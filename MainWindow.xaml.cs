@@ -68,7 +68,7 @@ namespace QAMP
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (hwnd != IntPtr.Zero)
                 {
-                    _mediaManager = new MediaControlsManager(hwnd);
+                    _mediaManager = new MediaControlsManager();
                     InitializeMediaControlsManagerHandlers();
 
                     _mediaManager.UpdatePlaybackStatus(Player.IsPlaying);
@@ -333,6 +333,7 @@ namespace QAMP
                     }
 
                     UpdatePlayPauseIconState();
+                    UpdateShuffleUI();
                     UpdateFavoriteIcon(track);
                     FavoriteButton1Grid.Visibility = Visibility.Visible;
 

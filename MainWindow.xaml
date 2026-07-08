@@ -45,15 +45,11 @@
         <Grid>
                 <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
-                        <!-- Строка заголовка -->
                         <RowDefinition Height="*"/>
-                        <!-- Основной контент -->
                 </Grid.RowDefinitions>
 
-                <!-- Строка заголовка -->
                 <Grid Grid.Row="0"
                       Background="{StaticResource SecondaryBackgroundBrush}">
-                        <!-- Название приложения слева (опционально) -->
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
@@ -64,7 +60,6 @@
                                            FontWeight="Bold"/>
                         </StackPanel>
 
-                        <!-- Панель поиска в центре -->
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
@@ -112,7 +107,6 @@
                                 </Button>
                         </StackPanel>
 
-                        <!-- Кнопки управления справа -->
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
                                     WindowChrome.IsHitTestVisibleInChrome="True">
@@ -178,7 +172,6 @@
                 </Grid>
                 <DockPanel Grid.Row="1"
                            LastChildFill="True">
-                        <!-- Нижняя панель с управлением -->
                         <Border DockPanel.Dock="Bottom"
                                 ClipToBounds="False"
                                 Height="100"
@@ -197,13 +190,11 @@
                                                 <ColumnDefinition Width="1*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Левая панель: избранное и информация о треке -->
                                         <StackPanel Grid.Row="0"
                                                     Grid.Column="0"
                                                     Orientation="Horizontal"
                                                     VerticalAlignment="Center">
 
-                                                <!-- Кнопка избранного -->
                                                 <Grid x:Name="FavoriteButton1Grid"
                                                       Height="40">
                                                         <Button x:Name="FavoriteButton"
@@ -223,7 +214,6 @@
                                                         </Button>
                                                 </Grid>
 
-                                                <!-- Информация о треке -->
                                                 <StackPanel>
                                                         <TextBlock x:Name="LastTrackName"
                                                                    Text=""
@@ -237,7 +227,6 @@
                                                 </StackPanel>
                                         </StackPanel>
 
-                                        <!-- Центральная панель: кнопки управления -->
                                         <StackPanel Grid.Row="0"
                                                     Grid.Column="1"
                                                     Margin="0,5"
@@ -251,7 +240,6 @@
                                                                 <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <!-- Левая группа кнопок -->
                                                         <StackPanel Grid.Column="0"
                                                                     Orientation="Horizontal"
                                                                     HorizontalAlignment="Right">
@@ -309,7 +297,6 @@
                                                                 </Grid>
                                                         </StackPanel>
 
-                                                        <!-- Кнопка Play/Pause -->
                                                         <Grid Grid.Column="1"
                                                               HorizontalAlignment="Center">
                                                                 <Grid Height="40">
@@ -333,7 +320,6 @@
                                                                 </Grid>
                                                         </Grid>
 
-                                                        <!-- Правая группа кнопок -->
                                                         <StackPanel Grid.Column="2"
                                                                     Orientation="Horizontal"
                                                                     HorizontalAlignment="Left">
@@ -395,7 +381,6 @@
                                                         </StackPanel>
                                                 </Grid>
 
-                                                <!-- Прогресс-бар -->
                                                 <Grid Margin="20,5"
                                                       HorizontalAlignment="Stretch">
                                                         <Grid.ColumnDefinitions>
@@ -404,7 +389,6 @@
                                                                 <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <!-- Текущее время -->
                                                         <TextBlock x:Name="CurrentTimeText"
                                                                    Grid.Column="0"
                                                                    Text="0:00"
@@ -416,7 +400,6 @@
                                                                    MinWidth="35"
                                                                    TextAlignment="Right"/>
 
-                                                        <!-- Слайдер -->
                                                         <Slider x:Name="ProgressSlider"
                                                                 Grid.Column="1"
                                                                 Style="{StaticResource ModernSliderStyle}"
@@ -428,7 +411,6 @@
                                                                 VerticalAlignment="Center"
                                                                 Margin="0,5"/>
 
-                                                        <!-- Общее время -->
                                                         <TextBlock x:Name="TotalTimeText"
                                                                    Grid.Column="2"
                                                                    Text="0:00"
@@ -441,7 +423,6 @@
                                                 </Grid>
                                         </StackPanel>
 
-                                        <!-- Правая панель: управление громкостью -->
                                         <StackPanel Grid.Row="0"
                                                     Grid.Column="2"
                                                     Orientation="Horizontal"
@@ -450,7 +431,6 @@
                                                     ClipToBounds="False"
                                                     Margin="0,0,15,0">
 
-                                                <!-- Кнопка звука -->
                                                 <Button x:Name="VolumeButton"
                                                         Style="{StaticResource VolumeButtonStyle}"
                                                         MouseDoubleClick="VolumeButton_MouseDoubleClick"
@@ -467,7 +447,6 @@
                                                               VerticalAlignment="Center"/>
                                                 </Button>
 
-                                                <!-- Слайдер громкости -->
                                                 <Slider x:Name="VolumeSlider"
                                                         Style="{StaticResource ModernSliderStyle}"
                                                         ValueChanged="VolumeSlider_ValueChanged"
@@ -477,7 +456,6 @@
                                                         Maximum="100"
                                                         Margin="5,0,5,0"/>
 
-                                                <!-- Процент громкости -->
                                                 <TextBlock x:Name="VolumePercentage"
                                                            Foreground="{StaticResource SecondaryForegroundBrush}"
                                                            FontSize="11"
@@ -487,8 +465,6 @@
                                         </StackPanel>
                                 </Grid>
                         </Border>
-
-                        <!-- Основная область с тремя колонками -->
 
                         <Grid>
 
@@ -510,8 +486,7 @@
                                                             KernelType="Box"/>
                                         </Image.Effect>
                                 </Image>
-
-                                <!-- Левая колонка - плейлисты -->
+                                <!-- Playlists -->
                                 <Border x:Name="LeftZona"
                                         Grid.Column="0"
                                         BorderBrush="{StaticResource BorderBrush}"
@@ -641,7 +616,6 @@
                                                         </UniformGrid>
                                                 </Grid>
 
-                                                <!-- Placeholder для загрузки плейлистов -->
                                                 <Grid Grid.Row="1"
                                                       x:Name="PlaylistsLoadingPlaceholder"
                                                       Visibility="Collapsed">
@@ -712,7 +686,6 @@
                                                                                                 <ColumnDefinition Width="*"/>
                                                                                         </Grid.ColumnDefinitions>
 
-                                                                                        <!-- Обложка плейлиста -->
                                                                                         <Border x:Name="PlaylistCoverBorder"
                                                                                                 Grid.Column="0"
                                                                                                 Width="45"
@@ -722,9 +695,9 @@
                                                                                                 CornerRadius="{DynamicResource AppCornerRadius}"
                                                                                                 Background="{StaticResource CentralPanelCardBackground}">
                                                                                                 <Grid>
-                                                                                                        <!-- Изображение (если есть) -->
                                                                                                         <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
                                                                                                                Stretch="UniformToFill"
+                                                                                                               RenderOptions.BitmapScalingMode="LowQuality"
                                                                                                                Margin="2">
                                                                                                                 <Image.Style>
                                                                                                                         <Style TargetType="Image">
@@ -745,21 +718,17 @@
                                                                                                                         </Style>
                                                                                                                 </Image.Style>
                                                                                                         </Image>
-                                                                                                        <!-- Текстовая иконка (если нет изображения) -->
                                                                                                         <Grid x:Name="PlaylistPlaceholderContainer">
                                                                                                                 <Grid.Style>
                                                                                                                         <Style TargetType="Grid">
-                                                                                                                                <!-- По умолчанию скрываем весь контейнер заглушки -->
                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                         Value="Collapsed"/>
                                                                                                                                 <Style.Triggers>
-                                                                                                                                        <!-- Показываем, если CoverImage равен null -->
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage}"
                                                                                                                                                      Value="{x:Null}">
                                                                                                                                                 <Setter Property="Visibility"
                                                                                                                                                         Value="Visible"/>
                                                                                                                                         </DataTrigger>
-                                                                                                                                        <!-- Показываем, если строка пути/массив пустой (длина 0) -->
                                                                                                                                         <DataTrigger Binding="{Binding CoverImage.Length}"
                                                                                                                                                      Value="0">
                                                                                                                                                 <Setter Property="Visibility"
@@ -768,18 +737,15 @@
                                                                                                                                 </Style.Triggers>
                                                                                                                         </Style>
                                                                                                                 </Grid.Style>
-                                                                                                                <!-- Сама иконка, которая управляет своей геометрией -->
                                                                                                                 <Path Fill="{DynamicResource AccentBrush}"
                                                                                                                       HorizontalAlignment="Center"
                                                                                                                       VerticalAlignment="Center"
                                                                                                                       Stretch="Uniform">
                                                                                                                         <Path.Style>
                                                                                                                                 <Style TargetType="Path">
-                                                                                                                                        <!-- Геометрия по умолчанию (обычная заглушка) -->
                                                                                                                                         <Setter Property="Data"
                                                                                                                                                 Value="{StaticResource PlugForTheRightSideGeometry}"/>
                                                                                                                                         <Style.Triggers>
-                                                                                                                                                <!-- Если это избранное (Id = 1), меняем геометрию -->
                                                                                                                                                 <DataTrigger Binding="{Binding Id}"
                                                                                                                                                              Value="1">
                                                                                                                                                         <Setter Property="Data"
@@ -801,19 +767,16 @@
                                                                                                 </Grid>
                                                                                         </Border>
 
-                                                                                        <!-- Информация о плейлисте -->
                                                                                         <StackPanel
                                                                                                 Grid.Column="1"
                                                                                                 Margin="8,0,0,0"
                                                                                                 VerticalAlignment="Center">
 
                                                                                                 <StackPanel.ContextMenu>
-
                                                                                                         <ContextMenu Background="{StaticResource ContextMenuBackground}"
                                                                                                                      Foreground="{StaticResource ForegroundBrush}"
                                                                                                                      BorderBrush="{StaticResource ContextMenuBorderBrush}">
                                                                                                                 <ContextMenu.Resources>
-                                                                                                                        <!-- 1. Убираем колонку иконок в самом ContextMenu -->
                                                                                                                         <Style TargetType="ContextMenu">
                                                                                                                                 <Setter Property="Template">
                                                                                                                                         <Setter.Value>
@@ -822,8 +785,6 @@
                                                                                                                                                                 BorderBrush="{TemplateBinding BorderBrush}"
                                                                                                                                                                 BorderThickness="1"
                                                                                                                                                                 Padding="0">
-                                                                                                                                                                <!-- Убираем лишние отступы -->
-                                                                                                                                                                <!-- Используем StackPanel вместо стандартного ItemsPresenter -->
                                                                                                                                                                 <StackPanel IsItemsHost="True"
                                                                                                                                                                             KeyboardNavigation.DirectionalNavigation="Cycle"/>
                                                                                                                                                         </Border>
@@ -831,8 +792,6 @@
                                                                                                                                         </Setter.Value>
                                                                                                                                 </Setter>
                                                                                                                         </Style>
-
-                                                                                                                        <!-- 2. Ваш стиль для MenuItem (уже почти ок, добавим только привязку текста) -->
                                                                                                                         <Style TargetType="MenuItem">
                                                                                                                                 <Setter Property="Template">
                                                                                                                                         <Setter.Value>
@@ -840,7 +799,6 @@
                                                                                                                                                         <Border x:Name="Border"
                                                                                                                                                                 Background="Transparent"
                                                                                                                                                                 Padding="15,7">
-                                                                                                                                                                <!-- Header — это то, что вы написали в MenuItem Header="..." -->
                                                                                                                                                                 <ContentPresenter ContentSource="Header"
                                                                                                                                                                                   RecognizesAccessKey="True"/>
                                                                                                                                                         </Border>
@@ -849,7 +807,7 @@
                                                                                                                                                                          Value="True">
                                                                                                                                                                         <Setter TargetName="Border"
                                                                                                                                                                                 Property="Background"
-                                                                                                                                                                                Value="#3E3E3E"/>
+                                                                                                                                                                                Value="{DynamicResource BackgroundBrush}"/>
                                                                                                                                                                 </Trigger>
                                                                                                                                                         </ControlTemplate.Triggers>
                                                                                                                                                 </ControlTemplate>
@@ -1005,7 +963,8 @@
                                                                                         <Setter Property="Content">
                                                                                                 <Setter.Value>
                                                                                                         <Image Source="{Binding CurrentPlaylist.CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
-                                                                                                               Stretch="UniformToFill"/>
+                                                                                                               Stretch="UniformToFill"
+                                                                                                               RenderOptions.BitmapScalingMode="LowQuality"/>
                                                                                                 </Setter.Value>
                                                                                         </Setter>
 
@@ -1140,13 +1099,13 @@
                                                                 </Button>
                                                         </Grid>
                                                         <Grid Height="40">
-                                                                <Button x:Name="Shuffle_button1"
+                                                                <Button x:Name="Shuffle_buttonContorlPanel"
                                                                         Style="{StaticResource IconButton}"
                                                                         Click="ShuffleButton_Click"
                                                                         Width="40"
                                                                         Height="40"
                                                                         Margin="5,0">
-                                                                        <Path x:Name="ShuffleImage1"
+                                                                        <Path x:Name="ShuffleImageContorlPanel"
                                                                               Width="25"
                                                                               Height="25"
                                                                               Margin="5"
@@ -1175,7 +1134,6 @@
                                         </Border>
 
                                         <Grid Grid.Row="2">
-                                                <!-- Placeholder для загрузки треков -->
                                                 <Grid x:Name="TracksLoadingPlaceholder"
                                                       Visibility="Collapsed"
                                                       Background="{DynamicResource TertiaryBackgroundBrush}">
@@ -1225,7 +1183,8 @@
                                                           AllowDrop="True"
                                                           MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
                                                           SelectionChanged="TracksDataGrid_SelectionChanged"
-                                                          DragOver="MainGrid_DragOver">
+                                                          Drop="TracksDataGrid_Drop"
+                                                          DragOver="TracksDataGrid_DragOver">
                                                         <DataGrid.ContextMenu>
                                                                 <ContextMenu Background="{StaticResource ContextMenuBackground}"
                                                                              BorderBrush="{StaticResource ContextMenuBorderBrush}"
@@ -1343,10 +1302,12 @@
                                                                                                               Margin="5"
                                                                                                               HorizontalAlignment="Center"
                                                                                                               VerticalAlignment="Center"/>
-                                                                                                        <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
+                                                                                                        <Image Source="{Binding Converter={StaticResource ByteArrayToImageConverter}}"
                                                                                                                Stretch="UniformToFill"
                                                                                                                HorizontalAlignment="Center"
-                                                                                                               VerticalAlignment="Center">
+                                                                                                               VerticalAlignment="Center"
+                                                                                                               RenderOptions.BitmapScalingMode="LowQuality"
+                                                                                                               RenderOptions.ClearTypeHint="Enabled">
                                                                                                                 <Image.Style>
                                                                                                                         <Style TargetType="Image">
                                                                                                                                 <Setter Property="Visibility"
@@ -1503,6 +1464,10 @@
                                                                                                 </ControlTemplate>
                                                                                         </Setter.Value>
                                                                                 </Setter>
+                                                                                <Setter Property="Cursor"
+                                                                                        Value="Hand"/>
+                                                                                <EventSetter Event="PreviewMouseLeftButtonDown"
+                                                                                             Handler="LrcLine_Click"/>
                                                                         </Style>
                                                                 </ListBox.ItemContainerStyle>
 
@@ -1540,7 +1505,7 @@
                                         </Grid>
                                 </Grid>
 
-                                <!-- Правая колонка - NOW PLAYING -->
+                                <!-- NowPlaying -->
                                 <Border Grid.Column="2"
                                         Width="300"
                                         HorizontalAlignment="Stretch"

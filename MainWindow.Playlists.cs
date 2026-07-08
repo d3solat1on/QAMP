@@ -22,7 +22,91 @@ namespace QAMP
         private readonly SettingsManager _settingsManager = SettingsManager.Instance;
         private AppSettings AppSettings => _settingsManager.Config;
         private readonly LargeTrackImageConverter _imageConverter = new();
-        private DispatcherTimer? _scrollCleanupTimer;  
+        private DispatcherTimer? _scrollCleanupTimer;
+        private async Task ProcessDroppedPaths(string[] paths)
+        {
+            if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
+            if (MusicLibrary.Instance.CurrentPlaylist == null) return;
+
+            Cursor = Cursors.Wait;
+            int addedCount = 0;
+
+            try
+            {
+                var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
+                };
+
+                var allFiles = new List<string>();
+
+                foreach (var path in paths)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        var folderFiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+                            .Where(file => supportedExtensions.Contains(Path.GetExtension(file)));
+                        allFiles.AddRange(folderFiles);
+                    }
+                    else if (File.Exists(path))
+                    {
+                        if (supportedExtensions.Contains(Path.GetExtension(path)))
+                        {
+                            allFiles.Add(path);
+                        }
+                    }
+                }
+
+                if (allFiles.Count == 0) return;
+
+                var tracks = await Task.Run(() => TagReader.ReadTracksFromFiles([.. allFiles]));
+
+                foreach (var track in tracks)
+                {
+                    if (track != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (!MusicLibrary.Instance.CurrentPlaylist.Tracks.Any(t => t.Path == track.Path))
+                            {
+                                DatabaseService.SaveTrackToPlaylist(MusicLibrary.Instance.CurrentPlaylist.Id, track);
+                                MusicLibrary.Instance.CurrentPlaylist.Tracks.Add(track);
+                                addedCount++;
+                            }
+                        });
+                    }
+                }
+
+                if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
+                {
+                    Player.UpdateQueueOrder([.. selectedPlaylist.Tracks]);
+                }
+
+                if (selectedPlaylist.SortType != TrackSortType.AddedDate)
+                {
+                    ApplySort(selectedPlaylist.SortType);
+                }
+                else
+                {
+                    TracksDataGrid.ItemsSource = null;
+                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
+                }
+
+                UpdateNextTrackUI();
+
+                string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
+                string toastMessage = string.Format(toastTemplate, addedCount);
+                await MyToast.ShowAsync(toastMessage);
+            }
+            catch (Exception ex)
+            {
+                App.LogException(ex, "ProcessDroppedPaths");
+            }
+            finally
+            {
+                Cursor = Cursors.Arrow;
+            }
+        }
         private void AddMusicButton_Click(object sender, RoutedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
@@ -53,81 +137,13 @@ namespace QAMP
 
         private async void AddFolderToCurrentPlaylist()
         {
-            if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
+            if (PlaylistsListBox.SelectedItem is not Playlist) return;
+            if (MusicLibrary.Instance.CurrentPlaylist == null) return;
 
-            if (MusicLibrary.Instance.CurrentPlaylist == null)
-            {
-                string errorMsg = Application.Current.FindResource("LngSelectPlaylistFirst") as string ?? "Сначала выберите плейлист!";
-                NotificationWindow.Show(errorMsg, this);
-                return;
-            }
-
-            string dialogTitle = Application.Current.FindResource("LngChooseFolderTitle") as string ?? "Выберите папку с музыкой (включая подпапки)";
-
-            var folderDialog = new OpenFolderDialog
-            {
-                Title = dialogTitle,
-                Multiselect = true
-            };
-
+            var folderDialog = new OpenFolderDialog { Multiselect = true };
             if (folderDialog.ShowDialog() == true)
             {
-                Cursor = Cursors.Wait;
-                try
-                {
-                    var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
-                        };
-
-                    var files = Directory.GetFiles(folderDialog.FolderName, "*.*", SearchOption.AllDirectories)
-                        .Where(file => supportedExtensions.Contains(Path.GetExtension(file)))
-                        .ToArray();
-
-                    var tracks = TagReader.ReadTracksFromFiles(files);
-                    int addedCount = 0;
-
-                    foreach (var track in tracks)
-                    {
-                        if (track != null)
-                        {
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                if (!MusicLibrary.Instance.CurrentPlaylist.Tracks.Any(t => t.Path == track.Path))
-                                {
-                                    DatabaseService.SaveTrackToPlaylist(MusicLibrary.Instance.CurrentPlaylist.Id, track);
-                                    MusicLibrary.Instance.CurrentPlaylist.Tracks.Add(track);
-                                    addedCount++;
-                                }
-                            });
-                        }
-                    }
-
-                    if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
-                    {
-                        Player.UpdateQueueOrder([.. selectedPlaylist.Tracks]);
-                    }
-
-                    if (selectedPlaylist.SortType != TrackSortType.AddedDate)
-                    {
-                        ApplySort(selectedPlaylist.SortType);
-                    }
-                    else
-                    {
-                        TracksDataGrid.ItemsSource = null;
-                        TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
-                    }
-                    UpdateNextTrackUI();
-
-                    string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
-                    string toastMessage = string.Format(toastTemplate, addedCount);
-
-                    await MyToast.ShowAsync(toastMessage);
-                }
-                finally
-                {
-                    Cursor = Cursors.Arrow;
-                }
+                await ProcessDroppedPaths([folderDialog.FolderName]);
             }
         }
         private async void AddFilesToCurrentPlaylist()
@@ -135,51 +151,15 @@ namespace QAMP
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
             var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
-                        };
+            {
+                ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
+            };
             string extensionsPattern = string.Join(";", supportedExtensions.Select(ext => $"*{ext}"));
 
-            var openFileDialog = new OpenFileDialog
-            {
-                Multiselect = true,
-                Filter = $"Music Files|{extensionsPattern}"
-            };
-
+            var openFileDialog = new OpenFileDialog { Multiselect = true, Filter = $"Music Files|{extensionsPattern}" };
             if (openFileDialog.ShowDialog() == true)
             {
-                int addedCount = 0;
-                foreach (string filePath in openFileDialog.FileNames)
-                {
-                    var newTrack = TagReader.ReadTrackFromFile(filePath);
-                    if (newTrack != null)
-                    {
-                        if (!selectedPlaylist.Tracks.Any(t => t.Path == newTrack.Path))
-                        {
-                            DatabaseService.SaveTrackToPlaylist(selectedPlaylist.Id, newTrack);
-                            selectedPlaylist.Tracks.Add(newTrack);
-                            addedCount++;
-                        }
-                    }
-                }
-                if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
-                {
-                    Player.UpdateQueueOrder([.. selectedPlaylist.Tracks]);
-                }
-                if (selectedPlaylist.SortType != TrackSortType.AddedDate)
-                {
-                    ApplySort(selectedPlaylist.SortType);
-                }
-                else
-                {
-                    TracksDataGrid.ItemsSource = null;
-                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
-                }
-                UpdateNextTrackUI();
-                string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
-                string toastMessage = string.Format(toastTemplate, addedCount);
-
-                await MyToast.ShowAsync(toastMessage);
+                await ProcessDroppedPaths(openFileDialog.FileNames);
             }
         }
 
@@ -212,12 +192,10 @@ namespace QAMP
                     dialog.PlaylistDescription,
                     dialog.PlaylistCoverImage);
 
-                // Вместо RefreshPlaylists() загружаем только новый плейлист
                 var newPlaylist = DatabaseService.GetPlaylistById((int)newId);
 
                 if (newPlaylist != null)
                 {
-                    // Добавляем новый плейлист в коллекцию (оптимизировано)
                     MusicLibrary.Instance.AddNewPlaylist(newPlaylist);
 
                     PlaylistsListBox.SelectedItem = newPlaylist;
@@ -254,7 +232,6 @@ namespace QAMP
             {
                 if (PlaylistsListBox.SelectedItem is Playlist currentPlaylist)
                 {
-                    App.LogInfo($"TrackDoubleClick: {selectedTrack.Executor} - {selectedTrack.Name} | Playlist: {currentPlaylist.Name}");
                     var displayOrder = TracksDataGrid.ItemsSource as IEnumerable<Track>;
                     MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, currentPlaylist, displayOrder);
                     UpdateNextTrackUI();
@@ -306,10 +283,8 @@ namespace QAMP
                 MusicLibrary.Instance.CurrentPlaylist = selected;
                 System.Diagnostics.Debug.WriteLine($"=== ПРОСМОТР ПЛЕЙЛИСТА: {selected.Name} ===");
                 System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
-                App.LogInfo($"SelectPlaylist: {selected.Name} | Tracks: {selected.Tracks.Count}");
                 ApplySort(selected.SortType);
 
-                // Для плейлиста "Избранное" используем цвет приложения
                 if (selected.IsSystemPlaylist || selected.CoverImage == null)
                 {
                     UpdateUpperPanelGradientForFavorites();
@@ -325,8 +300,9 @@ namespace QAMP
                 if (Player.CurrentTrack != null)
                 {
                     UpdateFavoriteIcon(Player.CurrentTrack);
+                    UpdatePlayPauseIconState();
+                    UpdateShuffleUI();
                 }
-                UpdatePlayPauseIconState();
             }
         }
 
@@ -348,7 +324,7 @@ namespace QAMP
                 if (!string.IsNullOrEmpty(config.CustomBackgroundPath))
                 {
                     dominant.A = 0xCC;
-                    secondary.A = 0x66; 
+                    secondary.A = 0x66;
                 }
 
                 var brush = new LinearGradientBrush
@@ -489,14 +465,8 @@ namespace QAMP
 
                 menuItem.Click += (s, args) =>
                 {
-                    // 1. Применяем визуальную сортировку в WPF
                     ApplyPlaylistSorting(sortOrder);
 
-                    // 2. Сохраняем глобальный выбор сортировки (например, в менеджер библиотеки)
-                    // MusicLibrary.Instance.CurrentSortOrder = sortOrder;
-
-                    // 3. Опционально: вызываем сохранение этой настройки в БД/конфиг,
-                    // чтобы при следующем запуске QAMP конфигурация восстановилась.
                     AppSettings.CurrentPlaylistSort = sortOrder;
                     SettingsManager.Instance.Save();
                     string toastMessage = Application.Current.FindResource("LngSortingChanged") as string ?? "Сортировка изменена";
@@ -506,7 +476,6 @@ namespace QAMP
                 contextMenu.Items.Add(menuItem);
             }
 
-            // Привязываем контекстное меню к кнопке, которая его вызвала, и открываем
             if (sender is FrameworkElement element)
             {
                 contextMenu.PlacementTarget = element;

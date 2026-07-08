@@ -196,7 +196,7 @@ public class DatabaseService
             var newCount = checkCmd.ExecuteScalar();
             System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] AFTER - New PlayCount: {(newCount != null ? newCount.ToString() : "NULL")}");
 
-            App.LogInfo($"Statistics: Track ID {trackId} play count incremented.");
+            // App.LogInfo($"Statistics: Track ID {trackId} play count incremented.");
 
             // Уведомляем об изменении статистики
             StatisticsChanged?.Invoke();

@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngSavingTags">Saving tags</System:String>
         <System:String x:Key="LngGraphics">Graphics</System:String>
         <System:String x:Key="LngInterface">Interface</System:String>
         <System:String x:Key="LngThemeRestartRequired">Application restart required to apply theme</System:String>

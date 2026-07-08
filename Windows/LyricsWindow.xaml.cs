@@ -1,6 +1,8 @@
 using System.Windows;
 using QAMP.Dialogs;
 using QAMP.Models;
+using QAMP.Services;
+
 namespace QAMP.Windows;
 
 public partial class LyricsWindow : Window
@@ -18,23 +20,51 @@ public partial class LyricsWindow : Window
     {
         try
         {
-            using (var file = TagLib.File.Create(_track.Path))
+            SaveButton.IsEnabled = false;
+            string messageSavingTags = (string)Application.Current.FindResource("LngTextSaved");
+            TrackInfoToast.StartLoading(messageSavingTags);
+
+            bool isCurrentTrack = PlayerService.Instance.CurrentTrack?.Path == _track.Path;
+
+            if (isCurrentTrack)
             {
-                file.Tag.Lyrics = FullLyricsEditor.Text;
-                file.Save();
+                PlayerService.Instance.PrepareForTagEdit();
             }
-            _track.Lyrics = FullLyricsEditor.Text; // Обновляем модель
 
-            string message = (string)Application.Current.FindResource("LngTextSaved");
+            await Task.Run(() =>
+            {
+                using (var file = TagLib.File.Create(_track.Path))
+                {
+                    file.Tag.Lyrics = FullLyricsEditor.Text; 
+                    file.Save();
+                }
 
+                DatabaseService.UpdateTrackMetadata(_track);
+            });
+
+            _track.Lyrics = FullLyricsEditor.Text;
+
+            if (isCurrentTrack)
+            {
+                PlayerService.Instance.ResumeAfterTagEdit(_track);
+            }
+
+            string message = (string)Application.Current.FindResource("LngTextSaved") ?? "Сохранено";
             await TrackInfoToast.ShowAsync(message);
+
             Close();
         }
         catch (Exception ex)
         {
-            string message = (string)Application.Current.FindResource("LngErorr");
-
+            string message = (string)Application.Current.FindResource("LngError") ?? "Ошибка";
             NotificationWindow.Show($"{message} {ex.Message}", this);
+
+            SaveButton.IsEnabled = true;
+        }
+        finally
+        {
+            await TrackInfoToast.StopLoadingAsync();
+            SaveButton.IsEnabled = true;
         }
     }
 

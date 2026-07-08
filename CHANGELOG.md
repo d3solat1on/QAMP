@@ -1,4 +1,12 @@
 # CHANGELOG
+## (09.07.2026) Version 1.8.1:
+    - LyricsMode performance has been optimized.  
+    - Optimized cover caching.  
+    - The application has been optimized. The LogException method is now only called in the catch block or in the event of an application crash.  
+    - The MediaControlsManager class has been modified.  
+    - Added DragDrop support.  
+    - Now also edit and save tags for a playing track.    
+
 ## (04.07.2026) Version 1.8.0:
     - The Settings window has been redesigned.  
     - To improve performance, track and playlist artwork is now cached.  

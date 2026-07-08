@@ -86,7 +86,8 @@
                                                    FontWeight="Bold"
                                                    Foreground="{StaticResource TextBrush}"
                                                    VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1"
+                                        <Button x:Name="SaveButton"
+                                                Grid.Column="1"
                                                 Style="{StaticResource ModernPlayerButton}"
                                                 Content="{DynamicResource LngSaveButton}"
                                                 Click="Save_Click"

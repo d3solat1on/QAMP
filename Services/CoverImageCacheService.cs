@@ -1,7 +1,7 @@
 using System.IO;
+using System.Text;
 using System.Security.Cryptography;
 using System.Windows.Media.Imaging;
-using QAMP.Models;
 
 namespace QAMP.Services;
 
@@ -10,13 +10,15 @@ public static class CoverImageCacheService
     private static readonly Lock _syncRoot = new();
     private static readonly Dictionary<string, CacheEntry> _memoryCache = new(StringComparer.OrdinalIgnoreCase);
     private static readonly LinkedList<string> _accessOrder = new();
-    private const int MaxMemoryEntries = 32;
-    private const long MaxMemorySizeBytes = 100_000_000;
+    private const int MaxMemoryEntries = 250;
+    private const long MaxMemorySizeBytes = 50_000_000;
     private static long _currentMemorySize = 0;
 
-    private static readonly string _cacheDirectory = Path.Combine(
-        AppDataManager.AppDataPath,
-        "cover_cache");
+    private static string GetCacheDirectory()
+    {
+        string basePath = AppDataManager.AppDataPath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "QAMP");
+        return Path.Combine(basePath, "cover_cache");
+    }
 
     public static bool IsEnabled
     {
@@ -24,7 +26,7 @@ public static class CoverImageCacheService
         {
             try
             {
-                return SettingsManager.Instance.Config.EnableCoverCache;
+                return Models.SettingsManager.Instance.Config.EnableCoverCache;
             }
             catch
             {
@@ -33,21 +35,9 @@ public static class CoverImageCacheService
         }
     }
 
-    static CoverImageCacheService()
+    public static BitmapImage? GetImage(string trackPath, byte[]? bytes, int decodePixelWidth)
     {
-        try
-        {
-            Directory.CreateDirectory(_cacheDirectory);
-        }
-        catch
-        {
-            // I
-        }
-    }
-
-    public static BitmapImage? GetImage(byte[]? bytes, int decodePixelWidth)
-    {
-        if (bytes == null || bytes.Length == 0)
+        if (string.IsNullOrEmpty(trackPath) || bytes == null || bytes.Length == 0)
         {
             return null;
         }
@@ -58,7 +48,8 @@ public static class CoverImageCacheService
             return CreateImageFromBytes(bytes, decodePixelWidth);
         }
 
-        string key = GetCacheKey(bytes);
+        string key = GetCacheKeyFromPath(trackPath);
+
         lock (_syncRoot)
         {
             if (_memoryCache.TryGetValue(key, out var entry))
@@ -68,7 +59,8 @@ public static class CoverImageCacheService
             }
         }
 
-        string cacheFilePath = GetCacheFilePath(key);
+        string cacheDir = GetCacheDirectory();
+        string cacheFilePath = Path.Combine(cacheDir, $"{key}.bin");
         BitmapImage? image = null;
 
         if (File.Exists(cacheFilePath))
@@ -81,7 +73,7 @@ public static class CoverImageCacheService
             image = CreateImageFromBytes(bytes, decodePixelWidth);
             if (image != null)
             {
-                SaveImageToFile(bytes, cacheFilePath);
+                SaveImageToFile(bytes, cacheDir, cacheFilePath);
             }
         }
 
@@ -91,28 +83,6 @@ public static class CoverImageCacheService
         }
 
         return image;
-    }
-
-    public static void ForceGarbageCollection()
-    {
-        lock (_syncRoot)
-        {
-            _memoryCache.Clear();
-            _accessOrder.Clear();
-            _currentMemorySize = 0;
-        }
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive);
-        GC.WaitForPendingFinalizers();
-    }
-
-    public static void ClearMemoryCache()
-    {
-        lock (_syncRoot)
-        {
-            _memoryCache.Clear();
-            _accessOrder.Clear();
-            _currentMemorySize = 0;
-        }
     }
 
     private static BitmapImage? CreateImageFromBytes(byte[] bytes, int decodePixelWidth)
@@ -139,7 +109,9 @@ public static class CoverImageCacheService
     {
         try
         {
-            using var stream = File.OpenRead(filePath);
+            byte[] fileBytes = File.ReadAllBytes(filePath);
+            using var stream = new MemoryStream(fileBytes);
+
             var image = new BitmapImage();
             image.BeginInit();
             image.CacheOption = BitmapCacheOption.OnLoad;
@@ -155,40 +127,37 @@ public static class CoverImageCacheService
         }
     }
 
-    private static void SaveImageToFile(byte[] bytes, string filePath)
+    private static void SaveImageToFile(byte[] bytes, string cacheDir, string filePath)
     {
         try
         {
-            if (File.Exists(filePath))
+            if (!Directory.Exists(cacheDir))
             {
-                return;
+                Directory.CreateDirectory(cacheDir);
             }
 
-            using var stream = File.Open(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-            stream.Write(bytes, 0, bytes.Length);
+            if (File.Exists(filePath)) return;
+            File.WriteAllBytes(filePath, bytes);
         }
         catch
         {
-            // ignore
+            //I
         }
     }
 
-    private static string GetCacheKey(byte[] bytes)
+    private static string GetCacheKeyFromPath(string path)
     {
-        byte[] hash = SHA256.HashData(bytes);
-        return Convert.ToHexString(hash);
-    }
-
-    private static string GetCacheFilePath(string key)
-    {
-        return Path.Combine(_cacheDirectory, $"{key}.bin");
+        byte[] inputBytes = Encoding.UTF8.GetBytes(path.ToLowerInvariant());
+        byte[] hashBytes = SHA256.HashData(inputBytes);
+        return Convert.ToHexString(hashBytes);
     }
 
     private static void StoreInMemory(string key, BitmapImage image)
     {
         lock (_syncRoot)
         {
-            long estimatedImageSize = 800 * 800 * 4;
+            long estimatedImageSize = image.PixelWidth * image.PixelHeight * 4;
+            if (estimatedImageSize <= 0) estimatedImageSize = 200 * 200 * 4;
 
             while ((_memoryCache.Count >= MaxMemoryEntries || _currentMemorySize + estimatedImageSize > MaxMemorySizeBytes)
                    && _accessOrder.Count > 0)
@@ -198,7 +167,10 @@ public static class CoverImageCacheService
                 {
                     _memoryCache.Remove(oldestKey);
                     _accessOrder.RemoveFirst();
-                    _currentMemorySize -= estimatedImageSize;
+
+                    long oldSize = oldEntry.Image.PixelWidth * oldEntry.Image.PixelHeight * 4;
+                    if (oldSize <= 0) oldSize = 200 * 200 * 4;
+                    _currentMemorySize -= oldSize;
                 }
             }
 
@@ -218,8 +190,29 @@ public static class CoverImageCacheService
     private static void Touch(string key)
     {
         _accessOrder.Remove(key);
-
         _accessOrder.AddLast(key);
+    }
+
+    public static void ForceGarbageCollection()
+    {
+        lock (_syncRoot)
+        {
+            _memoryCache.Clear();
+            _accessOrder.Clear();
+            _currentMemorySize = 0;
+        }
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive);
+        GC.WaitForPendingFinalizers();
+    }
+
+    public static void ClearMemoryCache()
+    {
+        lock (_syncRoot)
+        {
+            _memoryCache.Clear();
+            _accessOrder.Clear();
+            _currentMemorySize = 0;
+        }
     }
 
     private sealed class CacheEntry(BitmapImage image)

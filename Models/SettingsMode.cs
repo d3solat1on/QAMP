@@ -14,13 +14,13 @@ public class AppSettings : INotifyPropertyChanged
     }
     public bool CloseToTray { get; set; } = true;
     public bool IsVisualizerEnabled { get; set; } = true;
-    public int VisualizerBarCount { get; set; } = 64; // Количество столбцов спектрограммы
-    public string ColorScheme { get; set; } = "Dark"; // "Dark", "Light", "Custom"
-    public string AccentColor { get; set; } = "#1db954"; // Главный цвет приложения
+    public int VisualizerBarCount { get; set; } = 64; 
+    public string ColorScheme { get; set; } = "Dark"; 
+    public string AccentColor { get; set; } = "#1db954";
     public int CurrentRound { get; set; } = 0;
-    public double[] EqualizerGains { get; set; } = new double[10]; // Значения эквалайзера
+    public double[] EqualizerGains { get; set; } = new double[10]; 
     public double[] CurrentEqualizerValues { get; set; } = new double[10];
-    public string EqualizerPreset { get; set; } = "Пользовательский"; // Текущий выбранный режим
+    public string EqualizerPreset { get; set; } = "Пользовательский";
     public bool ReverbEnabled { get; set; } = false;
     public double ReverbLevel { get; set; } = 50.0;
     public bool EchoEnabled { get; set; } = false;
@@ -37,7 +37,7 @@ public class AppSettings : INotifyPropertyChanged
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;
-    public bool IsAutoLaunchEnabled { get; set; } = false; // Автозапуск приложения
+    public bool IsAutoLaunchEnabled { get; set; } = false; 
     public bool IsCompactMode
     {
         get => _isCompactMode;
@@ -47,13 +47,13 @@ public class AppSettings : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsCompactMode));
         }
     }
-    private string? _customBackgroundPath;
-    public string CustomBackgroundPath
+
+    public string? CustomBackgroundPath
     {
-        get => _customBackgroundPath;
+        get;
         set
         {
-            _customBackgroundPath = value;
+            field = value;
             OnPropertyChanged(nameof(CustomBackgroundPath));
         }
     }
@@ -116,19 +116,11 @@ public class SettingsManager
             OnPropertyChanged(nameof(Config));
         }
     }
-    public event EventHandler? ThemeChanged;
-    public void NotifyThemeChanged()
-    {
-        ThemeChanged?.Invoke(this, EventArgs.Empty);
-        OnPropertyChanged(nameof(Config)); // Принудительное обновление привязок
-    }
-
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     public SettingsManager()
     {
-        // Гарантируем существование папки AppData
         AppDataManager.EnsureAppDataFolderExists();
 
         if (File.Exists(_path))

@@ -29,22 +29,20 @@ namespace QAMP
                 if (MusicLibrary.Instance.PlaybackQueue.Count > 0)
                 {
                     var track = MusicLibrary.Instance.PlaybackQueue[0];
-                    App.LogInfo($"PlayTrack (Toggle): {track.Executor} - {track.Name}");
                     _ = Player.PlayTrack(track);
                     UpdateNextTrackUI();
                 }
             }
             else if (Player.IsPlaying)
             {
-                App.LogInfo($"Pause: {Player.CurrentTrack?.Executor} - {Player.CurrentTrack?.Name}");
                 _ = Player.PauseAsync();
             }
             else
             {
-                App.LogInfo($"Resume: {Player.CurrentTrack?.Executor} - {Player.CurrentTrack?.Name}");
                 Player.Resume();
             }
             UpdatePlayPauseIconState();
+            UpdateShuffleUI();
             UpdateOSD();
         }
 
@@ -61,8 +59,6 @@ namespace QAMP
                 return;
             }
 
-            // Приоритет 1: Если музыка воспроизводится из ДРУГОГО плейлиста,
-            // начинаем воспроизводить выбранный плейлист
             if (Player.CurrentTrack != null && Library.PlayingPlaylist != null &&
                 Library.PlayingPlaylist.Id != Library.CurrentPlaylist.Id)
             {
@@ -70,38 +66,35 @@ namespace QAMP
                 return;
             }
 
-            // Приоритет 2: Если что-то воспроизводится из ТЕКУЩЕГО плейлиста, паузируем
             if (Player.IsPlaying)
             {
                 _ = Player.PauseAsync();
                 UpdatePlayPauseIconState();
+                UpdateShuffleUI();
                 UpdateOSD();
                 return;
             }
 
-            // Приоритет 3: Если текущий трек есть в текущем плейлисте, возобновляем
             if (Player.CurrentTrack != null && Library.CurrentPlaylist.Tracks.Contains(Player.CurrentTrack))
             {
                 Player.Resume();
                 UpdatePlayPauseIconState();
+                UpdateShuffleUI();
                 UpdateOSD();
                 return;
             }
 
-            // Приоритет 4: Начинаем воспроизведение плейлиста с начала
             StartPlayingPlaylist("");
         }
 
         private void StartPlayingPlaylist(string logSuffix)
         {
-            // Устанавливаем текущий плейлист как плейлист для воспроизведения
             Library.PlayingPlaylist = Library.CurrentPlaylist;
 
             var firstTrack = Library.CurrentPlaylist!.Tracks[0];
             var logMsg = string.IsNullOrEmpty(logSuffix)
                 ? $"PlayPlaylist: {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}"
                 : $"PlayPlaylist ({logSuffix}): {Library.CurrentPlaylist.Name} | Track: {firstTrack.Executor} - {firstTrack.Name}";
-            App.LogInfo(logMsg);
             _ = Player.PlayTrack(firstTrack, true);
 
             Library.PlaybackQueue.Clear();
@@ -124,23 +117,19 @@ namespace QAMP
                 _playService.ShuffledQueue = shuffledList;
             }
             UpdatePlayPauseIconState();
+            UpdateShuffleUI();
             UpdateNextTrackUI();
             UpdateOSD();
         }
 
         private void UpdatePlayPauseIcon(bool isPlaying)
         {
-            // 1. Получаем контекст плейлистов
             var playingPlaylist = MusicLibrary.Instance.PlayingPlaylist;
 
-            // 2. Логика для ГЛОБАЛЬНОЙ кнопки (нижняя панель)
-            // Она зависит только от того, играет ли музыка в принципе
             var globalGeometry = isPlaying
                 ? (Geometry)Application.Current.Resources["pauseGeometry"]
                 : (Geometry)Application.Current.Resources["playGeometry"];
 
-            // 3. Логика для КОНТЕКСТНОЙ кнопки (вверху плейлиста)
-            // Она зависит и от состояния, и от того, тот ли это плейлист
             bool isCurrentPlaylistPlaying = isPlaying &&
                                             PlaylistsListBox.SelectedItem is Playlist displayedPlaylist &&
                                             playingPlaylist != null &&
@@ -150,12 +139,9 @@ namespace QAMP
                 ? (Geometry)Application.Current.Resources["pauseGeometry"]
                 : (Geometry)Application.Current.Resources["playGeometry"];
 
-            // 4. Распределяем иконки
-            // Предположим, PlayPauseIcon1 — это нижняя панель, а PlayPauseIcon — верхняя
-            PlayPauseIcon1.Data = contextGeometry; // Верхняя (контекстная)
-            PlayPauseIcon.Data = globalGeometry; // Нижняя (глобальная)
+            PlayPauseIcon1.Data = contextGeometry;
+            PlayPauseIcon.Data = globalGeometry;
 
-            // Принудительное обновление
             PlayPauseIcon.InvalidateVisual();
             PlayPauseIcon1.InvalidateVisual();
             _mediaManager?.UpdatePlaybackStatus(isPlaying);
@@ -168,23 +154,18 @@ namespace QAMP
         private void UpdatePlayPauseIconState()
         {
             bool hasTrack = Player.CurrentTrack != null;
+
             bool hasPlayingPlaylist = Library.PlayingPlaylist != null;
-            // bool playlistMatches = hasPlayingPlaylist && Library.CurrentPlaylist != null && 
-            //                       Library.PlayingPlaylist.Id == Library.CurrentPlaylist.Id;
+
             bool isPlaying = Player.IsPlaying;
 
             bool shouldShowPlaying = hasTrack && hasPlayingPlaylist && isPlaying;
-
-            // System.Diagnostics.Debug.WriteLine($"[UpdatePlayPauseIconState] HasTrack={hasTrack}, HasPlaylist={hasPlayingPlaylist}, " +
-            //     $"Match={playlistMatches} (Playing:{Library.PlayingPlaylist?.Name}={Library.CurrentPlaylist?.Name}), " +
-            //     $"IsPlaying={isPlaying}, ShowPause={shouldShowPlaying}");
 
             UpdatePlayPauseIcon(shouldShowPlaying);
         }
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
-            // Проверяем, что у нас есть текущий трек
             if (Player.CurrentTrack == null)
             {
                 _ = MyToast.ShowAsync(Application.Current.FindResource("LngNoTrackToPlay") as string ?? "No track to play");
@@ -239,54 +220,53 @@ namespace QAMP
 
             if (_playService.IsShuffleEnabled)
             {
-                var sourceQueue = _playService._actualPlayingQueue.ToList(); // Создаем копию, чтобы не изменять оригинальную очередь напрямую
-
-                if (sourceQueue.Count == 0) return;
-
-                Track? currentTrack = Player.CurrentTrack;
-
-                var shuffledList = sourceQueue.OrderBy(x => Guid.NewGuid()).ToList();
-
-                if (currentTrack != null)
+                var sourceQueue = _playService._actualPlayingQueue.ToList();
+                if (sourceQueue.Count > 0)
                 {
-                    var existing = shuffledList.FirstOrDefault(t => t.Path == currentTrack.Path);
-                    if (existing != null) shuffledList.Remove(existing);
-                    shuffledList.Insert(0, currentTrack);
-                }
+                    Track? currentTrack = Player.CurrentTrack;
+                    var shuffledList = sourceQueue.OrderBy(x => Guid.NewGuid()).ToList();
 
-                _playService.ShuffledQueue = shuffledList;
+                    if (currentTrack != null)
+                    {
+                        var existing = shuffledList.FirstOrDefault(t => t.Path == currentTrack.Path);
+                        if (existing != null) shuffledList.Remove(existing);
+                        shuffledList.Insert(0, currentTrack);
+                    }
 
-                // Обновляем обе иконки (верхняя и нижняя панель)
-                if (ShuffleImage != null)
-                {
-                    ShuffleImage.Data = (Geometry)Application.Current.Resources["shuffle_OnGeometry"];
-                    ShuffleImage.Fill = (Brush)Application.Current.Resources["AccentBrush"];
+                    _playService.ShuffledQueue = shuffledList;
                 }
-                if (ShuffleImage1 != null)
-                {
-                    ShuffleImage1.Data = (Geometry)Application.Current.Resources["shuffle_OnGeometry"];
-                    ShuffleImage1.Fill = (Brush)Application.Current.Resources["AccentBrush"];
-                }
-                UpdateNextTrackUI();
             }
             else
             {
                 _playService.ShuffledQueue.Clear();
-                // Обновляем обе иконки (верхняя и нижняя панель)
-                if (ShuffleImage != null)
-                {
-                    ShuffleImage.Data = (Geometry)Application.Current.Resources["shuffleGeometry"];
-                    ShuffleImage.Fill = (Brush)Application.Current.Resources["AccentBrush"];
-                }
-                if (ShuffleImage1 != null)
-                {
-                    ShuffleImage1.Data = (Geometry)Application.Current.Resources["shuffleGeometry"];
-                    ShuffleImage1.Fill = (Brush)Application.Current.Resources["AccentBrush"];
-                }
-                UpdateNextTrackUI();
+            }
+
+            UpdateShuffleUI();
+            UpdateNextTrackUI();
+        }
+        private void UpdateShuffleUI()
+        {
+            bool isShuffle = _playService.IsShuffleEnabled;
+
+            if (ShuffleImage != null)
+            {
+                ShuffleImage.Data = (Geometry)Application.Current.Resources[isShuffle ? "shuffle_OnGeometry" : "shuffleGeometry"];
+                ShuffleImage.Fill = (Brush)Application.Current.Resources["AccentBrush"];
+            }
+
+            if (ShuffleImageContorlPanel != null)
+            {
+                var playingPlaylist = MusicLibrary.Instance.PlayingPlaylist;
+
+                bool isCurrentPlaylistShuffled = isShuffle &&
+                                                PlaylistsListBox.SelectedItem is Playlist displayedPlaylist &&
+                                                playingPlaylist != null &&
+                                                displayedPlaylist.Id == playingPlaylist.Id;
+
+                ShuffleImageContorlPanel.Data = (Geometry)Application.Current.Resources[isCurrentPlaylistShuffled ? "shuffle_OnGeometry" : "shuffleGeometry"];
+                ShuffleImageContorlPanel.Fill = (Brush)Application.Current.Resources["AccentBrush"];
             }
         }
-
         private void ProgressSlider_DragStarted(object sender, DragStartedEventArgs e)
         {
             _isSliderDragging = true;
@@ -312,7 +292,7 @@ namespace QAMP
             slider.Value = newValue;
         }
 
-        private void SortButton_Click(object sender, RoutedEventArgs e) // Обработчик кнопки сортировки
+        private void SortButton_Click(object sender, RoutedEventArgs e)
         {
             if (Library.CurrentPlaylist == null)
             {
