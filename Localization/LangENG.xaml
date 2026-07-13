@@ -1,6 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngPlayNextFromDataGrid">Play Next</System:String>
+        <System:String x:Key="LngPlayFromQueue">Play track from queue</System:String>
+        <System:String x:Key="LngRemoveFromQueue">Remove track from queue</System:String>
+        <System:String x:Key="LngQueueMusic">Track queue</System:String>
         <System:String x:Key="LngSavingTags">Saving tags</System:String>
         <System:String x:Key="LngGraphics">Graphics</System:String>
         <System:String x:Key="LngInterface">Interface</System:String>
@@ -183,7 +187,7 @@
         <System:String x:Key="LngSortNone"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">No Sorting</System:String>
         <System:String x:Key="LngPlaylistUpdate"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist {0} was updated</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist was updated</System:String>
         <System:String x:Key="LngCreatedPlaylist"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Playlist {0} was created</System:String>
         <System:String x:Key="LngSelectPlaylistFirst"

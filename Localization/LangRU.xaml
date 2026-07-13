@@ -1,6 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngPlayNextFromDataGrid">Проиграть следующим</System:String>
+        <System:String x:Key="LngPlayFromQueue">Проиграть трек из очереди</System:String>
+        <System:String x:Key="LngRemoveFromQueue">Удалить трек из очереди</System:String>
+        <System:String x:Key="LngQueueMusic">Очередь треков</System:String>
         <System:String x:Key="LngSavingTags">Сохранение тегов</System:String>
         <System:String x:Key="LngGraphics">Графика</System:String>
         <System:String x:Key="LngInterface">Внешний вид</System:String>
@@ -182,7 +186,7 @@
         <System:String x:Key="LngSortNone"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Без сортировки</System:String>
         <System:String x:Key="LngPlaylistUpdate"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Плейист {0} обновлен</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Плейист обновлен</System:String>
         <System:String x:Key="LngCreatedPlaylist"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Плейист {0} создан</System:String>
         <System:String x:Key="LngSelectPlaylistFirst"

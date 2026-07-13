@@ -276,6 +276,7 @@ namespace QAMP
             _lastTrackWithCover = track;
         }
 
+        // ?
         private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selected)
@@ -429,7 +430,7 @@ namespace QAMP
                     }
                     ApplySort(updatedPlaylist.SortType);
                     UpdateNextTrackUI();
-                    string toastTemple = Application.Current.FindResource("LngPlaylistUpdate") as string ?? "Плейсит {updatedPlaylist.Name} обновлен";
+                    string toastTemple = Application.Current.FindResource("LngPlaylistUpdate") as string ?? "Плейсит обновлен";
                     string toastMessage = string.Format(toastTemple);
                     await MyToast.ShowAsync(toastMessage);
                 }

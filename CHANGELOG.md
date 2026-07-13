@@ -1,4 +1,8 @@
 # CHANGELOG
+## (13.07.2026) Version 1.8.2:
+    - Added manage the queue of tracks in the playing playlist.  
+    - Also, after saving track tags, the data is immediately updated in the TracksDataGrid.  
+    
 ## (09.07.2026) Version 1.8.1:
     - LyricsMode performance has been optimized.  
     - Optimized cover caching.  

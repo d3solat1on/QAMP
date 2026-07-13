@@ -56,6 +56,7 @@ namespace QAMP
             PlaylistsListBox.MouseDoubleClick += PlaylistsListBox_MouseDoubleClick;
             PreviewKeyDown += Window_PreviewKeyDown;
             PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
+            PreviewMouseLeftButtonDown += Window_PreviewMouseLeftButtonDown;
             PlayerService.Instance.AddSpectrumControl(SpectrumViewer);
             Closing += (s, e) => OnClosing(e);
         }

@@ -233,6 +233,10 @@ namespace QAMP.Windows
                 string message = (string)Application.Current.FindResource("LngTagsSaved");
                 await TrackInfoToast.ShowAsync(message);
                 EditModeButton.IsChecked = false;
+                if (Application.Current.MainWindow is MainWindow mainWin)
+                {
+                    mainWin.RefreshSingleTrackInUI(_track);
+                }
             }
             catch (Exception ex)
             {

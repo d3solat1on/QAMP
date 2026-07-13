@@ -93,23 +93,15 @@ namespace QAMP.ViewModels
             }
         }
 
-        /// <summary>
+        //// <summary>
         /// Воспроизводит трек из плейлиста с учетом отображаемого порядка (например, при сортировке)
         /// </summary>
-        /// <param name="track">Трек для воспроизведения</param>
-        /// <param name="playlist">Плейлист, из которого воспроизводится трек</param>
-        /// <param name="displayOrder">Порядок треков для отображения в очереди (если null, использует playlist.Tracks)</param>
-        public void PlayTrackFromPlaylist(Track track, Playlist playlist, IEnumerable<Track>? displayOrder = null)
+        public void PlayTrackFromPlaylist(Track track, Playlist playlist, IEnumerable<Track>? displayOrder = null, bool bypassShuffle = false)
         {
             if (track == null || playlist == null) return;
 
-            System.Diagnostics.Debug.WriteLine($"=== ВОСПРОИЗВЕДЕНИЕ ТРЕКА: {track.Name} из плейлиста: {playlist.Name} ===");
-            System.Diagnostics.Debug.WriteLine($"Использует displayOrder: {displayOrder != null}");
-
-            // Устанавливаем плейлист из которого воспроизводится музыка
             PlayingPlaylist = playlist;
 
-            // Обновляем очередь воспроизведения: используем displayOrder если предоставлен, иначе playlist.Tracks
             var tracksForQueue = displayOrder ?? playlist.Tracks;
 
             PlaybackQueue.Clear();
@@ -118,31 +110,54 @@ namespace QAMP.ViewModels
                 PlaybackQueue.Add(t);
             }
 
-            // Отладка: выводим всю очередь
-            System.Diagnostics.Debug.WriteLine($"PlaybackQueue после заполнения (всего {PlaybackQueue.Count} треков):");
-            for (int i = 0; i < Math.Min(5, PlaybackQueue.Count); i++)
-            {
-                System.Diagnostics.Debug.WriteLine($"  {i}: {PlaybackQueue[i].Name}");
-            }
-            if (PlaybackQueue.Count > 5)
-            {
-                System.Diagnostics.Debug.WriteLine($"  ... еще {PlaybackQueue.Count - 5} треков");
-            }
-
-            // Найдем позицию текущего трека в очереди
-            int trackIndexInQueue = PlaybackQueue.IndexOf(track);
-            System.Diagnostics.Debug.WriteLine($"Позиция трека '{track.Name}' в PlaybackQueue: {trackIndexInQueue}");
-
-            // Если включен Shuffle, обновляем перемешанную очередь
-            if (PlayerService.Instance.IsShuffleEnabled)
+            if (PlayerService.Instance.IsShuffleEnabled && !bypassShuffle)
             {
                 var remainingTracks = PlaybackQueue.Where(t => t != track).OrderBy(x => Guid.NewGuid()).ToList();
                 PlayerService.Instance.ShuffledQueue = [track, .. remainingTracks];
-                System.Diagnostics.Debug.WriteLine($"ShuffledQueue обновлена, Count: {PlayerService.Instance.ShuffledQueue.Count}");
+            }
+            else if (PlayerService.Instance.IsShuffleEnabled && bypassShuffle)
+            {
+                PlayerService.Instance.ShuffledQueue = [.. PlaybackQueue];
+            }
+            _ = PlayerService.Instance.PlayTrack(track, true);
+        }
+        public void AddTrackToPlayNext(Track track)
+        {
+            if (track == null) return;
+
+            Track? currentTrack = PlayerService.Instance.CurrentTrack;
+
+            int targetIndex = 0;
+
+            if (PlayerService.Instance.IsShuffleEnabled)
+            {
+                if (currentTrack != null)
+                {
+                    targetIndex = PlayerService.Instance.ShuffledQueue.IndexOf(currentTrack) + 1;
+                }
+                targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance.ShuffledQueue.Count);
+                PlayerService.Instance.ShuffledQueue.Insert(targetIndex, track);
+            }
+            else
+            {
+                if (currentTrack != null)
+                {
+                    targetIndex = PlayerService.Instance._actualPlayingQueue.IndexOf(currentTrack) + 1;
+                }
+                targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance._actualPlayingQueue.Count); 
+                PlayerService.Instance._actualPlayingQueue.Insert(targetIndex, track);
             }
 
-            // Начинаем с выбранного трека
-            _ = PlayerService.Instance.PlayTrack(track, true);
+            int uiTargetIndex = 0;
+            if (currentTrack != null)
+            {
+                uiTargetIndex = PlaybackQueue.IndexOf(currentTrack) + 1;
+            }
+            uiTargetIndex = Math.Clamp(uiTargetIndex, 0, PlaybackQueue.Count);
+
+            PlaybackQueue.Insert(uiTargetIndex, track);
+
+            System.Diagnostics.Debug.WriteLine($"Трек '{track.Name}' добавлен как следующий. Позиция в UI: {uiTargetIndex}");
         }
         public MusicLibrary()
         {
@@ -242,7 +257,7 @@ namespace QAMP.ViewModels
         public async Task RefreshPlaylistsAsync()
         {
             System.Diagnostics.Debug.WriteLine("=== АСИНХРОННАЯ ЗАГРУЗКА ПЛЕЙЛИСТОВ (БЕЗ ТРЕКОВ) ===");
-            
+
             var list = await DatabaseService.GetPlaylistsAsync();
             System.Diagnostics.Debug.WriteLine($"Загружено плейлистов из БД: {list.Count}");
             foreach (var p in list)
@@ -255,7 +270,7 @@ namespace QAMP.ViewModels
             if (favoritesPlaylist == null)
             {
                 System.Diagnostics.Debug.WriteLine($"Плейлист '{FavoritesName}' не найден, создаем его...");
-                
+
                 long newId = DatabaseService.CreatePlaylist(FavoritesName, "Your favorite tracks", null, isSystemPlaylist: true);
                 favoritesPlaylist = new Playlist
                 {
@@ -306,22 +321,22 @@ namespace QAMP.ViewModels
         public async Task LoadPlaylistTracksAsync(Playlist playlist)
         {
             if (playlist == null) return;
-            
+
             System.Diagnostics.Debug.WriteLine($"=== АСИНХРОННАЯ ЗАГРУЗКА ТРЕКОВ ДЛЯ ПЛЕЙЛИСТА: {playlist.Name} ===");
-            
+
             var tracks = await DatabaseService.GetTracksForPlaylistAsync(playlist.Id);
-            
+
             // Очищаем старые треки
             playlist.Tracks.Clear();
-            
+
             // Добавляем новые треки
             foreach (var track in tracks)
             {
                 playlist.Tracks.Add(track);
             }
-            
+
             System.Diagnostics.Debug.WriteLine($"Загружено {tracks.Count} треков для плейлиста '{playlist.Name}'");
-            
+
             // Уведомляем об изменении
             OnPropertyChanged(nameof(Playlists));
         }
@@ -332,17 +347,17 @@ namespace QAMP.ViewModels
         public async Task LoadAllPlaylistsTracksAsync(Action<int, int>? onProgress = null)
         {
             System.Diagnostics.Debug.WriteLine("=== АСИНХРОННАЯ ЗАГРУЗКА ВСЕХ ТРЕКОВ ===");
-            
+
             int totalPlaylists = Playlists.Count;
             for (int i = 0; i < totalPlaylists; i++)
             {
                 var playlist = Playlists[i];
                 await LoadPlaylistTracksAsync(playlist);
-                
+
                 System.Diagnostics.Debug.WriteLine($"Прогресс: {i + 1}/{totalPlaylists}");
                 onProgress?.Invoke(i + 1, totalPlaylists);
             }
-            
+
             System.Diagnostics.Debug.WriteLine($"=== КОНЕЦ АСИНХРОННОЙ ЗАГРУЗКИ ВСЕХ ТРЕКОВ ===");
         }
 

@@ -234,15 +234,37 @@ namespace QAMP
                     }
 
                     _playService.ShuffledQueue = shuffledList;
+                    MusicLibrary.Instance.PlaybackQueue.Clear();
+                    foreach (var track in _playService.ShuffledQueue)
+                    {
+                        MusicLibrary.Instance.PlaybackQueue.Add(track);
+                    }
                 }
             }
             else
             {
                 _playService.ShuffledQueue.Clear();
+
+                MusicLibrary.Instance.PlaybackQueue.Clear();
+                foreach (var track in _playService._actualPlayingQueue)
+                {
+                    MusicLibrary.Instance.PlaybackQueue.Add(track);
+                }
             }
 
             UpdateShuffleUI();
             UpdateNextTrackUI();
+        }
+        private void PlayNextFromDataGrid_Click(object sender, RoutedEventArgs e)
+        {
+            if (TracksDataGrid.SelectedItem is Track selectedTrack)
+            {
+                if (MusicLibrary.Instance != null && PlayerService.Instance != null)
+                {
+                    MusicLibrary.Instance.AddTrackToPlayNext(selectedTrack);
+                    UpdateNextTrackUI();
+                }
+            }
         }
         private void UpdateShuffleUI()
         {

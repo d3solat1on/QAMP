@@ -151,7 +151,7 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="{DynamicResource AccentColor}"
+                        <GroupBox Header="{DynamicResource LngAccentColor}"
                                   Margin="0,0,0,10"
                                   Foreground="{StaticResource ForegroundBrush}">
                             <StackPanel Margin="10">

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -6,6 +7,7 @@ using System.Windows.Interop;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
+using QAMP.ViewModels;
 using QAMP.Visualization;
 using QAMP.Windows;
 using static QAMP.Dialogs.NotificationWindow;
@@ -21,6 +23,8 @@ namespace QAMP
         private string? _currentLyricsFilePath = null;
         private LrcLine? _lastHighlightedLine = null;
         private bool _hasTimeCodes = false;
+        private Point _queueDragStartPoint;
+        private Track? _queueDraggedTrack;
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
@@ -687,6 +691,173 @@ namespace QAMP
                 {
                     await ProcessDroppedPaths(paths);
                 }
+            }
+        }
+
+        public void RefreshSingleTrackInUI(Track updatedTrack)
+        {
+            if (updatedTrack == null || TracksDataGrid == null) return;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (TracksDataGrid.ItemsSource is System.Collections.IEnumerable items)
+                {
+                    foreach (var item in items)
+                    {
+                        if (item is Track t && t.Path == updatedTrack.Path)
+                        {
+                            t.Lyrics = updatedTrack.Lyrics;
+                            t.Name = updatedTrack.Name;
+                            t.Executor = updatedTrack.Executor;
+                            t.Genre = updatedTrack.Genre;
+                            t.Album = updatedTrack.Album;
+
+                            if (TracksDataGrid.ItemContainerGenerator.ContainerFromItem(t) is FrameworkElement itemProperties)
+                            {
+                                TracksDataGrid.Items.Refresh();
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+
+
+        private void OpenQueue_Click(object sender, RoutedEventArgs e)
+        {
+            if (QueuePanel.Visibility == Visibility.Collapsed)
+            {
+                QueuePanel.Visibility = Visibility.Visible;
+
+                if (MusicLibrary.Instance != null && _playService != null)
+                {
+                    MusicLibrary.Instance.PlaybackQueue.Clear();
+
+                    var activeSource = _playService.IsShuffleEnabled
+                        ? _playService.ShuffledQueue
+                        : _playService._actualPlayingQueue;
+
+                    foreach (var track in activeSource)
+                    {
+                        MusicLibrary.Instance.PlaybackQueue.Add(track);
+                    }
+
+                    QueueListBox.ItemsSource = MusicLibrary.Instance.PlaybackQueue;
+                }
+            }
+            else
+            {
+                QueuePanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (QueuePanel.Visibility == Visibility.Visible)
+            {
+                Point mousePos = e.GetPosition(QueuePanel);
+                bool isOverQueue = mousePos.X >= 0 && mousePos.X <= QueuePanel.ActualWidth &&
+                                   mousePos.Y >= 0 && mousePos.Y <= QueuePanel.ActualHeight;
+
+                if (!isOverQueue)
+                {
+                    QueuePanel.Visibility = Visibility.Collapsed;
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void RemoveFromQueue_Click(object sender, RoutedEventArgs e)
+        {
+            if (QueueListBox.SelectedItem is Track selectedTrack)
+            {
+                MusicLibrary.Instance.PlaybackQueue.Remove(selectedTrack);
+
+                Player._actualPlayingQueue.Remove(selectedTrack);
+                UpdateNextTrackUI();
+            }
+        }
+        private void PlayFromQueue_Click(object sender, RoutedEventArgs e)
+        {
+            if (QueueListBox.SelectedItem is Track selectedTrack)
+            {
+                var playingPlaylist = MusicLibrary.Instance.PlayingPlaylist;
+
+                if (playingPlaylist != null)
+                {
+                    var currentOrder = MusicLibrary.Instance.PlaybackQueue.ToList();
+
+                    MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, playingPlaylist, currentOrder, bypassShuffle: true);
+                }
+                else
+                {
+                    if (MusicLibrary.Instance.CurrentPlaylist != null)
+                    {
+                        var currentPlaylist = MusicLibrary.Instance.CurrentPlaylist;
+                        MusicLibrary.Instance.PlayTrackFromPlaylist(selectedTrack, currentPlaylist);
+                    }
+                }
+                if (_isLyricsMode) UpdateLyricsView();
+            }
+        }
+        private void QueueListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _queueDragStartPoint = e.GetPosition(null);
+            if (ItemsControl.ContainerFromElement(QueueListBox, e.OriginalSource as DependencyObject) is ListBoxItem item)
+            {
+                _queueDraggedTrack = item.Content as Track;
+            }
+        }
+
+        private void QueueListBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && _queueDraggedTrack != null)
+            {
+                Point mousePos = e.GetPosition(null);
+                Vector diff = _queueDragStartPoint - mousePos;
+
+                if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+                {
+                    DragDrop.DoDragDrop(QueueListBox, new DataObject("QueueTrackItem", _queueDraggedTrack), DragDropEffects.Move);
+                }
+            }
+        }
+
+        private void QueueListBox_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("QueueTrackItem"))
+            {
+                e.Effects = DragDropEffects.Move;
+                e.Handled = true;
+            }
+        }
+
+        private void QueueListBox_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("QueueTrackItem"))
+            {
+                if (e.Data.GetData("QueueTrackItem") is not Track droppedTrack) return;
+
+                if (ItemsControl.ContainerFromElement(QueueListBox, e.OriginalSource as DependencyObject) is not ListBoxItem item) return;
+
+                if (item.Content is not Track targetTrack || droppedTrack.Path == targetTrack.Path) return;
+
+                var uiQueue = MusicLibrary.Instance.PlaybackQueue;
+                int oldIndex = uiQueue.IndexOf(droppedTrack);
+                int newIndex = uiQueue.IndexOf(targetTrack);
+
+                if (oldIndex >= 0 && newIndex >= 0)
+                {
+                    uiQueue.Move(oldIndex, newIndex);
+
+                    Player._actualPlayingQueue.RemoveAt(oldIndex);
+                    Player._actualPlayingQueue.Insert(newIndex, droppedTrack);
+                }
+                _queueDraggedTrack = null;
+                e.Handled = true;
+                UpdateNextTrackUI();
             }
         }
 

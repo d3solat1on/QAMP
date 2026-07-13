@@ -14,8 +14,13 @@ namespace QAMP
         public static TaskbarIcon? TrayIcon { get; private set; }
         protected override void OnStartup(StartupEventArgs e)
         {
+#if DEBUG
+            const string appName = "QAMP_MusicPlayer_Unique_Mutex_Debug";
+            Mutex _mutex = new(true, appName, out bool createdNew);
+#else
             const string appName = "QAMP_MusicPlayer_Unique_Mutex";
             Mutex _mutex = new(true, appName, out bool createdNew);
+#endif            
 
             if (!createdNew)
             {
@@ -46,7 +51,11 @@ namespace QAMP
             {
                 TrayIcon = new TaskbarIcon
                 {
+#if DEBUG
+                    ToolTipText = "QAMP_DEBUG",
+#else
                     ToolTipText = "QAMP",
+#endif             
                     Visibility = Visibility.Visible,
                     IconSource = new System.Windows.Media.ImageSourceConverter()
                         .ConvertFromString("pack://application:,,,/icon/QAMP_icon.ico") as System.Windows.Media.ImageSource
