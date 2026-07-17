@@ -218,52 +218,16 @@ namespace QAMP
         {
             _playService.IsShuffleEnabled = !_playService.IsShuffleEnabled;
 
-            if (_playService.IsShuffleEnabled)
-            {
-                var sourceQueue = _playService._actualPlayingQueue.ToList();
-                if (sourceQueue.Count > 0)
-                {
-                    Track? currentTrack = Player.CurrentTrack;
-                    var shuffledList = sourceQueue.OrderBy(x => Guid.NewGuid()).ToList();
-
-                    if (currentTrack != null)
-                    {
-                        var existing = shuffledList.FirstOrDefault(t => t.Path == currentTrack.Path);
-                        if (existing != null) shuffledList.Remove(existing);
-                        shuffledList.Insert(0, currentTrack);
-                    }
-
-                    _playService.ShuffledQueue = shuffledList;
-                    MusicLibrary.Instance.PlaybackQueue.Clear();
-                    foreach (var track in _playService.ShuffledQueue)
-                    {
-                        MusicLibrary.Instance.PlaybackQueue.Add(track);
-                    }
-                }
-            }
-            else
-            {
-                _playService.ShuffledQueue.Clear();
-
-                MusicLibrary.Instance.PlaybackQueue.Clear();
-                foreach (var track in _playService._actualPlayingQueue)
-                {
-                    MusicLibrary.Instance.PlaybackQueue.Add(track);
-                }
-            }
+            RebuildPlaybackQueue();
 
             UpdateShuffleUI();
-            UpdateNextTrackUI();
         }
         private void PlayNextFromDataGrid_Click(object sender, RoutedEventArgs e)
         {
             if (TracksDataGrid.SelectedItem is Track selectedTrack)
             {
-                if (MusicLibrary.Instance != null && PlayerService.Instance != null)
-                {
-                    MusicLibrary.Instance.AddTrackToPlayNext(selectedTrack);
-                    UpdateNextTrackUI();
-                }
+                PlayNext(selectedTrack);
+                UpdateNextTrackUI();
             }
         }
         private void UpdateShuffleUI()
@@ -289,6 +253,117 @@ namespace QAMP
                 ShuffleImageContorlPanel.Fill = (Brush)Application.Current.Resources["AccentBrush"];
             }
         }
+        // later //
+        public void RebuildPlaybackQueue()
+        {
+            Track? currentTrack = Player.CurrentTrack;
+
+            if (_playService.IsShuffleEnabled)
+            {
+                if (_playService.ShuffledQueue.Count == 0)
+                {
+                    var sourceQueue = _playService._actualPlayingQueue.ToList();
+
+                    if (sourceQueue.Count > 0)
+                    {
+                        var shuffledList = sourceQueue.OrderBy(x => Guid.NewGuid()).ToList();
+
+                        if (currentTrack != null)
+                        {
+                            var existing = shuffledList.FirstOrDefault(t => t.Path == currentTrack.Path);
+                            if (existing != null) shuffledList.Remove(existing);
+                            shuffledList.Insert(0, currentTrack);
+                        }
+
+                        _playService.ShuffledQueue = shuffledList;
+                    }
+                }
+            }
+            else
+            {
+                _playService.ShuffledQueue.Clear();
+            }
+
+            SyncPlaybackQueueWithCurrentState();
+        }
+        public void SyncPlaybackQueueWithCurrentState()
+        {
+            MusicLibrary.Instance.PlaybackQueue.Clear();
+
+            var queueToLoad = _playService.IsShuffleEnabled
+                ? _playService.ShuffledQueue
+                : _playService._actualPlayingQueue;
+
+            foreach (var track in queueToLoad)
+            {
+                MusicLibrary.Instance.PlaybackQueue.Add(track);
+            }
+
+            UpdateNextTrackUI();
+        }
+
+
+        // <<<???>>>
+        public void PlayNext(Track nextTrack)
+        {
+            if (nextTrack == null) return;
+
+            Track? currentTrack = Player.CurrentTrack;
+
+            _playService._actualPlayingQueue.Remove(nextTrack);
+            _playService.ShuffledQueue.Remove(nextTrack);
+
+            if (currentTrack != null)
+            {
+                int currentIndex = _playService._actualPlayingQueue.IndexOf(currentTrack);
+                if (currentIndex != -1)
+                {
+                    _playService._actualPlayingQueue.Insert(currentIndex + 1, nextTrack);
+                }
+                else
+                {
+                    _playService._actualPlayingQueue.Insert(0, nextTrack);
+                }
+            }
+            else
+            {
+                _playService._actualPlayingQueue.Insert(0, nextTrack);
+            }
+
+            if (_playService.IsShuffleEnabled)
+            {
+                if (currentTrack != null)
+                {
+                    int currentIndex = _playService.ShuffledQueue.IndexOf(currentTrack);
+                    if (currentIndex != -1)
+                    {
+                        _playService.ShuffledQueue.Insert(currentIndex + 1, nextTrack);
+                    }
+                    else
+                    {
+                        _playService.ShuffledQueue.Insert(0, nextTrack);
+                    }
+                }
+                else
+                {
+                    _playService.ShuffledQueue.Insert(0, nextTrack);
+                }
+            }
+
+            MusicLibrary.Instance.PlaybackQueue.Clear();
+
+            var queueToLoad = _playService.IsShuffleEnabled
+                ? _playService.ShuffledQueue
+                : _playService._actualPlayingQueue;
+
+            foreach (var track in queueToLoad)
+            {
+                MusicLibrary.Instance.PlaybackQueue.Add(track);
+            }
+
+            UpdateNextTrackUI();
+        }
+
         private void ProgressSlider_DragStarted(object sender, DragStartedEventArgs e)
         {
             _isSliderDragging = true;

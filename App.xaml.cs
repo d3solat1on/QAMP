@@ -11,20 +11,24 @@ namespace QAMP
 {
     public partial class App : Application
     {
+        private static Mutex? _appMutex;
+
+        private static readonly int WM_SHOWME = RegisterWindowMessage("QAMP_UNIQUE_SHOW_ME_MSG");
         public static TaskbarIcon? TrayIcon { get; private set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
 #if DEBUG
-            const string appName = "QAMP_MusicPlayer_Unique_Mutex_Debug";
-            Mutex _mutex = new(true, appName, out bool createdNew);
+            const string appName = "Global\\QAMP_MusicPlayer_Unique_Mutex_Debug";
 #else
-            const string appName = "QAMP_MusicPlayer_Unique_Mutex";
-            Mutex _mutex = new(true, appName, out bool createdNew);
+            const string appName = "Global\\QAMP_MusicPlayer_Unique_Mutex";
 #endif            
+
+            _appMutex = new Mutex(true, appName, out bool createdNew);
 
             if (!createdNew)
             {
-                ActivateExistingInstance();
+                SignalToExistingInstance();
                 Current.Shutdown();
                 return;
             }
@@ -43,6 +47,42 @@ namespace QAMP
                 Path.Combine(AppContext.BaseDirectory, "QAMP.exe"),
                 "QAMPCompany.QAMP.MusicPlayer"
             ));
+        }
+
+        private static void SignalToExistingInstance()
+        {
+            PostMessage(
+                HWND_BROADCAST,
+                WM_SHOWME,
+                IntPtr.Zero,
+                IntPtr.Zero
+            );
+        }
+
+        public static void RegisterWindowForSingleInstance(Window window)
+        {
+            var wih = new System.Windows.Interop.WindowInteropHelper(window);
+            var hWnd = wih.EnsureHandle();
+
+            System.Windows.Interop.HwndSource.FromHwnd(hWnd)?.AddHook((IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) =>
+            {
+                if (msg == WM_SHOWME && msg != 0)
+                {
+                    if (window.Visibility != Visibility.Visible)
+                    {
+                        window.Show();
+                    }
+
+                    if (window.WindowState == WindowState.Minimized)
+                    {
+                        window.WindowState = WindowState.Normal;
+                    }
+
+                    window.Activate();
+                    handled = true;
+                }
+                return IntPtr.Zero;
+            });
         }
 
         private static void InitializeTray()
@@ -84,7 +124,6 @@ namespace QAMP
                 LogException(ex, "TrayInit Error");
             }
         }
-
         private static void InitializeBass()
         {
             try
@@ -120,7 +159,6 @@ namespace QAMP
                 LogException(ex, "BASS init Error");
             }
         }
-
         private static void InitializeInterface()
         {
             try
@@ -138,7 +176,6 @@ namespace QAMP
                 LogException(ex, "Interface init Error");
             }
         }
-
         public static void LogException(Exception? ex, string source)
         {
             if (ex == null) return;
@@ -156,7 +193,6 @@ namespace QAMP
                 Debug.WriteLine("ььуьуьу баб эбэбэ");
             }
         }
-
         private static void InitializeUnhandledExceptions()
         {
             static void handler(object s, UnhandledExceptionEventArgs ex)
@@ -194,22 +230,6 @@ namespace QAMP
             };
         }
 
-        private static void ActivateExistingInstance()
-        {
-            try
-            {
-                var current = Process.GetCurrentProcess();
-                var running = Process.GetProcessesByName(current.ProcessName)
-                    .FirstOrDefault(p => p.Id != current.Id);
-
-                if (running?.MainWindowHandle != IntPtr.Zero && running != null)
-                {
-                    ShowWindow(running.MainWindowHandle, 9);
-                    SetForegroundWindow(running.MainWindowHandle);
-                }
-            }
-            catch { }
-        }
         private void OpenQAMP_Click(object? sender, RoutedEventArgs e)
         {
             if (Current.MainWindow is MainWindow mainWindow)
@@ -254,12 +274,20 @@ namespace QAMP
             TrayIcon?.Dispose();
             Current.Shutdown();
         }
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _appMutex?.Dispose();
+            Bass.BASS_Free();
+            base.OnExit(e);
+        }
 
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private const int HWND_BROADCAST = 0xffff;
 
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern int RegisterWindowMessage(string lpString);
 
         [DllImport("shell32.dll")]
         private static extern int SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string appId);

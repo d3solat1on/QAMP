@@ -772,10 +772,13 @@ namespace QAMP
         {
             if (QueueListBox.SelectedItem is Track selectedTrack)
             {
-                MusicLibrary.Instance.PlaybackQueue.Remove(selectedTrack);
+                _playService._actualPlayingQueue.Remove(selectedTrack);
 
-                Player._actualPlayingQueue.Remove(selectedTrack);
-                UpdateNextTrackUI();
+                if (_playService.IsShuffleEnabled)
+                {
+                    _playService.ShuffledQueue.Remove(selectedTrack);
+                }
+                SyncPlaybackQueueWithCurrentState();
             }
         }
         private void PlayFromQueue_Click(object sender, RoutedEventArgs e)

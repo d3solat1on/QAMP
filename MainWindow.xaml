@@ -469,7 +469,7 @@
                         <Grid>
 
                                 <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="250"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="300"/>
                                 </Grid.ColumnDefinitions>
@@ -488,6 +488,7 @@
                                 </Image>
                                 <!-- Playlists -->
                                 <Border x:Name="LeftZona"
+                                        Width="250"
                                         Grid.Column="0"
                                         BorderBrush="{StaticResource BorderBrush}"
                                         BorderThickness="0,0,1,0"

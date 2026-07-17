@@ -70,28 +70,28 @@ namespace QAMP.ViewModels
         public Track? CurrentTrack { get; set; }
 
         // НОВЫЙ МЕТОД: для воспроизведения плейлиста
-        public void PlayPlaylist(Playlist playlist)
-        {
-            if (playlist == null) return;
+        // public void PlayPlaylist(Playlist playlist)
+        // {
+        //     if (playlist == null) return;
 
-            System.Diagnostics.Debug.WriteLine($"=== ВОСПРОИЗВЕДЕНИЕ ПЛЕЙЛИСТА: {playlist.Name} ===");
+        //     System.Diagnostics.Debug.WriteLine($"=== ВОСПРОИЗВЕДЕНИЕ ПЛЕЙЛИСТА: {playlist.Name} ===");
 
-            // Устанавливаем плейлист из которого воспроизводится музыка
-            PlayingPlaylist = playlist;
+        //     // Устанавливаем плейлист из которого воспроизводится музыка
+        //     PlayingPlaylist = playlist;
 
-            // Обновляем очередь воспроизведения
-            PlaybackQueue.Clear();
-            foreach (var track in playlist.Tracks)
-            {
-                PlaybackQueue.Add(track);
-            }
+        //     // Обновляем очередь воспроизведения
+        //     PlaybackQueue.Clear();
+        //     foreach (var track in playlist.Tracks)
+        //     {
+        //         PlaybackQueue.Add(track);
+        //     }
 
-            // Начинаем с первого трека
-            if (PlaybackQueue.Count > 0)
-            {
-                _ = PlayerService.Instance.PlayTrack(PlaybackQueue[0]);
-            }
-        }
+        //     // Начинаем с первого трека
+        //     if (PlaybackQueue.Count > 0)
+        //     {
+        //         _ = PlayerService.Instance.PlayTrack(PlaybackQueue[0]);
+        //     }
+        // }
 
         //// <summary>
         /// Воспроизводит трек из плейлиста с учетом отображаемого порядка (например, при сортировке)
@@ -121,52 +121,50 @@ namespace QAMP.ViewModels
             }
             _ = PlayerService.Instance.PlayTrack(track, true);
         }
-        public void AddTrackToPlayNext(Track track)
-        {
-            if (track == null) return;
+        // public void AddTrackToPlayNext(Track track)
+        // {
+        //     if (track == null) return;
 
-            Track? currentTrack = PlayerService.Instance.CurrentTrack;
+        //     Track? currentTrack = PlayerService.Instance.CurrentTrack;
 
-            int targetIndex = 0;
+        //     int targetIndex = 0;
 
-            if (PlayerService.Instance.IsShuffleEnabled)
-            {
-                if (currentTrack != null)
-                {
-                    targetIndex = PlayerService.Instance.ShuffledQueue.IndexOf(currentTrack) + 1;
-                }
-                targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance.ShuffledQueue.Count);
-                PlayerService.Instance.ShuffledQueue.Insert(targetIndex, track);
-            }
-            else
-            {
-                if (currentTrack != null)
-                {
-                    targetIndex = PlayerService.Instance._actualPlayingQueue.IndexOf(currentTrack) + 1;
-                }
-                targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance._actualPlayingQueue.Count); 
-                PlayerService.Instance._actualPlayingQueue.Insert(targetIndex, track);
-            }
+        //     if (PlayerService.Instance.IsShuffleEnabled)
+        //     {
+        //         if (currentTrack != null)
+        //         {
+        //             targetIndex = PlayerService.Instance.ShuffledQueue.IndexOf(currentTrack) + 1;
+        //         }
+        //         targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance.ShuffledQueue.Count);
+        //         PlayerService.Instance.ShuffledQueue.Insert(targetIndex, track);
+        //     }
+        //     else
+        //     {
+        //         if (currentTrack != null)
+        //         {
+        //             targetIndex = PlayerService.Instance._actualPlayingQueue.IndexOf(currentTrack) + 1;
+        //         }
+        //         targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance._actualPlayingQueue.Count); 
+        //         PlayerService.Instance._actualPlayingQueue.Insert(targetIndex, track);
+        //     }
 
-            int uiTargetIndex = 0;
-            if (currentTrack != null)
-            {
-                uiTargetIndex = PlaybackQueue.IndexOf(currentTrack) + 1;
-            }
-            uiTargetIndex = Math.Clamp(uiTargetIndex, 0, PlaybackQueue.Count);
+        //     int uiTargetIndex = 0;
+        //     if (currentTrack != null)
+        //     {
+        //         uiTargetIndex = PlaybackQueue.IndexOf(currentTrack) + 1;
+        //     }
+        //     uiTargetIndex = Math.Clamp(uiTargetIndex, 0, PlaybackQueue.Count);
 
-            PlaybackQueue.Insert(uiTargetIndex, track);
+        //     PlaybackQueue.Insert(uiTargetIndex, track);
 
-            System.Diagnostics.Debug.WriteLine($"Трек '{track.Name}' добавлен как следующий. Позиция в UI: {uiTargetIndex}");
-        }
+        //     System.Diagnostics.Debug.WriteLine($"Трек '{track.Name}' добавлен как следующий. Позиция в UI: {uiTargetIndex}");
+        // }
         public MusicLibrary()
         {
-            // Подписываемся на изменения коллекции треков в текущем плейлисте
             PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(CurrentPlaylist) && CurrentPlaylist != null)
                 {
-                    // Подписываемся на изменения треков в плейлисте
                     CurrentPlaylist.Tracks.CollectionChanged += (sender, args) =>
                     {
                         UpdatePlaybackQueue();

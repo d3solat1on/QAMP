@@ -122,7 +122,7 @@ namespace QAMP.Services
         }
         public event Action<RepeatMode>? RepeatModeChanged;
 
-        private string? _tempFilePath;
+        // private string? _tempFilePath;
         public List<Track> _actualPlayingQueue = [];
 
         private PlayerService()
@@ -707,7 +707,12 @@ namespace QAMP.Services
 
         private void SpectrumTimer_Tick(object? sender, EventArgs e)
         {
-            if (_currentStream != 0 && IsPlaying && SettingsManager.Instance.Config.IsVisualizerEnabled)
+            if (_currentStream == 0 || !IsPlaying || !SettingsManager.Instance.Config.IsVisualizerEnabled)
+                return;
+
+            bool isNoGcStarted = GC.TryStartNoGCRegion(50 * 1024);
+
+            try
             {
                 foreach (var control in SpectrumControls)
                 {
@@ -724,6 +729,13 @@ namespace QAMP.Services
 
                         control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
                     }
+                }
+            }
+            finally
+            {
+                if (isNoGcStarted)
+                {
+                    GC.EndNoGCRegion();
                 }
             }
         }
@@ -819,11 +831,11 @@ namespace QAMP.Services
             _spectrumTimer?.Stop();
             IsPlaying = false;
 
-            if (!string.IsNullOrEmpty(_tempFilePath) && File.Exists(_tempFilePath))
-            {
-                try { File.Delete(_tempFilePath); } catch { }
-                _tempFilePath = null;
-            }
+            // if (!string.IsNullOrEmpty(_tempFilePath) && File.Exists(_tempFilePath))
+            // {
+            //     try { File.Delete(_tempFilePath); } catch { }
+            //     _tempFilePath = null;
+            // }
         }
         public void Seek(double seconds)
         {
@@ -993,22 +1005,42 @@ namespace QAMP.Services
             }
         }
 
-        public void UpdateQueueOrder(List<Track> newOrder)
+        // public void UpdateQueueOrder(List<Track> newOrder)
+        // {
+        //     _actualPlayingQueue = newOrder;
+
+        //     if (IsShuffleEnabled)
+        //     {
+        //         ShuffledQueue = [.. _actualPlayingQueue];
+        //         var rnd = new Random();
+        //         for (int i = ShuffledQueue.Count - 1; i > 0; i--)
+        //         {
+        //             int j = rnd.Next(i + 1);
+        //             (ShuffledQueue[j], ShuffledQueue[i]) = (ShuffledQueue[i], ShuffledQueue[j]);
+        //         }
+        //     }
+
+        //     System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь обновлена: {_actualPlayingQueue.Count} треков");
+        // }
+        public void AppendTracksToQueue(List<Track> newTracks)
         {
-            _actualPlayingQueue = newOrder;
+            if (newTracks == null || newTracks.Count == 0) return;
+
+            _actualPlayingQueue.AddRange(newTracks);
 
             if (IsShuffleEnabled)
             {
-                ShuffledQueue = [.. _actualPlayingQueue];
-                var rnd = new Random();
-                for (int i = ShuffledQueue.Count - 1; i > 0; i--)
-                {
-                    int j = rnd.Next(i + 1);
-                    (ShuffledQueue[j], ShuffledQueue[i]) = (ShuffledQueue[i], ShuffledQueue[j]);
-                }
+                var shuffledNewTracks = newTracks.OrderBy(x => Guid.NewGuid()).ToList();
+
+                ShuffledQueue.AddRange(shuffledNewTracks);
             }
 
-            System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь обновлена: {_actualPlayingQueue.Count} треков");
+            foreach (var track in newTracks)
+            {
+                MusicLibrary.Instance.PlaybackQueue.Add(track);
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь дополнена на {newTracks.Count} треков. Всего: {_actualPlayingQueue.Count}");
         }
     }
 

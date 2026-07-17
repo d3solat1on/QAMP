@@ -176,29 +176,39 @@ namespace QAMP.Visualization
 
             if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
             {
-                if (myBars != null && myBars.Bars.Any(b => b.Value > 0))
+                bool hasActiveBars = false;
+                for (int i = 0; i < myBars.Bars.Count; i++)
+                {
+                    if (myBars.Bars[i].Value > 0)
+                    {
+                        hasActiveBars = true;
+                        break;
+                    }
+                }
+
+                if (hasActiveBars)
                 {
                     ResetPeaks();
                     SpectrumPlot.Refresh();
                 }
                 return;
             }
-            Dispatcher.Invoke(() =>
+
+            try
             {
-                try
+                int limit = Math.Min(incomingCount, myBars.Bars.Count);
+                for (int i = 0; i < limit; i++)
                 {
-                    for (int i = 0; i < incomingCount && i < myBars.Bars.Count; i++)
-                    {
-                        myBars.Bars[i].Value = spectrumData[i];
-                        _peakBars.Bars[i].Value = peakData[i];
-                    }
-                    SpectrumPlot.Refresh();
+                    myBars.Bars[i].Value = spectrumData[i];
+                    _peakBars.Bars[i].Value = peakData[i];
                 }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"UpdateSpectrum Error: {ex.Message}");
-                }
-            });
+
+                SpectrumPlot.Refresh();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateSpectrum Error: {ex.Message}");
+            }
         }
         public void ResetPeaks()
         {

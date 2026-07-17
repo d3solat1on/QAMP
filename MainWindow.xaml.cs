@@ -53,7 +53,6 @@ namespace QAMP
             Player.VolumeChanged += OnVolumeChanged;
             Player.DurationChanged += OnDurationChanged;
             _playService.TrackChanged += UpdateNextTrackUI;
-            PlaylistsListBox.MouseDoubleClick += PlaylistsListBox_MouseDoubleClick;
             PreviewKeyDown += Window_PreviewKeyDown;
             PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
             PreviewMouseLeftButtonDown += Window_PreviewMouseLeftButtonDown;
@@ -63,6 +62,8 @@ namespace QAMP
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("=== MainWindow_Loaded НАЧАЛО ===");
+
+            App.RegisterWindowForSingleInstance(this);
 
             if (_mediaManager == null)
             {
@@ -239,9 +240,7 @@ namespace QAMP
                     {
                         MusicLibrary.Instance.PlaybackQueue.Add(t);
                     }
-                    Player.UpdateQueueOrder([.. MusicLibrary.Instance.PlaybackQueue]);
 
-                    // Явно загружаем последний трек этого плейлиста
                     string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
                     System.Diagnostics.Debug.WriteLine($"DEBUG: RestoreLastPlaylistAndTrackAsync - LastTrackPath={lastTrackPath}");
 

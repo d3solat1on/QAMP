@@ -29,7 +29,6 @@ namespace QAMP
             if (MusicLibrary.Instance.CurrentPlaylist == null) return;
 
             Cursor = Cursors.Wait;
-            int addedCount = 0;
 
             try
             {
@@ -48,55 +47,66 @@ namespace QAMP
                             .Where(file => supportedExtensions.Contains(Path.GetExtension(file)));
                         allFiles.AddRange(folderFiles);
                     }
-                    else if (File.Exists(path))
+                    else if (File.Exists(path) && supportedExtensions.Contains(Path.GetExtension(path)))
                     {
-                        if (supportedExtensions.Contains(Path.GetExtension(path)))
-                        {
-                            allFiles.Add(path);
-                        }
+                        allFiles.Add(path);
                     }
                 }
 
                 if (allFiles.Count == 0) return;
 
-                var tracks = await Task.Run(() => TagReader.ReadTracksFromFiles([.. allFiles]));
-
-                foreach (var track in tracks)
+                var (tracksToAdd, addedCount) = await Task.Run(() =>
                 {
-                    if (track != null)
+                    var readTracks = TagReader.ReadTracksFromFiles([.. allFiles]);
+
+                    var existingPaths = new HashSet<string>(
+                        MusicLibrary.Instance.CurrentPlaylist.Tracks.Select(t => t.Path),
+                        StringComparer.OrdinalIgnoreCase
+                    );
+
+                    var filteredTracks = new List<Track>();
+                    var playlistId = MusicLibrary.Instance.CurrentPlaylist.Id;
+
+                    foreach (var track in readTracks)
                     {
-                        Application.Current.Dispatcher.Invoke(() =>
+                        if (track != null && !existingPaths.Contains(track.Path))
                         {
-                            if (!MusicLibrary.Instance.CurrentPlaylist.Tracks.Any(t => t.Path == track.Path))
-                            {
-                                DatabaseService.SaveTrackToPlaylist(MusicLibrary.Instance.CurrentPlaylist.Id, track);
-                                MusicLibrary.Instance.CurrentPlaylist.Tracks.Add(track);
-                                addedCount++;
-                            }
-                        });
+                            DatabaseService.SaveTrackToPlaylist(playlistId, track);
+                            filteredTracks.Add(track);
+                        }
                     }
-                }
 
-                if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
+                    return (filteredTracks, filteredTracks.Count);
+                });
+
+                if (addedCount > 0)
                 {
-                    Player.UpdateQueueOrder([.. selectedPlaylist.Tracks]);
-                }
+                    foreach (var track in tracksToAdd)
+                    {
+                        MusicLibrary.Instance.CurrentPlaylist.Tracks.Add(track);
+                    }
 
-                if (selectedPlaylist.SortType != TrackSortType.AddedDate)
-                {
-                    ApplySort(selectedPlaylist.SortType);
-                }
-                else
-                {
-                    TracksDataGrid.ItemsSource = null;
-                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
-                }
+                    if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
+                    {
+                        Player.AppendTracksToQueue(tracksToAdd);
+                    }
 
-                UpdateNextTrackUI();
+                    if (selectedPlaylist.SortType != TrackSortType.AddedDate)
+                    {
+                        ApplySort(selectedPlaylist.SortType);
+                    }
+                    else
+                    {
+                        TracksDataGrid.ItemsSource = null;
+                        TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
+                    }
 
-                string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
-                string toastMessage = string.Format(toastTemplate, addedCount);
-                await MyToast.ShowAsync(toastMessage);
+                    UpdateNextTrackUI();
+
+                    string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
+                    string toastMessage = string.Format(toastTemplate, addedCount);
+                    await MyToast.ShowAsync(toastMessage);
+                }
             }
             catch (Exception ex)
             {
@@ -210,20 +220,6 @@ namespace QAMP
                     await MyToast.ShowAsync(toastMessage);
                 }
             }
-        }
-
-        private void PlaylistsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (PlaylistsListBox.SelectedItem is Playlist selected)
-            {
-                PlayPlaylist(selected);
-            }
-        }
-
-        private void PlayPlaylist(Playlist playlist)
-        {
-            MusicLibrary.Instance.PlayPlaylist(playlist);
-            UpdateNextTrackUI();
         }
 
         private void TracksDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -424,10 +420,6 @@ namespace QAMP
                 if (updatedPlaylist != null)
                 {
                     MusicLibrary.Instance.UpdatePlaylist(updatedPlaylist);
-                    if (MusicLibrary.Instance.PlayingPlaylist?.Id == selectedPlaylist.Id)
-                    {
-                        Player.UpdateQueueOrder([.. updatedPlaylist.Tracks]);
-                    }
                     ApplySort(updatedPlaylist.SortType);
                     UpdateNextTrackUI();
                     string toastTemple = Application.Current.FindResource("LngPlaylistUpdate") as string ?? "Плейсит обновлен";

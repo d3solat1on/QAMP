@@ -1,4 +1,8 @@
 # CHANGELOG
+## (17.07.2026) Version 1.8.3:
+    - Queue logic has been optimized.  
+    - Overall, application performance has been optimized.
+
 ## (13.07.2026) Version 1.8.2:
     - Added manage the queue of tracks in the playing playlist.  
     - Also, after saving track tags, the data is immediately updated in the TracksDataGrid.  
