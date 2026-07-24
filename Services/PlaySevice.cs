@@ -122,7 +122,6 @@ namespace QAMP.Services
         }
         public event Action<RepeatMode>? RepeatModeChanged;
 
-        // private string? _tempFilePath;
         public List<Track> _actualPlayingQueue = [];
 
         private PlayerService()
@@ -135,10 +134,8 @@ namespace QAMP.Services
             _spectrumTimer.Interval = TimeSpan.FromMilliseconds(30);
             _spectrumTimer.Tick += SpectrumTimer_Tick;
 
-            // Инициализируем массив EqGains
             EqGains = new float[10];
 
-            // Загружаем сохраненные настройки
             var config = SettingsManager.Instance.Config;
             if (config.EqualizerGains != null)
             {
@@ -342,17 +339,14 @@ namespace QAMP.Services
             int stream;
             if (extension == ".flac")
             {
-                // Используем FLAC аддон для воспроизводимого потока
                 stream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0, 0, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_SAMPLE_FLOAT);
                 if (stream == 0)
                 {
-                    // Fallback на обычный BASS
                     stream = Bass.BASS_StreamCreateFile(filePath, 0, 0, BASSFlag.BASS_DEFAULT);
                 }
             }
             else
             {
-                // Для MP3, OGG, WAV и других форматов
                 stream = Bass.BASS_StreamCreateFile(filePath, 0, 0, BASSFlag.BASS_DEFAULT);
             }
 
@@ -410,7 +404,6 @@ namespace QAMP.Services
 
             if (config.VocalEnhancementEnabled)
             {
-                // Укрепляем средние частоты для лучшей разборчивости вокала
                 for (int i = 4; i <= 6 && i < effectiveGains.Length; i++)
                 {
                     effectiveGains[i] += 2.0f;
@@ -540,10 +533,8 @@ namespace QAMP.Services
                 EqGains[i] = gains[i];
             }
 
-            // Обновляем эффект эквалайзера
             ApplyEqualizerToStream();
 
-            // Сохраняем в конфиг
             var config = SettingsManager.Instance.Config;
             for (int i = 0; i < gains.Length; i++)
             {
@@ -710,10 +701,6 @@ namespace QAMP.Services
             if (_currentStream == 0 || !IsPlaying || !SettingsManager.Instance.Config.IsVisualizerEnabled)
                 return;
 
-            bool isNoGcStarted = GC.TryStartNoGCRegion(50 * 1024);
-
-            try
-            {
                 foreach (var control in SpectrumControls)
                 {
                     int barsCount = control.BarCount;
@@ -730,14 +717,6 @@ namespace QAMP.Services
                         control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
                     }
                 }
-            }
-            finally
-            {
-                if (isNoGcStarted)
-                {
-                    GC.EndNoGCRegion();
-                }
-            }
         }
 
         private void PositionTimer_Tick(object? sender, EventArgs e)
@@ -755,7 +734,6 @@ namespace QAMP.Services
                         Position = newPosition;
                         PositionChanged?.Invoke(Position);
 
-                        // Проверка на конец трека (BASS обычно сам отправляет синхронизацию)
                         if (totalDuration > 0 && (totalDuration - newPosition) < 0.3)
                         {
                             System.Diagnostics.Debug.WriteLine($"[PositionTimer] Track ending detected! Remaining: {totalDuration - newPosition:F2}s");
@@ -830,12 +808,6 @@ namespace QAMP.Services
             _positionTimer?.Stop();
             _spectrumTimer?.Stop();
             IsPlaying = false;
-
-            // if (!string.IsNullOrEmpty(_tempFilePath) && File.Exists(_tempFilePath))
-            // {
-            //     try { File.Delete(_tempFilePath); } catch { }
-            //     _tempFilePath = null;
-            // }
         }
         public void Seek(double seconds)
         {
@@ -1005,23 +977,6 @@ namespace QAMP.Services
             }
         }
 
-        // public void UpdateQueueOrder(List<Track> newOrder)
-        // {
-        //     _actualPlayingQueue = newOrder;
-
-        //     if (IsShuffleEnabled)
-        //     {
-        //         ShuffledQueue = [.. _actualPlayingQueue];
-        //         var rnd = new Random();
-        //         for (int i = ShuffledQueue.Count - 1; i > 0; i--)
-        //         {
-        //             int j = rnd.Next(i + 1);
-        //             (ShuffledQueue[j], ShuffledQueue[i]) = (ShuffledQueue[i], ShuffledQueue[j]);
-        //         }
-        //     }
-
-        //     System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь обновлена: {_actualPlayingQueue.Count} треков");
-        // }
         public void AppendTracksToQueue(List<Track> newTracks)
         {
             if (newTracks == null || newTracks.Count == 0) return;

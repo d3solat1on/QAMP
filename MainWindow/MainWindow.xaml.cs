@@ -17,22 +17,23 @@ namespace QAMP
         private readonly PlayerService _playService = PlayerService.Instance;
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => PlayerService.Instance;
-        private bool _isSliderDragging = false;
         private double _lastFormattedSeconds = -1;
         private double _lastVolume = 0.5;
-        private Track? _lastTrackWithCover;
-        private bool _isLyricsMode = false;
 
         private readonly Grid? _playlistsLoadingPlaceholder;
         private readonly Grid? _tracksLoadingPlaceholder;
         private readonly Grid? _nowPlayingLoadingPlaceholder;
         private readonly StackPanel? _nowPlayingPanel;
         private MediaControlsManager? _mediaManager;
+        private bool _isClosing = false;
+
 
         public MainWindow()
         {
             InitializeComponent();
+#if DEBUG
             TestCppDll();
+#endif
             _playlistsLoadingPlaceholder = (Grid?)FindName("PlaylistsLoadingPlaceholder");
             _tracksLoadingPlaceholder = (Grid?)FindName("TracksLoadingPlaceholder");
             _nowPlayingLoadingPlaceholder = (Grid?)FindName("NowPlayingLoadingPlaceholder");
@@ -77,10 +78,8 @@ namespace QAMP
                 }
             }
 
-            // Загружаем громкость - устанавливаем в слайдер, это вызовет VolumeSlider_ValueChanged
             string savedVolume = DatabaseService.GetSetting("Volume", "0.5");
 
-            // ВАЖНО: парсим с InvariantCulture! В БД сохраняется с точкой (0.5), а не с запятой (0,5)
             if (double.TryParse(savedVolume, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double vol))
             {
                 VolumeSlider.Value = vol * 100;
@@ -90,10 +89,8 @@ namespace QAMP
                 }
             }
 
-            // Обновляем UI элементы
             VolumePercentage?.Text = $"{VolumeSlider.Value:F0}%";
 
-            System.Diagnostics.Debug.WriteLine("=== ЗАПУСК АСИНХРОННОЙ ЗАГРУЗКИ ===");
             var savedSort = AppSettings.CurrentPlaylistSort;
             ApplyPlaylistSorting(savedSort);
             _ = InitializePlaylistsAndTracksAsync();
@@ -106,22 +103,17 @@ namespace QAMP
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("Шаг 1: Показываем плейсхолдер плейлистов");
                 _playlistsLoadingPlaceholder?.Visibility = Visibility.Visible;
                 PlaylistsListBox.Visibility = Visibility.Collapsed;
 
-                System.Diagnostics.Debug.WriteLine("Шаг 2: Загружаем плейлисты");
                 await MusicLibrary.Instance.RefreshPlaylistsAsync();
 
-                System.Diagnostics.Debug.WriteLine("Шаг 3: Показываем плейлисты");
                 _playlistsLoadingPlaceholder?.Visibility = Visibility.Collapsed;
                 PlaylistsListBox.Visibility = Visibility.Visible;
 
-                System.Diagnostics.Debug.WriteLine("Шаг 4: Показываем плейсхолдер треков");
                 _tracksLoadingPlaceholder?.Visibility = Visibility.Visible;
                 TracksDataGrid.Visibility = Visibility.Collapsed;
 
-                System.Diagnostics.Debug.WriteLine("Шаг 5: Загружаем треки для плейлистов");
                 await MusicLibrary.Instance.LoadAllPlaylistsTracksAsync(
                     onProgress: (current, total) =>
                     {
@@ -129,22 +121,17 @@ namespace QAMP
                     }
                 );
 
-                System.Diagnostics.Debug.WriteLine("Шаг 6: Показываем DataGrid");
                 _tracksLoadingPlaceholder?.Visibility = Visibility.Collapsed;
                 TracksDataGrid.Visibility = Visibility.Visible;
 
-                System.Diagnostics.Debug.WriteLine("Шаг 7: Показываем плейсхолдер информации о треке");
                 _nowPlayingLoadingPlaceholder?.Visibility = Visibility.Visible;
                 _nowPlayingPanel?.Visibility = Visibility.Collapsed;
 
-                System.Diagnostics.Debug.WriteLine("Шаг 8: Восстанавливаем последний плейлист и трек");
                 await RestoreLastPlaylistAndTrackAsync();
 
-                System.Diagnostics.Debug.WriteLine("Шаг 9: Показываем информацию о треке");
                 _nowPlayingLoadingPlaceholder?.Visibility = Visibility.Collapsed;
                 _nowPlayingPanel?.Visibility = Visibility.Visible;
 
-                System.Diagnostics.Debug.WriteLine("=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===");
             }
             catch (Exception ex)
             {
@@ -285,163 +272,65 @@ namespace QAMP
             }
         }
 
-        private void OnDurationChanged()
-        {
-            Dispatcher.Invoke(() => { TotalTimeText.Text = FormatTime(Player.Duration); });
-        }
-
-        private void OnVolumeChanged(double volume)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                VolumeSlider.Value = volume * 100;
-                VolumePercentage.Text = $"{volume * 100:F0}%";
-            });
-        }
-
-        private void OnTrackChanged(Track? track)
-        {
-            if (track != null)
-            {
-                string path = track.Path ?? string.Empty;
-                Task.Run(() => DatabaseService.SaveSettingSync("LastTrackPath", path));
-            }
-
-            Dispatcher.Invoke(() =>
-            {
-                try
-                {
-                    UpdateNowPlayingInfo(track);
-
-                    if (track == null)
-                    {
-                        CurrentTrackImage.Source = null;
-                        CurrentTrackImage.Visibility = Visibility.Collapsed;
-                        DefaultCoverPath.Visibility = Visibility.Visible;
-                        FavoriteButton1Grid.Visibility = Visibility.Collapsed;
-
-                        CurrentTrackName.Text = string.Empty;
-                        CurrentTrackExecutor.Text = string.Empty;
-                        CurrentTrackAlbum.Text = string.Empty;
-                        CurrentTrackData.Text = string.Empty;
-                        CurrentTrackExtension.Text = string.Empty;
-                        CurrentTrackYear.Text = string.Empty;
-
-                        Title = "QAMP";
-                        _mediaManager?.UpdatePlaybackStatus(false);
-                        return;
-                    }
-
-                    UpdatePlayPauseIconState();
-                    UpdateShuffleUI();
-                    UpdateFavoriteIcon(track);
-                    FavoriteButton1Grid.Visibility = Visibility.Visible;
-
-                    CurrentTrackName.Text = track.Name;
-                    CurrentTrackExecutor.Text = track.Executor;
-                    CurrentTrackAlbum.Text = track.Album;
-                    CurrentTrackData.Text = $"{track.Genre} | {track.Duration} | {track.SampleRate} Hz | {track.Bitrate} kbps";
-                    CurrentTrackExtension.Text = track.DisplayExtension;
-                    CurrentTrackYear.Text = track.Year > 0 ? track.Year.ToString() : "Unknown year";
-
-                    NextTrack.Text = "Next Track";
-                    NowPlaying.Text = "NOW PLAYING";
-                    Title = $"{track.Name} - {track.Executor} | QAMP";
-
-                    if (_mediaManager != null)
-                    {
-                        try
-                        {
-                            _mediaManager.UpdateTrackInfo(
-                                track.Name ?? "Unknown Title",
-                                track.Executor ?? "Unknown Artist",
-                                track.Album ?? "Unknown Album"
-                            );
-                            _mediaManager.UpdatePlaybackStatus(PlayerService.Instance.IsPlaying);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Ошибка обновления SMTC: {ex.Message}");
-                        }
-                    }
-
-                    string totalTime = Player.Duration > 0 ? FormatTime(Player.Duration) : "Loading...";
-                    if (Player.Duration <= 0) CheckDurationAsync();
-                    TotalTimeText.Text = totalTime;
-
-                    if (_imageConverter.Convert(track.CoverImage, typeof(System.Windows.Media.Imaging.BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is System.Windows.Media.ImageSource cover)
-                    {
-                        CurrentTrackImage.Source = cover;
-                        CurrentTrackImage.Visibility = Visibility.Visible;
-                        DefaultCoverPath.Visibility = Visibility.Collapsed;
-                        CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
-                        CurrentTrackImage.Margin = new Thickness(0);
-                    }
-                    else
-                    {
-                        CurrentTrackImage.Source = null;
-                        CurrentTrackImage.Visibility = Visibility.Collapsed;
-                        DefaultCoverPath.Visibility = Visibility.Visible;
-                    }
-
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged Успешно: {track.Name}");
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Error in OnTrackChanged UI: {ex.Message}");
-                }
-            });
-        }
-
-        private async void CheckDurationAsync()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                await Task.Delay(100);
-                if (Player.Duration > 0)
-                {
-                    Dispatcher.Invoke(() => { TotalTimeText.Text = FormatTime(Player.Duration); });
-                    break;
-                }
-            }
-        }
-
-        private void OnPositionChanged(double position)
-        {
-            if (!Dispatcher.CheckAccess())
-            {
-                Dispatcher.BeginInvoke(new Action<double>(OnPositionChanged), position);
-                return;
-            }
-
-            if (!_isSliderDragging)
-            {
-                if (Player.Duration > 0)
-                {
-                    double sliderValue = position / Player.Duration * 100;
-                    if (!double.IsNaN(sliderValue) && !double.IsInfinity(sliderValue))
-                    {
-                        ProgressSlider.Value = sliderValue;
-                    }
-                }
-
-                double currentWholeSecond = Math.Floor(position);
-                if (currentWholeSecond != _lastFormattedSeconds)
-                {
-                    _lastFormattedSeconds = currentWholeSecond;
-                    CurrentTimeText.Text = FormatTime(position);
-                }
-            }
-            if (_isLyricsMode)
-            {
-                UpdateLyricsHighlight(TimeSpan.FromSeconds(position));
-            }
-        }
-
         private void OnPlaybackPaused(bool isPaused)
         {
             Dispatcher.Invoke(UpdatePlayPauseIconState);
         }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (_isClosing) return;
+
+            try
+            {
+                var config = SettingsManager.Instance.Config;
+
+                if (config != null && config.CloseToTray)
+                {
+                    e.Cancel = true;
+                    Hide();
+                    MemoryOptimizer.RunAsync(Dispatcher);
+                    return;
+                }
+
+                _isClosing = true;
+
+                _playService.Dispose();
+                LyricsCache.Clear();
+                CoverImageCacheService.ClearMemoryCache();
+
+                var volumeStr = _playService.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                DatabaseService.SaveSettingSync("Volume", volumeStr);
+
+                if (_playService.CurrentTrack != null)
+                {
+                    DatabaseService.SaveSettingSync("LastTrackPath", _playService.CurrentTrack.Path ?? "");
+                    DatabaseService.SaveSettingSync("LastTrackPosition", _playService.Position.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                }
+                SettingsManager.Instance.Save();
+
+            }
+            catch (Exception ex)
+            {
+                App.LogException(ex, "OnClosing");
+            }
+            finally
+            {
+                if (!e.Cancel)
+                {
+                    base.OnClosing(e);
+                    Environment.Exit(0);
+                }
+            }
+        }
+        private void Close_Click(object sender, RoutedEventArgs e) => Close();
+        private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+        private void Maximize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+        // ?
+#if DEBUG
         private static void TestCppDll()
         {
             try
@@ -454,5 +343,7 @@ namespace QAMP
                 System.Diagnostics.Debug.WriteLine($"[QAMP Native] Ошибка вызова DLL: {ex.Message}");
             }
         }
+#endif
+
     }
 }

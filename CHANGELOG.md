@@ -1,4 +1,7 @@
 # CHANGELOG
+## (24.07.2026) Version 1.8.3:
+    - The monolithic MainWindow.cs has been split into partial files by feature (lyrics, queue, search, etc.).  
+
 ## (17.07.2026) Version 1.8.3:
     - Queue logic has been optimized.  
     - Overall, application performance has been optimized.

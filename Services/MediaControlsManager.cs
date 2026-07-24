@@ -71,10 +71,7 @@ namespace QAMP.Services
 
         public void UpdateTrackInfo(string? name, string? executor, string? album)
         {
-            if (_smtc == null)
-            {
-                return;
-            }
+            if (_smtc == null) return;
 
             try
             {
@@ -85,12 +82,6 @@ namespace QAMP.Services
                 updater.MusicProperties.Artist = executor ?? "Unknown Artist";
                 updater.MusicProperties.AlbumTitle = album ?? "Unknown Album";
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    System.Windows.Application.Current.MainWindow?.Title = string.IsNullOrEmpty(executor)
-                            ? $"{name} — QAMP"
-                            : $"{executor} — {name} [QAMP]";
-                });
 
                 updater.Update();
             }

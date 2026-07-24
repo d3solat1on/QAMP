@@ -215,12 +215,12 @@
                                                 </Grid>
 
                                                 <StackPanel>
-                                                        <TextBlock x:Name="LastTrackName"
+                                                        <TextBlock x:Name="CurrentTrackTitleLeftBottomPanel"
                                                                    Text=""
                                                                    Foreground="{StaticResource ForegroundBrush}"
                                                                    FontSize="14"
                                                                    FontWeight="Bold"/>
-                                                        <TextBlock x:Name="LastTrackExecutor"
+                                                        <TextBlock x:Name="CurrentTrackArtistLeftBottomPanel"
                                                                    Text=""
                                                                    Foreground="{StaticResource SecondaryForegroundBrush}"
                                                                    FontSize="12"/>

@@ -6,7 +6,6 @@ using System.Windows.Shapes;
 using QAMP.Models;
 using QAMP.Services;
 using QAMP.ViewModels;
-using Un4seen.Bass;
 
 namespace QAMP.Windows
 {
