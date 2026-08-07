@@ -20,7 +20,8 @@ namespace QAMP.Models
         AddedDate = 0,          // По дате добавления (по умолчанию)
         AlbumAZ = 1,            // По альбому (A-Z)
         ExecutorAZ = 2,         // По исполнителю (A-Z)
-        NameAZ = 3              // По названию (A-Z)
+        NameAZ = 3,             // По названию (A-Z)
+        CustomOrder = 4         // Пользовательский порядок
     }
 
     public class Playlist : INotifyPropertyChanged
@@ -192,6 +193,7 @@ namespace QAMP.Models
             TrackSortType.AlbumAZ => Application.Current.FindResource("LngSortAlbumAZ") as string ?? "By album (A-Z)",
             TrackSortType.ExecutorAZ => Application.Current.FindResource("LngSortExecutorAZ") as string ?? "By artist (A-Z)",
             TrackSortType.NameAZ => Application.Current.FindResource("LngSortNameAZ") as string ?? "By title (A-Z)",
+            TrackSortType.CustomOrder => Application.Current.FindResource("LngSortCustom") as string ?? "Custom Order",
             _ => SortType.ToString()
         };
 

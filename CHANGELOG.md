@@ -1,4 +1,8 @@
 # CHANGELOG
+## (07.08.2026) Version 1.8.4:
+    - Added support for moving tracks in a playlist (Custom sorting).  
+    - Improved image caching. 
+
 ## (24.07.2026) Version 1.8.3:
     - The monolithic MainWindow.cs has been split into partial files by feature (lyrics, queue, search, etc.).  
 

@@ -13,6 +13,7 @@ public static class CoverImageCacheService
     private const int MaxMemoryEntries = 250;
     private const long MaxMemorySizeBytes = 50_000_000;
     private static long _currentMemorySize = 0;
+    private static bool _diskCacheCleanupTriggered;
 
     private static string GetCacheDirectory()
     {
@@ -26,7 +27,8 @@ public static class CoverImageCacheService
         {
             try
             {
-                return Models.SettingsManager.Instance.Config.EnableCoverCache;
+                var config = Models.SettingsManager.Instance.Config;
+                return config.EnableCoverCache && !config.IsCompactMode;
             }
             catch
             {
@@ -45,6 +47,10 @@ public static class CoverImageCacheService
         if (!IsEnabled)
         {
             ClearMemoryCache();
+            if (IsCompactModeEnabled())
+            {
+                ClearDiskCacheOnce();
+            }
             return CreateImageFromBytes(bytes, decodePixelWidth);
         }
 
@@ -142,6 +148,51 @@ public static class CoverImageCacheService
         catch
         {
             //I
+        }
+    }
+
+    private static bool IsCompactModeEnabled()
+    {
+        try
+        {
+            return Models.SettingsManager.Instance.Config.IsCompactMode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void ClearDiskCacheOnce()
+    {
+        if (_diskCacheCleanupTriggered) return;
+
+        lock (_syncRoot)
+        {
+            if (_diskCacheCleanupTriggered) return;
+
+            ClearDiskCache();
+            _diskCacheCleanupTriggered = true;
+        }
+    }
+
+    public static void ClearDiskCache()
+    {
+        try
+        {
+            string cacheDir = GetCacheDirectory();
+            if (!Directory.Exists(cacheDir)) return;
+
+            foreach (string filePath in Directory.EnumerateFiles(cacheDir, "*.bin", SearchOption.TopDirectoryOnly))
+            {
+                File.Delete(filePath);
+            }
+
+            Directory.Delete(cacheDir, recursive: true);
+        }
+        catch
+        {
+            // I
         }
     }
 

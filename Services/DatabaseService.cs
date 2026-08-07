@@ -110,6 +110,21 @@ public class DatabaseService
                 System.Diagnostics.Debug.WriteLine("Колонка AddedDate уже существует в PlaylistTracks");
             }
 
+            if (!playlistTracksColumns.Contains("OrderIndex"))
+            {
+                System.Diagnostics.Debug.WriteLine("Добавляем колонку OrderIndex в таблицу PlaylistTracks...");
+                var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE PlaylistTracks ADD COLUMN OrderIndex INTEGER DEFAULT 0";
+                alterCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine("Колонка OrderIndex успешно добавлена");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Колонка OrderIndex уже существует в PlaylistTracks");
+            }
+
+            ReindexPlaylistTrackOrder(connection);
+
             // Проверяем колонки в таблице Tracks
             var tracksCmd = connection.CreateCommand();
             tracksCmd.CommandText = "PRAGMA table_info(Tracks)";
@@ -247,6 +262,7 @@ public class DatabaseService
             PlaylistId INTEGER,
             TrackId INTEGER,
             AddedDate TEXT,
+            OrderIndex INTEGER DEFAULT 0,
             FOREIGN KEY(PlaylistId) REFERENCES Playlists(Id) ON DELETE CASCADE,
             FOREIGN KEY(TrackId) REFERENCES Tracks(Id) ON DELETE CASCADE
         );";
@@ -475,7 +491,7 @@ public class DatabaseService
                     }
 
                     // Загружаем треки для этого плейлиста
-                    var tracks = GetTracksForPlaylist(playlist.Id);
+                    var tracks = GetTracksForPlaylist(playlist.Id, playlist.SortType);
                     System.Diagnostics.Debug.WriteLine($"Загружен плейлист '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков");
 
                     foreach (var track in tracks)
@@ -597,10 +613,11 @@ public class DatabaseService
         {
             // Новая связь - добавляем с текущей датой
             var linkCmd = connection.CreateCommand();
-            linkCmd.CommandText = "INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate) VALUES ($pId, $tId, $date)";
+            linkCmd.CommandText = "INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate, OrderIndex) VALUES ($pId, $tId, $date, $order)";
             linkCmd.Parameters.AddWithValue("$pId", playlistId);
             linkCmd.Parameters.AddWithValue("$tId", trackId);
             linkCmd.Parameters.AddWithValue("$date", track.AddedDate.ToString("o")); // ISO 8601 формат
+            linkCmd.Parameters.AddWithValue("$order", GetNextPlaylistTrackOrder(connection, playlistId));
             int linkResult = linkCmd.ExecuteNonQuery();
             System.Diagnostics.Debug.WriteLine($"Новая связь добавлена, результат: {linkResult}");
         }
@@ -631,11 +648,14 @@ public class DatabaseService
         command.Parameters.AddWithValue("$tId", trackId);
 
         command.ExecuteNonQuery();
+
+        ReindexPlaylistTrackOrder(connection, playlistId);
     }
 
-    public static List<Track> GetTracksForPlaylist(int playlistId)
+    public static List<Track> GetTracksForPlaylist(int playlistId, TrackSortType? sortType = null)
     {
         var tracks = new List<Track>();
+        var effectiveSortType = sortType ?? TrackSortType.AddedDate;
         System.Diagnostics.Debug.WriteLine($"=== GetTracksForPlaylist для ID={playlistId} ===");
 
         using (var connection = new SqliteConnection(_connectionString))
@@ -662,7 +682,8 @@ public class DatabaseService
                 SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, t.TrackNumber, pt.AddedDate, COALESCE(t.PlayCount, 0) as PlayCount
                 FROM Tracks t
                 INNER JOIN PlaylistTracks pt ON t.Id = pt.TrackId
-                WHERE pt.PlaylistId = $pId";
+                WHERE pt.PlaylistId = $pId
+                ORDER BY pt.OrderIndex ASC, pt.AddedDate ASC, t.Id ASC";
 
                 command.Parameters.AddWithValue("$pId", playlistId);
 
@@ -705,7 +726,8 @@ public class DatabaseService
                 SELECT t.Id, t.Path, t.Name, t.Executor, t.Album, t.Duration, t.Genre, t.Bitrate, t.SampleRate, t.Year, t.TrackNumber, pt.AddedDate, COALESCE(t.PlayCount, 0) as PlayCount
                 FROM Tracks t
                 INNER JOIN PlaylistTracks pt ON t.Id = pt.TrackId
-                WHERE pt.PlaylistId = $pId";
+                WHERE pt.PlaylistId = $pId
+                ORDER BY pt.OrderIndex ASC, pt.AddedDate ASC, t.Id ASC";
 
                 command.Parameters.AddWithValue("$pId", playlistId);
 
@@ -737,7 +759,101 @@ public class DatabaseService
                 System.Diagnostics.Debug.WriteLine($"Всего треков загружено: {tracks.Count}");
             }
         }
-        return tracks;
+
+        return ApplyTrackSort(tracks, effectiveSortType);
+    }
+
+    private static List<Track> ApplyTrackSort(List<Track> tracks, TrackSortType sortType)
+    {
+        return sortType switch
+        {
+            TrackSortType.AlbumAZ => [.. tracks.OrderBy(t => t.Album ?? "").ThenBy(t => t.TrackNumber)],
+            TrackSortType.ExecutorAZ => [.. tracks.OrderBy(t => t.Executor ?? "").ThenBy(t => t.Album ?? "").ThenBy(t => t.TrackNumber)],
+            TrackSortType.NameAZ => [.. tracks.OrderBy(t => t.Name ?? "")],
+            TrackSortType.CustomOrder => tracks,
+            _ => [.. tracks.OrderBy(t => t.AddedDate)]
+        };
+    }
+
+    private static int GetNextPlaylistTrackOrder(SqliteConnection connection, int playlistId)
+    {
+        var countCommand = connection.CreateCommand();
+        countCommand.CommandText = "SELECT COALESCE(MAX(OrderIndex), -1) + 1 FROM PlaylistTracks WHERE PlaylistId = $pId";
+        countCommand.Parameters.AddWithValue("$pId", playlistId);
+        var result = countCommand.ExecuteScalar();
+        return result is null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
+    }
+
+    private static void ReindexPlaylistTrackOrder(SqliteConnection connection, int? playlistId = null)
+    {
+        try
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = playlistId.HasValue
+                ? @"SELECT TrackId FROM PlaylistTracks WHERE PlaylistId = $pId ORDER BY OrderIndex ASC, AddedDate ASC, TrackId ASC"
+                : @"SELECT TrackId FROM PlaylistTracks ORDER BY PlaylistId ASC, OrderIndex ASC, AddedDate ASC, TrackId ASC";
+            command.Parameters.AddWithValue("$pId", playlistId ?? 0);
+
+            var trackIds = new List<int>();
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                trackIds.Add(reader.GetInt32(0));
+            }
+
+            if (trackIds.Count == 0)
+            {
+                return;
+            }
+
+            var updateCommand = connection.CreateCommand();
+            updateCommand.CommandText = "UPDATE PlaylistTracks SET OrderIndex = $order WHERE PlaylistId = $pId AND TrackId = $tId";
+            var orderParam = updateCommand.Parameters.Add("$order", SqliteType.Integer);
+            var playlistParam = updateCommand.Parameters.Add("$pId", SqliteType.Integer);
+            var trackParam = updateCommand.Parameters.Add("$tId", SqliteType.Integer);
+
+            for (int i = 0; i < trackIds.Count; i++)
+            {
+                orderParam.Value = i;
+                playlistParam.Value = playlistId ?? 0;
+                trackParam.Value = trackIds[i];
+                updateCommand.ExecuteNonQuery();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при перенумерации порядка треков: {ex.Message}");
+        }
+    }
+
+    public static void SavePlaylistTrackOrder(int playlistId, IEnumerable<Track> tracks)
+    {
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            var updateCommand = connection.CreateCommand();
+            updateCommand.CommandText = "UPDATE PlaylistTracks SET OrderIndex = $order WHERE PlaylistId = $pId AND TrackId = $tId";
+            var orderParam = updateCommand.Parameters.Add("$order", SqliteType.Integer);
+            var playlistParam = updateCommand.Parameters.Add("$pId", SqliteType.Integer);
+            var trackParam = updateCommand.Parameters.Add("$tId", SqliteType.Integer);
+
+            int index = 0;
+            foreach (var track in tracks)
+            {
+                orderParam.Value = index++;
+                playlistParam.Value = playlistId;
+                trackParam.Value = track.Id;
+                updateCommand.ExecuteNonQuery();
+            }
+
+            ReindexPlaylistTrackOrder(connection, playlistId);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении порядка треков: {ex.Message}");
+        }
     }
 
     public static long CreatePlaylist(string name, string description = "", byte[]? coverImage = null, bool isSystemPlaylist = false)
@@ -1287,9 +1403,9 @@ public class DatabaseService
     /// <summary>
     /// Асинхронная загрузка треков для плейлиста
     /// </summary>
-    public static async Task<List<Track>> GetTracksForPlaylistAsync(int playlistId)
+    public static async Task<List<Track>> GetTracksForPlaylistAsync(int playlistId, TrackSortType? sortType = null)
     {
-        return await Task.Run(() => GetTracksForPlaylist(playlistId));
+        return await Task.Run(() => GetTracksForPlaylist(playlistId, sortType));
     }
 
     public static bool IsTrackInOtherPlaylists(int trackId, int excludePlaylistId)

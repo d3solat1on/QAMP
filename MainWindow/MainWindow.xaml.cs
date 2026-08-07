@@ -78,6 +78,11 @@ namespace QAMP
                 }
             }
 
+            if (SettingsManager.Instance.Config.IsCompactMode)
+            {
+                CoverImageCacheService.ClearDiskCache();
+            }
+
             string savedVolume = DatabaseService.GetSetting("Volume", "0.5");
 
             if (double.TryParse(savedVolume, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double vol))

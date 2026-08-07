@@ -39,6 +39,10 @@ namespace QAMP
             menuItemName.Click += (s, args) => ApplySort(TrackSortType.NameAZ, true);
             _ = contextMenu.Items.Add(menuItemName);
 
+            var menuItemCustom = new MenuItem { Header = Application.Current.FindResource("LngSortCustom") as string ?? "Custom Order" };
+            menuItemCustom.Click += (s, args) => ApplySort(TrackSortType.CustomOrder, true);
+            _ = contextMenu.Items.Add(menuItemCustom);
+
             if (sender is Button button)
             {
                 contextMenu.PlacementTarget = button;
@@ -54,6 +58,13 @@ namespace QAMP
             Library.CurrentPlaylist.SortType = sortType;
 
             DatabaseService.UpdatePlaylistSortType(Library.CurrentPlaylist.Id, sortType);
+
+            if (sortType == TrackSortType.CustomOrder)
+            {
+                TracksDataGrid.ItemsSource = null;
+                TracksDataGrid.ItemsSource = Library.CurrentPlaylist.Tracks;
+                return;
+            }
 
             var sortedTracks = SortTracks([.. Library.CurrentPlaylist.Tracks], sortType);
 
@@ -99,6 +110,7 @@ namespace QAMP
                     .ThenBy(t => t.Album ?? "")
                     .ThenBy(t => t.TrackNumber)],
                 TrackSortType.NameAZ => [.. tracks.OrderBy(t => t.Name ?? "")],
+                TrackSortType.CustomOrder => tracks,
                 _ => tracks
             };
         }

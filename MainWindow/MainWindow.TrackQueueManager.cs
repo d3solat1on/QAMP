@@ -12,6 +12,9 @@ namespace QAMP;
 
 public partial class MainWindow
 {
+    private readonly Stack<List<int>> _trackReorderUndoStack = new();
+    private Track? _draggedTrack;
+    private Point? _dragStartPoint;
 
     public void RebuildPlaybackQueue()
     {
@@ -354,8 +357,51 @@ public partial class MainWindow
         };
         _scrollCleanupTimer.Start();
     }
+
+    private void TracksDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is not DependencyObject source) return;
+
+        var row = FindVisualParent<DataGridRow>(source);
+        if (row?.Item is Track track)
+        {
+            _draggedTrack = track;
+            _dragStartPoint = e.GetPosition(TracksDataGrid);
+        }
+    }
+
+    private void TracksDataGrid_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_draggedTrack == null || e.LeftButton != MouseButtonState.Pressed || _dragStartPoint is not Point startPoint)
+        {
+            return;
+        }
+
+        var currentPoint = e.GetPosition(TracksDataGrid);
+        if (Math.Abs(currentPoint.X - startPoint.X) < 2 && Math.Abs(currentPoint.Y - startPoint.Y) < 2)
+        {
+            return;
+        }
+
+        var data = new DataObject("QampTrackReorder", _draggedTrack);
+        DragDrop.DoDragDrop(TracksDataGrid, data, DragDropEffects.Move);
+        _draggedTrack = null;
+    }
+
     private void TracksDataGrid_DragOver(object sender, DragEventArgs e)
     {
+        if (e.Data.GetDataPresent("QampTrackReorder"))
+        {
+            if (e.GetPosition(TracksDataGrid) is Point point)
+            {
+                ScrollDataGridDuringDrag(point);
+            }
+
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+            return;
+        }
+
         if (ViewModels.MusicLibrary.Instance.CurrentPlaylist != null && e.Data.GetDataPresent(DataFormats.FileDrop))
         {
             e.Effects = DragDropEffects.Copy;
@@ -377,10 +423,107 @@ public partial class MainWindow
             {
                 await ProcessDroppedPaths(paths);
             }
+            return;
         }
+
+        if (e.Data.GetData("QampTrackReorder") is not Track droppedTrack)
+        {
+            return;
+        }
+
+        var currentPlaylist = Library.CurrentPlaylist;
+        if (currentPlaylist == null)
+        {
+            return;
+        }
+
+        var targetTrack = FindTrackFromDependencyObject(e.OriginalSource as DependencyObject);
+        targetTrack ??= currentPlaylist.Tracks.LastOrDefault();
+
+        if (targetTrack == null || targetTrack == droppedTrack)
+        {
+            return;
+        }
+
+        _trackReorderUndoStack.Push(currentPlaylist.Tracks.Select(t => t.Id).ToList());
+
+        int oldIndex = currentPlaylist.Tracks.IndexOf(droppedTrack);
+        int newIndex = currentPlaylist.Tracks.IndexOf(targetTrack);
+        if (oldIndex < 0 || newIndex < 0)
+        {
+            return;
+        }
+
+        currentPlaylist.Tracks.RemoveAt(oldIndex);
+        currentPlaylist.Tracks.Insert(newIndex, droppedTrack);
+
+        currentPlaylist.SortType = TrackSortType.CustomOrder;
+        DatabaseService.UpdatePlaylistSortType(currentPlaylist.Id, TrackSortType.CustomOrder);
+        DatabaseService.SavePlaylistTrackOrder(currentPlaylist.Id, currentPlaylist.Tracks);
+
+        TracksDataGrid.ItemsSource = null;
+        TracksDataGrid.ItemsSource = currentPlaylist.Tracks;
+        e.Handled = true;
+    }
+
+    private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
+    {
+        if (child == null)
+        {
+            return null;
+        }
+
+        var parent = VisualTreeHelper.GetParent(child);
+        while (parent != null)
+        {
+            if (parent is T found)
+            {
+                return found;
+            }
+
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+
+        return null;
+    }
+
+    private static Track? FindTrackFromDependencyObject(DependencyObject? source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        if (source is DataGridRow row && row.Item is Track track)
+        {
+            return track;
+        }
+
+        if (source is DependencyObject current)
+        {
+            var parent = VisualTreeHelper.GetParent(current);
+            while (parent != null)
+            {
+                if (parent is DataGridRow parentRow && parentRow.Item is Track parentTrack)
+                {
+                    return parentTrack;
+                }
+
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+        }
+
+        return null;
     }
     protected void TracksDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.Z)
+        {
+            UndoLastTrackReorder();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.Delete)
         {
             var currentPlaylist = Library.CurrentPlaylist;
@@ -402,6 +545,67 @@ public partial class MainWindow
                 }
             }
             e.Handled = true;
+        }
+    }
+
+    private void UndoLastTrackReorder()
+    {
+        var currentPlaylist = Library.CurrentPlaylist;
+        if (currentPlaylist == null || _trackReorderUndoStack.Count == 0)
+        {
+            return;
+        }
+
+        var previousOrder = _trackReorderUndoStack.Pop();
+        var trackMap = currentPlaylist.Tracks.ToDictionary(t => t.Id);
+        var restoredTracks = previousOrder
+            .Where(trackMap.ContainsKey)
+            .Select(id => trackMap[id])
+            .ToList();
+
+        if (restoredTracks.Count != currentPlaylist.Tracks.Count)
+        {
+            return;
+        }
+
+        currentPlaylist.Tracks.Clear();
+        foreach (var track in restoredTracks)
+        {
+            currentPlaylist.Tracks.Add(track);
+        }
+
+        currentPlaylist.SortType = TrackSortType.CustomOrder;
+        DatabaseService.UpdatePlaylistSortType(currentPlaylist.Id, TrackSortType.CustomOrder);
+        DatabaseService.SavePlaylistTrackOrder(currentPlaylist.Id, currentPlaylist.Tracks);
+
+        TracksDataGrid.ItemsSource = null;
+        TracksDataGrid.ItemsSource = currentPlaylist.Tracks;
+    }
+
+    private void ScrollDataGridDuringDrag(Point point)
+    {
+        if (TracksDataGrid.Items.Count == 0)
+        {
+            return;
+        }
+
+        var scrollViewer = FindVisualChild<ScrollViewer>(TracksDataGrid);
+        if (scrollViewer == null)
+        {
+            return;
+        }
+
+        const double edgeThreshold = 35;
+        const double scrollStep = 12;
+        double currentOffset = scrollViewer.VerticalOffset;
+
+        if (point.Y < edgeThreshold && currentOffset > 0)
+        {
+            scrollViewer.ScrollToVerticalOffset(Math.Max(0, currentOffset - scrollStep));
+        }
+        else if (point.Y > TracksDataGrid.ActualHeight - edgeThreshold && currentOffset < scrollViewer.ScrollableHeight)
+        {
+            scrollViewer.ScrollToVerticalOffset(Math.Min(scrollViewer.ScrollableHeight, currentOffset + scrollStep));
         }
     }
 }

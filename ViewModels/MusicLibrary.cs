@@ -322,7 +322,7 @@ namespace QAMP.ViewModels
 
             System.Diagnostics.Debug.WriteLine($"=== АСИНХРОННАЯ ЗАГРУЗКА ТРЕКОВ ДЛЯ ПЛЕЙЛИСТА: {playlist.Name} ===");
 
-            var tracks = await DatabaseService.GetTracksForPlaylistAsync(playlist.Id);
+            var tracks = await DatabaseService.GetTracksForPlaylistAsync(playlist.Id, playlist.SortType);
 
             // Очищаем старые треки
             playlist.Tracks.Clear();

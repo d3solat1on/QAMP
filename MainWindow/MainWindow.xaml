@@ -1184,6 +1184,8 @@
                                                           AllowDrop="True"
                                                           MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
                                                           SelectionChanged="TracksDataGrid_SelectionChanged"
+                                                          PreviewMouseLeftButtonDown="TracksDataGrid_PreviewMouseLeftButtonDown"
+                                                          MouseMove="TracksDataGrid_MouseMove"
                                                           Drop="TracksDataGrid_Drop"
                                                           DragOver="TracksDataGrid_DragOver">
                                                         <DataGrid.ContextMenu>
