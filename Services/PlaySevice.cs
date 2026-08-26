@@ -171,6 +171,7 @@ namespace QAMP.Services
         {
             foreach (var control in SpectrumControls)
             {
+                control.RefreshDisplayType();
                 control.RefreshColors();
             }
         }

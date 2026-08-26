@@ -1,6 +1,19 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngSecondColorSpectrum">Second color for spectrum</System:String>
+        <System:String x:Key="LngFirstColorSpectrum">First color for spectrum</System:String>
+        <System:String x:Key="LngGradientSpectrum">Gradient for spectrum</System:String>
+        <System:String x:Key="LngGradientDisabledSpectrum">Disabled gradient for spectrum</System:String>
+        <System:String x:Key="LngGradientEnabledSpectrum">Enabled gradient for spectrum</System:String>
+        <System:String x:Key="LngGradientStartHex">Start HEX</System:String>
+        <System:String x:Key="LngGradientEndHex">End HEX</System:String>
+        <System:String x:Key="LngSpectrumType">Spectrum type</System:String>
+        <System:String x:Key="LngSpectrumTypeBars">Bars</System:String>
+        <System:String x:Key="LngSpectrumTypeLine">Line</System:String>
+        <System:String x:Key="LngGradientTypeHeightBased">By height</System:String>
+        <System:String x:Key="LngGradientTypeFullHeight">Full height</System:String>
+        <System:String x:Key="LngGradientTypeHorizontal">Horizontal</System:String>
         <System:String x:Key="LngPlayNextFromDataGrid">Play Next</System:String>
         <System:String x:Key="LngPlayFromQueue">Play track from queue</System:String>
         <System:String x:Key="LngRemoveFromQueue">Remove track from queue</System:String>

@@ -1635,6 +1635,7 @@
                                                                                    Foreground="{StaticResource ForegroundBrush}"
                                                                                    TextWrapping="Wrap"/>
                                                                 </StackPanel>
+                                                                <!-- ??? -->
                                                                 <Grid>
                                                                         <vis:SpectrumControl x:Name="SpectrumViewer"
                                                                                              Height="150"

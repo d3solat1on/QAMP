@@ -1,4 +1,8 @@
 # CHANGELOG
+## (26.08.2026) Version 1.8.5:
+    - Added gradient to spectrogram.   
+    - Added a second type of sound visualization.
+
 ## (07.08.2026) Version 1.8.4:
     - Added support for moving tracks in a playlist (Custom sorting).  
     - Improved image caching. 

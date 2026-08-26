@@ -13,12 +13,19 @@ public class AppSettings : INotifyPropertyChanged
         if (Hotkeys == null || Hotkeys.Count == 0) InitializeDefaultHotkeys();
     }
     public bool CloseToTray { get; set; } = true;
+    // spectrum visualizer settings
+
     public bool IsVisualizerEnabled { get; set; } = true;
-    public int VisualizerBarCount { get; set; } = 64; 
-    public string ColorScheme { get; set; } = "Dark"; 
+    public int VisualizerBarCount { get; set; } = 64;
+    public bool UseSpectrumGradient { get; set; } = false;
+    public string SpectrumGradientStartColor { get; set; } = "#0f172a";
+    public string SpectrumGradientEndColor { get; set; } = "#4338ca";
+    public Visualization.SpectrumDisplayType SpectrumType { get; set; } = Visualization.SpectrumDisplayType.Bars;
+    public Visualization.SpectrumGradientType GradientType { get; set; } = Visualization.SpectrumGradientType.Horizontal;
+    public string ColorScheme { get; set; } = "Dark";
     public string AccentColor { get; set; } = "#1db954";
     public int CurrentRound { get; set; } = 0;
-    public double[] EqualizerGains { get; set; } = new double[10]; 
+    public double[] EqualizerGains { get; set; } = new double[10];
     public double[] CurrentEqualizerValues { get; set; } = new double[10];
     public string EqualizerPreset { get; set; } = "Пользовательский";
     public bool ReverbEnabled { get; set; } = false;
@@ -37,7 +44,7 @@ public class AppSettings : INotifyPropertyChanged
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;
-    public bool IsAutoLaunchEnabled { get; set; } = false; 
+    public bool IsAutoLaunchEnabled { get; set; } = false;
     public bool IsCompactMode
     {
         get => _isCompactMode;

@@ -18,6 +18,7 @@ namespace QAMP.Visualization
             int normalCount = SettingsManager.Instance.Config.VisualizerBarCount;
             FullSpectrumViewer.SetBarCount(normalCount * 2);
             PlayerService.Instance.AddSpectrumControl(FullSpectrumViewer);
+            FullSpectrumViewer.RefreshColors();
             PlayerService.Instance.TrackChanged += PlayerService_TrackChanged;
             UpdateCurrentTrackInfo(PlayerService.Instance.CurrentTrack);
         }

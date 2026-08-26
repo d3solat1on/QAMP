@@ -1,6 +1,19 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngSecondColorSpectrum">Второй цвет для спектра</System:String>
+        <System:String x:Key="LngFirstColorSpectrum">Первый цвет для спектра</System:String>
+        <System:String x:Key="LngGradientSpectrum">Градиент для спектра</System:String>
+        <System:String x:Key="LngGradientDisabledSpectrum">Выключить градиент для спектра</System:String>
+        <System:String x:Key="LngGradientEnabledSpectrum">Включить градиент для спектра</System:String>
+        <System:String x:Key="LngGradientStartHex">Начальный HEX</System:String>
+        <System:String x:Key="LngGradientEndHex">Конечный HEX</System:String>
+        <System:String x:Key="LngSpectrumType">Тип спектра</System:String>
+        <System:String x:Key="LngSpectrumTypeBars">Столбцы</System:String>
+        <System:String x:Key="LngSpectrumTypeLine">Линия</System:String>
+        <System:String x:Key="LngGradientTypeHeightBased">По высоте</System:String>
+        <System:String x:Key="LngGradientTypeFullHeight">На всю высоту</System:String>
+        <System:String x:Key="LngGradientTypeHorizontal">По горизонтали</System:String>
         <System:String x:Key="LngPlayNextFromDataGrid">Проиграть следующим</System:String>
         <System:String x:Key="LngPlayFromQueue">Проиграть трек из очереди</System:String>
         <System:String x:Key="LngRemoveFromQueue">Удалить трек из очереди</System:String>

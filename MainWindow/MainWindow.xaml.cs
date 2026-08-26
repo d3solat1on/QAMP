@@ -13,7 +13,7 @@ namespace QAMP
     public partial class MainWindow : Window
     {
         [DllImport("QampCore.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetCoreVersion();
+        private static extern int GetCoreVersion();
         private readonly PlayerService _playService = PlayerService.Instance;
         public static MusicLibrary Library => MusicLibrary.Instance;
         private static PlayerService Player => PlayerService.Instance;

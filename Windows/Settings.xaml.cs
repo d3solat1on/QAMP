@@ -21,6 +21,9 @@ namespace QAMP.Windows
         private int originalBarCount;
         private bool originalCloseToTray;
         private bool originalUseAdaptiveGradients;
+        private bool originalUseSpectrumGradient;
+        private Visualization.SpectrumDisplayType originalSpectrumType;
+        private Visualization.SpectrumGradientType originalSpectrumGradientType;
         private bool originalIsAutoLaunchEnabled;
         private readonly PlayerService _player;
         private DispatcherTimer? _memoryTimer;
@@ -34,7 +37,9 @@ namespace QAMP.Windows
             StartMemoryTicking();
         }
 
-        private static string ThemesFolderPath => System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
+        private static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
+        private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
+
 
         private void InitializeCustomThemes()
         {
@@ -272,10 +277,15 @@ namespace QAMP.Windows
             originalBarCount = config.VisualizerBarCount;
             originalCloseToTray = config.CloseToTray;
             originalUseAdaptiveGradients = config.UseAdaptiveGradients;
+            originalUseSpectrumGradient = config.UseSpectrumGradient;
+            originalSpectrumType = config.SpectrumType;
+            originalSpectrumGradientType = config.GradientType;
             originalIsAutoLaunchEnabled = config.IsAutoLaunchEnabled;
 
             VisualizerEnabled.IsChecked = config.IsVisualizerEnabled;
             VisualizerDisabled.IsChecked = !config.IsVisualizerEnabled;
+            SpectrumGradientStartColorTextBox.Text = config.SpectrumGradientStartColor;
+            SpectrumGradientEndColorTextBox.Text = config.SpectrumGradientEndColor;
 
             switch (config.ColorScheme)
             {
@@ -328,6 +338,17 @@ namespace QAMP.Windows
 
             CheckAutoLaunch(null, null);
 
+            //    ??
+
+            GradientEnabled.IsChecked = config.UseSpectrumGradient;
+            GradientDisabled.IsChecked = !config.UseSpectrumGradient;
+            SpectrumBarsRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Bars;
+            SpectrumLineRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Line;
+
+            // GradientHeightBasedRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.HeightBased;
+            // GradientFullHeightRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.FullHeight;
+            // GradientHorizontalRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.Horizontal;
+
             isInitializing = false;
         }
 
@@ -338,6 +359,95 @@ namespace QAMP.Windows
             var config = SettingsManager.Instance.Config;
             config.UseAdaptiveGradients = AdaptiveGradientsRadio.IsChecked ?? false;
             SettingsManager.Instance.Save();
+        }
+
+        // <???>
+        private void GradientToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+
+            var config = SettingsManager.Instance.Config;
+            config.UseSpectrumGradient = GradientEnabled.IsChecked ?? false;
+            SettingsManager.Instance.Save();
+            PlayerService.Instance.RefreshSpectrumControls();
+        }
+
+        private void SpectrumType_Checked(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+
+            var config = SettingsManager.Instance.Config;
+            config.SpectrumType = SpectrumLineRadio.IsChecked == true
+                ? Visualization.SpectrumDisplayType.Line
+                : Visualization.SpectrumDisplayType.Bars;
+            SettingsManager.Instance.Save();
+            PlayerService.Instance.RefreshSpectrumControls();
+        }
+
+        private void SpectrumGradientTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (isInitializing) return;
+
+            var config = SettingsManager.Instance.Config;
+            config.SpectrumGradientStartColor = SpectrumGradientStartColorTextBox.Text.Trim();
+            config.SpectrumGradientEndColor = SpectrumGradientEndColorTextBox.Text.Trim();
+
+            bool isValidStart = IsHexColorValid(config.SpectrumGradientStartColor);
+            bool isValidEnd = IsHexColorValid(config.SpectrumGradientEndColor);
+
+            if (!isValidStart || !isValidEnd)
+            {
+                return;
+            }
+
+            SettingsManager.Instance.Save();
+            PlayerService.Instance.RefreshSpectrumControls();
+        }
+
+        // private void GradientType_Checked(object sender, RoutedEventArgs e)
+        // {
+        //     if (isInitializing) return;
+
+        //     var config = SettingsManager.Instance.Config;
+
+        //     // if (GradientHeightBasedRadio.IsChecked == true)
+        //     // {
+        //     //     config.GradientType = Visualization.SpectrumGradientType.HeightBased;
+        //     // }
+        //     // else if (GradientFullHeightRadio.IsChecked == true)
+        //     // {
+        //     //     config.GradientType = Visualization.SpectrumGradientType.FullHeight;
+        //     // }
+        //     // else if (GradientHorizontalRadio.IsChecked == true)
+        //     // {
+        //     config.GradientType = Visualization.SpectrumGradientType.Horizontal;
+        //     // }
+
+        //     SettingsManager.Instance.Save();
+        //     PlayerService.Instance.RefreshSpectrumControls();
+        // }
+        private static bool IsHexColorValid(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var normalized = value.Trim();
+            if (!normalized.StartsWith("#"))
+            {
+                normalized = $"#{normalized}";
+            }
+
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(normalized);
+                return color.A >= 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void LanguageRadio_Checked(object sender, RoutedEventArgs e)
@@ -475,6 +585,9 @@ namespace QAMP.Windows
             config.VisualizerBarCount = originalBarCount;
             config.CloseToTray = originalCloseToTray;
             config.UseAdaptiveGradients = originalUseAdaptiveGradients;
+            config.UseSpectrumGradient = originalUseSpectrumGradient;
+            config.SpectrumType = originalSpectrumType;
+            config.GradientType = originalSpectrumGradientType;
             config.IsAutoLaunchEnabled = originalIsAutoLaunchEnabled;
 
             CloseToTrayRadio.IsChecked = originalCloseToTray;
@@ -482,6 +595,13 @@ namespace QAMP.Windows
 
             AdaptiveGradientsRadio.IsChecked = originalUseAdaptiveGradients;
             StaticGradientsRadio.IsChecked = !originalUseAdaptiveGradients;
+            GradientEnabled.IsChecked = originalUseSpectrumGradient;
+            GradientDisabled.IsChecked = !originalUseSpectrumGradient;
+            SpectrumBarsRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Bars;
+            SpectrumLineRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Line;
+            // GradientHeightBasedRadio.IsChecked = originalSpectrumGradientType == Visualization.SpectrumGradientType.HeightBased;
+            // GradientFullHeightRadio.IsChecked = originalSpectrumGradientType == Visualization.SpectrumGradientType.FullHeight;
+            // GradientHorizontalRadio.IsChecked = originalSpectrumGradientType == Visualization.SpectrumGradientType.Horizontal;
 
             AutoLaunchEnabled.IsChecked = originalIsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !originalIsAutoLaunchEnabled;
@@ -553,7 +673,6 @@ namespace QAMP.Windows
             }
         }
 
-        private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
 
         private async void ReplaceBG_Click(object sender, RoutedEventArgs e)
         {
@@ -644,7 +763,7 @@ namespace QAMP.Windows
             UpdateHotkeyTextBox(TbFullSpectr, HotkeyAction.OpenFullScreenSpectrum);
         }
 
-        private void UpdateHotkeyTextBox(TextBox textBox, HotkeyAction action)
+        private static void UpdateHotkeyTextBox(TextBox textBox, HotkeyAction action)
         {
             var config = SettingsManager.Instance.Config;
             var hotkey = config.Hotkeys.FirstOrDefault(h => h.Action == action);
