@@ -1,0 +1,87 @@
+<Window x:Class="QAMP.Windows.PlaybackHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource LngPlaybackHistory}"
+        Width="380"
+        Height="460"
+        MinWidth="320"
+        MinHeight="300"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterOwner">
+    <Border Background="{StaticResource SecondaryBackgroundBrush}"
+            CornerRadius="{DynamicResource AppCornerRadius}"
+            BorderBrush="{DynamicResource AccentBrush}"
+            BorderThickness="1">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  Margin="0,0,0,16"
+                  MouseDown="Header_MouseDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource LngPlaybackHistory}"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource TextBrush}"/>
+                    <TextBlock x:Name="TrackTitleText"
+                               Margin="0,5,0,0"
+                               Foreground="{StaticResource SecondaryForegroundBrush}"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Content="✕"
+                        Click="Close_Click"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CloseButtonStyle}"
+                        Background="{DynamicResource AccentBrush}"
+                        Width="30"
+                        Height="30">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius"
+                                    Value="{DynamicResource AppCornerRadius}"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <ScrollViewer x:Name="HistoryScrollViewer"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="PlayDates">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource CentralPanelCardBackground}"
+                                        CornerRadius="{DynamicResource AppCornerRadius}"
+                                        Padding="12"
+                                        Margin="0,0,0,8">
+                                    <TextBlock Text="{Binding}"
+                                               FontSize="14"
+                                               FontFamily="Consolas"
+                                               Foreground="{StaticResource TextBrush}"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <TextBlock x:Name="EmptyHistoryText"
+                           Text="{DynamicResource LngNoPlaybackHistory}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                           Visibility="Collapsed"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

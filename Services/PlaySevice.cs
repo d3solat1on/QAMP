@@ -18,6 +18,13 @@ namespace QAMP.Services
         private static PlayerService? _instance;
         public static PlayerService Instance => _instance ??= new PlayerService();
         private int _currentStream = 0;
+        private int _crossfadeStream = 0;
+        private Track? _crossfadeTargetTrack;
+        private double _crossfadeTargetDuration;
+        private double _crossfadeDuration;
+        private double _crossfadeElapsed;
+        private double _crossfadeLastPosition;
+        private bool _crossfadeAttempted;
         private bool _isInitialized = false;
 
         // BASS параметры
@@ -27,14 +34,21 @@ namespace QAMP.Services
         private readonly SemaphoreSlim _playSemaphore = new(1, 1);
         private int _endSyncHandle = 0;
         public float[] EqGains { get; set; } = new float[10];
-        private readonly int[] _eqFxHandles = new int[10];
-        private int _reverbFxHandle = 0;
-        private int _echoFxHandle = 0;
-        private int _compressorFxHandle = 0;
+        private readonly Dictionary<int, StreamEffects> _streamEffects = [];
         private long _savedPositionBytes = 0;
         private bool _wasPlayingBeforeEdit = false;
         private bool _disposed = false;
         private bool _playCountIncremented = false;
+        private double _listenedSeconds = 0;
+        private double _lastCountPosition = -1;
+
+        private sealed class StreamEffects
+        {
+            public int[] EqFxHandles { get; } = new int[10];
+            public int ReverbFxHandle { get; set; }
+            public int EchoFxHandle { get; set; }
+            public int CompressorFxHandle { get; set; }
+        }
 
         public List<SpectrumControl> SpectrumControls { get; } = [];
 
@@ -193,6 +207,9 @@ namespace QAMP.Services
                 StopInternal();
                 CurrentTrack = track;
                 _playCountIncremented = false;
+                _listenedSeconds = 0;
+                _lastCountPosition = -1;
+                _crossfadeAttempted = false;
 
                 int stream = 0;
 
@@ -211,6 +228,7 @@ namespace QAMP.Services
                     float linearVolume = (float)(_volume * _masterGain);
                     Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
 
+                    _currentStream = stream;
                     ApplyEqualizerToStream();
 
                     long length = Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE);
@@ -284,6 +302,7 @@ namespace QAMP.Services
             try
             {
                 CurrentTrack = track;
+                _lastCountPosition = -1;
 
                 int stream = CreateStreamFromFile(track.Path);
                 if (stream == 0) return;
@@ -294,6 +313,7 @@ namespace QAMP.Services
                 float linearVolume = (float)(_volume * _masterGain);
                 Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
 
+                _currentStream = stream;
                 ApplyEqualizerToStream();
 
                 long length = Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE);
@@ -310,6 +330,7 @@ namespace QAMP.Services
                 _currentStream = stream;
 
                 Bass.BASS_ChannelSetPosition(_currentStream, _savedPositionBytes, BASSMode.BASS_POS_BYTE);
+                _lastCountPosition = Bass.BASS_ChannelBytes2Seconds(_currentStream, _savedPositionBytes);
 
                 if (_wasPlayingBeforeEdit)
                 {
@@ -358,47 +379,70 @@ namespace QAMP.Services
         {
             if (stream == 0) return;
 
-            for (int i = 0; i < _eqFxHandles.Length; i++)
+            if (!_streamEffects.Remove(stream, out StreamEffects? effects)) return;
+
+            foreach (int fx in effects.EqFxHandles)
             {
-                if (_eqFxHandles[i] != 0)
+                if (fx != 0)
                 {
-                    Bass.BASS_ChannelRemoveFX(stream, _eqFxHandles[i]);
-                    _eqFxHandles[i] = 0;
+                    Bass.BASS_ChannelRemoveFX(stream, fx);
                 }
             }
 
-            if (_reverbFxHandle != 0)
+            if (effects.ReverbFxHandle != 0)
             {
-                Bass.BASS_ChannelRemoveFX(stream, _reverbFxHandle);
-                _reverbFxHandle = 0;
+                Bass.BASS_ChannelRemoveFX(stream, effects.ReverbFxHandle);
             }
-            if (_echoFxHandle != 0)
+            if (effects.EchoFxHandle != 0)
             {
-                Bass.BASS_ChannelRemoveFX(stream, _echoFxHandle);
-                _echoFxHandle = 0;
+                Bass.BASS_ChannelRemoveFX(stream, effects.EchoFxHandle);
             }
-            if (_compressorFxHandle != 0)
+            if (effects.CompressorFxHandle != 0)
             {
-                Bass.BASS_ChannelRemoveFX(stream, _compressorFxHandle);
-                _compressorFxHandle = 0;
+                Bass.BASS_ChannelRemoveFX(stream, effects.CompressorFxHandle);
             }
         }
 
         private void ApplyEqualizerToStream()
         {
-            if (_currentStream == 0) return;
+            if (_currentStream != 0) ApplyEqualizerToStream(_currentStream);
+            if (_crossfadeStream != 0) ApplyEqualizerToStream(_crossfadeStream);
+        }
 
-            for (int i = 0; i < _eqFxHandles.Length; i++)
+        private void ApplyEqualizerToStream(int stream)
+        {
+            if (stream == 0) return;
+
+            if (!_streamEffects.TryGetValue(stream, out StreamEffects? effects))
             {
-                if (_eqFxHandles[i] != 0)
-                {
-                    Bass.BASS_ChannelRemoveFX(_currentStream, _eqFxHandles[i]);
-                    _eqFxHandles[i] = 0;
-                }
+                effects = new StreamEffects();
+                _streamEffects.Add(stream, effects);
+            }
+
+            foreach (int fx in effects.EqFxHandles)
+            {
+                if (fx != 0) Bass.BASS_ChannelRemoveFX(stream, fx);
+            }
+            Array.Clear(effects.EqFxHandles);
+
+            if (effects.ReverbFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(stream, effects.ReverbFxHandle);
+                effects.ReverbFxHandle = 0;
+            }
+            if (effects.EchoFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(stream, effects.EchoFxHandle);
+                effects.EchoFxHandle = 0;
+            }
+            if (effects.CompressorFxHandle != 0)
+            {
+                Bass.BASS_ChannelRemoveFX(stream, effects.CompressorFxHandle);
+                effects.CompressorFxHandle = 0;
             }
 
             var config = SettingsManager.Instance.Config;
-            Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, (float)config.Balance);
+            Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_PAN, (float)config.Balance);
 
             float[] effectiveGains = new float[EqGains.Length];
             EqGains.CopyTo(effectiveGains, 0);
@@ -433,46 +477,22 @@ namespace QAMP.Services
 
             for (int i = 0; i < 10; i++)
             {
-                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_DX8_PARAMEQ, 1);
+                int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_DX8_PARAMEQ, 1);
                 if (fx != 0)
                 {
                     Bass.BASS_FXSetParameters(fx, equalizer[i]);
-                    _eqFxHandles[i] = fx;
-                }
-                else
-                {
-                    _eqFxHandles[i] = 0;
+                    effects.EqFxHandles[i] = fx;
                 }
             }
 
-            ApplyOptionalEffects();
+            ApplyOptionalEffects(stream, effects, config);
         }
 
-        private void ApplyOptionalEffects()
+        private static void ApplyOptionalEffects(int stream, StreamEffects effects, AppSettings config)
         {
-            if (_currentStream == 0) return;
-
-            if (_reverbFxHandle != 0)
-            {
-                Bass.BASS_ChannelRemoveFX(_currentStream, _reverbFxHandle);
-                _reverbFxHandle = 0;
-            }
-            if (_echoFxHandle != 0)
-            {
-                Bass.BASS_ChannelRemoveFX(_currentStream, _echoFxHandle);
-                _echoFxHandle = 0;
-            }
-            if (_compressorFxHandle != 0)
-            {
-                Bass.BASS_ChannelRemoveFX(_currentStream, _compressorFxHandle);
-                _compressorFxHandle = 0;
-            }
-
-            var config = SettingsManager.Instance.Config;
-
             if (config.ReverbEnabled)
             {
-                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_BFX_FREEVERB, 1);
+                int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_BFX_FREEVERB, 1);
                 if (fx != 0)
                 {
                     var reverb = new BASS_BFX_FREEVERB
@@ -484,13 +504,13 @@ namespace QAMP.Services
                         fWidth = 1.0f
                     };
                     Bass.BASS_FXSetParameters(fx, reverb);
-                    _reverbFxHandle = fx;
+                    effects.ReverbFxHandle = fx;
                 }
             }
 
             if (config.EchoEnabled)
             {
-                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_BFX_ECHO4, 1);
+                int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_BFX_ECHO4, 1);
                 if (fx != 0)
                 {
                     var echo = new BASS_BFX_ECHO4
@@ -502,13 +522,13 @@ namespace QAMP.Services
                         bStereo = true
                     };
                     Bass.BASS_FXSetParameters(fx, echo);
-                    _echoFxHandle = fx;
+                    effects.EchoFxHandle = fx;
                 }
             }
 
             if (config.CompressorEnabled)
             {
-                int fx = Bass.BASS_ChannelSetFX(_currentStream, BASSFXType.BASS_FX_BFX_COMPRESSOR2, 1);
+                int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_BFX_COMPRESSOR2, 1);
                 if (fx != 0)
                 {
                     var compressor = new BASS_BFX_COMPRESSOR2
@@ -520,7 +540,7 @@ namespace QAMP.Services
                         fRelease = 200.0f
                     };
                     Bass.BASS_FXSetParameters(fx, compressor);
-                    _compressorFxHandle = fx;
+                    effects.CompressorFxHandle = fx;
                 }
             }
         }
@@ -546,13 +566,11 @@ namespace QAMP.Services
 
         public void ApplyCurrentEqGains()
         {
-            if (_currentStream == 0) return;
             ApplyEqualizerToStream();
         }
 
         public void ApplyAudioEffects()
         {
-            if (_currentStream == 0) return;
             ApplyEqualizerToStream();
         }
 
@@ -612,6 +630,10 @@ namespace QAMP.Services
                 {
                     Bass.BASS_ChannelSetDevice(_currentStream, deviceId);
                 }
+                if (_crossfadeStream != 0 && Bass.BASS_ChannelIsActive(_crossfadeStream) != BASSActive.BASS_ACTIVE_STOPPED)
+                {
+                    Bass.BASS_ChannelSetDevice(_crossfadeStream, deviceId);
+                }
             }
         }
 
@@ -619,23 +641,32 @@ namespace QAMP.Services
         {
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                if (!_playCountIncremented && CurrentTrack != null)
-                {
-                    _playCountIncremented = true;
-                    int trackId = CurrentTrack.Id;
+                // The callback may already be queued when the user switches tracks.
+                if (channel != _currentStream || CurrentTrack == null || _crossfadeStream != 0) return;
 
-                    Task.Run(() =>
-                    {
-                        DatabaseService.IncrementTrackPlayCount(trackId);
-                        Application.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            CurrentTrack.PlayCount++;
-                            PlayCountUpdated?.Invoke(trackId);
-                        });
-                    });
-                }
+                IncrementCurrentTrackPlayCount();
 
                 PlayNextTrack();
+            });
+        }
+
+        private void IncrementCurrentTrackPlayCount()
+        {
+            if (_playCountIncremented || CurrentTrack == null) return;
+
+            _playCountIncremented = true;
+            Track track = CurrentTrack;
+            int trackId = track.Id;
+
+            _ = Task.Run(() =>
+            {
+                if (!DatabaseService.IncrementTrackPlayCount(trackId)) return;
+
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    track.PlayCount++;
+                    PlayCountUpdated?.Invoke(trackId);
+                });
             });
         }
 
@@ -645,6 +676,9 @@ namespace QAMP.Services
             {
                 Stop();
                 CurrentTrack = track;
+                _playCountIncremented = false;
+                _listenedSeconds = 0;
+                _lastCountPosition = 0;
 
                 int stream = CreateStreamFromFile(track.Path);
 
@@ -702,22 +736,22 @@ namespace QAMP.Services
             if (_currentStream == 0 || !IsPlaying || !SettingsManager.Instance.Config.IsVisualizerEnabled)
                 return;
 
-                foreach (var control in SpectrumControls)
+            foreach (var control in SpectrumControls)
+            {
+                int barsCount = control.BarCount;
+                if (barsCount > 128) barsCount = 128;
+
+                if (Native.QampCoreNative.GetSpectrumDataAdvanced(_currentStream, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
                 {
-                    int barsCount = control.BarCount;
-                    if (barsCount > 128) barsCount = 128;
-
-                    if (Native.QampCoreNative.GetSpectrumDataAdvanced(_currentStream, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
+                    for (int i = 0; i < barsCount; i++)
                     {
-                        for (int i = 0; i < barsCount; i++)
-                        {
-                            _scottPlotBuffer[i] = _nativeSpectrumBuffer[i];
-                            _scottPlotPeakBuffer[i] = _nativePeakBuffer[i];
-                        }
-
-                        control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
+                        _scottPlotBuffer[i] = _nativeSpectrumBuffer[i];
+                        _scottPlotPeakBuffer[i] = _nativePeakBuffer[i];
                     }
+
+                    control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
                 }
+            }
         }
 
         private void PositionTimer_Tick(object? sender, EventArgs e)
@@ -732,8 +766,42 @@ namespace QAMP.Services
 
                     if (!double.IsNaN(newPosition) && !double.IsInfinity(newPosition))
                     {
+                        if (_lastCountPosition >= 0)
+                        {
+                            double elapsed = newPosition - _lastCountPosition;
+                            if (elapsed > 0 && elapsed <= 1.0)
+                            {
+                                _listenedSeconds += elapsed;
+                            }
+                        }
+                        _lastCountPosition = newPosition;
+
+                        double playCountThreshold = totalDuration > 0
+                            ? Math.Min(30.0, totalDuration / 2.0)
+                            : double.PositiveInfinity;
+                        if (!_playCountIncremented && _listenedSeconds >= playCountThreshold)
+                        {
+                            IncrementCurrentTrackPlayCount();
+                        }
+
                         Position = newPosition;
                         PositionChanged?.Invoke(Position);
+
+                        var config = SettingsManager.Instance.Config;
+                        if (!_crossfadeAttempted &&
+                            _crossfadeStream == 0 &&
+                            config.CrossfadeEnabled &&
+                            config.CrossfadeDuration > 0 &&
+                            totalDuration - newPosition <= config.CrossfadeDuration)
+                        {
+                            _crossfadeAttempted = true;
+                            TryStartCrossfade(newPosition, totalDuration);
+                        }
+
+                        if (_crossfadeStream != 0)
+                        {
+                            UpdateCrossfade(newPosition);
+                        }
 
                         if (totalDuration > 0 && (totalDuration - newPosition) < 0.3)
                         {
@@ -753,6 +821,10 @@ namespace QAMP.Services
             if (_currentStream != 0 && IsPlaying)
             {
                 Bass.BASS_ChannelPause(_currentStream);
+                if (_crossfadeStream != 0)
+                {
+                    Bass.BASS_ChannelPause(_crossfadeStream);
+                }
                 IsPlaying = false;
                 _positionTimer.Stop();
                 _spectrumTimer.Stop();
@@ -766,6 +838,10 @@ namespace QAMP.Services
             if (_currentStream != 0 && !IsPlaying && CurrentTrack != null)
             {
                 Bass.BASS_ChannelPlay(_currentStream, false);
+                if (_crossfadeStream != 0)
+                {
+                    Bass.BASS_ChannelPlay(_crossfadeStream, false);
+                }
                 IsPlaying = true;
                 _positionTimer.Start();
                 _spectrumTimer.Start();
@@ -791,6 +867,15 @@ namespace QAMP.Services
         }
         private void StopInternal()
         {
+            if (_crossfadeStream != 0)
+            {
+                RemoveEffectsFromStream(_crossfadeStream);
+                Bass.BASS_ChannelStop(_crossfadeStream);
+                Bass.BASS_StreamFree(_crossfadeStream);
+                _crossfadeStream = 0;
+                _crossfadeTargetTrack = null;
+            }
+
             if (_currentStream != 0)
             {
                 RemoveEffectsFromStream(_currentStream);
@@ -809,7 +894,133 @@ namespace QAMP.Services
             _positionTimer?.Stop();
             _spectrumTimer?.Stop();
             IsPlaying = false;
+            _crossfadeAttempted = false;
         }
+
+        private void TryStartCrossfade(double currentPosition, double currentDuration)
+        {
+            Track? nextTrack = RepeatMode == RepeatMode.RepeatOne ? CurrentTrack : GetNextTrack();
+            if (nextTrack == null || currentDuration <= currentPosition) return;
+
+            int stream = 0;
+            try
+            {
+                stream = CreateStreamFromFile(nextTrack.Path);
+                if (stream == 0) return;
+
+                Bass.BASS_ChannelGetInfo(stream, _channelInfo);
+                double nextDuration = Bass.BASS_ChannelBytes2Seconds(stream, Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE));
+
+                int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
+                Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+
+                var config = SettingsManager.Instance.Config;
+
+                Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, 0f);
+                ApplyEqualizerToStream(stream);
+
+                if (!Bass.BASS_ChannelPlay(stream, false))
+                {
+                    Bass.BASS_StreamFree(stream);
+                    return;
+                }
+
+                _crossfadeDuration = Math.Min(config.CrossfadeDuration, Math.Min(currentDuration - currentPosition, nextDuration));
+                if (_crossfadeDuration <= 0)
+                {
+                    Bass.BASS_ChannelStop(stream);
+                    Bass.BASS_StreamFree(stream);
+                    return;
+                }
+
+                _crossfadeStream = stream;
+                _crossfadeTargetTrack = nextTrack;
+                _crossfadeTargetDuration = nextDuration;
+                _crossfadeElapsed = 0;
+                _crossfadeLastPosition = currentPosition;
+
+                int fadeMs = (int)(_crossfadeDuration * 1000);
+                float masterVolume = (float)(_volume * _masterGain);
+
+                Bass.BASS_ChannelSlideAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, 0f, fadeMs);
+
+                Bass.BASS_ChannelSlideAttribute(_crossfadeStream, BASSAttribute.BASS_ATTRIB_VOL, masterVolume, fadeMs);
+            }
+            catch (Exception ex)
+            {
+                if (stream != 0) Bass.BASS_StreamFree(stream);
+                System.Diagnostics.Debug.WriteLine($"Crossfade failed: {ex.Message}");
+            }
+        }
+
+        private void UpdateCrossfade(double currentPosition)
+        {
+            double elapsed = currentPosition - _crossfadeLastPosition;
+            if (elapsed > 0 && elapsed <= 1.0)
+            {
+                _crossfadeElapsed += elapsed;
+            }
+            _crossfadeLastPosition = currentPosition;
+
+            if (_crossfadeElapsed >= _crossfadeDuration)
+            {
+                CompleteCrossfade();
+            }
+        }
+
+        private void CompleteCrossfade()
+        {
+            if (_crossfadeStream == 0 || _crossfadeTargetTrack == null) return;
+
+            int previousStream = _currentStream;
+            int previousEndSync = _endSyncHandle;
+            IncrementCurrentTrackPlayCount();
+
+            if (previousEndSync != 0)
+            {
+                Bass.BASS_ChannelRemoveSync(previousStream, previousEndSync);
+            }
+            RemoveEffectsFromStream(previousStream);
+            Bass.BASS_ChannelStop(previousStream);
+            Bass.BASS_StreamFree(previousStream);
+
+            _currentStream = _crossfadeStream;
+            _crossfadeStream = 0;
+            CurrentTrack = _crossfadeTargetTrack;
+            _crossfadeTargetTrack = null;
+            Duration = _crossfadeTargetDuration;
+            _crossfadeTargetDuration = 0;
+            _crossfadeDuration = 0;
+            _crossfadeElapsed = 0;
+            _endSyncHandle = 0;
+            _playCountIncremented = false;
+            _listenedSeconds = 0;
+            _lastCountPosition = 0;
+            _crossfadeAttempted = false;
+
+            float linearVolume = (float)(_volume * _masterGain);
+            Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+            if (_endSyncProc != null)
+            {
+                _endSyncHandle = Bass.BASS_ChannelSetSync(
+                    _currentStream,
+                    BASSSync.BASS_SYNC_END,
+                    0,
+                    _endSyncProc,
+                    IntPtr.Zero);
+            }
+
+            IsPlaying = true;
+            Position = 0;
+            TrackChanged?.Invoke(CurrentTrack);
+            MainWindow.UpdateOSD();
+            if (Application.Current.MainWindow is MainWindow mainWin)
+            {
+                mainWin.UpdateLyricsView();
+                mainWin.UpdateNextTrackUI();
+            }
+        }
+
         public void Seek(double seconds)
         {
             if (_currentStream != 0 && CurrentTrack != null)
@@ -818,6 +1029,7 @@ namespace QAMP.Services
                 long position = Bass.BASS_ChannelSeconds2Bytes(_currentStream, seconds);
                 Bass.BASS_ChannelSetPosition(_currentStream, position, BASSMode.BASS_POS_BYTE);
                 Position = seconds;
+                _lastCountPosition = seconds;
             }
         }
 

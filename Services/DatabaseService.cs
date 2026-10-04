@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using System.Globalization;
 using Microsoft.Data.Sqlite;
 using QAMP.Models;
 
@@ -43,6 +44,7 @@ public class DatabaseService
         {
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
+            EnsureTrackPlayHistoryTable(connection);
 
             // Проверяем колонки в таблице Playlists
             var cmd = connection.CreateCommand();
@@ -182,45 +184,78 @@ public class DatabaseService
             System.Diagnostics.Debug.WriteLine($"Ошибка при миграции БД: {ex.Message}");
         }
     }
-    public static void IncrementTrackPlayCount(int trackId)
+    private static void EnsureTrackPlayHistoryTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS TrackPlayHistory (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                TrackId INTEGER NOT NULL,
+                PlayedAtUtc TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS IX_TrackPlayHistory_TrackId_PlayedAtUtc
+                ON TrackPlayHistory (TrackId, PlayedAtUtc);";
+        command.ExecuteNonQuery();
+    }
+
+    public static bool IncrementTrackPlayCount(int trackId)
     {
         System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] BEFORE - Attempting to increment PlayCount for Track ID={trackId}");
         try
         {
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
+            using var transaction = connection.BeginTransaction();
 
-            // Сначала читаем текущее значение
-            var readCmd = connection.CreateCommand();
-            readCmd.CommandText = "SELECT PlayCount FROM Tracks WHERE Id = $id";
-            readCmd.Parameters.AddWithValue("$id", trackId);
-            var currentCount = readCmd.ExecuteScalar();
-            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] Current PlayCount: {(currentCount != null ? currentCount.ToString() : "NULL")}");
+            using var updateCommand = connection.CreateCommand();
+            updateCommand.Transaction = transaction;
+            updateCommand.CommandText = "UPDATE Tracks SET PlayCount = COALESCE(PlayCount, 0) + 1 WHERE Id = $id";
+            updateCommand.Parameters.AddWithValue("$id", trackId);
+            if (updateCommand.ExecuteNonQuery() == 0)
+            {
+                transaction.Rollback();
+                return false;
+            }
 
-            // Теперь инкрементируем
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = "UPDATE Tracks SET PlayCount = PlayCount + 1 WHERE Id = $id";
-            cmd.Parameters.AddWithValue("$id", trackId);
-            int rowsAffected = cmd.ExecuteNonQuery();
-            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] Rows affected: {rowsAffected}");
+            using var historyCommand = connection.CreateCommand();
+            historyCommand.Transaction = transaction;
+            historyCommand.CommandText = "INSERT INTO TrackPlayHistory (TrackId, PlayedAtUtc) VALUES ($id, $playedAt)";
+            historyCommand.Parameters.AddWithValue("$id", trackId);
+            historyCommand.Parameters.AddWithValue("$playedAt", DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+            historyCommand.ExecuteNonQuery();
 
-            // Проверяем новое значение
-            var checkCmd = connection.CreateCommand();
-            checkCmd.CommandText = "SELECT PlayCount FROM Tracks WHERE Id = $id";
-            checkCmd.Parameters.AddWithValue("$id", trackId);
-            var newCount = checkCmd.ExecuteScalar();
-            System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] AFTER - New PlayCount: {(newCount != null ? newCount.ToString() : "NULL")}");
-
-            // App.LogInfo($"Statistics: Track ID {trackId} play count incremented.");
-
-            // Уведомляем об изменении статистики
+            transaction.Commit();
             StatisticsChanged?.Invoke();
+            return true;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] ERROR: {ex.Message}");
             App.LogException(ex, "IncrementPlayCount");
+            return false;
         }
+    }
+
+    public static List<DateTimeOffset> GetTrackPlayHistory(int trackId)
+    {
+        var playHistory = new List<DateTimeOffset>();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT PlayedAtUtc FROM TrackPlayHistory WHERE TrackId = $id ORDER BY PlayedAtUtc DESC";
+        command.Parameters.AddWithValue("$id", trackId);
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            if (DateTimeOffset.TryParse(reader.GetString(0), CultureInfo.InvariantCulture, DateTimeStyles.None, out var playedAt))
+            {
+                playHistory.Add(playedAt);
+            }
+        }
+
+        return playHistory;
     }
     public static void InitializeDatabase()
     {
@@ -278,6 +313,7 @@ public class DatabaseService
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
+        EnsureTrackPlayHistoryTable(connection);
 
         // Проверяем, существует ли колонка IsSystemPlaylist в таблице Playlists
         try
@@ -1431,6 +1467,11 @@ public class DatabaseService
         connection.Open();
 
         var cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM TrackPlayHistory WHERE TrackId = $trackId";
+        cmd.Parameters.AddWithValue("$trackId", trackId);
+        cmd.ExecuteNonQuery();
+
+        cmd = connection.CreateCommand();
         cmd.CommandText = "DELETE FROM PlaylistTracks WHERE TrackId = $trackId";
         cmd.Parameters.AddWithValue("$trackId", trackId);
         cmd.ExecuteNonQuery();

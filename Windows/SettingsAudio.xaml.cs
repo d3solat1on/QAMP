@@ -68,6 +68,10 @@ namespace QAMP.Windows
             PitchSlider.Value = config.Pitch;
             PitchText.Text = $"{config.Pitch:F2}x";
 
+            CrossfadeEnabled.IsChecked = config.CrossfadeEnabled;
+            CrossfadeDurationSlider.Value = config.CrossfadeDuration;
+            CrossfadeDurationText.Text = $"{config.CrossfadeDuration:F1} s";
+
             CompressorEnabled.IsChecked = config.CompressorEnabled;
             CompressorThresholdSlider.Value = config.CompressorThreshold;
             CompressorThresholdText.Text = $"{config.CompressorThreshold:F2}";
@@ -202,10 +206,12 @@ namespace QAMP.Windows
             config.VocalEnhancementEnabled = VocalEnhancementEnabled.IsChecked ?? false;
             config.LoudnessEnabled = LoudnessEnabled.IsChecked ?? false;
             config.CompressorEnabled = CompressorEnabled.IsChecked ?? false;
+            config.CrossfadeEnabled = CrossfadeEnabled.IsChecked ?? false;
             SettingsManager.Instance.Save();
             _player.ApplyAudioEffects();
         }
 
+        
         private void ReverbLevelSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (isInitializing) return;
@@ -237,6 +243,15 @@ namespace QAMP.Windows
             PitchText.Text = $"{config.Pitch:F2}x";
             SettingsManager.Instance.Save();
             _player.ApplyPlaybackRate(config.Tempo, config.Pitch);
+        }
+
+        private void CrossfadeDurationSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (isInitializing) return;
+            var config = SettingsManager.Instance.Config;
+            config.CrossfadeDuration = e.NewValue;
+            CrossfadeDurationText.Text = $"{e.NewValue:F1} s";
+            SettingsManager.Instance.Save();
         }
 
         private void CompressorThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -289,6 +304,8 @@ namespace QAMP.Windows
                 config.Balance = 0.0;
                 config.Tempo = 1.0;
                 config.Pitch = 1.0;
+                config.CrossfadeEnabled = true;
+                config.CrossfadeDuration = 3.0;
                 SettingsManager.Instance.Save();
 
                 if (_bands != null)
@@ -326,6 +343,10 @@ namespace QAMP.Windows
                 TempoText.Text = "1.00x";
                 PitchSlider.Value = 1.0;
                 PitchText.Text = "1.00x";
+
+                CrossfadeEnabled.IsChecked = true;
+                CrossfadeDurationSlider.Value = 3.0;
+                CrossfadeDurationText.Text = "3.0 s";
 
                 PresetComboBox.SelectedIndex = 0;
 

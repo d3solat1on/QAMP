@@ -1,6 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngCrossfade">Плавный переход</System:String>
+        <System:String x:Key="LngUseCrossfade">Использовать плавный переход</System:String>
+        
         <System:String x:Key="LngSecondColorSpectrum">Второй цвет для спектра</System:String>
         <System:String x:Key="LngFirstColorSpectrum">Первый цвет для спектра</System:String>
         <System:String x:Key="LngGradientSpectrum">Градиент для спектра</System:String>
@@ -549,6 +552,12 @@ FN+F3 - Пред. трек
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Текст песни</System:String>
         <System:String x:Key="LngPlayCountTrack"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Количество воспроизведений</System:String>
+        <System:String x:Key="LngPlaybackHistory"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">История прослушиваний</System:String>
+        <System:String x:Key="LngPlaybackHistoryTooltip"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Показать даты прослушиваний</System:String>
+        <System:String x:Key="LngNoPlaybackHistory"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Записей пока нет</System:String>
         <System:String x:Key="LngSizeFile"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Размер файла</System:String>
         <System:String x:Key="LngExstensionFile"

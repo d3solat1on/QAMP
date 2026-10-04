@@ -106,6 +106,7 @@ public partial class MainWindow
             var fullInfo = TagReader.GetFullTrackInfo(selectedTrack.Path);
             if (fullInfo != null)
             {
+                fullInfo.Id = selectedTrack.Id;
                 fullInfo.PlayCount = selectedTrack.PlayCount;
                 var infoWindow = new ShowTrackInfo(fullInfo) { Owner = this };
                 infoWindow.Show();

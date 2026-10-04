@@ -41,6 +41,8 @@ public class AppSettings : INotifyPropertyChanged
     public double Pitch { get; set; } = 1.0;
     public int OutputDeviceId { get; set; } = -1;
     public string OutputDeviceName { get; set; } = string.Empty;
+    public bool CrossfadeEnabled { get; set; } = true;
+    public double CrossfadeDuration { get; set; } = 3.0;
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;

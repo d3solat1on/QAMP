@@ -12,14 +12,18 @@ partial class HelpWindow : Window
         MouseLeftButtonDown += (s, e) =>
         {
             if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
-                DragMove(); 
+                DragMove();
         };
     }
     public void ShowVersion()
     {
         string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
         CurrentVersion.Text = $"Version {version}";
+#if DEBUG
+        CurrentVersion.Text = $"{version} (Debug)";
+#endif
         CurrentVersion.IsReadOnly = true;
+
     }
     public void ShowHelpWindow()
     {

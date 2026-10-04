@@ -70,6 +70,15 @@ namespace QAMP.Windows
             }
         }
 
+        private void ShowPlayHistory_Click(object sender, RoutedEventArgs e)
+        {
+            var historyWindow = new PlaybackHistoryWindow(_track)
+            {
+                Owner = this
+            };
+            historyWindow.ShowDialog();
+        }
+
         private void PathTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var currentTrack = _track;

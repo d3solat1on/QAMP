@@ -144,6 +144,7 @@ namespace QAMP
                 }
 
                 BassNet.Registration(email, key);
+                Debug.WriteLine($"BASS registered with email: {email}, key: {key}");
 
                 var deviceId = SettingsManager.Instance.Config.OutputDeviceId;
                 if (deviceId >= 0) Bass.BASS_SetDevice(deviceId);
@@ -257,6 +258,7 @@ namespace QAMP
                     var fullInfo = TagReader.GetFullTrackInfo(player.CurrentTrack.Path);
                     if (fullInfo != null)
                     {
+                        fullInfo.Id = player.CurrentTrack.Id;
                         fullInfo.PlayCount = player.CurrentTrack.PlayCount;
 
                         var infoWindow = new Windows.ShowTrackInfo(fullInfo)

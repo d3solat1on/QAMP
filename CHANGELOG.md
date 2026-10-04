@@ -1,4 +1,9 @@
 # CHANGELOG
+## (04.10.2026) Version 1.8.6:
+    - The track playback counter logic has been reworked.  
+    - A playback history window for tracks has been added.  
+    - The crossfade for tracks added.  
+
 ## (26.08.2026) Version 1.8.5:
     - Added gradient to spectrogram.   
     - Added a second type of sound visualization.

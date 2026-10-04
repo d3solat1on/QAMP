@@ -324,6 +324,35 @@
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource AccentBrush}"/>
                             </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,0,10">
+                                <TextBlock x:Name="CrossfadeText"
+                                           Text="{DynamicResource LngCrossfade}"
+                                           VerticalAlignment="Center"
+                                           Width="80"
+                                           Margin="0,0,5,0"
+                                           Foreground="{StaticResource ForegroundBrush}"/>
+                                <CheckBox x:Name="CrossfadeEnabled"
+                                          Content="{DynamicResource LngUseCrossfade}"
+                                          Foreground="{StaticResource ForegroundBrush}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,10,0"
+                                          Checked="AudioProcessingSettingChanged"
+                                          Unchecked="AudioProcessingSettingChanged"/>
+                                <Slider x:Name="CrossfadeDurationSlider"
+                                        Minimum="0"
+                                        Maximum="10"
+                                        TickFrequency="0.5"
+                                        Width="220"
+                                        ValueChanged="CrossfadeDurationSlider_ValueChanged"/>
+                                <TextBlock x:Name="CrossfadeDurationText"
+                                           Text="3.0 s"
+                                           VerticalAlignment="Center"
+                                           Width="60"
+                                           Foreground="{DynamicResource AccentBrush}"/>
+                            </StackPanel>
                         </StackPanel>
                     </GroupBox>
 
