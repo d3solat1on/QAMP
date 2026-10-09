@@ -15,7 +15,7 @@
         Title="QAMP"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
-        FontFamily="GOST type A"
+        FontFamily="{DynamicResource MainFont}"
         Loaded="MainWindow_Loaded"
         Background="{StaticResource BackgroundBrush}"
         Foreground="{StaticResource ForegroundBrush}">

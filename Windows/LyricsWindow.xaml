@@ -6,6 +6,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
+        FontFamily="{DynamicResource MainFont}"
         WindowStartupLocation="CenterOwner">
 
     <Border Background="{StaticResource SecondaryBackgroundBrush}"

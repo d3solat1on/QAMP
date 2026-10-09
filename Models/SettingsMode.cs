@@ -43,6 +43,8 @@ public class AppSettings : INotifyPropertyChanged
     public string OutputDeviceName { get; set; } = string.Empty;
     public bool CrossfadeEnabled { get; set; } = true;
     public double CrossfadeDuration { get; set; } = 3.0;
+    public bool UseWASAPI { get; set; } = false;
+    public string SelectedFontName { get; set; } = "GOST Type A";
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;

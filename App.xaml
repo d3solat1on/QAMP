@@ -22,7 +22,7 @@
 
             <Style TargetType="Window">
                 <Setter Property="FontFamily"
-                        Value="{StaticResource MainFont}"/>
+                        Value="{DynamicResource MainFont}"/>
             </Style>
 
             <ContextMenu x:Key="TrayContextMenu"

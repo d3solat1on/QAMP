@@ -167,7 +167,18 @@ namespace QAMP
                 LanguageManager.ApplyLanguage(SettingsManager.Instance.Config.Language);
                 ThemeManager.UpdateAccentColor(SettingsManager.Instance.Config.AccentColor);
                 ThemeManager.LoadThemeFromConfig();
+                var config = SettingsManager.Instance.Config;
+                var fontService = FontService.Instance;
+                var selectedFont = fontService.FindFont(config.SelectedFontName);
+                if (selectedFont is null)
+                {
+                    selectedFont = fontService.DefaultFont;
+                    Debug.WriteLine($"Saved font '{config.SelectedFontName}' was not found. Using the default font.");
+                    config.SelectedFontName = selectedFont.DisplayName;
+                    SettingsManager.Instance.Save();
+                }
 
+                Current.Resources["MainFont"] = selectedFont.Family;
                 var savedRound = SettingsManager.Instance.Config.CurrentRound;
                 Current.Resources["AppCornerRadius"] = new CornerRadius(savedRound);
             }
@@ -279,6 +290,7 @@ namespace QAMP
         protected override void OnExit(ExitEventArgs e)
         {
             _appMutex?.Dispose();
+            WasapiEngine.Instance.Stop();
             Bass.BASS_Free();
             base.OnExit(e);
         }

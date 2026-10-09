@@ -8,6 +8,7 @@ using QAMP.Models;
 using QAMP.ViewModels;
 using QAMP.Dialogs;
 using QAMP.Visualization;
+using Un4seen.BassWasapi;
 
 namespace QAMP.Services
 {
@@ -33,6 +34,7 @@ namespace QAMP.Services
         private readonly SYNCPROC? _endSyncProc;
         private readonly SemaphoreSlim _playSemaphore = new(1, 1);
         private int _endSyncHandle = 0;
+        private bool _usesWasapiCurrentStream;
         public float[] EqGains { get; set; } = new float[10];
         private readonly Dictionary<int, StreamEffects> _streamEffects = [];
         private long _savedPositionBytes = 0;
@@ -61,6 +63,7 @@ namespace QAMP.Services
         private readonly float[] _nativePeakBuffer = new float[128];
         private readonly double[] _scottPlotBuffer = new double[128];
         private readonly double[] _scottPlotPeakBuffer = new double[128];
+        private readonly float[] _fftBuffer = new float[512]; // buffer for FFT data
 
         // События
         public event Action<Track>? TrackChanged;
@@ -118,7 +121,14 @@ namespace QAMP.Services
                 if (_isInitialized && _currentStream != 0)
                 {
                     float linearVolume = (float)(_volume * _masterGain);
-                    Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                    if (_usesWasapiCurrentStream)
+                    {
+                        WasapiEngine.Instance.SetVolume(linearVolume);
+                    }
+                    else
+                    {
+                        Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                    }
                 }
                 VolumeChanged?.Invoke(_volume);
             }
@@ -159,6 +169,7 @@ namespace QAMP.Services
                 }
             }
             _endSyncProc = EndSyncCallback;
+            WasapiEngine.Instance.PlaybackEnded += WasapiPlaybackEnded;
         }
 
         private void InitializeBass()
@@ -210,12 +221,13 @@ namespace QAMP.Services
                 _listenedSeconds = 0;
                 _lastCountPosition = -1;
                 _crossfadeAttempted = false;
+                _usesWasapiCurrentStream = SettingsManager.Instance.Config.UseWASAPI;
 
                 int stream = 0;
 
                 await Task.Run(() =>
                 {
-                    stream = CreateStreamFromFile(track.Path);
+                    stream = CreateStreamFromFile(track.Path, _usesWasapiCurrentStream);
                     if (stream == 0)
                     {
                         int error = (int)Bass.BASS_ErrorGetCode();
@@ -226,7 +238,10 @@ namespace QAMP.Services
                     _sampleRate = _channelInfo.freq;
 
                     float linearVolume = (float)(_volume * _masterGain);
-                    Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                    if (!_usesWasapiCurrentStream)
+                    {
+                        Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                    }
 
                     _currentStream = stream;
                     ApplyEqualizerToStream();
@@ -234,10 +249,13 @@ namespace QAMP.Services
                     long length = Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE);
                     _duration = Bass.BASS_ChannelBytes2Seconds(stream, length);
 
-                    int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
-                    Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+                    if (!_usesWasapiCurrentStream)
+                    {
+                        int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
+                        Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+                    }
 
-                    if (_endSyncProc != null)
+                    if (!_usesWasapiCurrentStream && _endSyncProc != null)
                     {
                         _endSyncHandle = Bass.BASS_ChannelSetSync(stream, BASSSync.BASS_SYNC_END, 0, _endSyncProc, IntPtr.Zero);
                     }
@@ -250,7 +268,15 @@ namespace QAMP.Services
 
                 _currentStream = stream;
 
-                if (!Bass.BASS_ChannelPlay(_currentStream, false))
+                if (_usesWasapiCurrentStream)
+                {
+                    WasapiEngine.Instance.Start(
+                        _currentStream,
+                        _channelInfo,
+                        SettingsManager.Instance.Config.OutputDeviceId,
+                        (float)(_volume * _masterGain));
+                }
+                else if (!Bass.BASS_ChannelPlay(_currentStream, false))
                 {
                     throw new Exception($"Failed to play stream. Error: {Bass.BASS_ErrorGetCode()}");
                 }
@@ -273,6 +299,25 @@ namespace QAMP.Services
                 _playSemaphore.Release();
             }
         }
+
+        public async Task ApplyOutputModeAsync()
+        {
+            if (CurrentTrack == null) return;
+
+            Track track = CurrentTrack;
+            double position = Position;
+            bool wasPlaying = IsPlaying;
+
+            await PlayTrack(track);
+            if (_currentStream == 0 || CurrentTrack.Path != track.Path) return;
+
+            Seek(position);
+            if (!wasPlaying)
+            {
+                await PauseAsync();
+            }
+        }
+
         public void PrepareForTagEdit()
         {
             if (_currentStream == 0) return;
@@ -304,14 +349,18 @@ namespace QAMP.Services
                 CurrentTrack = track;
                 _lastCountPosition = -1;
 
-                int stream = CreateStreamFromFile(track.Path);
+                _usesWasapiCurrentStream = SettingsManager.Instance.Config.UseWASAPI;
+                int stream = CreateStreamFromFile(track.Path, _usesWasapiCurrentStream);
                 if (stream == 0) return;
 
                 Bass.BASS_ChannelGetInfo(stream, _channelInfo);
                 _sampleRate = _channelInfo.freq;
 
                 float linearVolume = (float)(_volume * _masterGain);
-                Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                if (!_usesWasapiCurrentStream)
+                {
+                    Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                }
 
                 _currentStream = stream;
                 ApplyEqualizerToStream();
@@ -319,10 +368,13 @@ namespace QAMP.Services
                 long length = Bass.BASS_ChannelGetLength(stream, BASSMode.BASS_POS_BYTE);
                 _duration = Bass.BASS_ChannelBytes2Seconds(stream, length);
 
-                int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
-                Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+                if (!_usesWasapiCurrentStream)
+                {
+                    int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
+                    Bass.BASS_ChannelSetDevice(stream, targetDeviceId);
+                }
 
-                if (_endSyncProc != null)
+                if (!_usesWasapiCurrentStream && _endSyncProc != null)
                 {
                     _endSyncHandle = Bass.BASS_ChannelSetSync(stream, BASSSync.BASS_SYNC_END, 0, _endSyncProc, IntPtr.Zero);
                 }
@@ -334,7 +386,18 @@ namespace QAMP.Services
 
                 if (_wasPlayingBeforeEdit)
                 {
-                    Bass.BASS_ChannelPlay(_currentStream, false);
+                    if (_usesWasapiCurrentStream)
+                    {
+                        WasapiEngine.Instance.Start(
+                            _currentStream,
+                            _channelInfo,
+                            SettingsManager.Instance.Config.OutputDeviceId,
+                            (float)(_volume * _masterGain));
+                    }
+                    else
+                    {
+                        Bass.BASS_ChannelPlay(_currentStream, false);
+                    }
                     IsPlaying = true;
                     _positionTimer.Start();
                     _spectrumTimer.Start();
@@ -348,28 +411,30 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error huerror: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error occurred: {ex.Message}");
             }
             finally
             {
                 _playSemaphore.Release();
             }
         }
-        private static int CreateStreamFromFile(string filePath)
+        private static int CreateStreamFromFile(string filePath, bool decodeForWasapi = false)
         {
             string extension = Path.GetExtension(filePath).ToLowerInvariant();
-            int stream;
+
+            BASSFlag streamFlags = decodeForWasapi
+                ? BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_PRESCAN
+                : BASSFlag.BASS_DEFAULT;
+
+            int stream = 0;
             if (extension == ".flac")
             {
-                stream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0, 0, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_SAMPLE_FLOAT);
-                if (stream == 0)
-                {
-                    stream = Bass.BASS_StreamCreateFile(filePath, 0, 0, BASSFlag.BASS_DEFAULT);
-                }
+                stream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0, 0, streamFlags);
             }
-            else
+
+            if (stream == 0)
             {
-                stream = Bass.BASS_StreamCreateFile(filePath, 0, 0, BASSFlag.BASS_DEFAULT);
+                stream = Bass.BASS_StreamCreateFile(filePath, 0, 0, streamFlags);
             }
 
             return stream;
@@ -634,6 +699,16 @@ namespace QAMP.Services
                 {
                     Bass.BASS_ChannelSetDevice(_crossfadeStream, deviceId);
                 }
+
+                if (_usesWasapiCurrentStream && IsPlaying && _currentStream != 0)
+                {
+                    Bass.BASS_ChannelGetInfo(_currentStream, _channelInfo);
+                    WasapiEngine.Instance.Start(
+                        _currentStream,
+                        _channelInfo,
+                        deviceId,
+                        (float)(_volume * _masterGain));
+                }
             }
         }
 
@@ -646,6 +721,17 @@ namespace QAMP.Services
 
                 IncrementCurrentTrackPlayCount();
 
+                PlayNextTrack();
+            });
+        }
+
+        private void WasapiPlaybackEnded(int stream)
+        {
+            Application.Current.Dispatcher.BeginInvoke(() =>
+            {
+                if (!_usesWasapiCurrentStream || stream != _currentStream || CurrentTrack == null) return;
+
+                IncrementCurrentTrackPlayCount();
                 PlayNextTrack();
             });
         }
@@ -680,7 +766,8 @@ namespace QAMP.Services
                 _listenedSeconds = 0;
                 _lastCountPosition = 0;
 
-                int stream = CreateStreamFromFile(track.Path);
+                _usesWasapiCurrentStream = SettingsManager.Instance.Config.UseWASAPI;
+                int stream = CreateStreamFromFile(track.Path, _usesWasapiCurrentStream);
 
                 if (stream == 0)
                 {
@@ -694,14 +781,17 @@ namespace QAMP.Services
                 _sampleRate = _channelInfo.freq;
 
                 float linearVolume = (float)(_volume * _masterGain);
-                Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                if (!_usesWasapiCurrentStream)
+                {
+                    Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_VOL, linearVolume);
+                }
 
                 ApplyEqualizerToStream();
 
                 long length = Bass.BASS_ChannelGetLength(_currentStream, BASSMode.BASS_POS_BYTE);
                 _duration = Bass.BASS_ChannelBytes2Seconds(_currentStream, length);
 
-                if (_endSyncProc != null)
+                if (!_usesWasapiCurrentStream && _endSyncProc != null)
                 {
                     Bass.BASS_ChannelSetSync(_currentStream, BASSSync.BASS_SYNC_END, 0, _endSyncProc, IntPtr.Zero);
                 }
@@ -741,15 +831,31 @@ namespace QAMP.Services
                 int barsCount = control.BarCount;
                 if (barsCount > 128) barsCount = 128;
 
-                if (Native.QampCoreNative.GetSpectrumDataAdvanced(_currentStream, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
-                {
-                    for (int i = 0; i < barsCount; i++)
-                    {
-                        _scottPlotBuffer[i] = _nativeSpectrumBuffer[i];
-                        _scottPlotPeakBuffer[i] = _nativePeakBuffer[i];
-                    }
+                bool hasFft;
 
-                    control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
+                if (_usesWasapiCurrentStream)
+                {
+                    int bytesRead = BassWasapi.BASS_WASAPI_GetData(_fftBuffer, (int)BASSData.BASS_DATA_FFT1024);
+                    hasFft = bytesRead > 0;
+                }
+                else
+                {
+                    int bytesRead = Bass.BASS_ChannelGetData(_currentStream, _fftBuffer, (int)BASSData.BASS_DATA_FFT1024);
+                    hasFft = bytesRead > 0;
+                }
+
+                if (hasFft)
+                {
+                    if (Native.QampCoreNative.CalculateSpectrumFromFFT(_fftBuffer, _nativeSpectrumBuffer, _nativePeakBuffer, barsCount))
+                    {
+                        for (int i = 0; i < barsCount; i++)
+                        {
+                            _scottPlotBuffer[i] = _nativeSpectrumBuffer[i];
+                            _scottPlotPeakBuffer[i] = _nativePeakBuffer[i];
+                        }
+
+                        control.UpdateSpectrum(_scottPlotBuffer, _scottPlotPeakBuffer, barsCount);
+                    }
                 }
             }
         }
@@ -790,6 +896,7 @@ namespace QAMP.Services
                         var config = SettingsManager.Instance.Config;
                         if (!_crossfadeAttempted &&
                             _crossfadeStream == 0 &&
+                            !_usesWasapiCurrentStream &&
                             config.CrossfadeEnabled &&
                             config.CrossfadeDuration > 0 &&
                             totalDuration - newPosition <= config.CrossfadeDuration)
@@ -820,7 +927,14 @@ namespace QAMP.Services
         {
             if (_currentStream != 0 && IsPlaying)
             {
-                Bass.BASS_ChannelPause(_currentStream);
+                if (_usesWasapiCurrentStream)
+                {
+                    WasapiEngine.Instance.Pause();
+                }
+                else
+                {
+                    Bass.BASS_ChannelPause(_currentStream);
+                }
                 if (_crossfadeStream != 0)
                 {
                     Bass.BASS_ChannelPause(_crossfadeStream);
@@ -837,7 +951,25 @@ namespace QAMP.Services
         {
             if (_currentStream != 0 && !IsPlaying && CurrentTrack != null)
             {
-                Bass.BASS_ChannelPlay(_currentStream, false);
+                if (_usesWasapiCurrentStream)
+                {
+                    if (WasapiEngine.Instance.IsInitialized)
+                    {
+                        WasapiEngine.Instance.Resume();
+                    }
+                    else
+                    {
+                        WasapiEngine.Instance.Start(
+                            _currentStream,
+                            _channelInfo,
+                            SettingsManager.Instance.Config.OutputDeviceId,
+                            (float)(_volume * _masterGain));
+                    }
+                }
+                else
+                {
+                    Bass.BASS_ChannelPlay(_currentStream, false);
+                }
                 if (_crossfadeStream != 0)
                 {
                     Bass.BASS_ChannelPlay(_crossfadeStream, false);
@@ -867,6 +999,12 @@ namespace QAMP.Services
         }
         private void StopInternal()
         {
+            if (_usesWasapiCurrentStream)
+            {
+                WasapiEngine.Instance.Stop();
+                _usesWasapiCurrentStream = false;
+            }
+
             if (_crossfadeStream != 0)
             {
                 RemoveEffectsFromStream(_crossfadeStream);

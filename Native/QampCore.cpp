@@ -129,3 +129,82 @@ extern "C" __declspec(dllexport) bool GetSpectrumDataAdvanced(DWORD channel, flo
 
     return true;
 }
+extern "C" __declspec(dllexport) bool CalculateSpectrumFromFFT(const float *fft, float *mainBuffer, float *peakBuffer, int bandsCount)
+{
+    if (!fft || !mainBuffer || !peakBuffer)
+        return false;
+
+    if (bandsCount > 512)
+        bandsCount = 512;
+
+    const float fallOffSpeed = 0.045f;
+    const float gravity = 0.0022f;
+    const float initialDelay = -0.010f;
+
+    for (int i = 0; i < bandsCount; i++)
+    {
+        double interpolation = (double)i / bandsCount;
+
+        int startIdx = (int)(pow(2.0, pow(interpolation, 0.75) * log2(512.0)));
+        int endIdx = (int)(pow(2.0, pow((double)(i + 1) / bandsCount, 0.75) * log2(512.0)));
+
+        if (startIdx >= 512) startIdx = 511;
+        if (endIdx > 512) endIdx = 512;
+        if (endIdx <= startIdx) endIdx = startIdx + 1;
+
+        float maxVal = 0.0f;
+        for (int j = startIdx; j < endIdx; j++)
+        {
+            if (fft[j] > maxVal)
+                maxVal = fft[j];
+        }
+
+        if (maxVal < 0.0000001f)
+            maxVal = 0.0000001f;
+            
+        float db = 20.0f * log10f(maxVal);
+
+        float minDb = -70.0f;
+        float maxDb = -3.0f;
+        float intensity = (db - minDb) / (maxDb - minDb);
+        if (intensity < 0.0f) intensity = 0.0f;
+        if (intensity > 1.0f) intensity = 1.0f;
+
+        intensity = powf(intensity, 1.5f);
+
+        float frequencyFactor = (float)i / bandsCount;
+        float boost = 1.0f + frequencyFactor * 0.8f;
+        intensity *= boost;
+        if (intensity > 0.95f) intensity = 0.95f;
+
+        if (intensity >= g_lastValues[i])
+            g_lastValues[i] = intensity;
+        else
+            g_lastValues[i] -= fallOffSpeed;
+            
+        if (g_lastValues[i] < 0.0f) g_lastValues[i] = 0.0f;
+
+        mainBuffer[i] = g_lastValues[i];
+
+        if (mainBuffer[i] >= g_peakValues[i])
+        {
+            g_peakValues[i] = mainBuffer[i];
+            g_peakSpeeds[i] = initialDelay;
+        }
+        else
+        {
+            g_peakSpeeds[i] += gravity;
+            g_peakValues[i] -= g_peakSpeeds[i];
+
+            if (g_peakValues[i] < 0.0f)
+            {
+                g_peakValues[i] = 0.0f;
+                g_peakSpeeds[i] = 0.0f;
+            }
+        }
+
+        peakBuffer[i] = g_peakValues[i];
+    }
+
+    return true;
+}

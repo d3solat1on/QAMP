@@ -1,9 +1,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngFontFiles">Файлы шрифтов (*.ttf; *.otf)|*.ttf;*.otf</System:String>
+        <System:String x:Key="LngSelectedFont">Выберите файл шрифта</System:String>
+        <System:String x:Key="LngFontWasAdded">Шрифт успешно добавлен</System:String>
+        <System:String x:Key="LngReplaceFont">Заменить шрифт</System:String>
+        <System:String x:Key="LngAccentFont">Главный шрифт</System:String>
+        <System:String x:Key="LngUseWASAPI">Использовать WASAPI</System:String>
         <System:String x:Key="LngCrossfade">Плавный переход</System:String>
         <System:String x:Key="LngUseCrossfade">Использовать плавный переход</System:String>
-        
         <System:String x:Key="LngSecondColorSpectrum">Второй цвет для спектра</System:String>
         <System:String x:Key="LngFirstColorSpectrum">Первый цвет для спектра</System:String>
         <System:String x:Key="LngGradientSpectrum">Градиент для спектра</System:String>

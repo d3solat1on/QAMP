@@ -88,6 +88,7 @@ namespace QAMP.Windows
             {
                 OutputDeviceComboBox.SelectedIndex = 0;
             }
+            WASAPIEnabled.IsChecked = config.UseWASAPI;
         }
 
         private void OutputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -197,17 +198,23 @@ namespace QAMP.Windows
             return "Пользовательский";
         }
 
-        private void AudioProcessingSettingChanged(object sender, RoutedEventArgs e)
+        private async void AudioProcessingSettingChanged(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
             var config = SettingsManager.Instance.Config;
+            bool wasapiModeChanged = config.UseWASAPI != (WASAPIEnabled.IsChecked ?? false);
             config.ReverbEnabled = ReverbEnabled.IsChecked ?? false;
             config.EchoEnabled = EchoEnabled.IsChecked ?? false;
             config.VocalEnhancementEnabled = VocalEnhancementEnabled.IsChecked ?? false;
             config.LoudnessEnabled = LoudnessEnabled.IsChecked ?? false;
             config.CompressorEnabled = CompressorEnabled.IsChecked ?? false;
             config.CrossfadeEnabled = CrossfadeEnabled.IsChecked ?? false;
+            config.UseWASAPI = WASAPIEnabled.IsChecked ?? false;
             SettingsManager.Instance.Save();
+            if (wasapiModeChanged)
+            {
+                await _player.ApplyOutputModeAsync();
+            }
             _player.ApplyAudioEffects();
         }
 
@@ -280,12 +287,14 @@ namespace QAMP.Windows
             PresetComboBox.SelectedIndex = 0;
         }
 
-        private void ResetAllAudioSettings_Click(object sender, RoutedEventArgs e)
+        private async void ResetAllAudioSettings_Click(object sender, RoutedEventArgs e)
         {
             isInitializing = true;
+            bool wasapiModeChanged = false;
             try
             {
                 var config = SettingsManager.Instance.Config;
+                wasapiModeChanged = config.UseWASAPI;
 
                 for (int i = 0; i < config.EqualizerGains.Length; i++)
                 {
@@ -306,6 +315,7 @@ namespace QAMP.Windows
                 config.Pitch = 1.0;
                 config.CrossfadeEnabled = true;
                 config.CrossfadeDuration = 3.0;
+                config.UseWASAPI = false;
                 SettingsManager.Instance.Save();
 
                 if (_bands != null)
@@ -347,6 +357,7 @@ namespace QAMP.Windows
                 CrossfadeEnabled.IsChecked = true;
                 CrossfadeDurationSlider.Value = 3.0;
                 CrossfadeDurationText.Text = "3.0 s";
+                WASAPIEnabled.IsChecked = false;
 
                 PresetComboBox.SelectedIndex = 0;
 
@@ -359,6 +370,11 @@ namespace QAMP.Windows
             finally
             {
                 isInitializing = false;
+            }
+
+            if (wasapiModeChanged)
+            {
+                await _player.ApplyOutputModeAsync();
             }
         }
 

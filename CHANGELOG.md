@@ -1,4 +1,8 @@
 # CHANGELOG
+## (09.10.2026) Version 1.8.7:
+    - Added WASAPI mode.  
+    - Added the ability to change the app's font. (Beta)  
+    
 ## (04.10.2026) Version 1.8.6:
     - The track playback counter logic has been reworked.  
     - A playback history window for tracks has been added.  

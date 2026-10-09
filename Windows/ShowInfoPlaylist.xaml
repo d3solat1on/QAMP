@@ -9,6 +9,7 @@
         Width="1000"
         Height="800"
         Title="{DynamicResource LngInfoPlaylistTitle}"
+        FontFamily="{DynamicResource MainFont}"
         WindowStartupLocation="CenterOwner">
         <Window.Resources>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>

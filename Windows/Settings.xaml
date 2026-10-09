@@ -20,6 +20,7 @@
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
+        FontFamily="{DynamicResource MainFont}"
         Loaded="Window_Loaded">
 
     <WindowChrome.WindowChrome>
@@ -193,7 +194,7 @@
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngLanguage}"
-                                  Margin="0,0,0,0"
+                                  Margin="0,0,0,10"
                                   Foreground="{StaticResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="LanguageRuRadio"
@@ -208,6 +209,12 @@
                                              GroupName="Language"
                                              Checked="LanguageRadio_Checked"/>
                             </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="{DynamicResource LngAccentFont}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{StaticResource ForegroundBrush}">
+                            <StackPanel x:Name="FontRadioPanel"
+                                        Margin="10"/>
                         </GroupBox>
 
                     </StackPanel>
@@ -236,7 +243,8 @@
                                              Foreground="{StaticResource ForegroundBrush}"
                                              Checked="VisualizerToggle_Changed"/>
 
-                                <Separator Margin="0,10" Background="{StaticResource BorderBrush}"/>
+                                <Separator Margin="0,10"
+                                           Background="{StaticResource BorderBrush}"/>
                                 <TextBlock Text="{DynamicResource LngSpectrumType}"
                                            Foreground="{StaticResource ForegroundBrush}"
                                            Margin="0,0,0,8"/>
@@ -269,7 +277,8 @@
                                              Foreground="{StaticResource ForegroundBrush}"
                                              Checked="GradientToggle_Changed"/>
 
-                                <Separator Margin="0,10" Background="{StaticResource BorderBrush}"/>
+                                <Separator Margin="0,10"
+                                           Background="{StaticResource BorderBrush}"/>
 
                                 <TextBlock Text="{DynamicResource LngGradientStartHex}"
                                            Foreground="{StaticResource ForegroundBrush}"
@@ -293,7 +302,8 @@
                                          Background="{StaticResource TertiaryBackgroundBrush}"
                                          BorderBrush="{StaticResource BorderBrush}"/>
 
-                                <Separator Margin="0,10" Background="{StaticResource BorderBrush}"/>
+                                <Separator Margin="0,10"
+                                           Background="{StaticResource BorderBrush}"/>
 
                                 <!-- <RadioButton x:Name="GradientHeightBasedRadio"
                                              Content="{DynamicResource LngGradientTypeHeightBased}"
@@ -458,10 +468,18 @@
 
                                 <Button Style="{StaticResource ModernPlayerButton}"
                                         x:Name="ReplaceBG"
+                                        Margin="0,0,0,10"
                                         Width="Auto"
                                         Height="30"
                                         Content="{DynamicResource LngReplaceBG}"
                                         Click="ReplaceBG_Click"/>
+                                <Button Style="{StaticResource ModernPlayerButton}"
+                                        x:Name="ReplaceFont"
+                                        Margin="0,0,0,10"
+                                        Width="Auto"
+                                        Height="30"
+                                        Content="{DynamicResource LngReplaceFont}"
+                                        Click="ReplaceFont_Click"/>
                             </StackPanel>
                         </GroupBox>
 

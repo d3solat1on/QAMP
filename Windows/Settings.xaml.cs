@@ -9,6 +9,7 @@ using QAMP.Models;
 using QAMP.Services;
 using Microsoft.Win32;
 using QAMP.Dialogs;
+using System.Drawing.Printing;
 
 namespace QAMP.Windows
 {
@@ -98,6 +99,75 @@ namespace QAMP.Windows
             LightThemeRadio.Checked += StandardThemeRadio_Checked;
             CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
             Debug.WriteLine("[QAMP Theme Debug] ---------------------------------------------");
+        }
+        private void InitFontSettingsUI()
+        {
+            FontRadioPanel.Children.Clear();
+
+            var fontService = FontService.Instance;
+            var currentSelectedFont = fontService.FindFont(SettingsManager.Instance.Config.SelectedFontName)
+                ?? fontService.DefaultFont;
+
+            foreach (var fontOption in fontService.AvailableFonts)
+            {
+                AddFontRadioButton(fontOption, isChecked: fontOption == currentSelectedFont);
+            }
+        }
+        private void AddFontRadioButton(FontService.FontOption fontOption, bool isChecked)
+        {
+            var radioButton = new RadioButton
+            {
+                Content = fontOption.DisplayName,
+                GroupName = "AvailableFonts",
+                Tag = fontOption,
+                IsChecked = isChecked,
+                Foreground = (Brush)FindResource("ForegroundBrush"),
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+
+            FontRadioPanel.Children.Add(radioButton);
+
+            radioButton.Checked += (s, e) =>
+            {
+                if (radioButton.IsChecked == true && radioButton.Tag is FontService.FontOption selectedFont)
+                {
+                    var config = SettingsManager.Instance.Config;
+                    config.SelectedFontName = selectedFont.DisplayName;
+                    FontService.ApplyFontToApplication(selectedFont.Family);
+                    SettingsManager.Instance.Save();
+                }
+            };
+        }
+        private void ReplaceFont_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new()
+            {
+                Filter = (string)Application.Current.FindResource("LngFontFiles") ?? "Файлы шрифтов (*.ttf;*.otf)|*.ttf;*.otf",
+                Title = (string)Application.Current.FindResource("LngSelectedFont") ?? "Выберите файл шрифта"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+
+                var importedFont = FontService.Instance.ImportFont(filePath);
+
+                if (importedFont is not null)
+                {
+                    InitFontSettingsUI();
+                    var importedRadio = FontRadioPanel.Children
+                        .OfType<RadioButton>()
+                        .FirstOrDefault(radio =>
+                            radio.Tag is FontService.FontOption option && option == importedFont);
+                    if (importedRadio is not null)
+                    {
+                        importedRadio.IsChecked = true;
+                    }
+
+                    string message = (string)Application.Current.FindResource("LngFontWasAdded") ?? "Шрифт успешно добавлен";
+                    _ = SettingsInfoToast.ShowAsync(message);
+                }
+            }
         }
 
         private void RefreshThemesList()
@@ -344,6 +414,8 @@ namespace QAMP.Windows
             GradientDisabled.IsChecked = !config.UseSpectrumGradient;
             SpectrumBarsRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Bars;
             SpectrumLineRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Line;
+
+            InitFontSettingsUI();
 
             // GradientHeightBasedRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.HeightBased;
             // GradientFullHeightRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.FullHeight;

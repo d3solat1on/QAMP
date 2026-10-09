@@ -12,6 +12,7 @@
         Title="{DynamicResource LngStatistics}"
         Background="{StaticResource BackgroundBrush}"
         Foreground="{StaticResource ForegroundBrush}"
+        FontFamily="{DynamicResource MainFont}"
         WindowStartupLocation="CenterOwner">
 
     <Grid>

@@ -1,8 +1,13 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngFontFiles">Font files (*.ttf;*.otf)|*.ttf;*.otf</System:String>
+        <System:String x:Key="LngSelectedFont">Select Font File</System:String>
+        <System:String x:Key="LngFontWasAdded">Font successfully added</System:String>
+        <System:String x:Key="LngReplaceFont">Replace Font</System:String>
+        <System:String x:Key="LngAccentFont">Accent Font</System:String>
+        <System:String x:Key="LngUseWASAPI">Use WASAPI</System:String>
         <System:String x:Key="LngUseCrossfade">Use Crossfade</System:String>
-
         <System:String x:Key="LngCrossfade">Crossfade</System:String>
         <System:String x:Key="LngSecondColorSpectrum">Second color for spectrum</System:String>
         <System:String x:Key="LngFirstColorSpectrum">First color for spectrum</System:String>
