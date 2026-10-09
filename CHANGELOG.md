@@ -1,4 +1,7 @@
 # CHANGELOG
+# (10.10.2026) Version 1.8.7.1:
+    - You can hover your mouse over the album title, artist, etc., in the right panel (Now Playing) to see the full name if it doesn't fit.
+
 ## (09.10.2026) Version 1.8.7:
     - Added WASAPI mode.  
     - Added the ability to change the app's font. (Beta)  

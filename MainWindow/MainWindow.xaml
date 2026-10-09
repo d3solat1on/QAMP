@@ -1201,8 +1201,8 @@
                                                                         <MenuItem x:Name="AddToPlaylist"
                                                                                   Header="{DynamicResource LngAddToPlaylist}"/>
                                                                         <MenuItem x:Name="PlayNextFromDataGrid"
-                                                                                Header="{DynamicResource LngPlayNextFromDataGrid}"
-                                                                                Click="PlayNextFromDataGrid_Click"/>
+                                                                                  Header="{DynamicResource LngPlayNextFromDataGrid}"
+                                                                                  Click="PlayNextFromDataGrid_Click"/>
                                                                         <MenuItem x:Name="DeleteFromPlaylist"
                                                                                   Header="{DynamicResource LngDeleteFromPlaylist}"
                                                                                   Click="RemoveFromPlaylist_Click"/>
@@ -1522,128 +1522,151 @@
                                         <Grid>
                                                 <Grid>
                                                         <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto"/>
                                                                 <RowDefinition Height="*"/>
+                                                                <RowDefinition Height="Auto"/>
                                                         </Grid.RowDefinitions>
 
-                                                        <Grid x:Name="NowPlayingLoadingPlaceholder"
-                                                              Visibility="Collapsed"
-                                                              Margin="20">
-                                                                <StackPanel VerticalAlignment="Top">
-                                                                        <Border Height="275"
-                                                                                Width="275"
-                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
-                                                                                Background="#333333"
-                                                                                Opacity="0.5"
-                                                                                Margin="0,15"
-                                                                                HorizontalAlignment="Center"/>
-                                                                        <Border Height="30"
-                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
-                                                                                Background="#333333"
-                                                                                Opacity="0.5"
-                                                                                Margin="0,15"/>
-                                                                        <Border Height="25"
-                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
-                                                                                Background="#333333"
-                                                                                Opacity="0.5"
-                                                                                Margin="0,15"/>
-                                                                        <Border Height="20"
-                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
-                                                                                Background="#333333"
-                                                                                Opacity="0.5"
-                                                                                Margin="0,15"/>
-                                                                </StackPanel>
-                                                        </Grid>
+                                                        <ScrollViewer Grid.Row="0"
+                                                                      VerticalScrollBarVisibility="Auto"
+                                                                      HorizontalScrollBarVisibility="Disabled">
 
-                                                        <StackPanel Grid.Row="0"
-                                                                    VerticalAlignment="Top"
-                                                                    Margin="0,0,15,0"
-                                                                    x:Name="NowPlayingPanel">
-                                                                <TextBlock x:Name="NowPlaying"
-                                                                           Text=""
-                                                                           Foreground="{StaticResource ForegroundBrush}"
-                                                                           FontSize="20"
-                                                                           FontWeight="Bold"
-                                                                           Margin="0,0,0,20"/>
-                                                                <Border x:Name="CurrentTrackImage1"
-                                                                        HorizontalAlignment="Center"
-                                                                        VerticalAlignment="Center"
-                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
-                                                                        ClipToBounds="True"
-                                                                        Height="300"
-                                                                        Width="300"
-                                                                        Background="{StaticResource CentralPanelCardBackground}"
-                                                                        BorderBrush="{StaticResource CentralPanelCardBorderBrush}"
-                                                                        BorderThickness="1">
-                                                                        <Grid>
-                                                                                <Path x:Name="DefaultCoverPath"
-                                                                                      Data="{StaticResource default_coverGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"
-                                                                                      HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"
-                                                                                      Width="275"
-                                                                                      Height="275"
-                                                                                      Visibility="Visible"/>
-                                                                                <Image x:Name="CurrentTrackImage"
-                                                                                       HorizontalAlignment="Stretch"
-                                                                                       VerticalAlignment="Stretch"
-                                                                                       UseLayoutRounding="True"
-                                                                                       RenderOptions.BitmapScalingMode="HighQuality"
-                                                                                       Visibility="Collapsed"/>
-                                                                        </Grid>
-                                                                </Border>
-                                                                <TextBlock x:Name="CurrentTrackName"
-                                                                           Text=""
-                                                                           FontSize="22"
-                                                                           FontWeight="Bold"
-                                                                           Foreground="{StaticResource CentralPanelHighlightForeground}"
-                                                                           TextWrapping="Wrap"
-                                                                           Margin="0,5,0,0"/>
-                                                                <TextBlock x:Name="CurrentTrackExecutor"
-                                                                           Text=""
-                                                                           FontSize="20"
-                                                                           Foreground="{StaticResource CentralPanelSecondaryForeground}"
-                                                                           Margin="0,5"/>
-                                                                <TextBlock x:Name="CurrentTrackAlbum"
-                                                                           Text=""
-                                                                           FontSize="20"
-                                                                           Foreground="{StaticResource CentralPanelSecondaryForeground}"/>
-                                                                <TextBlock x:Name="CurrentTrackData"
-                                                                           Text=""
-                                                                           FontSize="16"
-                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"
-                                                                           Margin="0,20,0,0"/>
-                                                                <TextBlock x:Name="CurrentTrackExtension"
-                                                                           Text=""
-                                                                           FontSize="16"
-                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"/>
-                                                                <TextBlock x:Name="CurrentTrackYear"
-                                                                           Text=""
-                                                                           FontSize="16"
-                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"/>
-                                                                <StackPanel x:Name="NextTrackPanel"
-                                                                            Margin="0,20,0,0">
-                                                                        <TextBlock x:Name="NextTrack"
-                                                                                   Text=""
-                                                                                   FontSize="12"
-                                                                                   Foreground="{StaticResource CentralPanelSecondaryForeground}"
-                                                                                   FontWeight="Bold"/>
-                                                                        <TextBlock x:Name="NextTrackName"
-                                                                                   Text=""
-                                                                                   FontSize="14"
-                                                                                   Foreground="{StaticResource ForegroundBrush}"
-                                                                                   TextWrapping="Wrap"/>
-                                                                </StackPanel>
-                                                                <!-- ??? -->
                                                                 <Grid>
-                                                                        <vis:SpectrumControl x:Name="SpectrumViewer"
-                                                                                             Height="150"
-                                                                                             VerticalAlignment="Bottom"
-                                                                                             HorizontalAlignment="Stretch"
-                                                                                             BorderThickness="2"/>
+                                                                        <Grid x:Name="NowPlayingLoadingPlaceholder"
+                                                                              Visibility="Collapsed"
+                                                                              Margin="20">
+                                                                                <StackPanel VerticalAlignment="Top">
+                                                                                        <Border Height="275"
+                                                                                                Width="275"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
+                                                                                                Background="#333333"
+                                                                                                Opacity="0.5"
+                                                                                                Margin="0,15"
+                                                                                                HorizontalAlignment="Center"/>
+                                                                                        <Border Height="30"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
+                                                                                                Background="#333333"
+                                                                                                Opacity="0.5"
+                                                                                                Margin="0,15"/>
+                                                                                        <Border Height="25"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
+                                                                                                Background="#333333"
+                                                                                                Opacity="0.5"
+                                                                                                Margin="0,15"/>
+                                                                                        <Border Height="20"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
+                                                                                                Background="#333333"
+                                                                                                Opacity="0.5"
+                                                                                                Margin="0,15"/>
+                                                                                </StackPanel>
+                                                                        </Grid>
+
+                                                                        <StackPanel VerticalAlignment="Top"
+                                                                                    Margin="0,0,15,0"
+                                                                                    x:Name="NowPlayingPanel">
+
+                                                                                <TextBlock x:Name="NowPlaying"
+                                                                                           Text=""
+                                                                                           Foreground="{StaticResource ForegroundBrush}"
+                                                                                           FontSize="20"
+                                                                                           FontWeight="Bold"
+                                                                                           Margin="0,0,0,20"/>
+
+                                                                                <Border x:Name="CurrentTrackImage1"
+                                                                                        HorizontalAlignment="Center"
+                                                                                        VerticalAlignment="Center"
+                                                                                        CornerRadius="{DynamicResource AppCornerRadius}"
+                                                                                        ClipToBounds="True"
+                                                                                        Height="300"
+                                                                                        Width="300"
+                                                                                        Background="{StaticResource CentralPanelCardBackground}"
+                                                                                        BorderBrush="{StaticResource CentralPanelCardBorderBrush}"
+                                                                                        BorderThickness="1">
+                                                                                        <Grid>
+                                                                                                <Path x:Name="DefaultCoverPath"
+                                                                                                      Data="{StaticResource default_coverGeometry}"
+                                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                                      Stretch="Uniform"
+                                                                                                      HorizontalAlignment="Center"
+                                                                                                      VerticalAlignment="Center"
+                                                                                                      Width="275"
+                                                                                                      Height="275"
+                                                                                                      Visibility="Visible"/>
+                                                                                                <Image x:Name="CurrentTrackImage"
+                                                                                                       HorizontalAlignment="Stretch"
+                                                                                                       VerticalAlignment="Stretch"
+                                                                                                       UseLayoutRounding="True"
+                                                                                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                                                                                       Visibility="Collapsed"/>
+                                                                                        </Grid>
+                                                                                </Border>
+
+                                                                                <TextBlock x:Name="CurrentTrackName"
+                                                                                           Text=""
+                                                                                           FontSize="22"
+                                                                                           FontWeight="Bold"
+                                                                                           TextTrimming="CharacterEllipsis"
+                                                                                           ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
+                                                                                           Foreground="{StaticResource CentralPanelHighlightForeground}"
+                                                                                           Margin="0,5,0,0"/>
+
+                                                                                <TextBlock x:Name="CurrentTrackExecutor"
+                                                                                           Text=""
+                                                                                           FontSize="20"
+                                                                                           Foreground="{StaticResource CentralPanelSecondaryForeground}"
+                                                                                           ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
+                                                                                           Margin="0,5,0,0"/>
+
+                                                                                <TextBlock x:Name="CurrentTrackAlbum"
+                                                                                           Text=""
+                                                                                           FontSize="20"
+                                                                                           Foreground="{StaticResource CentralPanelSecondaryForeground}"
+                                                                                           ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
+                                                                                           Margin="0,5,0,0"/>
+
+                                                                                <TextBlock x:Name="CurrentTrackData"
+                                                                                           Text=""
+                                                                                           FontSize="16"
+                                                                                           TextTrimming="CharacterEllipsis"
+                                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"
+                                                                                           ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
+                                                                                           Margin="0,20,0,0"/>
+
+                                                                                <TextBlock x:Name="CurrentTrackExtension"
+                                                                                           Text=""
+                                                                                           FontSize="16"
+                                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"
+                                                                                           ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+
+                                                                                <TextBlock x:Name="CurrentTrackYear"
+                                                                                           Text=""
+                                                                                           FontSize="16"
+                                                                                           Foreground="{StaticResource CentralPanelMutedForeground}"
+                                                                                           ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+
+                                                                                <StackPanel x:Name="NextTrackPanel"
+                                                                                            Margin="0,20,0,0">
+                                                                                        <TextBlock x:Name="NextTrack"
+                                                                                                   Text=""
+                                                                                                   FontSize="12"
+                                                                                                   Foreground="{StaticResource CentralPanelSecondaryForeground}"
+                                                                                                   FontWeight="Bold"/>
+                                                                                        <TextBlock x:Name="NextTrackName"
+                                                                                                   Text=""
+                                                                                                   FontSize="14"
+                                                                                                   ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
+                                                                                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                                                                </StackPanel>
+
+                                                                                <Grid>
+                                                                                        <vis:SpectrumControl x:Name="SpectrumViewer"
+                                                                                                             Height="150"
+                                                                                                             VerticalAlignment="Bottom"
+                                                                                                             HorizontalAlignment="Stretch"
+                                                                                                             BorderThickness="2"/>
+                                                                                </Grid>
+                                                                        </StackPanel>
                                                                 </Grid>
-                                                        </StackPanel>
+                                                        </ScrollViewer>
 
                                                         <StackPanel Grid.Row="1"
                                                                     x:Name="StackPanelBottomQueue"
@@ -1707,7 +1730,7 @@
                                                                         <ListBox.ContextMenu>
                                                                                 <ContextMenu>
                                                                                         <MenuItem Header="{DynamicResource LngPlayFromQueue}"
-                                                                                                Click="PlayFromQueue_Click"/>
+                                                                                                  Click="PlayFromQueue_Click"/>
                                                                                         <MenuItem Header="{DynamicResource LngRemoveFromQueue}"
                                                                                                   Click="RemoveFromQueue_Click"/>
                                                                                 </ContextMenu>
