@@ -55,9 +55,8 @@
 <summary>Нажми, чтобы посмотреть скриншоты</summary>
 
 ![Главное меню](images/QAMP_MAIN.png)
-![Подробная информация](images/QAMP_SHOW_TRACK_INFO.png)
-![Редактирование](images/QAMP_EDIT_TRACK_INFO.png)
-![Настройки](images/QAMP_SETTINGS.png)
+![Аудио Настройки](images/QAMP_AudioSettings.png)
+![Настройки](images/QAMP_Settings.png)
 
 </details>
 
@@ -135,9 +134,8 @@ Done.
 <summary>Click to view screenshots</summary>  
 
 ![Main Menu](images/QAMP_MAIN.png)
-![Detailed track information](images/QAMP_SHOW_TRACK_INFO.png)
-![Editing a track](images/QAMP_EDIT_TRACK_INFO.png)
-![Settings](images/QAMP_SETTINGS.png)
+![Audio settings](images/QAMP_AudioSettings.png)
+![Settings](images/QAMP_Settings.png)
 </details>
 
 ## How to Create a Custom Theme
