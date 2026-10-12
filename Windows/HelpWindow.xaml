@@ -11,6 +11,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         FontFamily="{DynamicResource MainFont}"
+        FontSize="{DynamicResource FontSize}"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="20">
         <Grid.RowDefinitions>

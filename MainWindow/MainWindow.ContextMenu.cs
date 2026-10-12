@@ -118,4 +118,42 @@ public partial class MainWindow
             _ = MyToast.ShowAsync(message);
         }
     }
+    private void ShowTrackInExplorer_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedTrack = TracksDataGrid.SelectedItem as Track;
+
+        if (selectedTrack == null)
+        {
+            var menuItem = sender as MenuItem;
+            var contextMenu = menuItem?.Parent as ContextMenu;
+            var grid = contextMenu?.PlacementTarget as DataGrid;
+            selectedTrack = grid?.SelectedItem as Track;
+        }
+
+        if (selectedTrack != null)
+        {
+            if (!string.IsNullOrEmpty(selectedTrack.Path))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{selectedTrack.Path}\"");
+                }
+                catch (Exception ex)
+                {
+                    string message = Application.Current.Resources["LngErrorOpeningExplorer"] as string ?? "Error opening Explorer.";
+                    _ = MyToast.ShowAsync($"{message} {ex.Message}");
+                }
+            }
+            else
+            {
+                string message = Application.Current.Resources["LngErrorTrackPath"] as string ?? "Invalid track path!";
+                _ = MyToast.ShowAsync(message);
+            }
+        }
+        else
+        {
+            string message = Application.Current.Resources["LngSelectTrackFirst"] as string ?? "Please select a track first.";
+            _ = MyToast.ShowAsync(message);
+        }
+    }
 }

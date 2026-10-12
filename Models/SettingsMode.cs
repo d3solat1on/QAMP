@@ -26,8 +26,9 @@ public class AppSettings : INotifyPropertyChanged
     public string AccentColor { get; set; } = "#1db954";
     public int CurrentRound { get; set; } = 0;
     public double[] EqualizerGains { get; set; } = new double[10];
+    public double[] CustomEqualizerGains { get; set; } = new double[10];
     public double[] CurrentEqualizerValues { get; set; } = new double[10];
-    public string EqualizerPreset { get; set; } = "Пользовательский";
+    public string EqualizerPreset { get; set; } = "Default";
     public bool ReverbEnabled { get; set; } = false;
     public double ReverbLevel { get; set; } = 50.0;
     public bool EchoEnabled { get; set; } = false;
@@ -45,6 +46,7 @@ public class AppSettings : INotifyPropertyChanged
     public double CrossfadeDuration { get; set; } = 3.0;
     public bool UseWASAPI { get; set; } = false;
     public string SelectedFontName { get; set; } = "GOST Type A";
+    public double FontSize { get; set; } = 16.0; //test
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;

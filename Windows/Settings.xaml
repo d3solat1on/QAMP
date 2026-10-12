@@ -21,6 +21,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         FontFamily="{DynamicResource MainFont}"
+        FontSize="{DynamicResource FontSize}"
         Loaded="Window_Loaded">
 
     <WindowChrome.WindowChrome>

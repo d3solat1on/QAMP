@@ -177,8 +177,11 @@ namespace QAMP
                     config.SelectedFontName = selectedFont.DisplayName;
                     SettingsManager.Instance.Save();
                 }
-
                 Current.Resources["MainFont"] = selectedFont.Family;
+                var fontSize = config.FontSize;
+                Current.Resources["FontSize"] = fontSize;
+                Debug.WriteLine($"Font size from config: {config.FontSize}");
+                Debug.WriteLine($"Font size set to: {fontSize}");
                 var savedRound = SettingsManager.Instance.Config.CurrentRound;
                 Current.Resources["AppCornerRadius"] = new CornerRadius(savedRound);
             }

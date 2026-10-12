@@ -1,6 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <!-- <System:String x:Key="LngErrorTrackPath">Error opening track path</System:String> -->
+        <System:String x:Key="LngErrorOpeningExplorer">Error opening explorer</System:String>
+        <System:String x:Key="LngShowInFolder">Show in Folder</System:String>
+        <System:String x:Key="LngSaveEQ">Save current EQ settings</System:String>
         <System:String x:Key="LngFontFiles">Font files (*.ttf;*.otf)|*.ttf;*.otf</System:String>
         <System:String x:Key="LngSelectedFont">Select Font File</System:String>
         <System:String x:Key="LngFontWasAdded">Font successfully added</System:String>

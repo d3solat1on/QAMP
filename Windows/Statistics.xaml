@@ -13,6 +13,7 @@
         Background="{StaticResource BackgroundBrush}"
         Foreground="{StaticResource ForegroundBrush}"
         FontFamily="{DynamicResource MainFont}"
+        FontSize="{DynamicResource FontSize}"
         WindowStartupLocation="CenterOwner">
 
     <Grid>

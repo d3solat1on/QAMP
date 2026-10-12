@@ -1203,6 +1203,9 @@
                                                                         <MenuItem x:Name="PlayNextFromDataGrid"
                                                                                   Header="{DynamicResource LngPlayNextFromDataGrid}"
                                                                                   Click="PlayNextFromDataGrid_Click"/>
+                                                                        <MenuItem x:Name="ShowInFolder"
+                                                                                  Header="{DynamicResource LngShowInFolder}"
+                                                                                  Click="ShowTrackInExplorer_Click"/>
                                                                         <MenuItem x:Name="DeleteFromPlaylist"
                                                                                   Header="{DynamicResource LngDeleteFromPlaylist}"
                                                                                   Click="RemoveFromPlaylist_Click"/>

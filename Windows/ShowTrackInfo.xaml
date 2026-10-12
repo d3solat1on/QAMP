@@ -11,6 +11,7 @@
         Height="800"
         Title="{DynamicResource LngInfoTrack}"
         FontFamily="{DynamicResource MainFont}"
+        FontSize="{DynamicResource FontSize}"
         WindowStartupLocation="CenterOwner"
         MouseDown="Window_MouseDown">
 

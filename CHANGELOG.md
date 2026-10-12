@@ -1,4 +1,8 @@
 # CHANGELOG
+# (12.10.2026) Version 1.8.7.2:
+    - Added the ability to save custom equalizer settings.  
+    - A "Show track in folder" button has been added to the context menu.
+
 # (10.10.2026) Version 1.8.7.1:
     - You can hover your mouse over the album title, artist, etc., in the right panel (Now Playing) to see the full name if it doesn't fit.
 

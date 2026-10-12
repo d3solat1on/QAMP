@@ -1,6 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <!-- <System:String x:Key="LngErrorTrackPath">Ошибка при открытии пути к треку</System:String> -->
+        <System:String x:Key="LngErrorOpeningExplorer">Ошибка при открытии проводника</System:String>
+        <System:String x:Key="LngShowInFolder">Показать в папке</System:String>
+        <System:String x:Key="LngSaveEQ">Сохранить текущие настройки EQ</System:String>
         <System:String x:Key="LngFontFiles">Файлы шрифтов (*.ttf; *.otf)|*.ttf;*.otf</System:String>
         <System:String x:Key="LngSelectedFont">Выберите файл шрифта</System:String>
         <System:String x:Key="LngFontWasAdded">Шрифт успешно добавлен</System:String>

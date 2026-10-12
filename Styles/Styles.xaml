@@ -167,6 +167,8 @@
                         Value="5"/>
                 <Setter Property="FontFamily"
                         Value="{DynamicResource MainFont}"/>
+                <Setter Property="FontSize"
+                        Value="{DynamicResource FontSize}"/>
                 <Setter Property="Template">
                         <Setter.Value>
                                 <ControlTemplate TargetType="ContextMenu">
@@ -400,6 +402,8 @@
                         Value="{StaticResource TextBrush}"/>
                 <Setter Property="FontWeight"
                         Value="Bold"/>
+                <Setter Property="FontSize"
+                        Value="{DynamicResource FontSize}"/>
                 <Style.Resources>
                         <Style TargetType="Border">
                                 <Setter Property="CornerRadius"

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -127,9 +128,16 @@ namespace QAMP.Windows
             if (isInitializing) return;
             if (PresetComboBox.SelectedItem is ComboBoxItem item)
             {
-                string presetName = item.Content?.ToString() ?? "Пользовательский";
+                string presetName = item.Content?.ToString() ?? "Default";
                 switch (presetName)
                 {
+
+                    case "Custom":
+                        ApplyPreset([.. SettingsManager.Instance.Config.CustomEqualizerGains.Select(g => (float)g)]);
+                        break;
+                    case "Default":
+                        ApplyPreset([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                        break;
                     case "Bass Boost":
                         ApplyPreset([8, 10, 7, 3, 0, 0, 2, 4, 6, 5]);
                         break;
@@ -189,13 +197,28 @@ namespace QAMP.Windows
             DrawEqGraph();
         }
 
+        private void SavePresetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_bands == null) return;
+
+            var config = SettingsManager.Instance.Config;
+            for (int i = 0; i < _bands.Count; i++)
+            {
+                config.CustomEqualizerGains[i] = _bands[i].Gain;
+            }
+            config.EqualizerPreset = "Custom";
+            SettingsManager.Instance.Save();
+            SetPresetComboBoxValue("Custom");
+        }
+
+
         private string GetCurrentPresetName()
         {
             if (PresetComboBox.SelectedItem is ComboBoxItem item)
             {
-                return item.Content?.ToString() ?? "Пользовательский";
+                return item.Content?.ToString() ?? "Default";
             }
-            return "Пользовательский";
+            return "Default";
         }
 
         private async void AudioProcessingSettingChanged(object sender, RoutedEventArgs e)
@@ -218,7 +241,7 @@ namespace QAMP.Windows
             _player.ApplyAudioEffects();
         }
 
-        
+
         private void ReverbLevelSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (isInitializing) return;
@@ -301,7 +324,7 @@ namespace QAMP.Windows
                     config.EqualizerGains[i] = 0.0;
                 }
 
-                config.EqualizerPreset = "Пользовательский";
+                config.EqualizerPreset = "Default";
                 config.ReverbEnabled = false;
                 config.ReverbLevel = 50.0;
                 config.EchoEnabled = false;
