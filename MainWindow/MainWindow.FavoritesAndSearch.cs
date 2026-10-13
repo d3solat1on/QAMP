@@ -9,7 +9,7 @@ namespace QAMP
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            var settingsWindow = new Settings(_playService)
+            var settingsWindow = new Settings()
             {
                 Owner = this
             };

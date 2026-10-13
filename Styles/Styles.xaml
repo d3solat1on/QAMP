@@ -3,7 +3,7 @@
         <Style x:Key="ModernSliderStyle"
                TargetType="Slider">
                 <Setter Property="Background"
-                        Value="{StaticResource BorderBrush}"/>
+                        Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="VerticalAlignment"
                         Value="Center"/>
                 <Setter Property="Template">
@@ -12,7 +12,7 @@
                                         <Grid>
                                                 <Border x:Name="TrackBackground"
                                                         Height="4"
-                                                        Background="{StaticResource BorderBrush}"
+                                                        Background="{DynamicResource BorderBrush}"
                                                         CornerRadius="{DynamicResource AppCornerRadius}"
                                                         VerticalAlignment="Center"/>
 
@@ -35,7 +35,7 @@
                                                                                 <ControlTemplate TargetType="Thumb">
                                                                                         <Ellipse Width="14"
                                                                                                  Height="14"
-                                                                                                 Fill="{StaticResource ForegroundBrush}">
+                                                                                                 Fill="{DynamicResource ForegroundBrush}">
                                                                                                 <Ellipse.Effect>
                                                                                                         <DropShadowEffect BlurRadius="5"
                                                                                                                           ShadowDepth="0"
@@ -86,12 +86,12 @@
                                                 <Trigger Property="IsMouseOver"
                                                          Value="True">
                                                         <Setter Property="Background"
-                                                                Value="{StaticResource SecondaryBackgroundBrush}"/>
+                                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsPressed"
                                                          Value="True">
                                                         <Setter Property="Background"
-                                                                Value="{StaticResource TertiaryBackgroundBrush}"/>
+                                                                Value="{DynamicResource TertiaryBackgroundBrush}"/>
                                                 </Trigger>
                                         </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -131,12 +131,12 @@
                                                 <Trigger Property="IsMouseOver"
                                                          Value="True">
                                                         <Setter Property="Background"
-                                                                Value="{StaticResource BorderBrush}"/>
+                                                                Value="{DynamicResource BorderBrush}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsPressed"
                                                          Value="True">
                                                         <Setter Property="Background"
-                                                                Value="{StaticResource SecondaryBackgroundBrush}"/>
+                                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                                 </Trigger>
                                         </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -158,9 +158,9 @@
         <Style x:Key="ModernContextMenu"
                TargetType="ContextMenu">
                 <Setter Property="Background"
-                        Value="{StaticResource SecondaryBackgroundBrush}"/>
+                        Value="{DynamicResource SecondaryBackgroundBrush}"/>
                 <Setter Property="BorderBrush"
-                        Value="{StaticResource BorderBrush}"/>
+                        Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness"
                         Value="1"/>
                 <Setter Property="Padding"
@@ -185,9 +185,9 @@
 
         <Style TargetType="ContextMenu">
                 <Setter Property="Background"
-                        Value="{StaticResource SecondaryBackgroundBrush}"/>
+                        Value="{DynamicResource SecondaryBackgroundBrush}"/>
                 <Setter Property="BorderBrush"
-                        Value="{StaticResource BorderBrush}"/>
+                        Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness"
                         Value="1"/>
                 <Setter Property="FontFamily"
@@ -231,7 +231,7 @@
                                                                 <Path x:Name="Arrow"
                                                                       Grid.Column="1"
                                                                       Data="M 0,0 L 4,3.5 L 0,7 Z"
-                                                                      Fill="{StaticResource ForegroundBrush}"
+                                                                      Fill="{DynamicResource ForegroundBrush}"
                                                                       Margin="10,0,10,0"
                                                                       VerticalAlignment="Center"
                                                                       Visibility="Collapsed"/>
@@ -243,8 +243,8 @@
                                                                        Placement="Right"
                                                                        HorizontalOffset="-2"
                                                                        PopupAnimation="Fade">
-                                                                        <Border Background="{StaticResource SecondaryBackgroundBrush}"
-                                                                                BorderBrush="{StaticResource BorderBrush}"
+                                                                        <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                                                BorderBrush="{DynamicResource BorderBrush}"
                                                                                 BorderThickness="1"
                                                                                 CornerRadius="{DynamicResource AppCornerRadius}"
                                                                                 Padding="1">
@@ -259,7 +259,7 @@
                                                          Value="True">
                                                         <Setter TargetName="Bg"
                                                                 Property="Background"
-                                                                Value="{StaticResource TertiaryBackgroundBrush}"/>
+                                                                Value="{DynamicResource TertiaryBackgroundBrush}"/>
                                                 </Trigger>
                                                 <Trigger Property="HasItems"
                                                          Value="True">
@@ -399,7 +399,7 @@
                 <Setter Property="Background"
                         Value="{DynamicResource AccentBrush}"/>
                 <Setter Property="Foreground"
-                        Value="{StaticResource TextBrush}"/>
+                        Value="{DynamicResource TextBrush}"/>
                 <Setter Property="FontWeight"
                         Value="Bold"/>
                 <Setter Property="FontSize"
@@ -455,11 +455,11 @@
         </Style>
         <Style TargetType="ToolTip">
                 <Setter Property="Background"
-                        Value="{StaticResource SecondaryBackgroundBrush}"/>
+                        Value="{DynamicResource SecondaryBackgroundBrush}"/>
                 <Setter Property="Foreground"
-                        Value="{StaticResource ForegroundBrush}"/>
+                        Value="{DynamicResource ForegroundBrush}"/>
                 <Setter Property="BorderBrush"
-                        Value="{StaticResource BorderBrush}"/>
+                        Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness"
                         Value="1"/>
                 <Setter Property="Padding"
@@ -481,4 +481,20 @@
                         </Setter.Value>
                 </Setter>
         </Style>
+        <!-- <Style x:Key="ModernPlayerComboBox"
+               TargetType="ComboBox">
+                <Setter Property="Background"
+                        Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                <Setter Property="Foreground"
+                        Value="{DynamicResource ForegroundBrush}"/>
+                <Setter Property="BorderBrush"
+                        Value="{DynamicResource BorderBrush}"/>
+                <Setter Property="BorderThickness"
+                        Value="1"/>
+                <Setter Property="Padding"
+                        Value="5"/>
+                <Setter Property="FontFamily"
+                        Value="{DynamicResource MainFont}"/>
+                        
+        </Style> -->
 </ResourceDictionary>

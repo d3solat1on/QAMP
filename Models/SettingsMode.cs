@@ -70,6 +70,10 @@ public class AppSettings : INotifyPropertyChanged
             OnPropertyChanged(nameof(CustomBackgroundPath));
         }
     }
+
+    public void NotifyThemeResourcesChanged() =>
+        OnPropertyChanged(nameof(CustomBackgroundPath));
+
     private bool _useCustomBackground;
     public bool UseCustomBackground
     {

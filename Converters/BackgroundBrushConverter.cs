@@ -11,28 +11,26 @@ public class BackgroundBrushConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         string? elementPart = parameter as string;
-
-        var manager = SettingsManager.Instance;
-        var config = manager?.Config;
-
+        var config = SettingsManager.Instance.Config;
         string bgPath = (value as string) ?? string.Empty;
 
-        if (config == null || !config.UseCustomBackground || string.IsNullOrWhiteSpace(bgPath))
+        if (!config.UseCustomBackground || string.IsNullOrWhiteSpace(bgPath))
         {
-            return elementPart switch
+            return GetThemeBrush(elementPart switch
             {
-                "Header" => Application.Current.TryFindResource("DataGridHeaderBackground") as Brush
-                            ?? new SolidColorBrush(Color.FromRgb(0x1F, 0x1F, 0x1F)),
-                "Cell" => Application.Current.TryFindResource("DataGridCellBackground") as Brush
-                            ?? Brushes.Transparent,
-                "Row" => Application.Current.TryFindResource("DataGridRowBackground") as Brush
-                            ?? new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14)),
-                "RowAlt" => Application.Current.TryFindResource("DataGridRowAltBackground") as Brush
-                            ?? new SolidColorBrush(Color.FromRgb(0x1A, 0x1A, 0x1A)),
-                "Controls" => Application.Current.TryFindResource("CentralPanelHeaderBackground") as Brush ?? Brushes.Transparent,
-                _ => Application.Current.TryFindResource("TertiaryBackgroundBrush") as Brush
-                            ?? Brushes.Transparent
-            };
+                "Header" => "DataGridHeaderBackground",
+                "Cell" => "DataGridCellBackground",
+                "Row" => "DataGridRowBackground",
+                "RowAlt" => "DataGridRowAltBackground",
+                "Controls" => "CentralPanelHeaderBackground",
+                _ => "TertiaryBackgroundBrush"
+            }, elementPart switch
+            {
+                "Header" => new SolidColorBrush(Color.FromRgb(0x1F, 0x1F, 0x1F)),
+                "Row" => new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14)),
+                "RowAlt" => new SolidColorBrush(Color.FromRgb(0x1A, 0x1A, 0x1A)),
+                _ => Brushes.Transparent
+            });
         }
 
         if (elementPart == "Cell" || elementPart == "Row" || elementPart == "RowAlt")
@@ -40,38 +38,28 @@ public class BackgroundBrushConverter : IValueConverter
             return Brushes.Transparent;
         }
 
-        bool isLight = config.ColorScheme == "Light";
-        bool isHeader = elementPart == "Header";
-
-        if (isLight)
+        string overlayResourceKey = elementPart switch
         {
-            Color lightColor;
-            if (isHeader)
-            {
-                lightColor = Color.FromArgb(0xE6, 0xEF, 0xEF, 0xEF);
-            }
-            else
-            {
-                lightColor = Color.FromArgb(0xCC, 0xEF, 0xEF, 0xEF);
-            }
+            "Header" => "DataGridHeaderBackground",
+            "Controls" => "CentralPanelHeaderBackground",
+            _ => "SecondaryBackgroundBrush"
+        };
+        var overlayBrush = GetThemeBrush(
+            overlayResourceKey,
+            GetThemeBrush("BackgroundBrush", Brushes.Transparent));
+        var result = overlayBrush.CloneCurrentValue();
+        result.Opacity *= (elementPart == "Header" ? 0xE6 : 0xCC) / 255d;
 
-            return new SolidColorBrush(lightColor);
-        }
-        else
+        if (result.CanFreeze)
         {
-            Color darkColor;
-            if (isHeader)
-            {
-                darkColor = Color.FromArgb(0xE6, 0x11, 0x11, 0x11);
-            }
-            else
-            {
-                darkColor = Color.FromArgb(0xCC, 0x1E, 0x1E, 0x1E);
-            }
-
-            return new SolidColorBrush(darkColor);
+            result.Freeze();
         }
+
+        return result;
     }
+
+    private static Brush GetThemeBrush(string key, Brush fallback)
+        => Application.Current?.TryFindResource(key) as Brush ?? fallback;
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotImplementedException();

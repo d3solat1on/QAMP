@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using QAMP.Services;
 
 namespace QAMP.Windows;
@@ -87,6 +88,16 @@ public partial class Statistics : Window
             {
                 MostListenedTrackText.Text = "Error loading statistics. Please try again.";
             });
+        }
+    }
+
+
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+            MemoryOptimizer.RunAsync(Dispatcher);
         }
     }
 

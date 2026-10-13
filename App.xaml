@@ -26,8 +26,8 @@
             </Style>
 
             <ContextMenu x:Key="TrayContextMenu"
-                         Background="{StaticResource BackgroundBrush}"
-                         Foreground="{StaticResource TextBrush}">
+                         Background="{DynamicResource BackgroundBrush}"
+                         Foreground="{DynamicResource TextBrush}">
                 <MenuItem Header="Open QAMP"
                           Click="OpenQAMP_Click"/>
                 <MenuItem Header="Play/Pause"

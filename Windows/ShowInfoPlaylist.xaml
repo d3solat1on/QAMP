@@ -11,7 +11,8 @@
         Title="{DynamicResource LngInfoPlaylistTitle}"
         FontFamily="{DynamicResource MainFont}"
         FontSize="{DynamicResource FontSize}"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        KeyDown="Window_KeyDown">
         <Window.Resources>
                 <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
                 <Style TargetType="ScrollViewer">
@@ -23,9 +24,9 @@
                                 Value="Transparent"/>
                 </Style>
         </Window.Resources>
-        <Border Background="{StaticResource CentralPanelCardBackground}"
+        <Border Background="{DynamicResource CentralPanelCardBackground}"
                 CornerRadius="{DynamicResource AppCornerRadius}"
-                BorderBrush="{StaticResource AccentBrush}"
+                BorderBrush="{DynamicResource AccentBrush}"
                 BorderThickness="1">
                 <Grid Margin="0">
                         <Grid.RowDefinitions>
@@ -39,7 +40,7 @@
                                 <TextBlock Text="{DynamicResource LngInfoPlaylistTitle}"
                                            FontSize="18"
                                            FontWeight="Bold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            VerticalAlignment="Center"/>
                                 <Button x:Name="CloseButton"
                                         Content="✕"
@@ -47,7 +48,7 @@
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
                                         Style="{StaticResource CloseButtonStyle}"
-                                        Background="{StaticResource AccentBrush}"
+                                        Background="{DynamicResource AccentBrush}"
                                         Width="30"
                                         Height="30">
                                         <Button.Resources>
@@ -70,7 +71,7 @@
                                                 Width="320"
                                                 Height="320"
                                                 CornerRadius="{DynamicResource AppCornerRadius}"
-                                                Background="{StaticResource CentralPanelCardBackground}"
+                                                Background="{DynamicResource CentralPanelCardBackground}"
                                                 Padding="8"
                                                 ClipToBounds="True">
                                                 <Grid>
@@ -145,12 +146,12 @@
                                                            Text="{Binding Name}"
                                                            FontSize="28"
                                                            FontWeight="Bold"
-                                                           Foreground="{StaticResource TextBrush}"
+                                                           Foreground="{DynamicResource TextBrush}"
                                                            TextWrapping="Wrap"/>
                                                 <TextBlock x:Name="DescriptionTextBlock"
                                                            Text="{Binding Description}"
                                                            FontSize="14"
-                                                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                            Margin="0,12,0,20"
                                                            TextWrapping="Wrap"
                                                            MaxHeight="120"/>
@@ -174,90 +175,90 @@
                                                                    Grid.Row="0"
                                                                    Grid.Column="0"
                                                                    Text="ID:"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="IdValueTextBlock"
                                                                    Grid.Row="0"
                                                                    Grid.Column="1"
                                                                    Text="{Binding Id}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="TracksCountTextBlock"
                                                                    Grid.Row="1"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngTrackCount}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="TracksCountValueTextBlock"
                                                                    Grid.Row="1"
                                                                    Grid.Column="1"
                                                                    Text="{Binding TrackCountDisplay}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="TotalDurationTextBlock"
                                                                    Grid.Row="2"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngTotalDuration}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="TotalDurationValueTextBlock"
                                                                    Grid.Row="2"
                                                                    Grid.Column="1"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="CreatedDateTextBlock"
                                                                    Grid.Row="3"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngCreatedDate}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="CreatedDateValueTextBlock"
                                                                    Grid.Row="3"
                                                                    Grid.Column="1"
                                                                    Text="{Binding CreatedDateDisplay}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="PinnedTextBlock"
                                                                    Grid.Row="4"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngPinnded}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="PinnedValueTextBlock"
                                                                    Grid.Row="4"
                                                                    Grid.Column="1"
                                                                    Text="{Binding PinnedDisplay}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="SystemPlaylistTextBlock"
                                                                    Grid.Row="5"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngSystemPlaylist}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SystemPlaylistValueTextBlock"
                                                                    Grid.Row="5"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SystemPlaylistDisplay}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
                                                         <TextBlock x:Name="SortTypeTextBlock"
                                                                    Grid.Row="6"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngSortType}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SortTypeValueTextBlock"
                                                                    Grid.Row="6"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SortTypeDisplay}"
-                                                                   Foreground="{StaticResource TextBrush}"
+                                                                   Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
                                                 </Grid>
                                         </StackPanel>
@@ -352,7 +353,7 @@
                                                         <DataGridTextColumn.ElementStyle>
                                                                 <Style TargetType="TextBlock">
                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
+                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
                                                                         <Setter Property="TextBlock.Margin"
                                                                                 Value="10,0,0,0"/>
                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -366,7 +367,7 @@
                                                         <DataGridTextColumn.ElementStyle>
                                                                 <Style TargetType="TextBlock">
                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
+                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
                                                                         <Setter Property="TextBlock.Margin"
                                                                                 Value="10,0,0,0"/>
                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -380,7 +381,7 @@
                                                         <DataGridTextColumn.ElementStyle>
                                                                 <Style TargetType="TextBlock">
                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
+                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
                                                                         <Setter Property="TextBlock.Margin"
                                                                                 Value="10,0,0,0"/>
                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -394,7 +395,7 @@
                                                         <DataGridTextColumn.ElementStyle>
                                                                 <Style TargetType="TextBlock">
                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
+                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
                                                                         <Setter Property="TextBlock.Margin"
                                                                                 Value="10,0,0,0"/>
                                                                         <Setter Property="TextBlock.VerticalAlignment"
@@ -408,7 +409,7 @@
                                                         <DataGridTextColumn.ElementStyle>
                                                                 <Style TargetType="TextBlock">
                                                                         <Setter Property="TextBlock.Foreground"
-                                                                                Value="{StaticResource CentralPanelSecondaryForeground}"/>
+                                                                                Value="{DynamicResource CentralPanelSecondaryForeground}"/>
                                                                         <Setter Property="TextBlock.Margin"
                                                                                 Value="10,0,0,0"/>
                                                                         <Setter Property="TextBlock.VerticalAlignment"

@@ -7,9 +7,9 @@
              Visibility="Collapsed"
              IsHitTestVisible="False">
 
-    <Border Background="{StaticResource BackgroundBrush}"
+    <Border Background="{DynamicResource BackgroundBrush}"
             CornerRadius="{DynamicResource AppCornerRadius}"
-            BorderBrush="{StaticResource BorderBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             Padding="20,12"
             HorizontalAlignment="Center"

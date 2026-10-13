@@ -12,9 +12,9 @@
         Title="{DynamicResource LngCreatePlaylist}"
         WindowStartupLocation="CenterOwner">
         <Border
-                Background="{StaticResource SecondaryBackgroundBrush}"
+                Background="{DynamicResource SecondaryBackgroundBrush}"
                 CornerRadius="{DynamicResource AppCornerRadius}"
-                BorderBrush="{StaticResource BorderBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1">
                 <Grid Margin="20">
 
@@ -27,7 +27,7 @@
 
                         <TextBlock x:Name="NewPlaylist"
                                    Text="{DynamicResource LngNewPlaylist}"
-                                   Foreground="{StaticResource TextBrush}"
+                                   Foreground="{DynamicResource TextBrush}"
                                    FontSize="20"
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center"
@@ -37,7 +37,7 @@
                                 Width="180"
                                 Height="180"
                                 Click="SelectCoverButton_Click"
-                                Background="{StaticResource CentralPanelCardBackground}">
+                                Background="{DynamicResource CentralPanelCardBackground}">
                                 <Grid>
                                         <Image x:Name="CoverImage"
                                                Stretch="UniformToFill"/>
@@ -48,7 +48,7 @@
                                                            HorizontalAlignment="Center"/>
                                                 <TextBlock x:Name="SelectCover"
                                                            Text="{DynamicResource LngSelectCover}"
-                                                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                                            FontSize="12"
                                                            HorizontalAlignment="Center"/>
                                         </StackPanel>
@@ -59,22 +59,22 @@
                                     Margin="0,20">
                                 <TextBlock x:Name="TitlePlaylist"
                                            Text="{DynamicResource LngTitlePlaylist}"
-                                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="PlaylistNameTextBox"
-                                         Background="{StaticResource CentralPanelCardBackground}"
-                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{DynamicResource CentralPanelCardBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
                                          BorderThickness="0"
                                          Padding="10"
                                          Margin="0,0,0,15"/>
 
                                 <TextBlock x:Name="DescriptionPlaylist"
                                            Text="{DynamicResource LngDescriptionPlaylist}"
-                                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="PlaylistDescriptionTextBox"
-                                         Background="{StaticResource CentralPanelCardBackground}"
-                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{DynamicResource CentralPanelCardBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
                                          BorderThickness="0"
                                          Padding="10"
                                          Height="80"
@@ -90,7 +90,7 @@
                                         Click="CancelButton_Click"
                                         Width="100"
                                         Height="35"
-                                        Style="{StaticResource ModernPlayerButton}"
+                                        Style="{DynamicResource ModernPlayerButton}"
                                         Margin="0,0,10,0"
                                         IsCancel="True"
                                         BorderThickness="0">

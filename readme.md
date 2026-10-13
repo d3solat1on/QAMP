@@ -56,7 +56,7 @@
 
 ![Главное меню](images/QAMP_MAIN.png)
 ![Аудио Настройки](images/QAMP_AudioSettings.png)
-![Настройки](images/QAMP_Settings.png)
+![Настройки](images/QAMP_Settingsss.png)
 
 </details>
 
@@ -73,6 +73,8 @@
    - `ForegroundBrush` — цвет основного текста.
    - `TertiaryBackgroundBrush` — подложка под визуализатор.
 5. Запустите плеер, зайдите в Настройки, нажмите кнопку **«Добавить тему»** и выберите ваш созданный `.xaml` файл.
+
+При включенном пользовательском фоне полупрозрачные панели используют цвета `DataGridHeaderBackground`, `CentralPanelHeaderBackground` и `SecondaryBackgroundBrush` из выбранной темы. Оставьте эти ресурсы в файле темы, чтобы оверлеи соответствовали ее палитре.
 
 ## PRIVACY
 
@@ -135,7 +137,7 @@ Done.
 
 ![Main Menu](images/QAMP_MAIN.png)
 ![Audio settings](images/QAMP_AudioSettings.png)
-![Settings](images/QAMP_Settings.png)
+![Settings](images/QAMP_Settingsss.png)
 </details>
 
 ## How to Create a Custom Theme
@@ -151,6 +153,8 @@ QAMP supports fully customizable XAML themes. You can create your own look in ju
    - `ForegroundBrush` — text color.
    - `TertiaryBackgroundBrush` — visualizer background.
 5. Open QAMP, go to Settings, click **"Add Theme"**, and select your custom `.xaml` file.
+
+When a custom background is enabled, translucent panels use `DataGridHeaderBackground`, `CentralPanelHeaderBackground`, and `SecondaryBackgroundBrush` from the selected theme. Keep these resources in the theme file so the overlays match its palette.
 
 ## PRIVACY
 

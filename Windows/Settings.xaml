@@ -15,14 +15,15 @@
         ResizeMode="CanMinimize"
         Height="900"
         Width="1100"
-        Background="{StaticResource BackgroundBrush}"
-        Foreground="{StaticResource ForegroundBrush}"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
         FontFamily="{DynamicResource MainFont}"
         FontSize="{DynamicResource FontSize}"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        KeyDown="Window_KeyDown">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
@@ -38,14 +39,14 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
-              Background="{StaticResource SecondaryBackgroundBrush}">
+              Background="{DynamicResource SecondaryBackgroundBrush}">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Margin="10,0,0,0"
                         WindowChrome.IsHitTestVisibleInChrome="True">
                 <TextBlock Text="{DynamicResource LngSettingsQAMP}"
-                           Foreground="{StaticResource ForegroundBrush}"
+                           Foreground="{DynamicResource ForegroundBrush}"
                            FontWeight="Bold"/>
             </StackPanel>
 
@@ -88,37 +89,37 @@
                 <GroupBox Grid.Row="1"
                           Header="{DynamicResource LngInterface}"
                           Margin="0,0,0,20"
-                          Foreground="{StaticResource ForegroundBrush}">
+                          Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
 
                         <GroupBox Header="{DynamicResource LngTheme}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="DarkThemeRadio"
                                              Content="{DynamicResource LngDarkTheme}"
                                              GroupName="Theme"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="StandardThemeRadio_Checked"/>
 
                                 <RadioButton x:Name="LightThemeRadio"
                                              Content="{DynamicResource LngLightTheme}"
                                              GroupName="Theme"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="StandardThemeRadio_Checked"/>
 
                                 <RadioButton x:Name="CustomThemeRadio"
                                              Content="{DynamicResource LngCustomTheme}"
                                              GroupName="Theme"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CustomThemeRadio_Checked"/>
 
                                 <GroupBox Header="{DynamicResource LngCustomThemes}"
                                           Margin="0,5,0,0"
-                                          Foreground="{StaticResource ForegroundBrush}">
+                                          Foreground="{DynamicResource ForegroundBrush}">
                                     <Grid Margin="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -134,9 +135,9 @@
                                             <ComboBox.ItemContainerStyle>
                                                 <Style TargetType="ComboBoxItem">
                                                     <Setter Property="Foreground"
-                                                            Value="{StaticResource ForegroundBrush}"/>
+                                                            Value="{DynamicResource ForegroundBrush}"/>
                                                     <Setter Property="Background"
-                                                            Value="{StaticResource SecondaryBackgroundBrush}"/>
+                                                            Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                                 </Style>
                                             </ComboBox.ItemContainerStyle>
                                         </ComboBox>
@@ -155,65 +156,65 @@
 
                         <GroupBox Header="{DynamicResource LngAccentColor}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <TextBlock x:Name="SelectColor"
                                            Text="{DynamicResource LngMainColor}"
-                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="AccentColorTextBox"
                                          Width="200"
                                          HorizontalAlignment="Left"
                                          TextChanged="AccentColorTextBox_TextChanged"
-                                         Foreground="{StaticResource ForegroundBrush}"
-                                         Background="{StaticResource TertiaryBackgroundBrush}"
-                                         BorderBrush="{StaticResource BorderBrush}"/>
+                                         Foreground="{DynamicResource ForegroundBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{DynamicResource BorderBrush}"/>
                                 <TextBlock x:Name="ColorPreview"
                                            Margin="0,10,0,0"
                                            FontSize="14"
-                                           Foreground="{StaticResource ForegroundBrush}"/>
+                                           Foreground="{DynamicResource ForegroundBrush}"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngRounding}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <TextBlock x:Name="SelectNumber"
                                            Text="{DynamicResource LngRoundingEnter}"
                                            ToolTip="{DynamicResource LngErrorMessageRound}"
-                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="CurrentRoundTextBox"
                                          Width="200"
                                          HorizontalAlignment="Left"
                                          TextChanged="CurrentRound_TextChanged"
-                                         Foreground="{StaticResource ForegroundBrush}"
-                                         Background="{StaticResource TertiaryBackgroundBrush}"
-                                         BorderBrush="{StaticResource BorderBrush}"/>
+                                         Foreground="{DynamicResource ForegroundBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{DynamicResource BorderBrush}"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngLanguage}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="LanguageRuRadio"
                                              Content="{DynamicResource LngLanguageRussian}"
                                              GroupName="Language"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Margin="0,0,0,10"
                                              Checked="LanguageRadio_Checked"/>
                                 <RadioButton x:Name="LanguageEnRadio"
                                              Content="{DynamicResource LngLanguageEnglish}"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              GroupName="Language"
                                              Checked="LanguageRadio_Checked"/>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Header="{DynamicResource LngAccentFont}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel x:Name="FontRadioPanel"
                                         Margin="10"/>
                         </GroupBox>
@@ -224,104 +225,104 @@
                 <GroupBox Grid.Row="2"
                           Header="{DynamicResource LngGraphics}"
                           Margin="0,0,0,20"
-                          Foreground="{StaticResource ForegroundBrush}">
+                          Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
 
                         <!-- Спектр -->
                         <GroupBox Header="{DynamicResource LngSpectrum}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="VisualizerEnabled"
                                              Content="{DynamicResource LngVisualizerEnabled}"
                                              GroupName="VisualizerOnOff"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="VisualizerToggle_Changed"/>
                                 <RadioButton x:Name="VisualizerDisabled"
                                              Content="{DynamicResource LngVisualizerDisabled}"
                                              GroupName="VisualizerOnOff"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="VisualizerToggle_Changed"/>
 
                                 <Separator Margin="0,10"
-                                           Background="{StaticResource BorderBrush}"/>
+                                           Background="{DynamicResource BorderBrush}"/>
                                 <TextBlock Text="{DynamicResource LngSpectrumType}"
-                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
                                            Margin="0,0,0,8"/>
                                 <RadioButton x:Name="SpectrumBarsRadio"
                                              Content="{DynamicResource LngSpectrumTypeBars}"
                                              GroupName="SpectrumType"
                                              Margin="0,0,0,8"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="SpectrumType_Checked"/>
                                 <RadioButton x:Name="SpectrumLineRadio"
                                              Content="{DynamicResource LngSpectrumTypeLine}"
                                              GroupName="SpectrumType"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="SpectrumType_Checked"/>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Header="{DynamicResource LngGradientSpectrum}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="GradientEnabled"
                                              Content="{DynamicResource LngGradientEnabledSpectrum}"
                                              GroupName="GradientOnOff"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="GradientToggle_Changed"/>
                                 <RadioButton x:Name="GradientDisabled"
                                              Content="{DynamicResource LngGradientDisabledSpectrum}"
                                              GroupName="GradientOnOff"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="GradientToggle_Changed"/>
 
                                 <Separator Margin="0,10"
-                                           Background="{StaticResource BorderBrush}"/>
+                                           Background="{DynamicResource BorderBrush}"/>
 
                                 <TextBlock Text="{DynamicResource LngGradientStartHex}"
-                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="SpectrumGradientStartColorTextBox"
                                          Width="200"
                                          HorizontalAlignment="Left"
                                          TextChanged="SpectrumGradientTextBox_TextChanged"
-                                         Foreground="{StaticResource ForegroundBrush}"
-                                         Background="{StaticResource TertiaryBackgroundBrush}"
-                                         BorderBrush="{StaticResource BorderBrush}"/>
+                                         Foreground="{DynamicResource ForegroundBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{DynamicResource BorderBrush}"/>
 
                                 <TextBlock Text="{DynamicResource LngGradientEndHex}"
-                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
                                            Margin="0,10,0,5"/>
                                 <TextBox x:Name="SpectrumGradientEndColorTextBox"
                                          Width="200"
                                          HorizontalAlignment="Left"
                                          TextChanged="SpectrumGradientTextBox_TextChanged"
-                                         Foreground="{StaticResource ForegroundBrush}"
-                                         Background="{StaticResource TertiaryBackgroundBrush}"
-                                         BorderBrush="{StaticResource BorderBrush}"/>
+                                         Foreground="{DynamicResource ForegroundBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{DynamicResource BorderBrush}"/>
 
                                 <Separator Margin="0,10"
-                                           Background="{StaticResource BorderBrush}"/>
+                                           Background="{DynamicResource BorderBrush}"/>
 
                                 <!-- <RadioButton x:Name="GradientHeightBasedRadio"
                                              Content="{DynamicResource LngGradientTypeHeightBased}"
                                              GroupName="SpectrumGradientType"
                                              Margin="0,0,0,8"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="GradientType_Checked"/>
                                 <RadioButton x:Name="GradientFullHeightRadio"
                                              Content="{DynamicResource LngGradientTypeFullHeight}"
                                              GroupName="SpectrumGradientType"
                                              Margin="0,0,0,8"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="GradientType_Checked"/> -->
                                 <!-- <RadioButton x:Name="GradientHorizontalRadio"
                                              Content="{DynamicResource LngGradientTypeHorizontal}"
                                              GroupName="SpectrumGradientType"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="GradientType_Checked"/> -->
                             </StackPanel>
                         </GroupBox>
@@ -330,54 +331,54 @@
 
                         <GroupBox Header="{DynamicResource LngFormatLibrary}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="DefaultModeRadio"
                                              Content="{DynamicResource LngDefaultMode}"
                                              GroupName="Format"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="Format_Checked"/>
                                 <RadioButton x:Name="CompactModeRadio"
                                              Content="{DynamicResource LngCompactMode}"
                                              GroupName="Format"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="Format_Checked"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngBG}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="NotUseCustomBGradio"
                                              Content="{DynamicResource LngUseDefaultBG}"
                                              GroupName="BgGroup"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCustomBG"/>
                                 <RadioButton x:Name="UseCustomBGradio"
                                              Content="{DynamicResource LngUseCustomBG}"
                                              GroupName="BgGroup"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCustomBG"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngDopolnitelno}"
                                   Margin="0,0,0,0"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="AdaptiveGradientsRadio"
                                              Content="{DynamicResource LngAdaptiveGradients}"
                                              GroupName="AdaptiveGradients"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="AdaptiveGradients_Checked"/>
                                 <RadioButton x:Name="StaticGradientsRadio"
                                              Content="{DynamicResource LngStaticGradients}"
                                              GroupName="AdaptiveGradients"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="AdaptiveGradients_Checked"/>
                             </StackPanel>
                         </GroupBox>
@@ -388,67 +389,67 @@
                 <GroupBox Grid.Row="3"
                           Header="{DynamicResource LngSystem}"
                           Margin="0,0,0,20"
-                          Foreground="{StaticResource ForegroundBrush}">
+                          Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
 
                         <!-- Действие при закрытии -->
                         <GroupBox Header="{DynamicResource LngSystemSettings}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="CloseAppRadio"
                                              Content="{DynamicResource LngCloseApp}"
                                              GroupName="CloseAction"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CloseAction_Checked"/>
                                 <RadioButton x:Name="CloseToTrayRadio"
                                              Content="{DynamicResource LngCloseToTrayApp}"
                                              GroupName="CloseAction"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CloseAction_Checked"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngAutoLauch}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="AutoLaunchEnabled"
                                              Content="{DynamicResource LngAutoLaunchOn}"
                                              GroupName="AutoLaunch"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckAutoLaunch"/>
                                 <RadioButton x:Name="AutoLaunchDisabled"
                                              Content="{DynamicResource LngAutoLaunchOff}"
                                              GroupName="AutoLaunch"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckAutoLaunch"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngCoverCache}"
                                   Margin="0,0,0,10"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="UseCoverCache"
                                              Content="{DynamicResource LngEnableCoverCache}"
                                              GroupName="CoverCache"
                                              Margin="0,0,0,10"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCoverCache"/>
                                 <RadioButton x:Name="NotUseCoverCache"
                                              Content="{DynamicResource LngDisableCoverCache}"
                                              GroupName="CoverCache"
-                                             Foreground="{StaticResource ForegroundBrush}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCoverCache"/>
                             </StackPanel>
                         </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngSystem}"
                                   Margin="0,0,0,0"
-                                  Foreground="{StaticResource ForegroundBrush}">
+                                  Foreground="{DynamicResource ForegroundBrush}">
                             <StackPanel Margin="10"
                                         HorizontalAlignment="Left">
                                 <Button Style="{StaticResource ModernPlayerButton}"
@@ -490,7 +491,7 @@
                 <GroupBox Grid.Row="4"
                           Header="{DynamicResource LngHotKeys}"
                           Margin="0,0,0,20"
-                          Foreground="{StaticResource ForegroundBrush}">
+                          Foreground="{DynamicResource ForegroundBrush}">
                     <Grid Margin="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
@@ -515,7 +516,7 @@
                                    Text="{DynamicResource LngPlayPause}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="0"
                                  Grid.Column="1"
                                  x:Name="TbKeyPlayPause"
@@ -525,16 +526,16 @@
                                  IsReadOnly="True"
                                  IsUndoEnabled="False"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="1"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngNext}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="1"
                                  Grid.Column="1"
                                  x:Name="TbKeyNextTrack"
@@ -543,16 +544,16 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngPrev}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="2"
                                  Grid.Column="1"
                                  x:Name="TbKeyPrevTrack"
@@ -561,16 +562,16 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="3"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngViewLyrics}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="3"
                                  Grid.Column="1"
                                  x:Name="TbLyricsMode"
@@ -579,16 +580,16 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="4"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngFavorite}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="4"
                                  Grid.Column="1"
                                  x:Name="TbFavoriteRemoveAdd"
@@ -597,16 +598,16 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="5"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngInfoTrack}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="5"
                                  Grid.Column="1"
                                  x:Name="TbTrackInfo"
@@ -615,16 +616,16 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <TextBlock Grid.Row="6"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngRepeat}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="6"
                                  Grid.Column="1"
                                  x:Name="TbRepeatTrack"
@@ -633,9 +634,9 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <!-- Shuffle -->
                         <TextBlock Grid.Row="7"
@@ -643,7 +644,7 @@
                                    Text="{DynamicResource LngShuffle}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="7"
                                  Grid.Column="1"
                                  x:Name="TbShuffleTrack"
@@ -652,9 +653,9 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <!-- 5s Forward -->
                         <TextBlock Grid.Row="8"
@@ -662,7 +663,7 @@
                                    Text="{DynamicResource Lng5SecForward}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="8"
                                  Grid.Column="1"
                                  x:Name="Tb5secForward"
@@ -671,9 +672,9 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <!-- 5s Backward -->
                         <TextBlock Grid.Row="9"
@@ -681,7 +682,7 @@
                                    Text="{DynamicResource Lng5SecBack}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="9"
                                  Grid.Column="1"
                                  x:Name="Tb5secback"
@@ -690,9 +691,9 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <!-- Fullscreen Spectrum -->
                         <TextBlock Grid.Row="10"
@@ -700,7 +701,7 @@
                                    Text="{DynamicResource LngFullSpectrumWindow}"
                                    VerticalAlignment="Center"
                                    Margin="0,5"
-                                   Foreground="{StaticResource ForegroundBrush}"/>
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
                         <TextBox Grid.Row="10"
                                  Grid.Column="1"
                                  x:Name="TbFullSpectr"
@@ -709,9 +710,9 @@
                                  Margin="0,5"
                                  IsReadOnly="True"
                                  PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-                                 Foreground="{StaticResource ForegroundBrush}"
-                                 Background="{StaticResource TertiaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
                     </Grid>
                 </GroupBox>
 
@@ -719,7 +720,7 @@
         </ScrollViewer>
 
         <Grid Grid.Row="2"
-              Background="{StaticResource SecondaryBackgroundBrush}">
+              Background="{DynamicResource SecondaryBackgroundBrush}">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="0,0,10,0">
@@ -730,7 +731,7 @@
                            Margin="0,0,10,0"
                            VerticalAlignment="Center"
                            Background="Transparent"
-                           Foreground="{StaticResource ForegroundBrush}"
+                           Foreground="{DynamicResource ForegroundBrush}"
                            FontWeight="Bold"
                            Visibility="Collapsed"/>
 

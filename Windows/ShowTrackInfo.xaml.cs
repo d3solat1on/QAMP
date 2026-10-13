@@ -36,7 +36,8 @@ namespace QAMP.Windows
                 {
                     Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
 
-                    if (pressedKey == targetHotkey.Key && Keyboard.Modifiers == targetHotkey.Modifiers)
+                    if (pressedKey == targetHotkey.Key && Keyboard.Modifiers == targetHotkey.Modifiers ||
+                        pressedKey == Key.Escape)
                     {
                         Close();
                         e.Handled = true;

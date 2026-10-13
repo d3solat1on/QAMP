@@ -8,11 +8,12 @@
         Background="Transparent"
         FontFamily="{DynamicResource MainFont}"
         FontSize="{DynamicResource FontSize}"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        KeyDown="Window_KeyDown">
 
-    <Border Background="{StaticResource SecondaryBackgroundBrush}"
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
             CornerRadius="{DynamicResource AppCornerRadius}"
-            BorderBrush="{StaticResource AccentBrush}"
+            BorderBrush="{DynamicResource AccentBrush}"
             BorderThickness="1">
         <Grid Margin="30">
             <Grid.RowDefinitions>
@@ -26,7 +27,7 @@
                 <TextBlock Text="{Binding Name}"
                            FontSize="32"
                            FontWeight="Bold"
-                           Foreground="{StaticResource TextBrush}"/>
+                           Foreground="{DynamicResource TextBrush}"/>
                 <TextBlock Text="{Binding Executor}"
                            FontSize="18"
                            Foreground="{DynamicResource AccentBrush}"/>
@@ -36,7 +37,7 @@
                      x:Name="FullLyricsEditor"
                      Text="{Binding Lyrics, UpdateSourceTrigger=PropertyChanged}"
                      FontSize="20"
-                     Foreground="{StaticResource ForegroundBrush}"
+                     Foreground="{DynamicResource ForegroundBrush}"
                      Background="Transparent"
                      BorderThickness="0"
                      AcceptsReturn="True"

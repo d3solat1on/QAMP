@@ -34,4 +34,11 @@ public partial class PlaybackHistoryWindow : Window
     {
         Close();
     }
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+        }
+    }
 }

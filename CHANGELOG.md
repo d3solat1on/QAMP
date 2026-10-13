@@ -1,4 +1,7 @@
 # CHANGELOG
+# (13.10.2026) Version 1.8.7.3:
+    - Switching between themes is now possible without restarting the application.
+
 # (12.10.2026) Version 1.8.7.2:
     - Added the ability to save custom equalizer settings.  
     - A "Show track in folder" button has been added to the context menu.

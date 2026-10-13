@@ -26,15 +26,12 @@ namespace QAMP.Windows
         private Visualization.SpectrumDisplayType originalSpectrumType;
         private Visualization.SpectrumGradientType originalSpectrumGradientType;
         private bool originalIsAutoLaunchEnabled;
-        private readonly PlayerService _player;
         private DispatcherTimer? _memoryTimer;
-        private bool _themeChanged = false;
 
-        public Settings(PlayerService player)
+        public Settings()
         {
             InitializeComponent();
             InitializeCustomThemes();
-            _player = player;
             StartMemoryTicking();
         }
 
@@ -44,7 +41,7 @@ namespace QAMP.Windows
 
         private void InitializeCustomThemes()
         {
-            var appSettings = new AppSettings();
+            var appSettings = SettingsManager.Instance.Config;
             Debug.WriteLine("[QAMP Theme Debug] --- Инициализация пользовательских тем ---");
             DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
             LightThemeRadio.Checked -= StandardThemeRadio_Checked;
@@ -159,10 +156,7 @@ namespace QAMP.Windows
                         .OfType<RadioButton>()
                         .FirstOrDefault(radio =>
                             radio.Tag is FontService.FontOption option && option == importedFont);
-                    if (importedRadio is not null)
-                    {
-                        importedRadio.IsChecked = true;
-                    }
+                    importedRadio?.IsChecked = true;
 
                     string message = (string)Application.Current.FindResource("LngFontWasAdded") ?? "Шрифт успешно добавлен";
                     _ = SettingsInfoToast.ShowAsync(message);
@@ -289,9 +283,8 @@ namespace QAMP.Windows
 
             string themeName = (sender == DarkThemeRadio) ? "Dark" : "Light";
 
-            ThemeManager.SetTheme(themeName);
+            ApplyTheme(themeName);
 
-            _themeChanged = true;
         }
 
         private void CustomThemeRadio_Checked(object sender, RoutedEventArgs e)
@@ -301,8 +294,7 @@ namespace QAMP.Windows
 
             if (CustomThemesComboBox.SelectedItem is string selectedThemeFile)
             {
-                ThemeManager.SetTheme(selectedThemeFile);
-                _themeChanged = true;
+                ApplyTheme(selectedThemeFile);
             }
         }
 
@@ -321,19 +313,20 @@ namespace QAMP.Windows
                 DarkThemeRadio.Checked += StandardThemeRadio_Checked;
                 LightThemeRadio.Checked += StandardThemeRadio_Checked;
 
-                ThemeManager.SetTheme(selectedThemeFile);
-                _themeChanged = true;
+                ApplyTheme(selectedThemeFile);
             }
         }
 
-        private async void ShowRestartNotificationIfNeeded()
+        private void ApplyTheme(string themeName)
         {
-            if (_themeChanged)
+            if (ThemeManager.ApplyTheme(themeName))
             {
-                string message = (string)Application.Current.FindResource("LngThemeRestartRequired") ??
-                                 "Для применения темы необходимо перезапустить приложение.";
-                NotificationWindow.Show(message, this);
+                return;
             }
+
+            string message = Application.Current.TryFindResource("LngError") as string
+                             ?? "Could not apply the selected theme.";
+            NotificationWindow.Show($"{message} {themeName}", this);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -628,7 +621,6 @@ namespace QAMP.Windows
         {
             SettingsManager.Instance.Save();
 
-            ShowRestartNotificationIfNeeded();
 
             if (Application.Current.MainWindow is MainWindow mainWindow)
             {
@@ -649,7 +641,7 @@ namespace QAMP.Windows
             var config = SettingsManager.Instance.Config;
 
             if (originalColorScheme != null)
-                config.ColorScheme = originalColorScheme;
+                ThemeManager.ApplyTheme(originalColorScheme);
             if (originalAccentColor != null)
                 config.AccentColor = originalAccentColor;
 
@@ -955,6 +947,13 @@ namespace QAMP.Windows
                     config.IsAutoLaunchEnabled = true;
                     SettingsManager.Instance.Save();
                 }
+            }
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
             }
         }
     }

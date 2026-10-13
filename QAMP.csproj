@@ -37,6 +37,9 @@
 
   <ItemGroup>
     <Content Include="icon\icon.ico" />
+    <Content Include="Themes\*.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
