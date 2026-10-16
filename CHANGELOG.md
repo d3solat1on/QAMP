@@ -1,4 +1,7 @@
 # CHANGELOG
+# (16.10.2026) Version 1.8.7.4:
+    - The "Statistics" window has been improved. More detailed information about the music library has been added.  
+
 # (13.10.2026) Version 1.8.7.3:
     - Switching between themes is now possible without restarting the application.
 

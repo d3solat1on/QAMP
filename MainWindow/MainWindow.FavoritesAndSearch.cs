@@ -28,5 +28,13 @@ namespace QAMP
             };
             settingsAudioWindow.Show();
         }
+        private void StatisticsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var statisticsWindow = new Statistics()
+            {
+                Owner = this
+            };
+            statisticsWindow.Show();
+        }
     }
 }

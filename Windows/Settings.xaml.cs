@@ -26,13 +26,11 @@ namespace QAMP.Windows
         private Visualization.SpectrumDisplayType originalSpectrumType;
         private Visualization.SpectrumGradientType originalSpectrumGradientType;
         private bool originalIsAutoLaunchEnabled;
-        private DispatcherTimer? _memoryTimer;
 
         public Settings()
         {
             InitializeComponent();
             InitializeCustomThemes();
-            StartMemoryTicking();
         }
 
         private static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
@@ -676,7 +674,6 @@ namespace QAMP.Windows
             PlayerService.Instance.RefreshSpectrumControls();
 
             DialogResult = false;
-            _memoryTimer?.Stop();
             Close();
             MemoryOptimizer.RunAsync(Dispatcher);
         }
@@ -698,12 +695,6 @@ namespace QAMP.Windows
             helpWindow.ShowHelpWindow();
         }
 
-        private void StatisticsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var statisticsWindow = new Statistics() { Owner = this };
-            statisticsWindow.Show();
-        }
-
         private void OpenDatabaseLocation_Click(object sender, RoutedEventArgs e)
         {
             string path = AppDataManager.AppDataPath;
@@ -715,28 +706,6 @@ namespace QAMP.Windows
             string path = AppContext.BaseDirectory;
             Process.Start("explorer.exe", path);
         }
-
-        private void StartMemoryTicking()
-        {
-            _memoryTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            _memoryTimer.Tick += (s, e) => UsingRam();
-            _memoryTimer.Start();
-        }
-
-        private void UsingRam()
-        {
-            if (Keyboard.IsKeyDown(Key.I) && Keyboard.Modifiers == ModifierKeys.Control)
-            {
-                var memoryUsage = Process.GetCurrentProcess().WorkingSet64;
-                usingRAM.Text = $"Используемая память: {memoryUsage / (1024 * 1024):F2} MB";
-                usingRAM.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                usingRAM.Visibility = Visibility.Collapsed;
-            }
-        }
-
 
         private async void ReplaceBG_Click(object sender, RoutedEventArgs e)
         {

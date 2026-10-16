@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:QAMP.Windows"
         xmlns:converters="clr-namespace:QAMP.Converters"
+        xmlns:dialogs="clr-namespace:QAMP.Dialogs"
         AllowsTransparency="True"
         WindowStyle="None"
         Width="1000"
@@ -21,6 +22,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
@@ -68,6 +70,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0"
@@ -100,6 +103,12 @@
                           Margin="0,0,0,20">
                     <Grid Margin="5">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -144,31 +153,96 @@
                                    Margin="10,5,0,5"
                                    TextWrapping="Wrap"/>
 
-                        <TextBlock Grid.Row="3"
+                        <TextBlock Grid.Row="9"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngTotalLibrarySize}"
                                    FontWeight="SemiBold"
                                    Margin="0,5"/>
-                        <TextBlock Grid.Row="3"
+                        <TextBlock Grid.Row="9"
                                    Grid.Column="1"
                                    x:Name="TotalLibrarySizeText"
                                    Margin="10,5,0,5"
                                    TextWrapping="Wrap"/>
 
-                        <TextBlock Grid.Row="4"
+                        <TextBlock Grid.Row="10"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngTotalLibtatyWeight}"
                                    FontWeight="SemiBold"
                                    Margin="0,5"/>
-                        <TextBlock Grid.Row="4"
+                        <TextBlock Grid.Row="10"
                                    Grid.Column="1"
                                    x:Name="TotalLibraryWeightText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="6"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngFirstTrackInLib}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="6"
+                                   Grid.Column="1"
+                                   x:Name="FirstTrackInLibText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="7"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngLastTrackInLib}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="7"
+                                   Grid.Column="1"
+                                   x:Name="LastTrackInLibText"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngMostPopularAlbom}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="1"
+                                   x:Name="MostPopularAlbum"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="5"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngMostPopularGenre}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="5"
+                                   Grid.Column="1"
+                                   x:Name="MostPopularGenre"
+                                   Margin="10,5,0,5"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="8"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngLastListenedTrack}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="8"
+                                   Grid.Column="1"
+                                   x:Name="LastListenedTrack"
                                    Margin="10,5,0,5"
                                    TextWrapping="Wrap"/>
                     </Grid>
                 </GroupBox>
 
                 <GroupBox Grid.Row="3"
+                          Header="{DynamicResource LngGenres}"
+                          Margin="0,0,0,15">
+                    <ItemsControl x:Name="GenreStatisticsItems"
+                                  Margin="5">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           Margin="0,3"
+                                           TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </GroupBox>
+
+                <GroupBox Grid.Row="4"
                           Header="{DynamicResource LngCountTrackAndPlaylists}"
                           Margin="0,0,0,15">
                     <Grid Margin="5">
@@ -204,5 +278,38 @@
                 </GroupBox>
             </Grid>
         </ScrollViewer>
+        <Grid Grid.Row="2"
+              Background="{DynamicResource SecondaryBackgroundBrush}">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,10,0">
+                <Button Style="{StaticResource ModernPlayerButton}"
+                        Margin="5,0,0,0"
+                        Click="CreatePlaylistWithTop50Tracks_Click"
+                        Width="125"
+                        Height="45">
+                    <TextBlock Text="{DynamicResource LngCreatePlaylistWithTop50Tracks}"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               VerticalAlignment="Center"
+                               ToolTip="{DynamicResource LngCreatePlaylistWithTop50Tracks}"/>
+                </Button>
+                <Button Style="{StaticResource ModernPlayerButton}"
+                        Margin="5,0,0,0"
+                        Click="CreatePlaylistWithTracksNotListening"
+                        Width="125"
+                        Height="45">
+                    <TextBlock Text="{DynamicResource LngCreatePlaylistWithTracksNotListening}"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               VerticalAlignment="Center"
+                               ToolTip="{DynamicResource LngCreatePlaylistWithTracksNotListening}"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <dialogs:ModernNotice x:Name="StatisticsNotice"
+                              VerticalAlignment="Bottom"
+                              HorizontalAlignment="Center"
+                              Panel.ZIndex="9999"/>
     </Grid>
 </Window>

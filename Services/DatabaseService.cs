@@ -892,7 +892,7 @@ public class DatabaseService
         }
     }
 
-    public static long CreatePlaylist(string name, string description = "", byte[]? coverImage = null, bool isSystemPlaylist = false)
+    public static long CreatePlaylist(string name, string? description = "", byte[]? coverImage = null, bool isSystemPlaylist = false)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -1079,6 +1079,248 @@ public class DatabaseService
             System.Diagnostics.Debug.WriteLine($"Ошибка при обновлении типа сортировки: {ex.Message}");
         }
     }
+    public static string GetLastListenedTrack()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Tracks.Name
+            FROM TrackPlayHistory
+            INNER JOIN Tracks ON Tracks.Id = TrackPlayHistory.TrackId
+            ORDER BY TrackPlayHistory.PlayedAtUtc DESC, TrackPlayHistory.Id DESC
+            LIMIT 1";
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            return reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+        }
+        return "Unknown";
+    }
+
+    public static List<(string Genre, int TrackCount, double Percentage)> GetGenreStatistics()
+    {
+        var genreStatistics = new List<(string Genre, int TrackCount, double Percentage)>();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT TRIM(Genre), COUNT(*) AS TrackCount,
+                   COUNT(*) * 100.0 / (SELECT COUNT(*) FROM Tracks) AS Percentage
+            FROM Tracks
+            WHERE Genre IS NOT NULL AND TRIM(Genre) != ''
+            GROUP BY TRIM(Genre)
+            ORDER BY TrackCount DESC, TRIM(Genre) COLLATE NOCASE";
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            genreStatistics.Add((
+                reader.GetString(0),
+                reader.GetInt32(1),
+                reader.GetDouble(2)));
+        }
+
+        return genreStatistics;
+    }
+
+    public static string GetMostPopularGenre()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Genre, COUNT(*) as TrackCount
+            FROM Tracks
+            WHERE Genre IS NOT NULL AND Genre != ''
+            GROUP BY Genre
+            ORDER BY TrackCount DESC
+            LIMIT 1";
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            return reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+        }
+        return "Unknown";
+    }
+    public static string GetMostPopularAlbum()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Album, COUNT(*) as TrackCount
+            FROM Tracks
+            WHERE Album IS NOT NULL AND Album != ''
+            GROUP BY Album
+            ORDER BY TrackCount DESC
+            LIMIT 1";
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            return reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+        }
+        return "Unknown";
+    }
+    private static List<Track> GetMostListenedTracksList(int limit)
+    {
+        var tracks = new List<Track>();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Id, Path, Name, Executor, Album, Duration, Genre, Bitrate, SampleRate, Year, TrackNumber, PlayCount
+            FROM Tracks
+            WHERE PlayCount IS NOT NULL AND PlayCount > 0
+            ORDER BY PlayCount DESC
+            LIMIT $limit";
+        cmd.Parameters.AddWithValue("$limit", limit);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var track = new Track
+            {
+                Id = reader.GetInt32(0),
+                Path = reader.GetString(1),
+                Name = reader.IsDBNull(2) ? "Unknown" : reader.GetString(2),
+                Executor = reader.IsDBNull(3) ? "Unknown" : reader.GetString(3),
+                Album = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                Duration = reader.IsDBNull(5) ? "00:00" : reader.GetString(5),
+                Genre = reader.IsDBNull(6) ? "Unknown" : reader.GetString(6),
+                Bitrate = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
+                SampleRate = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
+                Year = reader.IsDBNull(9) ? 0 : reader.GetInt16(9),
+                TrackNumber = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
+                PlayCount = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
+            };
+            tracks.Add(track);
+        }
+
+        return tracks;
+    }
+
+    private static List<Track> GetTracksWithoutListeningButton()
+    {
+        var tracks = new List<Track>();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT Id, Path, Name, Executor, Album, Duration, Genre, Bitrate, SampleRate, Year, TrackNumber, PlayCount
+            FROM Tracks
+            WHERE PlayCount IS NULL OR PlayCount = 0
+            ORDER BY PlayCount DESC
+            ";
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var track = new Track
+            {
+                Id = reader.GetInt32(0),
+                Path = reader.GetString(1),
+                Name = reader.IsDBNull(2) ? "Unknown" : reader.GetString(2),
+                Executor = reader.IsDBNull(3) ? "Unknown" : reader.GetString(3),
+                Album = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                Duration = reader.IsDBNull(5) ? "00:00" : reader.GetString(5),
+                Genre = reader.IsDBNull(6) ? "Unknown" : reader.GetString(6),
+                Bitrate = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
+                SampleRate = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
+                Year = reader.IsDBNull(9) ? 0 : reader.GetInt16(9),
+                TrackNumber = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
+                PlayCount = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
+            };
+            tracks.Add(track);
+        }
+
+        return tracks;
+    }
+
+    public static void CreatePlaylistWithTop50Tracks()
+    {
+        long newPlaylistId = CreatePlaylist("Top 50 Tracks", null, null, true);
+        var newPlaylist = GetPlaylistById((int)newPlaylistId);
+
+        var topTracks = GetMostListenedTracksList(50);
+
+        foreach (var track in topTracks)
+        {
+            SaveTrackToPlaylist((int)newPlaylistId, track);
+        }
+        if (newPlaylist != null)
+        {
+            Windows.Statistics.RefreshRightPanel(newPlaylist);
+        }
+        System.Diagnostics.Debug.WriteLine($"Создан плейлист 'Top 50 Tracks' с ID={newPlaylistId} и добавлено {topTracks.Count} треков.");
+    }
+
+    public static void CreatePlaylistTracksWithoutListening()
+    {
+        long newPlaylistId = CreatePlaylist("Tracks without listening", null, null, true);
+        var newPlaylist = GetPlaylistById((int)newPlaylistId);
+
+        var tracks = GetTracksWithoutListeningButton();
+        foreach (var track in tracks)
+        {
+            SaveTrackToPlaylist((int)newPlaylistId, track);
+        }
+        if (newPlaylist != null)
+        {
+            Windows.Statistics.RefreshRightPanel(newPlaylist);
+        }
+    }
+
+    public static string GetFirstTrackInLibrary()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+        SELECT Name, Executor 
+        FROM Tracks 
+        ORDER BY Id ASC 
+        LIMIT 1";
+
+        using var reader = cmd.ExecuteReader();
+
+        if (reader.Read())
+        {
+            string name = reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? "Unknown" : reader.GetString(1);
+            return $"{name}  by {executor}";
+        }
+
+        return LocalizationService.GetString("LngNoTracksInLibrary");
+    }
+
+    public static string GetLastTrackInLibrary()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+        SELECT Name, Executor 
+        FROM Tracks 
+        ORDER BY Id DESC 
+        LIMIT 1";
+
+        using var reader = cmd.ExecuteReader();
+
+        if (reader.Read())
+        {
+            string name = reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? "Unknown" : reader.GetString(1);
+            return $"{name}  by {executor}";
+        }
+
+        return LocalizationService.GetString("LngNoTracksInLibrary");
+    }
+
     public static string GetMostListenedTracks()
     {
         using var connection = new SqliteConnection(_connectionString);

@@ -110,10 +110,24 @@
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
                                     WindowChrome.IsHitTestVisibleInChrome="True">
+                                <Button x:Name="StatisticsButton"
+                                        Style="{StaticResource IconButton}"
+                                        ToolTip="{DynamicResource LngOpenStatistics}"
+                                        Click="StatisticsButton_Click"
+                                        Margin="5,0,5,0">
+                                        <Path Data="{StaticResource StatisticsGeometry}"
+                                              Fill="{DynamicResource AccentBrush}"
+                                              Stretch="Uniform"
+                                              Width="18"
+                                              Height="18"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </Button>
                                 <Button x:Name="EqualizerButton"
                                         Style="{StaticResource IconButton}"
                                         ToolTip="{DynamicResource LngEqualizer}"
-                                        Click="EqualizerButton_Click">
+                                        Click="EqualizerButton_Click"
+                                        Margin="5,0,5,0">
                                         <Path Data="{StaticResource EqualizerGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
@@ -125,7 +139,8 @@
                                 <Button x:Name="Settings"
                                         Style="{StaticResource TitleBarButtonStyle}"
                                         ToolTip="{DynamicResource LngSettings}"
-                                        Click="Settings_Click">
+                                        Click="Settings_Click"
+                                        Margin="5,0,5,0">
                                         <Path Data="{StaticResource settingsGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
@@ -136,7 +151,8 @@
                                 </Button>
                                 <Button x:Name="BtnMinimize"
                                         Style="{StaticResource TitleBarButtonStyle}"
-                                        Click="Minimize_Click">
+                                        Click="Minimize_Click"
+                                        Margin="5,0,5,0">
                                         <Path Data="{StaticResource minimazeGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
@@ -148,7 +164,8 @@
 
                                 <Button x:Name="BtnMaximize"
                                         Style="{StaticResource TitleBarButtonStyle}"
-                                        Click="Maximize_Click">
+                                        Click="Maximize_Click"
+                                        Margin="5,0,5,0">
                                         <Path Data="{StaticResource maximizeGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"
@@ -159,7 +176,8 @@
                                 </Button>
                                 <Button x:Name="BtnClose"
                                         Style="{StaticResource CloseButtonStyle}"
-                                        Click="Close_Click">
+                                        Click="Close_Click"
+                                        Margin="5,0,5,0">
                                         <Path Data="{StaticResource closeGeometry}"
                                               Fill="{DynamicResource AccentBrush}"
                                               Stretch="Uniform"

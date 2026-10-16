@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using QAMP.Models;
 using QAMP.Services;
 
 namespace QAMP.Windows;
@@ -66,11 +67,21 @@ public partial class Statistics : Window
             var totalLibraryWeight = await Task.Run(() => DatabaseService.GetTotalLibraryWeight());
             var mostListenedArtistText = await Task.Run(() => DatabaseService.GetMostListenedArtist());
             var tracksWithoutListening = await Task.Run(() => DatabaseService.GetTracksWithoutListening());
+            var firstTrackInLib = await Task.Run(() => DatabaseService.GetFirstTrackInLibrary());
+            var lastTrackInLib = await Task.Run(() => DatabaseService.GetLastTrackInLibrary());
+            var mostPopularAlbum = await Task.Run(() => DatabaseService.GetMostPopularAlbum());
+            var mostPopularGenre = await Task.Run(() => DatabaseService.GetMostPopularGenre());
+            var lastListenedTrack = await Task.Run(() => DatabaseService.GetLastListenedTrack());
+            var genreStatistics = await Task.Run(() => DatabaseService.GetGenreStatistics());
 
             await Dispatcher.InvokeAsync(() =>
             {
                 TracksWithoutListening.Text = tracksWithoutListening;
                 MostListenedArtistText.Text = LocalizationService.GetFormattedString("LngMostListenedArtistValue", mostListenedArtistText);
+                FirstTrackInLibText.Text = firstTrackInLib;
+                LastTrackInLibText.Text = lastTrackInLib;
+                MostPopularAlbum.Text = mostPopularAlbum;
+                MostPopularGenre.Text = mostPopularGenre;
                 PlaylistCountText.Text = playlistCount;
                 TrackCountText.Text = trackCount;
                 MostListenedTrackText.Text = LocalizationService.GetFormattedString("LngMostListenedTrackValue", mostListened);
@@ -79,6 +90,14 @@ public partial class Statistics : Window
                 ShortestTrackText.Text = shortestTrack;
                 TotalLibrarySizeText.Text = totalLibrarySize;
                 TotalLibraryWeightText.Text = totalLibraryWeight;
+                LastListenedTrack.Text = lastListenedTrack;
+                GenreStatisticsItems.ItemsSource = genreStatistics.Count == 0
+                    ? [LocalizationService.GetString("LngNoGenreStatistics")]
+                    : genreStatistics.Select(genre => LocalizationService.GetFormattedString(
+                        "LngGenreStatisticsFormat",
+                        genre.Genre,
+                        genre.TrackCount,
+                        genre.Percentage));
             });
         }
         catch (Exception ex)
@@ -88,6 +107,48 @@ public partial class Statistics : Window
             {
                 MostListenedTrackText.Text = "Error loading statistics. Please try again.";
             });
+        }
+    }
+
+    private async void CreatePlaylistWithTop50Tracks_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            DatabaseService.CreatePlaylistWithTop50Tracks();
+            string message = Application.Current.Resources["LngSuccessfully"] as string ?? "Successfully";
+            await StatisticsNotice.ShowAsync(message);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error creating playlist with top 50 tracks: {ex.Message}");
+            string message = Application.Current.Resources["LngUnsuccessful"] as string ?? "Unsuccessful";
+            await StatisticsNotice.ShowAsync(message);
+            App.LogException(ex, "Error creating playlist with top 50 tracks");
+        }
+    }
+
+    private async void CreatePlaylistWithTracksNotListening(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            DatabaseService.CreatePlaylistTracksWithoutListening();
+            string message = Application.Current.Resources["LngSuccessfully"] as string ?? "Successfully";
+            await StatisticsNotice.ShowAsync(message);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error creating playlist with tracks without listening: {ex.Message}");
+            string message = Application.Current.Resources["LngUnsuccessful"] as string ?? "Unsuccessful";
+            await StatisticsNotice.ShowAsync(message);
+            App.LogException(ex, "Error creating playlist with tracks without listening");
+        }
+    }
+
+    public static void RefreshRightPanel(Playlist newPlaylist) //не RightPanel, а LeftPanel xd
+    {
+        if (newPlaylist != null)
+        {
+            ViewModels.MusicLibrary.Instance.Playlists.Add(newPlaylist);
         }
     }
 

@@ -725,23 +725,6 @@
                         HorizontalAlignment="Right"
                         Margin="0,0,10,0">
 
-                <TextBlock x:Name="usingRAM"
-                           Text=""
-                           Width="250"
-                           Margin="0,0,10,0"
-                           VerticalAlignment="Center"
-                           Background="Transparent"
-                           Foreground="{DynamicResource ForegroundBrush}"
-                           FontWeight="Bold"
-                           Visibility="Collapsed"/>
-
-                <Button Style="{StaticResource ModernPlayerButton}"
-                        x:Name="Statistics"
-                        Content="{DynamicResource LngStatistics}"
-                        Margin="5,0,0,0"
-                        Click="StatisticsButton_Click"
-                        Width="100"
-                        Height="35"/>
 
                 <Button Style="{StaticResource ModernPlayerButton}"
                         x:Name="HelpWindowButton"
