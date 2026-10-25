@@ -27,25 +27,34 @@ namespace QAMP
         private MediaControlsManager? _mediaManager;
         private bool _isClosing = false;
 
+        // #if DEBUG
+        //         private AppConsole _appConsole => AppConsole.Instance;
+        // #endif
 
         public MainWindow()
         {
             InitializeComponent();
-#if DEBUG
-            TestCppDll();
-#endif
             _playlistsLoadingPlaceholder = (Grid?)FindName("PlaylistsLoadingPlaceholder");
             _tracksLoadingPlaceholder = (Grid?)FindName("TracksLoadingPlaceholder");
             _nowPlayingLoadingPlaceholder = (Grid?)FindName("NowPlayingLoadingPlaceholder");
             _nowPlayingPanel = (StackPanel?)FindName("NowPlayingPanel");
 
-            System.Diagnostics.Debug.WriteLine("=== ПУТЬ К БАЗЕ ДАННЫХ ===");
-            System.Diagnostics.Debug.WriteLine($"Путь: {DatabaseService.DatabasePath}");
-            System.Diagnostics.Debug.WriteLine($"Папка существует: {Directory.Exists(Path.GetDirectoryName(DatabaseService.DatabasePath))}");
+            // #if DEBUG
+            this.KeyDown += Window_KeyDown;
+            DebugConsoleContainer.Content = new Windows.DebugConsoleView();
+            AppConsole.Log("Debug console initialized.");
+            // #endif
+            System.Diagnostics.Debug.WriteLine("Path to database: " + DatabaseService.DatabasePath);
+            AppConsole.Log("Path to database: " + DatabaseService.DatabasePath);
+            System.Diagnostics.Debug.WriteLine($"Folder exists: {Directory.Exists(Path.GetDirectoryName(DatabaseService.DatabasePath))}");
+            AppConsole.Log($"Folder exists: {Directory.Exists(Path.GetDirectoryName(DatabaseService.DatabasePath))}");
 
             DatabaseService.EnsureDatabaseCreated();
 
-            System.Diagnostics.Debug.WriteLine($"База данных существует: {File.Exists(DatabaseService.DatabasePath)}");
+            System.Diagnostics.Debug.WriteLine($"Database exists: {File.Exists(DatabaseService.DatabasePath)}");
+            AppConsole.Log($"Database exists: {File.Exists(DatabaseService.DatabasePath)}");
+            System.Diagnostics.Debug.WriteLine($"Database size: {new FileInfo(DatabaseService.DatabasePath).Length} bytes");
+            AppConsole.Log($"Database size: {new FileInfo(DatabaseService.DatabasePath).Length} bytes");
             DataContext = MusicLibrary.Instance;
 
             Player.TrackChanged += OnTrackChanged;
@@ -62,7 +71,8 @@ namespace QAMP
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("=== MainWindow_Loaded НАЧАЛО ===");
+            System.Diagnostics.Debug.WriteLine("MainWindow Loaded start");
+            AppConsole.Log("MainWindow Loaded start");
 
             App.RegisterWindowForSingleInstance(this);
 
@@ -122,7 +132,8 @@ namespace QAMP
                 await MusicLibrary.Instance.LoadAllPlaylistsTracksAsync(
                     onProgress: (current, total) =>
                     {
-                        System.Diagnostics.Debug.WriteLine($"Прогресс загрузки треков: {current}/{total}");
+                        System.Diagnostics.Debug.WriteLine($"Tracks loading progress: {current}/{total}");
+                        AppConsole.Log($"Tracks loading progress: {current}/{total}");
                     }
                 );
 
@@ -140,7 +151,8 @@ namespace QAMP
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка при инициализации: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error during initialization: {ex.Message}");
+                AppConsole.Log($"Error during initialization: {ex.Message}");
                 _playlistsLoadingPlaceholder?.Visibility = Visibility.Collapsed;
                 PlaylistsListBox.Visibility = Visibility.Visible;
                 _tracksLoadingPlaceholder?.Visibility = Visibility.Collapsed;
@@ -163,6 +175,7 @@ namespace QAMP
                 Dispatcher.Invoke(() =>
                 {
                     System.Diagnostics.Debug.WriteLine("SMTC: Play Requested");
+                    AppConsole.Log("SMTC: Play Requested");
                     if (_playService.CurrentTrack != null)
                     {
                         if (!_playService.IsPlaying)
@@ -183,6 +196,7 @@ namespace QAMP
                 Dispatcher.Invoke(() =>
                 {
                     System.Diagnostics.Debug.WriteLine("SMTC: Pause Requested");
+                    AppConsole.Log("SMTC: Pause Requested");
                     if (_playService.IsPlaying)
                     {
                         _ = _playService.PauseAsync();
@@ -195,6 +209,7 @@ namespace QAMP
                 Dispatcher.Invoke(() =>
                 {
                     System.Diagnostics.Debug.WriteLine("SMTC: Next Requested");
+                    AppConsole.Log("SMTC: Next Requested");
                     _playService.PlayNextTrack();
                 });
             };
@@ -204,6 +219,7 @@ namespace QAMP
                 Dispatcher.Invoke(() =>
                 {
                     System.Diagnostics.Debug.WriteLine("SMTC: Previous Requested");
+                    AppConsole.Log("SMTC: Previous Requested");
                     _playService.PlayPreviousTrack();
                 });
             };
@@ -234,14 +250,16 @@ namespace QAMP
                     }
 
                     string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
-                    System.Diagnostics.Debug.WriteLine($"DEBUG: RestoreLastPlaylistAndTrackAsync - LastTrackPath={lastTrackPath}");
+                    System.Diagnostics.Debug.WriteLine($"RestoreLastPlaylistAndTrackAsync - LastTrackPath={lastTrackPath}");
+                    AppConsole.Log($"RestoreLastPlaylistAndTrackAsync - LastTrackPath={lastTrackPath}");
 
                     if (!string.IsNullOrEmpty(lastTrackPath))
                     {
                         var lastTrack = playlist.Tracks.FirstOrDefault(t => t.Path == lastTrackPath);
                         if (lastTrack != null)
                         {
-                            System.Diagnostics.Debug.WriteLine($"DEBUG: Загружаю трек {lastTrack.Name}");
+                            System.Diagnostics.Debug.WriteLine($"Loading track: {lastTrack.Name}");
+                            AppConsole.Log($"Loading track: {lastTrack.Name}");
                             _playService.LoadTrack(lastTrack);
 
                             // Восстанавливаем позицию проигрывания
@@ -249,30 +267,35 @@ namespace QAMP
                             if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
                             {
                                 _playService.Seek(position);
-                                System.Diagnostics.Debug.WriteLine($"DEBUG: Позиция установлена на {position}s");
+                                System.Diagnostics.Debug.WriteLine($"Position is set to {position}s");
+                                AppConsole.Log($"Position is set to {position}s");
                             }
                         }
                         else
                         {
-                            System.Diagnostics.Debug.WriteLine($"DEBUG: Трек не найден, инициализирую пустое состояние");
+                            System.Diagnostics.Debug.WriteLine($"Track with path {lastTrackPath} not found in playlist {playlist.Name}");
+                            AppConsole.Log($"Track with path {lastTrackPath} not found in playlist {playlist.Name}");
                             OnTrackChanged(null);
                         }
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"DEBUG: LastTrackPath пуст, инициализирую пустое состояние");
+                        System.Diagnostics.Debug.WriteLine($"No last track path found for playlist {playlist.Name}");
+                        AppConsole.Log($"No last track path found for playlist {playlist.Name}");
                         OnTrackChanged(null);
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"DEBUG: Плейлист не найден");
+                    System.Diagnostics.Debug.WriteLine($"Playlist not found");
+                    AppConsole.Log($"Playlist not found");
                     OnTrackChanged(null);
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"DEBUG: Нет последнего плейлиста");
+                System.Diagnostics.Debug.WriteLine($"No last playlist found");
+                AppConsole.Log($"No last playlist found");
                 OnTrackChanged(null);
             }
         }
@@ -334,21 +357,5 @@ namespace QAMP
         {
             WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         }
-        // ?
-#if DEBUG
-        private static void TestCppDll()
-        {
-            try
-            {
-                int version = GetCoreVersion();
-                System.Diagnostics.Debug.WriteLine($"[QAMP Native] Версия C++ ядра: {version}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[QAMP Native] Ошибка вызова DLL: {ex.Message}");
-            }
-        }
-#endif
-
     }
 }

@@ -28,7 +28,8 @@ public static class MemoryOptimizer
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"[DEBUG]: CHTO-TO POSHLO NE TAK: {ex.Message}");
+                        Debug.WriteLine($"MemoryOptimizer Error: {ex.Message}");
+                        AppConsole.Log($"MemoryOptimizer Error: {ex.Message}");
                     }
                 });
             }

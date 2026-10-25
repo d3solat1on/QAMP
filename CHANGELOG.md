@@ -1,4 +1,8 @@
 # CHANGELOG
+# (25.10.2026) Version 1.8.7.5:
+    - Volume adjustment has been changed: from 0 to 10%, the volume now changes in one-percent increments.  
+    - A console has been added for controlling the player without using a mouse (Beta). You can view the available commands by using the `help` command.  
+
 # (16.10.2026) Version 1.8.7.4:
     - The "Statistics" window has been improved. More detailed information about the music library has been added.  
 

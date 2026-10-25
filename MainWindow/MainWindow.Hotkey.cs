@@ -51,10 +51,10 @@ public partial class MainWindow
                 _playService.SeekRelative(-5);
                 break;
             case HotkeyAction.VolumeUp:
-                _playService.Volume += 0.05;
+                ChangeVolume(1); 
                 break;
             case HotkeyAction.VolumeDown:
-                _playService.Volume -= 0.05;
+                ChangeVolume(-1);
                 break;
             case HotkeyAction.NextTrack:
                 _playService.PlayNextTrack();

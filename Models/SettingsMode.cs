@@ -40,6 +40,7 @@ public class AppSettings : INotifyPropertyChanged
     public double Balance { get; set; } = 0.0;
     public double Tempo { get; set; } = 1.0;
     public double Pitch { get; set; } = 1.0;
+    public bool UseConsole { get; set; } = false;
     public int OutputDeviceId { get; set; } = -1;
     public string OutputDeviceName { get; set; } = string.Empty;
     public bool CrossfadeEnabled { get; set; } = true;
@@ -47,6 +48,7 @@ public class AppSettings : INotifyPropertyChanged
     public bool UseWASAPI { get; set; } = false;
     public string SelectedFontName { get; set; } = "GOST Type A";
     public double FontSize { get; set; } = 16.0; //test
+    public double FontSizeDataGrid { get; set; } = 18; //test
     private bool _isCompactMode = true;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;

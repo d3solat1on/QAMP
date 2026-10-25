@@ -16,7 +16,7 @@ namespace QAMP
         {
             OpenSpectrumFullScreen();
         }
-        
+
         private void OpenSpectrumFullScreen()
         {
             if (_spectrumFullWindow != null)
@@ -88,6 +88,15 @@ namespace QAMP
                 e.Handled = true;
             }
         }
-        
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+
+            if (e.Key == Key.F12 || e.Key == Key.OemTilde)
+            {
+                ToggleDebugConsole();
+                e.Handled = true;
+            }
+
+        }
     }
 }

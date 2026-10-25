@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using QAMP.Services;
 
 namespace QAMP.Dialogs;
 
@@ -17,22 +18,26 @@ public partial class ModernNotice : UserControl
     }
     public async Task ShowAsync(string message)
     {
-        System.Diagnostics.Debug.WriteLine($"[TOAST] Метод ShowAsync вызван с сообщением: \"{message}\"");
+        System.Diagnostics.Debug.WriteLine($"[TOAST] Method ShowAsync called with message: \"{message}\"");
+        AppConsole.Log($"[TOAST] Method ShowAsync called with message: \"{message}\"");
 
         // Проверяем, примонтирован ли элемент к окну
         Window parentWindow = Window.GetWindow(this);
         if (parentWindow == null)
         {
-            System.Diagnostics.Debug.WriteLine("[TOAST] КРИТИЧЕСКАЯ ОШИБКА: UserControl не находится внутри какого-либо Окна (Parent Window равен null)!");
+            System.Diagnostics.Debug.WriteLine("[TOAST] Error: parentWindow is null. The ModernNotice control is not attached to any window.");
+            AppConsole.Log("[TOAST] Error: parentWindow is null. The ModernNotice control is not attached to any window.");
             return;
         }
         else
         {
-            System.Diagnostics.Debug.WriteLine($"[TOAST] Родительское окно найдено: {parentWindow.Title}. Видимость окна: {parentWindow.Visibility}");
+            System.Diagnostics.Debug.WriteLine($"[TOAST] Parent window found: {parentWindow.Title}. Window visibility: {parentWindow.Visibility}");
+            AppConsole.Log($"[TOAST] Parent window found: {parentWindow.Title}. Window visibility: {parentWindow.Visibility}");
         }
 
         // Выводим размеры до анимации
-        System.Diagnostics.Debug.WriteLine($"[TOAST] Размеры до показа: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}, Visibility = {this.Visibility}");
+        System.Diagnostics.Debug.WriteLine($"[TOAST] Sizes before showing: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}, Visibility = {this.Visibility}");
+        AppConsole.Log($"[TOAST] Sizes before showing: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}, Visibility = {this.Visibility}");
 
         ToastMessageText.Text = message;
         this.Visibility = Visibility.Visible;
@@ -40,7 +45,8 @@ public partial class ModernNotice : UserControl
         // Выводим размеры ПОСЛЕ изменения видимости
         // Принудительно заставим WPF пересчитать разметку для теста
         this.UpdateLayout();
-        System.Diagnostics.Debug.WriteLine($"[TOAST] Размеры после UpdateLayout: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}");
+        System.Diagnostics.Debug.WriteLine($"[TOAST] Sizes after UpdateLayout: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}");
+        AppConsole.Log($"[TOAST] Sizes after UpdateLayout: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}");
 
         var duration = TimeSpan.FromMilliseconds(250);
         var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -51,7 +57,8 @@ public partial class ModernNotice : UserControl
         // Подписываемся на завершение анимации появления для проверки Opacity
         fadeIn.Completed += (s, e) =>
         {
-            System.Diagnostics.Debug.WriteLine($"[TOAST] Анимация появления завершена. Текущий Opacity элемента = {this.Opacity}");
+            System.Diagnostics.Debug.WriteLine($"[TOAST] Animation completed. Current Opacity of the element = {this.Opacity}");
+            AppConsole.Log($"[TOAST] Animation completed. Current Opacity of the element = {this.Opacity}");
         };
 
         this.BeginAnimation(OpacityProperty, fadeIn);
@@ -67,7 +74,8 @@ public partial class ModernNotice : UserControl
 
         await Task.Delay(250);
         this.Visibility = Visibility.Collapsed;
-        System.Diagnostics.Debug.WriteLine("[TOAST] Цикл показа уведомления успешно завершен.");
+        System.Diagnostics.Debug.WriteLine("[TOAST] Notification show cycle completed successfully.");
+        AppConsole.Log("[TOAST] Notification show cycle completed successfully.");
     }
     public void StartLoading(string baseMessage)
     {

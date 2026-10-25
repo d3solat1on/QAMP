@@ -33,7 +33,8 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка чтения {filePath}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error reading {filePath}: {ex.Message}");
+                AppConsole.Log($"Error reading {filePath}: {ex.Message}");
                 return new Track
                 {
                     Name = Path.GetFileNameWithoutExtension(filePath),
@@ -83,7 +84,8 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка чтения тегов: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error reading tags: {ex.Message}");
+                AppConsole.Log($"Error reading tags: {ex.Message}");
                 return null;
             }
         }

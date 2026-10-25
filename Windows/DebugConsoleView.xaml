@@ -1,0 +1,33 @@
+<UserControl x:Class="QAMP.Windows.DebugConsoleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource BackgroundBrush}"
+             Height="200">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0"
+                 x:Name="ConsoleOutputBox"
+                 Background="Transparent"
+                 Foreground="{DynamicResource ForegroundBrush}"
+                 FontFamily="Consolas"
+                 FontSize="12"
+                 IsReadOnly="True"
+                 AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto"
+                 BorderThickness="0"/>
+        <TextBox Grid.Row="1"
+                 x:Name="ConsoleInputBox"
+                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                 Foreground="{DynamicResource TextBrush}"
+                 FontFamily="Consolas"
+                 FontSize="14"
+                 VerticalScrollBarVisibility="Auto"
+                 BorderThickness="0"
+                 Height="30"
+                 Visibility="Visible"
+                 KeyDown="ConsoleInputBox_KeyDown"/>
+    </Grid>
+</UserControl>

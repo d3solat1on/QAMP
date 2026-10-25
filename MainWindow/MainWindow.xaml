@@ -190,6 +190,9 @@
                 </Grid>
                 <DockPanel Grid.Row="1"
                            LastChildFill="True">
+                        <ContentControl x:Name="DebugConsoleContainer"
+                                        DockPanel.Dock="Bottom"
+                                        Visibility="Collapsed"/>
                         <Border DockPanel.Dock="Bottom"
                                 ClipToBounds="False"
                                 Height="100"
@@ -1247,7 +1250,7 @@
                                                                         <Setter Property="FontWeight"
                                                                                 Value="Bold"/>
                                                                         <Setter Property="FontSize"
-                                                                                Value="18"/>
+                                                                                Value="{DynamicResource FontSizeDataGrid}"/>
                                                                         <Setter Property="Height"
                                                                                 Value="40"/>
                                                                         <Setter Property="BorderBrush"
@@ -1272,7 +1275,7 @@
                                                                         <Setter Property="Padding"
                                                                                 Value="10,5,0,5"/>
                                                                         <Setter Property="FontSize"
-                                                                                Value="18"/>
+                                                                                Value="{DynamicResource FontSizeDataGrid}"/>
                                                                         <Style.Triggers>
                                                                                 <Trigger Property="IsSelected"
                                                                                          Value="True">

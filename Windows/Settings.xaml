@@ -447,6 +447,23 @@
                             </StackPanel>
                         </GroupBox>
 
+
+                        <GroupBox Header="{DynamicResource LngConsole}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{DynamicResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="EnabledConsole"
+                                             Content="{DynamicResource LngVisualizerEnabled}"
+                                             Margin="0,0,0,10"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="CheckUseConsole"/>
+                                <RadioButton x:Name="DisabledConsole"
+                                             Content="{DynamicResource LngVisualizerDisabled}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="CheckUseConsole"/>
+                            </StackPanel>
+                        </GroupBox>
+
                         <GroupBox Header="{DynamicResource LngSystem}"
                                   Margin="0,0,0,0"
                                   Foreground="{DynamicResource ForegroundBrush}">

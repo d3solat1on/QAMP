@@ -27,6 +27,7 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"LanguageManager: cannot load {fileName}: {ex.Message}");
+                AppConsole.Log($"LanguageManager: cannot load {fileName}: {ex.Message}");
                 return;
             }
 

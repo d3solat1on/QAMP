@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
+using QAMP.Services;
 
 namespace QAMP.Models
 {
@@ -284,15 +285,12 @@ namespace QAMP.Models
             }
         }
         
-        [JsonIgnore]
         private byte[]? _coverImage;
 
-        [JsonIgnore]
         public byte[]? CoverImage
         {
             get
             {
-                // Ленивая загрузка при первом обращении
                 if (_coverImage == null && !string.IsNullOrEmpty(Path))
                 {
                     _coverImage = LoadCoverFromFile();
@@ -313,7 +311,8 @@ namespace QAMP.Models
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки обложки: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading cover: {ex.Message}");
+                AppConsole.Log($"Error loading cover: {ex.Message}");
             }
             return null;
         }
@@ -334,7 +333,6 @@ namespace QAMP.Models
         protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        // ✅ Публичный метод для уведомления об изменении свойства (используется из других классов)
         public void NotifyPropertyChanged(string name) => OnPropertyChanged(name);
     }
 }

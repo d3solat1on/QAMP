@@ -30,7 +30,7 @@ namespace QAMP.Services
 
         // BASS параметры
         private readonly BASS_CHANNELINFO _channelInfo = new();
-        private int _sampleRate = 44100;
+        // private int _sampleRate = 44100;
         private readonly SYNCPROC? _endSyncProc;
         private readonly SemaphoreSlim _playSemaphore = new(1, 1);
         private int _endSyncHandle = 0;
@@ -211,7 +211,8 @@ namespace QAMP.Services
                     if (MusicLibrary.Instance.CurrentPlaylist != null)
                     {
                         _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
-                        System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь... {_actualPlayingQueue.Count}");
+                        System.Diagnostics.Debug.WriteLine($"[QUEUE] Queue size: {_actualPlayingQueue.Count}");
+                        AppConsole.Log($"[QUEUE] Queue size: {_actualPlayingQueue.Count}");
                     }
                 }
 
@@ -235,7 +236,6 @@ namespace QAMP.Services
                     }
 
                     Bass.BASS_ChannelGetInfo(stream, _channelInfo);
-                    _sampleRate = _channelInfo.freq;
 
                     float linearVolume = (float)(_volume * _masterGain);
                     if (!_usesWasapiCurrentStream)
@@ -289,8 +289,9 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
-                System.Diagnostics.Debug.WriteLine($"Ошибка в PlayTrack: {ex.Message}");
+                _ = NotificationWindow.Show($"Error: {ex.Message}", Application.Current.MainWindow);
+                System.Diagnostics.Debug.WriteLine($"Error in PlayTrack: {ex.Message}");
+                AppConsole.Log($"Error in PlayTrack: {ex.Message}");
                 App.LogException(ex, "PlayTrack");
                 StopInternal();
             }
@@ -354,7 +355,6 @@ namespace QAMP.Services
                 if (stream == 0) return;
 
                 Bass.BASS_ChannelGetInfo(stream, _channelInfo);
-                _sampleRate = _channelInfo.freq;
 
                 float linearVolume = (float)(_volume * _masterGain);
                 if (!_usesWasapiCurrentStream)
@@ -412,6 +412,8 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error occurred: {ex.Message}");
+                AppConsole.Log($"Error occurred: {ex.Message}");
+                App.LogException(ex, "ResumeAfterTagEdit");
             }
             finally
             {
@@ -778,7 +780,6 @@ namespace QAMP.Services
                 _currentStream = stream;
 
                 Bass.BASS_ChannelGetInfo(_currentStream, _channelInfo);
-                _sampleRate = _channelInfo.freq;
 
                 float linearVolume = (float)(_volume * _masterGain);
                 if (!_usesWasapiCurrentStream)
@@ -803,20 +804,23 @@ namespace QAMP.Services
                 if ((_actualPlayingQueue == null || _actualPlayingQueue.Count == 0) && MusicLibrary.Instance.PlaybackQueue.Count > 0)
                 {
                     _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
-                    System.Diagnostics.Debug.WriteLine($"[QUEUE] Восстановлена очередь из PlaybackQueue: {_actualPlayingQueue.Count} треков");
+                    System.Diagnostics.Debug.WriteLine($"[QUEUE] [QUEUE] Queue restored from PlaybackQueue: {_actualPlayingQueue.Count} tracks");
+                    AppConsole.Log($"[QUEUE] Queue restored from PlaybackQueue: {_actualPlayingQueue.Count} tracks");
                 }
                 else if (_actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
                 {
                     _actualPlayingQueue = [track];
-                    System.Diagnostics.Debug.WriteLine("[QUEUE] Установлен текущий трек как единственная запись очереди");
+                    System.Diagnostics.Debug.WriteLine("[QUEUE] [QUEUE] Current track set as the only entry in the queue");
+                    AppConsole.Log("[QUEUE] Current track set as the only entry in the queue");
                 }
 
                 TrackChanged?.Invoke(track);
             }
             catch (Exception ex)
             {
-                _ = NotificationWindow.Show($"Ошибка: {ex.Message}", Application.Current.MainWindow);
-                System.Diagnostics.Debug.WriteLine($"Ошибка в LoadTrack: {ex.Message}");
+                _ = NotificationWindow.Show($"Error: {ex.Message}", Application.Current.MainWindow);
+                System.Diagnostics.Debug.WriteLine($"Error in LoadTrack: {ex.Message}");
+                AppConsole.Log($"Error in LoadTrack: {ex.Message}");
                 Stop();
             }
         }
@@ -913,12 +917,14 @@ namespace QAMP.Services
                         if (totalDuration > 0 && (totalDuration - newPosition) < 0.3)
                         {
                             System.Diagnostics.Debug.WriteLine($"[PositionTimer] Track ending detected! Remaining: {totalDuration - newPosition:F2}s");
+                            AppConsole.Log($"[PositionTimer] Track ending detected! Remaining: {totalDuration - newPosition:F2}s");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"PositionTimer error: {ex.Message}");
+                    AppConsole.Log($"PositionTimer error: {ex.Message}");
                 }
             }
         }
@@ -1088,6 +1094,8 @@ namespace QAMP.Services
             {
                 if (stream != 0) Bass.BASS_StreamFree(stream);
                 System.Diagnostics.Debug.WriteLine($"Crossfade failed: {ex.Message}");
+                AppConsole.Log($"Crossfade failed: {ex.Message}");
+                App.LogException(ex, "TryStartCrossfade");
             }
         }
 
@@ -1237,6 +1245,7 @@ namespace QAMP.Services
             if (CurrentTrack == null)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: CurrentTrack == null");
+                AppConsole.Log("PlayNextTrack: CurrentTrack == null");
                 return;
             }
 
@@ -1245,6 +1254,7 @@ namespace QAMP.Services
             if (queue == null || queue.Count == 0)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: Queue is empty");
+                AppConsole.Log("PlayNextTrack: Queue is empty");
                 return;
             }
 
@@ -1254,6 +1264,7 @@ namespace QAMP.Services
             {
                 nextTrack = CurrentTrack;
                 System.Diagnostics.Debug.WriteLine("RepeatOne: playing same track");
+                AppConsole.Log("RepeatOne: playing same track");
             }
             else if (IsShuffleEnabled)
             {
@@ -1285,11 +1296,13 @@ namespace QAMP.Services
             if (nextTrack != null)
             {
                 System.Diagnostics.Debug.WriteLine($"Playing next: {nextTrack.Name}");
+                AppConsole.Log($"Playing next: {nextTrack.Name}");
                 _ = PlayTrack(nextTrack, false);
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("No next track available (End of playlist)");
+                AppConsole.Log("No next track available (End of playlist)");
             }
 
             MainWindow.UpdateOSD();
@@ -1346,7 +1359,8 @@ namespace QAMP.Services
                 MusicLibrary.Instance.PlaybackQueue.Add(track);
             }
 
-            System.Diagnostics.Debug.WriteLine($"[QUEUE] Очередь дополнена на {newTracks.Count} треков. Всего: {_actualPlayingQueue.Count}");
+            System.Diagnostics.Debug.WriteLine($"[QUEUE] Queue updated with {newTracks.Count} tracks. Total: {_actualPlayingQueue.Count}");
+            AppConsole.Log($"[QUEUE] Queue updated with {newTracks.Count} tracks. Total: {_actualPlayingQueue.Count}");
         }
     }
 

@@ -26,7 +26,7 @@ namespace QAMP.Windows
         private Visualization.SpectrumDisplayType originalSpectrumType;
         private Visualization.SpectrumGradientType originalSpectrumGradientType;
         private bool originalIsAutoLaunchEnabled;
-
+        private bool originalUseConsole;
         public Settings()
         {
             InitializeComponent();
@@ -40,23 +40,27 @@ namespace QAMP.Windows
         private void InitializeCustomThemes()
         {
             var appSettings = SettingsManager.Instance.Config;
-            Debug.WriteLine("[QAMP Theme Debug] --- Инициализация пользовательских тем ---");
+            Debug.WriteLine("[QAMP Theme Debug] Initializing custom themes...");
+            AppConsole.Log("[QAMP Theme Debug] Initializing custom themes...");
             DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
             LightThemeRadio.Checked -= StandardThemeRadio_Checked;
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
 
             try
             {
-                Debug.WriteLine($"[QAMP Theme Debug] Целевой путь к папке тем: {ThemesFolderPath}");
+                Debug.WriteLine($"[QAMP Theme Debug] Themes folder path: {ThemesFolderPath}");
+                AppConsole.Log($"[QAMP Theme Debug] Themes folder path: {ThemesFolderPath}");
 
                 if (!Directory.Exists(ThemesFolderPath))
                 {
-                    Debug.WriteLine("[QAMP Theme Debug] Папка Themes не найдена. Создаю директорию...");
+                    Debug.WriteLine("[QAMP Theme Debug] Themes folder not found. Creating directory...");
+                    AppConsole.Log("[QAMP Theme Debug] Themes folder not found. Creating directory...");
                     Directory.CreateDirectory(ThemesFolderPath);
                 }
                 else
                 {
-                    Debug.WriteLine("[QAMP Theme Debug] Папка Themes успешно обнаружена.");
+                    Debug.WriteLine("[QAMP Theme Debug] Themes folder successfully found.");
+                    AppConsole.Log("[QAMP Theme Debug] Themes folder successfully found.");
                 }
 
                 RefreshThemesList();
@@ -67,7 +71,8 @@ namespace QAMP.Windows
                 if (appSettings.ColorScheme != null)
                 {
                     string currentTheme = appSettings.ColorScheme;
-                    Debug.WriteLine($"[QAMP Theme Debug] Текущая тема из settings.json: {currentTheme}");
+                    Debug.WriteLine($"[QAMP Theme Debug] Current theme from settings.json: {currentTheme}");
+                    AppConsole.Log($"[QAMP Theme Debug] Current theme from settings.json: {currentTheme}");
 
                     if (currentTheme == "Dark")
                     {
@@ -88,12 +93,12 @@ namespace QAMP.Windows
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[QAMP Theme Debug] КРИТИЧЕСКАЯ ОШИБКА при инициализации: {ex.Message}");
+                Debug.WriteLine($"[QAMP Theme Debug] CRITICAL ERROR during initialization: {ex.Message}");
+                AppConsole.Log($"[QAMP Theme Debug] CRITICAL ERROR during initialization: {ex.Message}");
             }
             DarkThemeRadio.Checked += StandardThemeRadio_Checked;
             LightThemeRadio.Checked += StandardThemeRadio_Checked;
             CustomThemesComboBox.SelectionChanged += CustomThemesComboBox_SelectionChanged;
-            Debug.WriteLine("[QAMP Theme Debug] ---------------------------------------------");
         }
         private void InitFontSettingsUI()
         {
@@ -164,7 +169,8 @@ namespace QAMP.Windows
 
         private void RefreshThemesList()
         {
-            Debug.WriteLine("[QAMP Theme Debug] --- Обновление списка тем в ComboBox ---");
+            Debug.WriteLine("[QAMP Theme Debug] Updating themes list in ComboBox");
+            AppConsole.Log("[QAMP Theme Debug] Updating themes list in ComboBox");
 
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
             CustomThemesComboBox.Items.Clear();
@@ -342,7 +348,7 @@ namespace QAMP.Windows
             originalSpectrumType = config.SpectrumType;
             originalSpectrumGradientType = config.GradientType;
             originalIsAutoLaunchEnabled = config.IsAutoLaunchEnabled;
-
+            originalUseConsole = config.UseConsole;
             VisualizerEnabled.IsChecked = config.IsVisualizerEnabled;
             VisualizerDisabled.IsChecked = !config.IsVisualizerEnabled;
             SpectrumGradientStartColorTextBox.Text = config.SpectrumGradientStartColor;
@@ -405,6 +411,9 @@ namespace QAMP.Windows
             GradientDisabled.IsChecked = !config.UseSpectrumGradient;
             SpectrumBarsRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Bars;
             SpectrumLineRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Line;
+            EnabledConsole.IsChecked = config.UseConsole;
+            DisabledConsole.IsChecked = !config.UseConsole;
+
 
             InitFontSettingsUI();
 
@@ -415,6 +424,13 @@ namespace QAMP.Windows
             isInitializing = false;
         }
 
+        private void CheckUseConsole(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+            var config = SettingsManager.Instance.Config;
+            config.UseConsole = EnabledConsole.IsChecked ?? false;
+            SettingsManager.Instance.Save();
+        }
         private void AdaptiveGradients_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
@@ -543,7 +559,8 @@ namespace QAMP.Windows
                 if (config.IsCompactMode != isCompact)
                 {
                     config.IsCompactMode = isCompact;
-                    Debug.WriteLine($"Режим отображения изменен: Компактный = {isCompact}");
+                    Debug.WriteLine($"Mode changed: Compact = {isCompact}");
+                    AppConsole.Log($"Mode changed: Compact = {isCompact}");
                 }
             }
         }
@@ -651,6 +668,7 @@ namespace QAMP.Windows
             config.SpectrumType = originalSpectrumType;
             config.GradientType = originalSpectrumGradientType;
             config.IsAutoLaunchEnabled = originalIsAutoLaunchEnabled;
+            config.UseConsole = originalUseConsole;
 
             CloseToTrayRadio.IsChecked = originalCloseToTray;
             CloseAppRadio.IsChecked = !originalCloseToTray;

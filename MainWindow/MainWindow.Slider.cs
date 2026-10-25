@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using QAMP.Models;
 using QAMP.Services;
 
 namespace QAMP;
@@ -104,7 +105,8 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"ERROR in VolumeSlider_ValueChanged: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error in VolumeSlider_ValueChanged: {ex.Message}");
+            AppConsole.Log($"Error in VolumeSlider_ValueChanged: {ex.Message}");
         }
     }
 
@@ -119,6 +121,20 @@ public partial class MainWindow
         {
             VolumeSlider.Value = _lastVolume;
         }
+    }
+    private void ChangeVolume(double sign)
+    {
+        double step;
+        if (_playService.Volume >= 0 && _playService.Volume <= 0.10)
+        {
+            step = (double)0.01;
+        }
+        else
+        {
+            step = (double)0.05;
+        }
+
+        _playService.Volume += step * sign;
     }
     private async void CheckDurationAsync()
     {

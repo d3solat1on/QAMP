@@ -121,6 +121,7 @@ namespace QAMP
             catch (Exception ex)
             {
                 Debug.WriteLine($"Tray init error: {ex.Message}");
+                AppConsole.Log($"Tray init error: {ex.Message}");
                 LogException(ex, "TrayInit Error");
             }
         }
@@ -145,18 +146,23 @@ namespace QAMP
 
                 BassNet.Registration(email, key);
                 Debug.WriteLine($"BASS registered with email: {email}, key: {key}");
+                AppConsole.Log($"BASS registered with email: {email}, key: {key}");
 
                 var deviceId = SettingsManager.Instance.Config.OutputDeviceId;
                 if (deviceId >= 0) Bass.BASS_SetDevice(deviceId);
+                Debug.WriteLine($"BASS output device set to ID: {deviceId}");
+                AppConsole.Log($"BASS output device set to ID: {deviceId}");
 
                 if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, nint.Zero))
                 {
                     Debug.WriteLine($"BASS_Init failed: {Bass.BASS_ErrorGetCode()}");
+                    AppConsole.Log($"BASS_Init failed: {Bass.BASS_ErrorGetCode()}");
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"BASS init Error: {ex.Message}");
+                AppConsole.Log($"BASS init Error: {ex.Message}");
                 LogException(ex, "BASS init Error");
             }
         }
@@ -174,6 +180,7 @@ namespace QAMP
                 {
                     selectedFont = fontService.DefaultFont;
                     Debug.WriteLine($"Saved font '{config.SelectedFontName}' was not found. Using the default font.");
+                    AppConsole.Log($"Saved font '{config.SelectedFontName}' was not found. Using the default font.");
                     config.SelectedFontName = selectedFont.DisplayName;
                     SettingsManager.Instance.Save();
                 }
@@ -181,13 +188,16 @@ namespace QAMP
                 var fontSize = config.FontSize;
                 Current.Resources["FontSize"] = fontSize;
                 Debug.WriteLine($"Font size from config: {config.FontSize}");
+                AppConsole.Log($"Font size from config: {config.FontSize}");
                 Debug.WriteLine($"Font size set to: {fontSize}");
+                AppConsole.Log($"Font size set to: {fontSize}");
                 var savedRound = SettingsManager.Instance.Config.CurrentRound;
                 Current.Resources["AppCornerRadius"] = new CornerRadius(savedRound);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Interface init Error: {ex.Message}");
+                AppConsole.Log($"Interface init Error: {ex.Message}");
                 LogException(ex, "Interface init Error");
             }
         }

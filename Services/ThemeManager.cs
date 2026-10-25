@@ -14,7 +14,8 @@ namespace QAMP.Services
             if (!TryApplyThemeResources(config.ColorScheme))
             {
                 System.Diagnostics.Debug.WriteLine(
-                    $"ThemeManager: Не удалось применить тему из настроек: {config.ColorScheme}");
+                    $"ThemeManager: Failed to apply theme from settings: {config.ColorScheme}");
+                AppConsole.Log($"ThemeManager: Failed to apply theme from settings: {config.ColorScheme}");
                 return;
             }
 
@@ -36,7 +37,8 @@ namespace QAMP.Services
 
             SettingsManager.Instance.Save();
 
-            System.Diagnostics.Debug.WriteLine($"ThemeManager: Тема сохранена в конфиг: {themeName}");
+            System.Diagnostics.Debug.WriteLine($"ThemeManager: Theme saved in config: {themeName}");
+            AppConsole.Log($"ThemeManager: Theme saved in config: {themeName}");
         }
 
         public static bool ApplyTheme(string themeName)
@@ -51,7 +53,8 @@ namespace QAMP.Services
             SettingsManager.Instance.Save();
             UpdateAccentColor(config.AccentColor);
             config.NotifyThemeResourcesChanged();
-            System.Diagnostics.Debug.WriteLine($"ThemeManager: Тема применена: {themeName}");
+            System.Diagnostics.Debug.WriteLine($"ThemeManager: Theme applied: {themeName}");
+            AppConsole.Log($"ThemeManager: Theme applied: {themeName}");
             return true;
         }
 
@@ -64,7 +67,8 @@ namespace QAMP.Services
 
             if (!File.Exists(themePath))
             {
-                System.Diagnostics.Debug.WriteLine($"ThemeManager: Файл темы не найден: {themePath}");
+                System.Diagnostics.Debug.WriteLine($"ThemeManager: Theme file not found: {themePath}");
+                AppConsole.Log($"ThemeManager: Theme file not found: {themePath}");
                 return false;
             }
 
@@ -90,7 +94,8 @@ namespace QAMP.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ThemeManager: Ошибка загрузки темы '{themeName}': {ex}");
+                System.Diagnostics.Debug.WriteLine($"ThemeManager: Error loading theme '{themeName}': {ex}");
+                AppConsole.Log($"ThemeManager: Error loading theme '{themeName}': {ex}");
                 return false;
             }
         }

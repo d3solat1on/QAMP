@@ -14,11 +14,6 @@ namespace QAMP
                 Owner = this
             };
             settingsWindow.ShowDialog();
-#if DEBUG
-            string mem = MemoryProfiler.GetMemoryReport();
-
-            System.Diagnostics.Debug.WriteLine(mem);
-#endif
         }
         private void EqualizerButton_Click(object sender, RoutedEventArgs e)
         {

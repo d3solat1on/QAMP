@@ -236,21 +236,16 @@ namespace QAMP
             }
             return null;
         }
-
-
-
-        
-
-        
-
         // ?
         private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (PlaylistsListBox.SelectedItem is Playlist selected)
             {
                 MusicLibrary.Instance.CurrentPlaylist = selected;
-                System.Diagnostics.Debug.WriteLine($"=== ПРОСМОТР ПЛЕЙЛИСТА: {selected.Name} ===");
-                System.Diagnostics.Debug.WriteLine($"SortType из БД: {selected.SortType}");
+                System.Diagnostics.Debug.WriteLine($"View playlist: {selected.Name} (Tracks: {selected.Tracks.Count})");
+                AppConsole.Log($"View playlist: {selected.Name} (Tracks: {selected.Tracks.Count})");
+                System.Diagnostics.Debug.WriteLine($"SortType from DB: {selected.SortType}");
+                AppConsole.Log($"SortType from DB: {selected.SortType}");
                 ApplySort(selected.SortType);
 
                 if (selected.IsSystemPlaylist || selected.CoverImage == null)
@@ -273,10 +268,5 @@ namespace QAMP
                 }
             }
         }
-
-        
-
-
-
     }
 }

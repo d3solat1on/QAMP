@@ -1,0 +1,497 @@
+using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
+using System.Windows;
+using QAMP.Models;
+using QAMP.ViewModels;
+
+namespace QAMP.Services;
+
+public class AppConsole
+{
+    public static event Action<string>? LogAdded;
+    public static event Action? OnClearRequested;
+
+    /// <summary>
+    /// Логирование сообщений в консоль приложения
+    /// </summary>
+    /// <param name="message">Сообщение для логирования</param>
+    public static void Log(string message)
+    {
+        string timestamp = DateTime.Now.ToString("HH:mm:ss");
+        string formattedMessage = $"[{timestamp}] {message}";
+
+
+        LogAdded?.Invoke(formattedMessage);
+    }
+
+    public static async Task InputCommand(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        string[] tokens = input.Trim().Split([' '], 2, StringSplitOptions.RemoveEmptyEntries);
+        string command = tokens[0].ToLowerInvariant();
+        string args = tokens.Length > 1 ? tokens[1].Trim() : string.Empty;
+        string value = args.Trim().Trim('"');
+
+        var player = PlayerService.Instance;
+
+        switch (command)
+        {
+            case "help":
+                Log("""
+        Commands: 
+         help
+         status
+         play [track]
+         pause
+         stop
+         next
+         prev
+         seek <time|+/-seconds>
+         volume <0-100>
+         shuffle <on|off>
+         repeat <off|all|one>
+         queue
+         search <text>
+         playlists
+         playlist <name>
+         devices
+         device <id>
+         readconfig
+         changefontsize
+         changefontsizedatagrid
+         clear
+        """);
+                break;
+
+
+            case "volume":
+                if (int.TryParse(args, out int volumePercent) && volumePercent >= 0 && volumePercent <= 100)
+                {
+                    player.Volume = volumePercent / 100.0;
+                    Log($"Volume: {volumePercent}%");
+                }
+                else
+                {
+                    Log("Usage: volume <0-100> (example: volume 50)");
+                }
+                break;
+
+            case "play":
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    player.Resume();
+                    Log("Playback started");
+                }
+                else
+                {
+                    var match = (await FindTracksAsync(value)).FirstOrDefault();
+                    if (match.Track == null)
+                    {
+                        Log($"No track found matching: {value}");
+                        break;
+                    }
+
+                    MusicLibrary.Instance.PlayTrackFromPlaylist(match.Track, match.Playlist);
+                    Log($"Playing: {match.Track.Name} - {match.Track.Executor}");
+                }
+                break;
+
+            case "pause":
+                await player.PauseAsync();
+                Log("Playback paused");
+                break;
+
+            case "stop":
+                player.Stop();
+                Log("Playback stopped");
+                break;
+
+            case "next":
+                player.PlayNextTrack();
+                Log("Skipped to next track");
+                break;
+
+            case "prev":
+            case "previous":
+                player.PlayPreviousTrack();
+                Log("Skipped to previous track");
+                break;
+
+            case "status":
+                if (player.CurrentTrack == null)
+                {
+                    Log("No track is loaded.");
+                    break;
+                }
+
+                Log($"Track: {player.CurrentTrack.Name} - {player.CurrentTrack.Executor}");
+                Log($"Playback: {(player.IsPlaying ? "playing" : "paused")} | Position: {FormatTime(player.Position)} / {FormatTime(player.Duration)}");
+                Log($"Volume: {player.Volume * 100:0}% | Shuffle: {(player.IsShuffleEnabled ? "on" : "off")} | Repeat: {FormatRepeat(player.RepeatMode)}");
+                break;
+
+            case "seek":
+                if (TryParseSeek(value, out double seekSeconds))
+                {
+                    if (value.StartsWith('+') || value.StartsWith('-'))
+                    {
+                        player.SeekRelative(seekSeconds);
+                    }
+                    else
+                    {
+                        player.Seek(seekSeconds);
+                    }
+                    Log($"Position: {FormatTime(player.Position)}");
+                }
+                else
+                {
+                    Log("Usage: seek <seconds|mm:ss|+/-seconds> (example: seek 1:25 or seek +10)");
+                }
+                break;
+
+            case "shuffle":
+                if (TryParseToggle(value, out bool shuffleEnabled))
+                {
+                    player.IsShuffleEnabled = shuffleEnabled;
+                    if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+                    {
+                        mainWindow.RebuildPlaybackQueue();
+                    }
+                    Log($"Shuffle: {(shuffleEnabled ? "on" : "off")}");
+                }
+                else
+                {
+                    Log("Usage: shuffle <on|off>");
+                }
+                break;
+
+            case "repeat":
+                switch (value.ToLowerInvariant())
+                {
+                    case "off":
+                    case "none":
+                        player.RepeatMode = RepeatMode.NoRepeat;
+                        break;
+                    case "all":
+                        player.RepeatMode = RepeatMode.RepeatAll;
+                        break;
+                    case "one":
+                        player.RepeatMode = RepeatMode.RepeatOne;
+                        break;
+                    default:
+                        Log("Usage: repeat <off|all|one>");
+                        break;
+                }
+                if (value.Equals("off", StringComparison.OrdinalIgnoreCase)
+                    || value.Equals("none", StringComparison.OrdinalIgnoreCase)
+                    || value.Equals("all", StringComparison.OrdinalIgnoreCase)
+                    || value.Equals("one", StringComparison.OrdinalIgnoreCase))
+                {
+                    Log($"Repeat: {FormatRepeat(player.RepeatMode)}");
+                }
+                break;
+
+            case "queue":
+                LogQueue(player);
+                break;
+
+            case "search":
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Log("Usage: search <text>");
+                    break;
+                }
+
+                var matches = await FindTracksAsync(value);
+                if (matches.Count == 0)
+                {
+                    Log($"No tracks found matching: {value}");
+                    break;
+                }
+
+                Log($"Found {matches.Count} track(s):");
+                foreach (var match in matches.Take(20))
+                {
+                    Log($"{match.Track.Name} - {match.Track.Executor} [{match.Playlist.Name}]");
+                }
+                if (matches.Count > 20) Log($"...and {matches.Count - 20} more.");
+                break;
+
+            case "playlists":
+                await EnsurePlaylistsLoadedAsync();
+                if (MusicLibrary.Instance.Playlists.Count == 0)
+                {
+                    Log("No playlists found.");
+                    break;
+                }
+                foreach (var playlist in MusicLibrary.Instance.Playlists)
+                {
+                    Log($"[{playlist.Id}] {playlist.Name}");
+                }
+                break;
+
+            case "playlist":
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Log("Usage: playlist <name>");
+                    break;
+                }
+
+                await EnsurePlaylistsLoadedAsync();
+                var matchingPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(
+                    playlist => string.Equals(playlist.Name, value, StringComparison.OrdinalIgnoreCase))
+                    ?? MusicLibrary.Instance.Playlists.FirstOrDefault(
+                        playlist => playlist.Name?.Contains(value, StringComparison.OrdinalIgnoreCase) == true);
+                if (matchingPlaylist == null)
+                {
+                    Log($"Playlist not found: {value}");
+                    break;
+                }
+
+                await MusicLibrary.Instance.LoadPlaylistTracksAsync(matchingPlaylist);
+                if (matchingPlaylist.Tracks.Count == 0)
+                {
+                    Log($"Playlist is empty: {matchingPlaylist.Name}");
+                    break;
+                }
+
+                MusicLibrary.Instance.PlayTrackFromPlaylist(matchingPlaylist.Tracks[0], matchingPlaylist);
+                Log($"Playing playlist: {matchingPlaylist.Name} ({matchingPlaylist.Tracks.Count} tracks)");
+                break;
+
+            case "clear":
+                OnClearRequested?.Invoke();
+                break;
+
+            case "devices":
+            case "getoutputdevices":
+                var devices = PlayerService.GetOutputDevices();
+                if (devices.Count == 0)
+                {
+                    Log("No audio devices found.");
+                    break;
+                }
+
+                Log("Available audio devices:");
+                foreach (var device in devices)
+                {
+                    Log($"[{device.Id}] {device.Name}");
+                }
+                break;
+
+            case "device":
+            case "setoutputdevice":
+                if (!int.TryParse(value, out int deviceId))
+                {
+                    Log("Usage: device <id> (use 'devices' to list available devices)");
+                    break;
+                }
+
+                var allDevices = PlayerService.GetOutputDevices();
+                var selectedDevice = allDevices.FirstOrDefault(device => device.Id == deviceId);
+                if (selectedDevice == null)
+                {
+                    Log($"Audio device with ID {deviceId} does not exist. Use 'devices' to list available devices.");
+                    break;
+                }
+
+                player.SetOutputDevice(deviceId);
+                Log($"Audio output successfully changed to: {selectedDevice.Name}");
+                break;
+            case "readconfig":
+                _ = ReadConfigAsync();
+                break;
+            case "changefontsize":
+                if (double.TryParse(args, out double fontSize))
+                {
+                    ChangeFontSize(fontSize);
+                }
+                break;
+            case "changefontsizedatagrid":
+                if (double.TryParse(args, out double fontsizedatagrid))
+                {
+                    ChangeFontSizeDataGrid(fontsizedatagrid);
+                }
+                break;
+            default:
+                Log($"Unknown command: {tokens[0]}. Type 'help' for available commands.");
+                break;
+        }
+    }
+
+    public static void ChangeFontSizeDataGrid(double size)
+    {
+        var config = SettingsManager.Instance.Config;
+        config.FontSizeDataGrid = size;
+        SettingsManager.Instance.Save();
+        Application.Current.Resources["FontSizeDataGrid"] = size;
+        Log($"New FontSizeDataGrid = {size}");
+    }
+    public static void ChangeFontSize(double size)
+    {
+        var config = SettingsManager.Instance.Config;
+        Application.Current.Resources["FontSize"] = size;
+        config.FontSize = size;
+        SettingsManager.Instance.Save();
+        Log($"New FontSize = {size}");
+    }
+
+    public static async Task ReadConfigAsync()
+    {
+        string path = AppDataManager.SettingsPath;
+
+
+        if (!System.IO.File.Exists(path))
+        {
+            Log("Path is empty.");
+            return;
+        }
+
+        using System.IO.FileStream openStream = System.IO.File.OpenRead(path);
+        AppSettings? config = await JsonSerializer.DeserializeAsync<AppSettings>(openStream);
+
+        if (config == null)
+        {
+            Log("Config is null.");
+            return;
+        }
+
+
+        PropertyInfo[] properties = typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (PropertyInfo property in properties)
+        {
+            string name = property.Name;
+
+            object? value = property.GetValue(config);
+
+            if (value is System.Collections.IEnumerable enumerable && value is not string)
+            {
+                var items = new System.Collections.Generic.List<string>();
+                foreach (var item in enumerable)
+                {
+                    items.Add(item?.ToString() ?? "null");
+                }
+                Log($"{name}: [{string.Join(", ", items)}]");
+            }
+            else
+            {
+                Log($"{name}: {value ?? "null"}");
+            }
+        }
+    }
+
+    private static async Task EnsurePlaylistsLoadedAsync()
+    {
+        if (MusicLibrary.Instance.Playlists.Count == 0)
+        {
+            await MusicLibrary.Instance.RefreshPlaylistsAsync();
+        }
+    }
+
+    private static async Task<List<(Playlist Playlist, Track Track)>> FindTracksAsync(string query)
+    {
+        await EnsurePlaylistsLoadedAsync();
+
+        var matches = new List<(Playlist Playlist, Track Track)>();
+        var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var playlist in MusicLibrary.Instance.Playlists)
+        {
+            await MusicLibrary.Instance.LoadPlaylistTracksAsync(playlist);
+            foreach (var track in playlist.Tracks)
+            {
+                if (seenPaths.Add(track.Path)
+                    && (track.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                        || track.Executor.Contains(query, StringComparison.OrdinalIgnoreCase)
+                        || track.Album.Contains(query, StringComparison.OrdinalIgnoreCase)))
+                {
+                    matches.Add((playlist, track));
+                }
+            }
+        }
+
+        return matches;
+    }
+
+    private static void LogQueue(PlayerService player)
+    {
+        var queue = player.IsShuffleEnabled ? player.ShuffledQueue : player._actualPlayingQueue;
+        if (queue.Count == 0)
+        {
+            Log("The playback queue is empty.");
+            return;
+        }
+
+        int currentIndex = player.CurrentTrack == null
+            ? -1
+            : queue.FindIndex(track => track.Path == player.CurrentTrack.Path);
+        Log($"Queue ({queue.Count} tracks):");
+        for (int index = 0; index < queue.Count; index++)
+        {
+            string marker = index == currentIndex ? ">" : " ";
+            Log($"{marker} {index + 1}. {queue[index].Name} - {queue[index].Executor}");
+        }
+    }
+
+    private static bool TryParseSeek(string value, out double seconds)
+    {
+        seconds = 0;
+        bool relative = value.StartsWith('+') || value.StartsWith('-');
+        string numericValue = relative ? value[1..] : value;
+        if (numericValue.Contains(':'))
+        {
+            string[] parts = numericValue.Split(':');
+            if (parts.Length != 2
+                || !double.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out double minutes)
+                || !double.TryParse(parts[1], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out double remainingSeconds)
+                || remainingSeconds >= 60)
+            {
+                return false;
+            }
+
+            seconds = (minutes * 60) + remainingSeconds;
+            if (value.StartsWith('-')) seconds = -seconds;
+            return true;
+        }
+
+        if (!double.TryParse(value, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out seconds))
+        {
+            return false;
+        }
+
+        return !relative || seconds != 0 || value is "+0" or "-0";
+    }
+
+    private static bool TryParseToggle(string value, out bool enabled)
+    {
+        switch (value.ToLowerInvariant())
+        {
+            case "on":
+            case "true":
+                enabled = true;
+                return true;
+            case "off":
+            case "false":
+                enabled = false;
+                return true;
+            default:
+                enabled = false;
+                return false;
+        }
+    }
+
+    private static string FormatTime(double seconds)
+    {
+        if (!double.IsFinite(seconds) || seconds < 0) seconds = 0;
+        var time = TimeSpan.FromSeconds(seconds);
+        return time.TotalHours >= 1 ? time.ToString(@"h\:mm\:ss") : time.ToString(@"m\:ss");
+    }
+
+    private static string FormatRepeat(RepeatMode repeatMode) => repeatMode switch
+    {
+        RepeatMode.RepeatAll => "all",
+        RepeatMode.RepeatOne => "one",
+        _ => "off"
+    };
+}

@@ -24,12 +24,14 @@ public class DatabaseService
 
         if (!File.Exists(AppDataManager.DatabasePath))
         {
-            System.Diagnostics.Debug.WriteLine($"База данных не найдена, создаем новую: {AppDataManager.DatabasePath}");
+            System.Diagnostics.Debug.WriteLine($"Database not found, creating new one: {AppDataManager.DatabasePath}");
+            AppConsole.Log($"Database not found, creating new one: {AppDataManager.DatabasePath}");
             InitializeDatabase();
         }
         else
         {
-            System.Diagnostics.Debug.WriteLine($"База данных существует: {AppDataManager.DatabasePath}");
+            System.Diagnostics.Debug.WriteLine($"Database exists: {AppDataManager.DatabasePath}");
+            AppConsole.Log($"Database exists: {AppDataManager.DatabasePath}");
             // Проверяем и добавляем недостающие колонки
             MigrateDatabase();
         }
@@ -73,15 +75,18 @@ public class DatabaseService
             {
                 if (!playlistColumns.Contains(column.Key))
                 {
-                    System.Diagnostics.Debug.WriteLine($"Добавляем колонку {column.Key} в таблицу Playlists...");
+                    System.Diagnostics.Debug.WriteLine($"Adding column {column.Key} to Playlists table...");
+                    AppConsole.Log($"Adding column {column.Key} to Playlists table...");
                     var alterCmd = connection.CreateCommand();
                     alterCmd.CommandText = $"ALTER TABLE Playlists ADD COLUMN {column.Key} {column.Value}";
                     alterCmd.ExecuteNonQuery();
-                    System.Diagnostics.Debug.WriteLine($"Колонка {column.Key} успешно добавлена");
+                    System.Diagnostics.Debug.WriteLine($"Column {column.Key} added successfully");
+                    AppConsole.Log($"Column {column.Key} added successfully");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Колонка {column.Key} уже существует");
+                    System.Diagnostics.Debug.WriteLine($"Column {column.Key} already exists");
+                    AppConsole.Log($"Column {column.Key} already exists");
                 }
             }
 
@@ -101,28 +106,34 @@ public class DatabaseService
             // Проверяем и добавляем недостающие колонки в PlaylistTracks
             if (!playlistTracksColumns.Contains("AddedDate"))
             {
-                System.Diagnostics.Debug.WriteLine("Добавляем колонку AddedDate в таблицу PlaylistTracks...");
+                System.Diagnostics.Debug.WriteLine("Adding column AddedDate to PlaylistTracks table...");
+                AppConsole.Log("Adding column AddedDate to PlaylistTracks table...");
                 var alterCmd = connection.CreateCommand();
                 alterCmd.CommandText = "ALTER TABLE PlaylistTracks ADD COLUMN AddedDate TEXT";
                 alterCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Колонка AddedDate успешно добавлена");
+                System.Diagnostics.Debug.WriteLine("Column AddedDate added successfully");
+                AppConsole.Log("Column AddedDate added successfully");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Колонка AddedDate уже существует в PlaylistTracks");
+                System.Diagnostics.Debug.WriteLine("Column AddedDate already exists in PlaylistTracks");
+                AppConsole.Log("Column AddedDate already exists in PlaylistTracks");
             }
 
             if (!playlistTracksColumns.Contains("OrderIndex"))
             {
-                System.Diagnostics.Debug.WriteLine("Добавляем колонку OrderIndex в таблицу PlaylistTracks...");
+                System.Diagnostics.Debug.WriteLine("Adding column OrderIndex to PlaylistTracks table...");
+                AppConsole.Log("Adding column OrderIndex to PlaylistTracks table...");
                 var alterCmd = connection.CreateCommand();
                 alterCmd.CommandText = "ALTER TABLE PlaylistTracks ADD COLUMN OrderIndex INTEGER DEFAULT 0";
                 alterCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Колонка OrderIndex успешно добавлена");
+                System.Diagnostics.Debug.WriteLine("Column OrderIndex added successfully");
+                AppConsole.Log("Column OrderIndex added successfully");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Колонка OrderIndex уже существует в PlaylistTracks");
+                System.Diagnostics.Debug.WriteLine("Column OrderIndex already exists in PlaylistTracks");
+                AppConsole.Log("Column OrderIndex already exists in PlaylistTracks");
             }
 
             ReindexPlaylistTrackOrder(connection);
@@ -143,45 +154,55 @@ public class DatabaseService
             // Проверяем и добавляем недостающие колонки в Tracks
             if (!tracksColumns.Contains("TrackNumber"))
             {
-                System.Diagnostics.Debug.WriteLine("Добавляем колонку TrackNumber в таблицу Tracks...");
+                System.Diagnostics.Debug.WriteLine("Adding column TrackNumber to Tracks table...");
+                AppConsole.Log("Adding column TrackNumber to Tracks table...");
                 var alterCmd = connection.CreateCommand();
                 alterCmd.CommandText = "ALTER TABLE Tracks ADD COLUMN TrackNumber INTEGER DEFAULT 0";
                 alterCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Колонка TrackNumber успешно добавлена");
+                System.Diagnostics.Debug.WriteLine("Column TrackNumber added successfully");
+                AppConsole.Log("Column TrackNumber added successfully");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Колонка TrackNumber уже существует в Tracks");
+                System.Diagnostics.Debug.WriteLine("Column TrackNumber already exists in Tracks");
+                AppConsole.Log("Column TrackNumber already exists in Tracks");
             }
             if (!tracksColumns.Contains("PlayCount"))
             {
-                System.Diagnostics.Debug.WriteLine("Добавляем колонку PlayCount в таблицу Tracks...");
+                System.Diagnostics.Debug.WriteLine("Adding column PlayCount to Tracks table...");
+                AppConsole.Log("Adding column PlayCount to Tracks table...");
                 var alterCmd = connection.CreateCommand();
                 alterCmd.CommandText = "ALTER TABLE Tracks ADD COLUMN PlayCount INTEGER DEFAULT 0";
                 alterCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Колонка PlayCount успешно добавлена");
+                System.Diagnostics.Debug.WriteLine("Column PlayCount added successfully");
+                AppConsole.Log("Column PlayCount added successfully");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Колонка PlayCount уже существует в Tracks");
+                System.Diagnostics.Debug.WriteLine("Column PlayCount already exists in Tracks");
+                AppConsole.Log("Column PlayCount already exists in Tracks");
             }
 
             if (!tracksColumns.Contains("BPM"))
             {
-                System.Diagnostics.Debug.WriteLine("Добавляем колонку BPM в таблицу Tracks...");
+                System.Diagnostics.Debug.WriteLine("Adding column BPM to Tracks table...");
+                AppConsole.Log("Adding column BPM to Tracks table...");
                 var alterCmd = connection.CreateCommand();
                 alterCmd.CommandText = "ALTER TABLE Tracks ADD COLUMN BPM INTEGER DEFAULT 0";
                 alterCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Колонка BPM успешно добавлена");
+                System.Diagnostics.Debug.WriteLine("Column BPM added successfully");
+                AppConsole.Log("Column BPM added successfully");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Колонка BPM уже существует в Tracks");
+                System.Diagnostics.Debug.WriteLine("Column BPM already exists in Tracks");
+                AppConsole.Log("Column BPM already exists in Tracks");
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при миграции БД: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error during DB migration: {ex.Message}");
+            AppConsole.Log($"Error during DB migration: {ex.Message}");
         }
     }
     private static void EnsureTrackPlayHistoryTable(SqliteConnection connection)
@@ -201,6 +222,7 @@ public class DatabaseService
     public static bool IncrementTrackPlayCount(int trackId)
     {
         System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] BEFORE - Attempting to increment PlayCount for Track ID={trackId}");
+        AppConsole.Log($"[IncrementTrackPlayCount] BEFORE - Attempting to increment PlayCount for Track ID={trackId}");
         try
         {
             using var connection = new SqliteConnection(_connectionString);
@@ -231,6 +253,7 @@ public class DatabaseService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[IncrementTrackPlayCount] ERROR: {ex.Message}");
+            AppConsole.Log($"[IncrementTrackPlayCount] ERROR: {ex.Message}");
             App.LogException(ex, "IncrementPlayCount");
             return false;
         }
@@ -303,7 +326,8 @@ public class DatabaseService
         );";
         cmd.ExecuteNonQuery();
 
-        System.Diagnostics.Debug.WriteLine($"База данных инициализирована: {AppDataManager.DatabasePath}");
+        System.Diagnostics.Debug.WriteLine($"Database initialized: {AppDataManager.DatabasePath}");
+        AppConsole.Log($"Database initialized: {AppDataManager.DatabasePath}");
 
         // Проверяем и добавляем недостающие колонки (миграция)
         PerformDatabaseMigration();
@@ -335,16 +359,19 @@ public class DatabaseService
 
             if (!hasIsSystemPlaylist)
             {
-                System.Diagnostics.Debug.WriteLine("Колонка IsSystemPlaylist не найдена, добавляем...");
+                System.Diagnostics.Debug.WriteLine("Column IsSystemPlaylist not found, adding...");
+                AppConsole.Log("Column IsSystemPlaylist not found, adding...");
                 var alterCmd = connection.CreateCommand();
                 alterCmd.CommandText = "ALTER TABLE Playlists ADD COLUMN IsSystemPlaylist INTEGER DEFAULT 0";
                 alterCmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Колонка IsSystemPlaylist успешно добавлена");
+                System.Diagnostics.Debug.WriteLine("Column IsSystemPlaylist added successfully");
+                AppConsole.Log("Column IsSystemPlaylist added successfully");
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при миграции: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error during migration: {ex.Message}");
+            AppConsole.Log($"Error during migration: {ex.Message}");
         }
     }
 
@@ -446,116 +473,123 @@ public class DatabaseService
     /// </summary>
     public static Playlist? GetPlaylistById(int playlistId)
     {
-        System.Diagnostics.Debug.WriteLine($"=== ЗАГРУЗКА ПЛЕЙЛИСТА ПО ID: {playlistId} ===");
+        System.Diagnostics.Debug.WriteLine($"Loading playlist by ID: {playlistId}");
+        AppConsole.Log($"Loading playlist by ID: {playlistId}");
 
-        using (var connection = new SqliteConnection(_connectionString))
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var command = connection.CreateCommand();
+
+        try
         {
-            connection.Open();
-            var command = connection.CreateCommand();
+            // Проверяем наличие колонки IsSystemPlaylist
+            bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
 
-            try
+            string selectQuery = hasIsSystemPlaylist
+                ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists WHERE Id = $id"
+                : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists WHERE Id = $id";
+
+            command.CommandText = selectQuery;
+            command.Parameters.AddWithValue("$id", playlistId);
+
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
             {
-                // Проверяем наличие колонки IsSystemPlaylist
-                bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
-
-                string selectQuery = hasIsSystemPlaylist
-                    ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists WHERE Id = $id"
-                    : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists WHERE Id = $id";
-
-                command.CommandText = selectQuery;
-                command.Parameters.AddWithValue("$id", playlistId);
-
-                using var reader = command.ExecuteReader();
-                if (reader.Read())
+                var playlist = new Playlist
                 {
-                    var playlist = new Playlist
-                    {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                        CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
-                        IsPinned = !reader.IsDBNull(4) && reader.GetInt32(4) != 0
-                    };
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    CoverImage = reader.IsDBNull(3) ? null : (byte[])reader.GetValue(3),
+                    IsPinned = !reader.IsDBNull(4) && reader.GetInt32(4) != 0
+                };
 
-                    // Сортировка (SortOrder)
-                    if (!reader.IsDBNull(5))
+                // Сортировка (SortOrder)
+                if (!reader.IsDBNull(5))
+                {
+                    playlist.SortOrder = reader.GetInt32(5);
+                }
+
+                // Дата создания (CreatedDate)
+                if (!reader.IsDBNull(6))
+                {
+                    string dateString = reader.GetString(6);
+                    if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None,
+                        out DateTime parsedDate))
                     {
-                        playlist.SortOrder = reader.GetInt32(5);
+                        playlist.CreatedDate = parsedDate;
                     }
-
-                    // Дата создания (CreatedDate)
-                    if (!reader.IsDBNull(6))
+                    else if (DateTime.TryParse(dateString, out DateTime secondTry))
                     {
-                        string dateString = reader.GetString(6);
-                        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH:mm:ss",
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None,
-                            out DateTime parsedDate))
-                        {
-                            playlist.CreatedDate = parsedDate;
-                        }
-                        else if (DateTime.TryParse(dateString, out DateTime secondTry))
-                        {
-                            playlist.CreatedDate = secondTry;
-                        }
-                        else
-                        {
-                            playlist.CreatedDate = DateTime.Now;
-                        }
+                        playlist.CreatedDate = secondTry;
                     }
                     else
                     {
                         playlist.CreatedDate = DateTime.Now;
                     }
-
-                    // Тип сортировки (SortType)
-                    if (!reader.IsDBNull(7))
-                    {
-                        playlist.SortType = (TrackSortType)reader.GetInt32(7);
-                    }
-
-                    // Флаг системного плейлиста (IsSystemPlaylist) - только если колонка есть
-                    if (hasIsSystemPlaylist && !reader.IsDBNull(8))
-                    {
-                        playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
-                    }
-
-                    // Тип сортировки (SortType)
-                    if (!reader.IsDBNull(7))
-                    {
-                        playlist.SortType = (TrackSortType)reader.GetInt32(7);
-                    }
-
-                    // Загружаем треки для этого плейлиста
-                    var tracks = GetTracksForPlaylist(playlist.Id, playlist.SortType);
-                    System.Diagnostics.Debug.WriteLine($"Загружен плейлист '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} треков");
-
-                    foreach (var track in tracks)
-                    {
-                        playlist.Tracks.Add(track);
-                    }
-
-                    return playlist;
+                }
+                else
+                {
+                    playlist.CreatedDate = DateTime.Now;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Плейлист с ID={playlistId} не найден в БД");
-                return null;
+                // Тип сортировки (SortType)
+                if (!reader.IsDBNull(7))
+                {
+                    playlist.SortType = (TrackSortType)reader.GetInt32(7);
+                }
+
+                // Флаг системного плейлиста (IsSystemPlaylist) - только если колонка есть
+                if (hasIsSystemPlaylist && !reader.IsDBNull(8))
+                {
+                    playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
+                }
+
+                // Тип сортировки (SortType)
+                if (!reader.IsDBNull(7))
+                {
+                    playlist.SortType = (TrackSortType)reader.GetInt32(7);
+                }
+
+                // Загружаем треки для этого плейлиста
+                var tracks = GetTracksForPlaylist(playlist.Id, playlist.SortType);
+                System.Diagnostics.Debug.WriteLine($"Loaded '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} tracks");
+                AppConsole.Log($"Loaded '{playlist.Name}' (ID={playlist.Id}): {tracks.Count} tracks");
+
+                foreach (var track in tracks)
+                {
+                    playlist.Tracks.Add(track);
+                }
+
+                return playlist;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлиста ID={playlistId}: {ex.Message}");
-                throw;
-            }
+
+            System.Diagnostics.Debug.WriteLine($"Playlist with ID={playlistId} not found in DB");
+            AppConsole.Log($"Playlist with ID={playlistId} not found in DB");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error while loading playlist ID={playlistId}: {ex.Message}");
+            AppConsole.Log($"Error while loading playlist ID={playlistId}: {ex.Message}");
+            throw;
         }
     }
 
     public static void SaveTrackToPlaylist(int playlistId, Track track)
     {
-        System.Diagnostics.Debug.WriteLine($"=== СОХРАНЕНИЕ ТРЕКА В ПЛЕЙЛИСТ {playlistId} ===");
-        System.Diagnostics.Debug.WriteLine($"Путь: {track.Path}");
-        System.Diagnostics.Debug.WriteLine($"Имя: {track.Name}");
+        System.Diagnostics.Debug.WriteLine($"SAVING TRACK TO PLAYLIST {playlistId}");
+        System.Diagnostics.Debug.WriteLine($"Path: {track.Path}");
+        System.Diagnostics.Debug.WriteLine($"Name: {track.Name}");
         System.Diagnostics.Debug.WriteLine($"TrackNumber: {track.TrackNumber}");
-        System.Diagnostics.Debug.WriteLine($"TrackId из объекта: {track.Id}");
+        System.Diagnostics.Debug.WriteLine($"TrackId from object: {track.Id}");
+        AppConsole.Log($"SAVING TRACK TO PLAYLIST {playlistId}");
+        AppConsole.Log($"Path: {track.Path}");
+        AppConsole.Log($"Name: {track.Name}");
+        AppConsole.Log($"TrackNumber: {track.TrackNumber}");
+        AppConsole.Log($"TrackId from object: {track.Id}");
 
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -572,7 +606,8 @@ public class DatabaseService
         {
             // Трек уже существует, обновляем его данные
             trackId = (long)existingId;
-            System.Diagnostics.Debug.WriteLine($"Трек уже существует с ID={trackId}, обновляем данные");
+            System.Diagnostics.Debug.WriteLine($"Track already exists with ID={trackId}, updating data");
+            AppConsole.Log($"Track already exists with ID={trackId}, updating data");
 
             var updateCmd = connection.CreateCommand();
             updateCmd.CommandText = @"
@@ -593,12 +628,14 @@ public class DatabaseService
             updateCmd.Parameters.AddWithValue("$trackNum", track.TrackNumber > 0 ? track.TrackNumber : 0);
 
             int rowsAffected = updateCmd.ExecuteNonQuery();
-            System.Diagnostics.Debug.WriteLine($"Трек обновлен, affected rows: {rowsAffected}");
+            System.Diagnostics.Debug.WriteLine($"Track updated, affected rows: {rowsAffected}");
+            AppConsole.Log($"Track updated, affected rows: {rowsAffected}");
         }
         else
         {
             // Трека нет, создаем новый
-            System.Diagnostics.Debug.WriteLine($"Трек не существует, создаем новый");
+            System.Diagnostics.Debug.WriteLine($"Track does not exist, creating new");
+            AppConsole.Log($"Track does not exist, creating new");
 
             var insertCmd = connection.CreateCommand();
             insertCmd.CommandText = @"
@@ -617,7 +654,8 @@ public class DatabaseService
             insertCmd.Parameters.AddWithValue("$trackNum", track.TrackNumber > 0 ? track.TrackNumber : 0);
 
             int rowsAffected = insertCmd.ExecuteNonQuery();
-            System.Diagnostics.Debug.WriteLine($"Трек вставлен, affected rows: {rowsAffected}");
+            System.Diagnostics.Debug.WriteLine($"Track inserted, affected rows: {rowsAffected}");
+            AppConsole.Log($"Track inserted, affected rows: {rowsAffected}");
 
             // Получаем ID новосозданного трека
             var getIdCmd = connection.CreateCommand();
@@ -627,16 +665,18 @@ public class DatabaseService
             if (result != null)
             {
                 trackId = (long)result;
-                System.Diagnostics.Debug.WriteLine($"Новый трек ID: {trackId}");
+                System.Diagnostics.Debug.WriteLine($"New track ID: {trackId}");
+                AppConsole.Log($"New track ID: {trackId}");
             }
             else
             {
-                throw new Exception("Не удалось получить ID для нового трека после вставки");
+                throw new Exception("Failed to get ID for new track after insertion");
             }
 
         }
 
-        System.Diagnostics.Debug.WriteLine($"Финальный ID трека в БД: {trackId}");
+        System.Diagnostics.Debug.WriteLine($"Final track ID in DB: {trackId}");
+        AppConsole.Log($"Final track ID in DB: {trackId}");
 
         // Добавляем связь с плейлистом
         var checkLinkCmd = connection.CreateCommand();
@@ -655,11 +695,13 @@ public class DatabaseService
             linkCmd.Parameters.AddWithValue("$date", track.AddedDate.ToString("o")); // ISO 8601 формат
             linkCmd.Parameters.AddWithValue("$order", GetNextPlaylistTrackOrder(connection, playlistId));
             int linkResult = linkCmd.ExecuteNonQuery();
-            System.Diagnostics.Debug.WriteLine($"Новая связь добавлена, результат: {linkResult}");
+            System.Diagnostics.Debug.WriteLine($"New link added, result: {linkResult}");
+            AppConsole.Log($"New link added, result: {linkResult}");
         }
         else
         {
-            System.Diagnostics.Debug.WriteLine($"Связь уже существует, пропускаем добавление");
+            System.Diagnostics.Debug.WriteLine($"Link already exists, skipping addition");
+            AppConsole.Log($"Link already exists, skipping addition");
         }
 
         // Проверяем, сколько плейлистов содержат этот трек
@@ -667,7 +709,8 @@ public class DatabaseService
         countCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE TrackId = $trackId";
         countCmd.Parameters.AddWithValue("$trackId", trackId);
         long? playlistCount = (long?)countCmd.ExecuteScalar();
-        System.Diagnostics.Debug.WriteLine($"ТРЕК СОДЕРЖИТСЯ В {playlistCount} ПЛЕЙЛИСТАХ");
+        System.Diagnostics.Debug.WriteLine($"Track is in {playlistCount} playlists");
+        AppConsole.Log($"Track is in {playlistCount} playlists");
     }
 
     public static void RemoveTrackFromPlaylist(int playlistId, int trackId)
@@ -692,7 +735,8 @@ public class DatabaseService
     {
         var tracks = new List<Track>();
         var effectiveSortType = sortType ?? TrackSortType.AddedDate;
-        System.Diagnostics.Debug.WriteLine($"=== GetTracksForPlaylist для ID={playlistId} ===");
+        System.Diagnostics.Debug.WriteLine($"GetTracksForPlaylist for ID={playlistId} ");
+        AppConsole.Log($"GetTracksForPlaylist for ID={playlistId}");
 
         using (var connection = new SqliteConnection(_connectionString))
         {
@@ -703,11 +747,13 @@ public class DatabaseService
             checkCmd.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE PlaylistId = $pId";
             checkCmd.Parameters.AddWithValue("$pId", playlistId);
             long? linksCount = (long?)checkCmd.ExecuteScalar();
-            System.Diagnostics.Debug.WriteLine($"Связей в PlaylistTracks: {linksCount}");
+            System.Diagnostics.Debug.WriteLine($"Links in PlaylistTracks: {linksCount}");
+            AppConsole.Log($"Links in PlaylistTracks: {linksCount}");
 
             if (linksCount == 0)
             {
-                System.Diagnostics.Debug.WriteLine("Нет связей для этого плейлиста!");
+                System.Diagnostics.Debug.WriteLine("No links for this playlist!");
+                AppConsole.Log("No links for this playlist!");
                 return tracks;
             }
 
@@ -744,16 +790,19 @@ public class DatabaseService
                         PlayCount = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
+                    System.Diagnostics.Debug.WriteLine($"Track {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
+                    AppConsole.Log($"Track {count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                     tracks.Add(track);
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Всего треков загружено: {tracks.Count}");
+                System.Diagnostics.Debug.WriteLine($"Total tracks loaded: {tracks.Count}");
+                AppConsole.Log($"Total tracks loaded: {tracks.Count}");
             }
             catch (SqliteException ex) when (ex.Message.Contains("no such column: t.TrackNumber"))
             {
                 // Если колонки TrackNumber нет (старая БД), выполняем миграцию
-                System.Diagnostics.Debug.WriteLine($"Колонка TrackNumber не найдена, выполняем миграцию: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"TrackNumber column not found, performing migration: {ex.Message}");
+                AppConsole.Log($"TrackNumber column not found, performing migration: {ex.Message}");
                 MigrateDatabase();
 
                 // Пытаемся еще раз с правильным SELECT
@@ -788,11 +837,13 @@ public class DatabaseService
                         PlayCount = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"  Трек {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
+                    AppConsole.Log($"Track {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
+                    System.Diagnostics.Debug.WriteLine($"Track {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                     tracks.Add(track);
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Всего треков загружено: {tracks.Count}");
+                AppConsole.Log($"Total tracks loaded: {tracks.Count}");
+                System.Diagnostics.Debug.WriteLine($"Total tracks loaded: {tracks.Count}");
             }
         }
 
@@ -858,7 +909,8 @@ public class DatabaseService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при перенумерации порядка треков: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error in ReindexPlaylistTrackOrder: {ex.Message}");
+            AppConsole.Log($"Error in ReindexPlaylistTrackOrder: {ex.Message}");
         }
     }
 
@@ -888,7 +940,8 @@ public class DatabaseService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении порядка треков: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error in SavePlaylistTrackOrder: {ex.Message}");
+            AppConsole.Log($"Error in SavePlaylistTrackOrder: {ex.Message}");
         }
     }
 
@@ -918,6 +971,7 @@ public class DatabaseService
         catch (SqliteException ex)
         {
             System.Diagnostics.Debug.WriteLine($"SQL Error: {ex.Message}");
+            AppConsole.Log($"SQL Error: {ex.Message}");
             throw;
         }
     }
@@ -958,11 +1012,13 @@ public class DatabaseService
             }
 
             transaction.Commit();
-            System.Diagnostics.Debug.WriteLine("Порядок плейлистов успешно сохранен в БД.");
+            System.Diagnostics.Debug.WriteLine("Playlists order saved successfully.");
+            AppConsole.Log("Playlists order saved successfully.");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении порядка плейлистов: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error in SavePlaylistsOrder: {ex.Message}");
+            AppConsole.Log($"Error in SavePlaylistsOrder: {ex.Message}");
         }
     }
 
@@ -1050,11 +1106,13 @@ public class DatabaseService
             cmd.Parameters.AddWithValue("$id", playlistId);
             cmd.ExecuteNonQuery();
             string status = isPinned ? "закреплен" : "откреплен";
-            System.Diagnostics.Debug.WriteLine($"Плейлист {playlistId} {status}");
+            System.Diagnostics.Debug.WriteLine($"Playlist {playlistId} {status}");
+            AppConsole.Log($"Playlist {playlistId} {status}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при обновлении pin состояния: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error updating playlist pin state: {ex.Message}");
+            AppConsole.Log($"Error updating playlist pin state: {ex.Message}");
         }
     }
 
@@ -1072,11 +1130,13 @@ public class DatabaseService
             cmd.Parameters.AddWithValue("$sortType", (int)sortType);
             cmd.Parameters.AddWithValue("$id", playlistId);
             cmd.ExecuteNonQuery();
-            System.Diagnostics.Debug.WriteLine($"Плейлист {playlistId}: тип сортировки изменен на {sortType}");
+            System.Diagnostics.Debug.WriteLine($"Playlist {playlistId}: sort type changed to {sortType}");
+            AppConsole.Log($"Playlist {playlistId}: sort type changed to {sortType}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при обновлении типа сортировки: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error updating playlist sort type: {ex.Message}");
+            AppConsole.Log($"Error updating playlist sort type: {ex.Message}");
         }
     }
     public static string GetLastListenedTrack()
@@ -1256,7 +1316,8 @@ public class DatabaseService
         {
             Windows.Statistics.RefreshRightPanel(newPlaylist);
         }
-        System.Diagnostics.Debug.WriteLine($"Создан плейлист 'Top 50 Tracks' с ID={newPlaylistId} и добавлено {topTracks.Count} треков.");
+        System.Diagnostics.Debug.WriteLine($"Created 'Top 50 Tracks' with ID={newPlaylistId} and {topTracks.Count} tracks added.");
+        AppConsole.Log($"Created 'Top 50 Tracks' with ID={newPlaylistId} and {topTracks.Count} tracks added.");
     }
 
     public static void CreatePlaylistTracksWithoutListening()
@@ -1273,6 +1334,7 @@ public class DatabaseService
         {
             Windows.Statistics.RefreshRightPanel(newPlaylist);
         }
+        AppConsole.Log($"Created 'Tracks without listening' with ID={newPlaylistId} and {tracks.Count} tracks added.");
     }
 
     public static string GetFirstTrackInLibrary()
@@ -1422,7 +1484,7 @@ public class DatabaseService
         }
         else
         {
-            return "Нет данных о длительности треков.";
+            return "No data.";
         }
     }
     public static string GetShortestTrack()
@@ -1476,7 +1538,8 @@ public class DatabaseService
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Ошибка при получении размера файла {path}: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Error occurred while getting file size {path}: {ex.Message}");
+                    AppConsole.Log($"Error occurred while getting file size {path}: {ex.Message}");
                 }
             }
 
@@ -1492,8 +1555,9 @@ public class DatabaseService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка при расчете веса библиотеки: {ex.Message}");
-            return "Ошибка при расчете размера библиотеки.";
+            System.Diagnostics.Debug.WriteLine($"Error occurred while calculating library weight: {ex.Message}");
+            AppConsole.Log($"Error occurred while calculating library weight: {ex.Message}");
+            return "Error occurred while calculating library size.";
         }
     }
     public static int GetPlaylistCount()
@@ -1669,11 +1733,13 @@ public class DatabaseService
                 }
                 catch (SqliteException ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке плейлистов: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Error in GetPlaylistsAsync: {ex.Message}");
+                    AppConsole.Log($"Error in GetPlaylistsAsync: {ex.Message}");
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine($"Асинхронно загружено плейлистов: {playlists.Count}");
+            System.Diagnostics.Debug.WriteLine($"Loaded playlists: {playlists.Count}");
+            AppConsole.Log($"Loaded playlists: {playlists.Count}");
             return playlists;
         });
     }

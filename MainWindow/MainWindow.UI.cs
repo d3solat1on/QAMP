@@ -61,6 +61,9 @@ public partial class MainWindow
                 NextTrack.Text = "Next Track";
                 NowPlaying.Text = "NOW PLAYING";
 
+#if DEBUG
+                Title = $"{track.Executor} — {track.Name} | QAMP [DEBUG]";
+#endif
                 Title = $"{track.Executor} — {track.Name} | QAMP";
 
                 if (_mediaManager != null)
@@ -86,13 +89,13 @@ public partial class MainWindow
                     SetDefaultCover();
                 }
 
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] OnTrackChanged Успешно: {track.Name}");
-#endif
+                System.Diagnostics.Debug.WriteLine($"OnTrackChanged successful: {track.Name}");
+                AppConsole.Log($"OnTrackChanged successful: {track.Name}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] Error in OnTrackChanged UI: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in OnTrackChanged UI: {ex.Message}");
+                AppConsole.Log($"Error in OnTrackChanged UI: {ex.Message}");
             }
         });
     }
@@ -121,11 +124,12 @@ public partial class MainWindow
     }
     private void UpdateNowPlayingInfo(Track? track)
     {
-#if DEBUG
         System.Diagnostics.Debug.WriteLine($"UpdateNowPlayingInfo: {track?.Name ?? "null"}");
-        System.Diagnostics.Debug.WriteLine($"Размер обложки нового трека: {MemoryProfiler.GetSizeCoverTrack(track)} байт");
-        System.Diagnostics.Debug.WriteLine($"Размер обложки старого трека из Library: {MemoryProfiler.GetSizeCoverTrack(Library.CurrentTrack)} байт");
-#endif
+        AppConsole.Log($"UpdateNowPlayingInfo: {track?.Name ?? "null"}");
+        System.Diagnostics.Debug.WriteLine($"Cover art size for a new track: {MemoryProfiler.GetSizeCoverTrack(track)} bytes");
+        AppConsole.Log($"Cover art size for a new track: {MemoryProfiler.GetSizeCoverTrack(track)} bytes");
+        System.Diagnostics.Debug.WriteLine($"Size of cover art for the old track in Library: {MemoryProfiler.GetSizeCoverTrack(Library.CurrentTrack)} bytes");
+        AppConsole.Log($"Size of cover art for the old track in Library: {MemoryProfiler.GetSizeCoverTrack(Library.CurrentTrack)} bytes");
 
         Library.CurrentTrack?.UnloadCover();
         if (track == null)
@@ -248,5 +252,19 @@ public partial class MainWindow
                 }
             }
         });
+    }
+    private void ToggleDebugConsole()
+    {
+        if (_settingsManager.Config.UseConsole)
+        {
+            if (DebugConsoleContainer.Visibility == Visibility.Visible)
+            {
+                DebugConsoleContainer.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                DebugConsoleContainer.Visibility = Visibility.Visible;
+            }
+        }
     }
 }

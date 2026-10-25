@@ -101,6 +101,7 @@ namespace QAMP.Dialogs
                     var errorMsg = (Application.Current.Resources["LngImageLoadError"] as string ?? "Ошибка загрузки изображения: {0}")
                         .Replace("{0}", ex.Message);
                     NotificationWindow.Show(errorMsg, this);
+                    AppConsole.Log($"Error loading cover image: {ex.Message}");
                 }
             }
         }

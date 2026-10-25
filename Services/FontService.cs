@@ -59,7 +59,8 @@ public class FontService
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FontService] Ошибка чтения шрифта {file}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error reading font {file}: {ex.Message}");
+                AppConsole.Log($"Error reading font {file}: {ex.Message}");
             }
         }
     }
@@ -126,7 +127,8 @@ public class FontService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[FontService] Ошибка импорта шрифта: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error importing font: {ex.Message}");
+            AppConsole.Log($"Error importing font: {ex.Message}");
         }
 
         return null;
