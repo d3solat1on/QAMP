@@ -242,13 +242,11 @@ namespace QAMP.ViewModels
         public void AddNewPlaylist(Playlist newPlaylist)
         {
             System.Diagnostics.Debug.WriteLine($"Adding new playlist: {newPlaylist.Name} (ID={newPlaylist.Id})");
-            AppConsole.Log($"Adding new playlist: {newPlaylist.Name} (ID={newPlaylist.Id})");
 
             // Добавляем в коллекцию
             Playlists.Add(newPlaylist);
 
             System.Diagnostics.Debug.WriteLine($"Playlist '{newPlaylist.Name}' added. Total playlists: {Playlists.Count}");
-            AppConsole.Log($"Playlist '{newPlaylist.Name}' added. Total playlists: {Playlists.Count}");
         }
 
         /// <summary>
@@ -257,15 +255,12 @@ namespace QAMP.ViewModels
         public async Task RefreshPlaylistsAsync()
         {
             System.Diagnostics.Debug.WriteLine("Async loading playlists from DB...");
-            AppConsole.Log("Async loading playlists from DB...");
 
             var list = await DatabaseService.GetPlaylistsAsync();
             System.Diagnostics.Debug.WriteLine($"Loaded playlists from DB: {list.Count}");
-            AppConsole.Log($"Loaded playlists from DB: {list.Count}");
             foreach (var p in list)
             {
                 System.Diagnostics.Debug.WriteLine($"  - {p.Name} (ID={p.Id})");
-                AppConsole.Log($"  - {p.Name} (ID={p.Id})");
             }
 
             // Проверяем, существует ли плейлист "Избранное"
@@ -273,7 +268,6 @@ namespace QAMP.ViewModels
             if (favoritesPlaylist == null)
             {
                 System.Diagnostics.Debug.WriteLine($"Playlist '{FavoritesName}' not found, creating it...");
-                AppConsole.Log($"Playlist '{FavoritesName}' not found, creating it...");
 
                 long newId = DatabaseService.CreatePlaylist(FavoritesName, "Your favorite tracks", null, isSystemPlaylist: true);
                 favoritesPlaylist = new Playlist
@@ -287,7 +281,6 @@ namespace QAMP.ViewModels
 
                 list.Add(favoritesPlaylist);
                 System.Diagnostics.Debug.WriteLine($"Playlist '{FavoritesName}' successfully created (ID={newId})");
-                AppConsole.Log($"Playlist '{FavoritesName}' successfully created (ID={newId})");
             }
             else
             {
@@ -296,14 +289,12 @@ namespace QAMP.ViewModels
 
             var previousPlaylistId = CurrentPlaylist?.Id;
             System.Diagnostics.Debug.WriteLine($"Current playlist BEFORE clearing: ID={previousPlaylistId}");
-            AppConsole.Log($"Current playlist BEFORE clearing: ID={previousPlaylistId}");
 
             Playlists.Clear();
 
             foreach (var p in list)
             {
                 System.Diagnostics.Debug.WriteLine($"Adding playlist: '{p.Name}'");
-                AppConsole.Log($"Adding playlist: '{p.Name}'");
                 Playlists.Add(p);
             }
 
@@ -314,13 +305,11 @@ namespace QAMP.ViewModels
                 if (restoredPlaylist != null)
                 {
                     System.Diagnostics.Debug.WriteLine($"Restoring playlist: '{restoredPlaylist.Name}' (ID={restoredPlaylist.Id})");
-                    AppConsole.Log($"Restoring playlist: '{restoredPlaylist.Name}' (ID={restoredPlaylist.Id})");
                     CurrentPlaylist = restoredPlaylist;
                 }
             }
 
             System.Diagnostics.Debug.WriteLine($"END ASYNC PLAYLIST LOADING");
-            AppConsole.Log($"END ASYNC PLAYLIST LOADING");
             OnPropertyChanged(nameof(Playlists));
         }
 
@@ -332,7 +321,6 @@ namespace QAMP.ViewModels
             if (playlist == null) return;
 
             System.Diagnostics.Debug.WriteLine($"ASYNC LOADING TRACKS FOR PLAYLIST: {playlist.Name} (ID={playlist.Id})");
-            AppConsole.Log($"ASYNC LOADING TRACKS FOR PLAYLIST: {playlist.Name} (ID={playlist.Id})");
 
             var tracks = await DatabaseService.GetTracksForPlaylistAsync(playlist.Id, playlist.SortType);
 
@@ -346,7 +334,6 @@ namespace QAMP.ViewModels
             }
 
             System.Diagnostics.Debug.WriteLine($"Loaded {tracks.Count} tracks for playlist '{playlist.Name}' (ID={playlist.Id})");
-            AppConsole.Log($"Loaded {tracks.Count} tracks for playlist '{playlist.Name}' (ID={playlist.Id})");
 
             // Уведомляем об изменении
             OnPropertyChanged(nameof(Playlists));
@@ -358,7 +345,6 @@ namespace QAMP.ViewModels
         public async Task LoadAllPlaylistsTracksAsync(Action<int, int>? onProgress = null)
         {
             System.Diagnostics.Debug.WriteLine("ASYNC LOADING ALL TRACKS");
-            AppConsole.Log("ASYNC LOADING ALL TRACKS");
 
             int totalPlaylists = Playlists.Count;
             for (int i = 0; i < totalPlaylists; i++)
@@ -367,12 +353,10 @@ namespace QAMP.ViewModels
                 await LoadPlaylistTracksAsync(playlist);
 
                 System.Diagnostics.Debug.WriteLine($"Progress: {i + 1}/{totalPlaylists}");
-                AppConsole.Log($"Progress: {i + 1}/{totalPlaylists}");
                 onProgress?.Invoke(i + 1, totalPlaylists);
             }
 
             System.Diagnostics.Debug.WriteLine($"END ASYNC TRACK LOADING");
-            AppConsole.Log($"END ASYNC TRACK LOADING");
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

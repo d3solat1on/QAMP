@@ -41,7 +41,6 @@ namespace QAMP.Windows
         {
             var appSettings = SettingsManager.Instance.Config;
             Debug.WriteLine("[QAMP Theme Debug] Initializing custom themes...");
-            AppConsole.Log("[QAMP Theme Debug] Initializing custom themes...");
             DarkThemeRadio.Checked -= StandardThemeRadio_Checked;
             LightThemeRadio.Checked -= StandardThemeRadio_Checked;
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
@@ -49,18 +48,15 @@ namespace QAMP.Windows
             try
             {
                 Debug.WriteLine($"[QAMP Theme Debug] Themes folder path: {ThemesFolderPath}");
-                AppConsole.Log($"[QAMP Theme Debug] Themes folder path: {ThemesFolderPath}");
 
                 if (!Directory.Exists(ThemesFolderPath))
                 {
                     Debug.WriteLine("[QAMP Theme Debug] Themes folder not found. Creating directory...");
-                    AppConsole.Log("[QAMP Theme Debug] Themes folder not found. Creating directory...");
                     Directory.CreateDirectory(ThemesFolderPath);
                 }
                 else
                 {
                     Debug.WriteLine("[QAMP Theme Debug] Themes folder successfully found.");
-                    AppConsole.Log("[QAMP Theme Debug] Themes folder successfully found.");
                 }
 
                 RefreshThemesList();
@@ -72,7 +68,6 @@ namespace QAMP.Windows
                 {
                     string currentTheme = appSettings.ColorScheme;
                     Debug.WriteLine($"[QAMP Theme Debug] Current theme from settings.json: {currentTheme}");
-                    AppConsole.Log($"[QAMP Theme Debug] Current theme from settings.json: {currentTheme}");
 
                     if (currentTheme == "Dark")
                     {
@@ -94,7 +89,6 @@ namespace QAMP.Windows
             catch (Exception ex)
             {
                 Debug.WriteLine($"[QAMP Theme Debug] CRITICAL ERROR during initialization: {ex.Message}");
-                AppConsole.Log($"[QAMP Theme Debug] CRITICAL ERROR during initialization: {ex.Message}");
             }
             DarkThemeRadio.Checked += StandardThemeRadio_Checked;
             LightThemeRadio.Checked += StandardThemeRadio_Checked;
@@ -170,7 +164,6 @@ namespace QAMP.Windows
         private void RefreshThemesList()
         {
             Debug.WriteLine("[QAMP Theme Debug] Updating themes list in ComboBox");
-            AppConsole.Log("[QAMP Theme Debug] Updating themes list in ComboBox");
 
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
             CustomThemesComboBox.Items.Clear();
@@ -272,6 +265,7 @@ namespace QAMP.Windows
                 {
                     string message = (string)Application.Current.FindResource("LngFailedToCopyFile");
                     NotificationWindow.Show($"{message} {ex.Message}", this);
+                    Debug.WriteLine($"{message} {ex.Message}");
                 }
             }
         }
@@ -560,7 +554,6 @@ namespace QAMP.Windows
                 {
                     config.IsCompactMode = isCompact;
                     Debug.WriteLine($"Mode changed: Compact = {isCompact}");
-                    AppConsole.Log($"Mode changed: Compact = {isCompact}");
                 }
             }
         }

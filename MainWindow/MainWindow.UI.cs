@@ -90,12 +90,10 @@ public partial class MainWindow
                 }
 
                 System.Diagnostics.Debug.WriteLine($"OnTrackChanged successful: {track.Name}");
-                AppConsole.Log($"OnTrackChanged successful: {track.Name}");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in OnTrackChanged UI: {ex.Message}");
-                AppConsole.Log($"Error in OnTrackChanged UI: {ex.Message}");
             }
         });
     }
@@ -125,11 +123,8 @@ public partial class MainWindow
     private void UpdateNowPlayingInfo(Track? track)
     {
         System.Diagnostics.Debug.WriteLine($"UpdateNowPlayingInfo: {track?.Name ?? "null"}");
-        AppConsole.Log($"UpdateNowPlayingInfo: {track?.Name ?? "null"}");
-        System.Diagnostics.Debug.WriteLine($"Cover art size for a new track: {MemoryProfiler.GetSizeCoverTrack(track)} bytes");
-        AppConsole.Log($"Cover art size for a new track: {MemoryProfiler.GetSizeCoverTrack(track)} bytes");
-        System.Diagnostics.Debug.WriteLine($"Size of cover art for the old track in Library: {MemoryProfiler.GetSizeCoverTrack(Library.CurrentTrack)} bytes");
-        AppConsole.Log($"Size of cover art for the old track in Library: {MemoryProfiler.GetSizeCoverTrack(Library.CurrentTrack)} bytes");
+        // System.Diagnostics.Debug.WriteLine($"Cover art size for a new track: {MemoryProfiler.GetSizeCoverTrack(track)} bytes");
+        // System.Diagnostics.Debug.WriteLine($"Size of cover art for the old track in Library: {MemoryProfiler.GetSizeCoverTrack(Library.CurrentTrack)} bytes");
 
         Library.CurrentTrack?.UnloadCover();
         if (track == null)

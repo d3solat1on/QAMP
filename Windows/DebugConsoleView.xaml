@@ -18,16 +18,39 @@
                  AcceptsReturn="True"
                  VerticalScrollBarVisibility="Auto"
                  BorderThickness="0"/>
-        <TextBox Grid.Row="1"
-                 x:Name="ConsoleInputBox"
-                 Background="{DynamicResource SecondaryBackgroundBrush}"
-                 Foreground="{DynamicResource TextBrush}"
-                 FontFamily="Consolas"
-                 FontSize="14"
-                 VerticalScrollBarVisibility="Auto"
-                 BorderThickness="0"
-                 Height="30"
-                 Visibility="Visible"
-                 KeyDown="ConsoleInputBox_KeyDown"/>
+        <Grid Grid.Row="1">
+            <Popup x:Name="SuggestionsPopup"
+                   PlacementTarget="{Binding ElementName=CommandInputBox}"
+                   Placement="Top"
+                   IsOpen="False"
+                   StaysOpen="True"
+                   AllowsTransparency="True">
+                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        MaxHeight="120"
+                        Width="{Binding ActualWidth, ElementName=CommandInputBox}">
+                    <ListBox x:Name="SuggestionsListBox"
+                             Background="Transparent"
+                             Foreground="{DynamicResource ForegroundBrush}"
+                             BorderThickness="0"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             MouseLeftButtonUp="SuggestionsListBox_MouseLeftButtonUp"
+                             PreviewKeyDown="SuggestionsListBox_PreviewKeyDown"/>
+                </Border>
+            </Popup>
+            <TextBox x:Name="ConsoleInputBox"
+                     Background="{DynamicResource SecondaryBackgroundBrush}"
+                     Foreground="{DynamicResource TextBrush}"
+                     FontFamily="Consolas"
+                     FontSize="14"
+                     VerticalScrollBarVisibility="Auto"
+                     BorderThickness="0"
+                     Height="30"
+                     Visibility="Visible"
+                     TextChanged="ConsoleInputBox_TextChanged"
+                     PreviewKeyDown="ConsoleInputBox_PreviewKeyDown"/>
+        </Grid>
     </Grid>
 </UserControl>

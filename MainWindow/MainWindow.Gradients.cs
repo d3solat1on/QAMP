@@ -44,7 +44,6 @@ public partial class MainWindow
         catch (Exception ex)
         {
             App.LogException(ex, "GradientUpdate");
-            AppConsole.Log($"Error updating gradient: {ex.Message}");
             UpperPanel.Background = GetDefaultUpperPanelBrush(config);
         }
     }
@@ -88,7 +87,6 @@ public partial class MainWindow
         catch (Exception ex)
         {
             App.LogException(ex, "FavoritesGradientUpdate");
-            AppConsole.Log($"Error updating gradient for favorites: {ex.Message}");
             UpperPanel.Background = GetDefaultUpperPanelBrush(SettingsManager.Instance.Config);
         }
     }

@@ -35,7 +35,6 @@ public partial class Statistics : Window
     {
         DatabaseService.StatisticsChanged += OnStatisticsChanged;
         System.Diagnostics.Debug.WriteLine("Statistics window: subscribed to StatisticsChanged");
-        AppConsole.Log("Statistics window: subscribed to StatisticsChanged");
     }
 
     private void UnsubscribeFromStatisticsChanges()
@@ -43,7 +42,6 @@ public partial class Statistics : Window
         DatabaseService.StatisticsChanged -= OnStatisticsChanged;
         _debounceTimer?.Dispose();
         System.Diagnostics.Debug.WriteLine("Statistics window: unsubscribed from StatisticsChanged");
-        AppConsole.Log("Statistics window: unsubscribed from StatisticsChanged");
     }
 
     private void OnStatisticsChanged()
@@ -105,7 +103,6 @@ public partial class Statistics : Window
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error refreshing statistics: {ex.Message}");
-            AppConsole.Log($"Error refreshing statistics: {ex.Message}");
             await Dispatcher.InvokeAsync(() =>
             {
                 MostListenedTrackText.Text = "Error loading statistics. Please try again.";
@@ -126,7 +123,6 @@ public partial class Statistics : Window
             System.Diagnostics.Debug.WriteLine($"Error creating playlist with top 50 tracks: {ex.Message}");
             string message = Application.Current.Resources["LngUnsuccessful"] as string ?? "Unsuccessful";
             await StatisticsNotice.ShowAsync(message);
-            AppConsole.Log($"Error creating playlist with top 50 tracks: {ex.Message}");
             App.LogException(ex, "Error creating playlist with top 50 tracks");
         }
     }
@@ -144,7 +140,6 @@ public partial class Statistics : Window
             System.Diagnostics.Debug.WriteLine($"Error creating playlist with tracks without listening: {ex.Message}");
             string message = Application.Current.Resources["LngUnsuccessful"] as string ?? "Unsuccessful";
             await StatisticsNotice.ShowAsync(message);
-            AppConsole.Log($"Error creating playlist with tracks without listening: {ex.Message}");
             App.LogException(ex, "Error creating playlist with tracks without listening");
         }
     }

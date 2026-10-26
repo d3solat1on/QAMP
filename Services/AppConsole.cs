@@ -50,6 +50,9 @@ public class AppConsole
          prev
          seek <time|+/-seconds>
          volume <0-100>
+         mute
+         unmute
+         toggleunmute
          shuffle <on|off>
          repeat <off|all|one>
          queue
@@ -61,6 +64,10 @@ public class AppConsole
          readconfig
          changefontsize
          changefontsizedatagrid
+         createplaylist <title>
+         trackinfo
+         exit
+         quit
          clear
         """);
                 break;
@@ -314,9 +321,60 @@ public class AppConsole
                     ChangeFontSizeDataGrid(fontsizedatagrid);
                 }
                 break;
+            case "createplaylist":
+                CreatePlaylist(args);
+                break;
+            case "trackinfo":
+                var track = player.CurrentTrack;
+                Trackinfo(track);
+                break;
+            case "exit":
+            case "quit":
+                Log("Shutting down application...");
+                Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
+                break;
+            case "mute":
+            case "unmute":
+            case "togglemute":
+                player.ToggleMute();
+                Log($"Volume: {player.Volume * 100:0}%");
+                break;
             default:
                 Log($"Unknown command: {tokens[0]}. Type 'help' for available commands.");
                 break;
+        }
+    }
+
+    public static void Trackinfo(Track? track)
+    {
+        if (track == null)
+        {
+            Log("No track is currently loaded.");
+            return;
+        }
+
+        Log($"  Track Information for {track.Name}");
+        Log($"  Title: {track.Name}");
+        Log($"  Artist: {track.Executor}");
+        Log($"  Album: {track.Album}");
+        Log($"  Genre: {track.Genre ?? "N/A"}");
+        Log($"  Year: {track.Year}");
+        Log($"  Composer: {track.Composer ?? "N/A"}");
+        Log($"  Duration: {track.Duration}s");
+        Log($"  Bitrate: {track.Bitrate} kbps");
+        Log($"  Sample Rate: {track.SampleRate} Hz");
+        Log($"  Channels: {track.Channels}");
+        Log($"  Path: {track.Path}");
+    }
+
+    public static void CreatePlaylist(string title)
+    {
+        long newPlaylist = DatabaseService.CreatePlaylist(title);
+        var newPlaylistId = DatabaseService.GetPlaylistById((int)newPlaylist);
+
+        if (newPlaylistId != null)
+        {
+            Windows.Statistics.RefreshRightPanel(newPlaylistId);
         }
     }
 

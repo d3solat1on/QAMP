@@ -33,7 +33,6 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 App.LogException(ex, "SMTC Error");
-                AppConsole.Log($"SMTC Error: {ex.Message}");
             }
         }
 
@@ -67,7 +66,6 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 App.LogException(ex, "SMTC UpdatePlaybackStatusError");
-                AppConsole.Log($"SMTC UpdatePlaybackStatusError: {ex.Message}");
             }
         }
 
@@ -90,7 +88,6 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 App.LogException(ex, "UpdateTrackInfoError");
-                AppConsole.Log($"UpdateTrackInfoError: {ex.Message}");
             }
         }
     }

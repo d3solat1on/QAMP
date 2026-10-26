@@ -18,7 +18,6 @@ namespace QAMP.Dialogs
             InitializeComponent();
             Owner = Application.Current.MainWindow;
             
-            // Если редактируем существующий плейлист
             if (existingPlaylist != null)
             {
                 Title = Application.Current.Resources["LngEditPlaylistTitle"] as string ?? "Редактировать плейлист";
@@ -67,20 +66,16 @@ namespace QAMP.Dialogs
             {
                 try
                 {
-                    // 1. Загружаем изображение
                     var bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
                     if (Math.Abs(bitmap.PixelWidth - bitmap.PixelHeight) < 2)
                     {
-                        // Изображение уже 1 к 1
                         CoverImage.Source = bitmap;
                         PlaceholderText?.Visibility = Visibility.Collapsed;
                         
-                        // Сохраняем в байты
                         PlaylistCoverImage = BitmapSourceToByteArray(bitmap);
                     }
                     else
                     {
-                        // Изображение не квадратное — открываем кроппер
                         var cropper = new ImageCropperDialog(openFileDialog.FileName)
                         {
                             Owner = this
@@ -91,7 +86,6 @@ namespace QAMP.Dialogs
                             CoverImage.Source = cropper.ResultImage;
                             PlaceholderText?.Visibility = Visibility.Collapsed;
                             
-                            // Сохраняем обрезанное изображение
                             PlaylistCoverImage = BitmapSourceToByteArray(cropper.ResultImage);
                         }
                     }
@@ -101,7 +95,7 @@ namespace QAMP.Dialogs
                     var errorMsg = (Application.Current.Resources["LngImageLoadError"] as string ?? "Ошибка загрузки изображения: {0}")
                         .Replace("{0}", ex.Message);
                     NotificationWindow.Show(errorMsg, this);
-                    AppConsole.Log($"Error loading cover image: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"ImageLoaError: {ex.Message}");
                 }
             }
         }
@@ -118,11 +112,9 @@ namespace QAMP.Dialogs
 
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
-            // Получаем данные из полей
             string name = PlaylistNameTextBox.Text?.Trim() ?? "";
             string description = PlaylistDescriptionTextBox.Text?.Trim() ?? "";
             
-            // Валидация
             if (string.IsNullOrWhiteSpace(name))
             {
                 string message = Application.Current.Resources["LngPlaylistNameEmpty"] as string ?? "Пожалуйста, введите название плейлиста";
@@ -130,7 +122,6 @@ namespace QAMP.Dialogs
                 return;
             }
             
-            // Проверка на дубликат имени (если создаем новый)
             if (Title == (Application.Current.Resources["LngCreatePlaylistTitle"] as string ?? "Создать плейлист"))
             {
                 if (DatabaseService.PlaylistExists(name, -1))
@@ -141,11 +132,9 @@ namespace QAMP.Dialogs
                 }
             }
             
-            // Сохраняем данные
             PlaylistName = name;
             PlaylistDescription = description;
             
-            // Закрываем диалог с успехом
             DialogResult = true;
             Close();
         }

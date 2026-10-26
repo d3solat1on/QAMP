@@ -29,7 +29,6 @@ public static class MemoryOptimizer
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"MemoryOptimizer Error: {ex.Message}");
-                        AppConsole.Log($"MemoryOptimizer Error: {ex.Message}");
                     }
                 });
             }

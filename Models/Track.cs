@@ -312,7 +312,7 @@ namespace QAMP.Models
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading cover: {ex.Message}");
-                AppConsole.Log($"Error loading cover: {ex.Message}");
+                App.LogException(ex, "Error loading cover");
             }
             return null;
         }

@@ -106,21 +106,12 @@ public partial class MainWindow
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error in VolumeSlider_ValueChanged: {ex.Message}");
-            AppConsole.Log($"Error in VolumeSlider_ValueChanged: {ex.Message}");
         }
     }
 
     private void VolumeButton_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (VolumeSlider.Value > 0)
-        {
-            _lastVolume = VolumeSlider.Value;
-            VolumeSlider.Value = 0;
-        }
-        else
-        {
-            VolumeSlider.Value = _lastVolume;
-        }
+        PlayerService.Instance.ToggleMute();
     }
     private void ChangeVolume(double sign)
     {

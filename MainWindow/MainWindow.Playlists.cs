@@ -243,9 +243,7 @@ namespace QAMP
             {
                 MusicLibrary.Instance.CurrentPlaylist = selected;
                 System.Diagnostics.Debug.WriteLine($"View playlist: {selected.Name} (Tracks: {selected.Tracks.Count})");
-                AppConsole.Log($"View playlist: {selected.Name} (Tracks: {selected.Tracks.Count})");
                 System.Diagnostics.Debug.WriteLine($"SortType from DB: {selected.SortType}");
-                AppConsole.Log($"SortType from DB: {selected.SortType}");
                 ApplySort(selected.SortType);
 
                 if (selected.IsSystemPlaylist || selected.CoverImage == null)

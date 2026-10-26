@@ -66,7 +66,6 @@ namespace QAMP.Windows
             if (_track != null && _track.Id == trackId)
             {
                 Debug.WriteLine($"[ShowTrackInfo] Updating PlayCount for track {trackId}");
-                AppConsole.Log($"[ShowTrackInfo] Updating PlayCount for track {trackId}");
 
                 _track.NotifyPropertyChanged(nameof(Track.PlayCount));
             }
@@ -200,7 +199,6 @@ namespace QAMP.Windows
                 NotificationWindow.Show($"{message} {ex.Message}", this);
                 System.Diagnostics.Debug.WriteLine($"BPM Detection Error: {ex}");
                 App.LogException(ex, "DetectBPM_Click");
-                AppConsole.Log($"BPM Detection Error: {ex}");
             }
         }
 
@@ -257,7 +255,6 @@ namespace QAMP.Windows
                 NotificationWindow.Show($"{message} {ex.Message}", this, NotificationWindow.NotificationMode.Info);
                 System.Diagnostics.Debug.WriteLine($"Error saving tags: {ex}");
                 App.LogException(ex, "SaveClickShowTrackInfo");
-                AppConsole.Log($"Error saving tags: {ex}");
             }
             finally
             {
@@ -299,7 +296,6 @@ namespace QAMP.Windows
                     string message = (string)Application.Current.FindResource("LngError");
                     NotificationWindow.Show($"{message} {ex.Message}", this);
                     App.LogException(ex, "ExtractCover_Click");
-                    AppConsole.Log($"Error extracting cover art: {ex}");
                 }
             }
         }
@@ -333,7 +329,6 @@ namespace QAMP.Windows
                     string message = (string)Application.Current.FindResource("LngError");
                     NotificationWindow.Show($"{message} {ex.Message}", this);
                     App.LogException(ex, "ChangeCover_Click");
-                    AppConsole.Log($"Error changing cover art: {ex}");
                 }
             }
         }
@@ -401,7 +396,6 @@ namespace QAMP.Windows
                 string message = (string)Application.Current.FindResource("LngError");
                 NotificationWindow.Show($"{message} {ex.Message}", this);
                 App.LogException(ex, "SearchLyrics_Click");
-                AppConsole.Log($"SearchLyrics Error: {ex}");
             }
             finally
             {
@@ -437,7 +431,6 @@ namespace QAMP.Windows
             catch (Exception ex)
             {
                 Debug.WriteLine($"LRCLIB Error: {ex.Message}");
-                AppConsole.Log($"LRCLIB Error: {ex.Message}");
             }
             return null;
         }

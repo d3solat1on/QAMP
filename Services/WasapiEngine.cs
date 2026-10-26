@@ -140,7 +140,6 @@ public class WasapiEngine
         catch (Exception ex)
         {
             Debug.WriteLine($"WASAPI callback failed: {ex.Message}");
-            AppConsole.Log($"WASAPI callback failed: {ex.Message}");
             NotifyPlaybackEnded(stream);
             return 0;
         }
@@ -151,7 +150,6 @@ public class WasapiEngine
         if (_decodeBuffer == null || !_decodeBufferHandle.IsAllocated)
         {
             Debug.WriteLine("WASAPI resampling buffer is not available.");
-            AppConsole.Log("WASAPI resampling buffer is not available.");
             return 0;
         }
 
@@ -172,7 +170,6 @@ public class WasapiEngine
             if (freeFrames < framesToRead)
             {
                 Debug.WriteLine("WASAPI resampling buffer capacity exceeded.");
-                AppConsole.Log("WASAPI resampling buffer capacity exceeded.");
                 break;
             }
 

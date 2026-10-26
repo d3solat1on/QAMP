@@ -109,6 +109,7 @@ namespace QAMP.Services
             }
         }
 
+        private double _lastVolume = 0.5;  //
         private double _volume = 0.5;
         // Множитель громкости для быстрой регулировки (1.0 = без изменения)
         private readonly double _masterGain = 3.0;
@@ -212,7 +213,6 @@ namespace QAMP.Services
                     {
                         _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
                         System.Diagnostics.Debug.WriteLine($"[QUEUE] Queue size: {_actualPlayingQueue.Count}");
-                        AppConsole.Log($"[QUEUE] Queue size: {_actualPlayingQueue.Count}");
                     }
                 }
 
@@ -291,7 +291,6 @@ namespace QAMP.Services
             {
                 _ = NotificationWindow.Show($"Error: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Error in PlayTrack: {ex.Message}");
-                AppConsole.Log($"Error in PlayTrack: {ex.Message}");
                 App.LogException(ex, "PlayTrack");
                 StopInternal();
             }
@@ -300,7 +299,25 @@ namespace QAMP.Services
                 _playSemaphore.Release();
             }
         }
-
+        public void ToggleMute()
+        {
+            if (Volume > 0)
+            {
+                _lastVolume = Volume;
+                Volume = 0;
+            }
+            else
+            {
+                if (_lastVolume > 0)
+                {
+                    Volume = _lastVolume;
+                }
+                else
+                {
+                    Volume = 0.2;
+                }
+            }
+        }
         public async Task ApplyOutputModeAsync()
         {
             if (CurrentTrack == null) return;
@@ -412,7 +429,6 @@ namespace QAMP.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error occurred: {ex.Message}");
-                AppConsole.Log($"Error occurred: {ex.Message}");
                 App.LogException(ex, "ResumeAfterTagEdit");
             }
             finally
@@ -805,13 +821,11 @@ namespace QAMP.Services
                 {
                     _actualPlayingQueue = [.. MusicLibrary.Instance.PlaybackQueue];
                     System.Diagnostics.Debug.WriteLine($"[QUEUE] [QUEUE] Queue restored from PlaybackQueue: {_actualPlayingQueue.Count} tracks");
-                    AppConsole.Log($"[QUEUE] Queue restored from PlaybackQueue: {_actualPlayingQueue.Count} tracks");
                 }
                 else if (_actualPlayingQueue == null || _actualPlayingQueue.Count == 0)
                 {
                     _actualPlayingQueue = [track];
                     System.Diagnostics.Debug.WriteLine("[QUEUE] [QUEUE] Current track set as the only entry in the queue");
-                    AppConsole.Log("[QUEUE] Current track set as the only entry in the queue");
                 }
 
                 TrackChanged?.Invoke(track);
@@ -820,7 +834,7 @@ namespace QAMP.Services
             {
                 _ = NotificationWindow.Show($"Error: {ex.Message}", Application.Current.MainWindow);
                 System.Diagnostics.Debug.WriteLine($"Error in LoadTrack: {ex.Message}");
-                AppConsole.Log($"Error in LoadTrack: {ex.Message}");
+                App.LogException(ex, "Load track");
                 Stop();
             }
         }
@@ -917,14 +931,12 @@ namespace QAMP.Services
                         if (totalDuration > 0 && (totalDuration - newPosition) < 0.3)
                         {
                             System.Diagnostics.Debug.WriteLine($"[PositionTimer] Track ending detected! Remaining: {totalDuration - newPosition:F2}s");
-                            AppConsole.Log($"[PositionTimer] Track ending detected! Remaining: {totalDuration - newPosition:F2}s");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"PositionTimer error: {ex.Message}");
-                    AppConsole.Log($"PositionTimer error: {ex.Message}");
                 }
             }
         }
@@ -1094,7 +1106,6 @@ namespace QAMP.Services
             {
                 if (stream != 0) Bass.BASS_StreamFree(stream);
                 System.Diagnostics.Debug.WriteLine($"Crossfade failed: {ex.Message}");
-                AppConsole.Log($"Crossfade failed: {ex.Message}");
                 App.LogException(ex, "TryStartCrossfade");
             }
         }
@@ -1245,7 +1256,6 @@ namespace QAMP.Services
             if (CurrentTrack == null)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: CurrentTrack == null");
-                AppConsole.Log("PlayNextTrack: CurrentTrack == null");
                 return;
             }
 
@@ -1254,7 +1264,6 @@ namespace QAMP.Services
             if (queue == null || queue.Count == 0)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: Queue is empty");
-                AppConsole.Log("PlayNextTrack: Queue is empty");
                 return;
             }
 
@@ -1264,7 +1273,6 @@ namespace QAMP.Services
             {
                 nextTrack = CurrentTrack;
                 System.Diagnostics.Debug.WriteLine("RepeatOne: playing same track");
-                AppConsole.Log("RepeatOne: playing same track");
             }
             else if (IsShuffleEnabled)
             {
@@ -1296,13 +1304,11 @@ namespace QAMP.Services
             if (nextTrack != null)
             {
                 System.Diagnostics.Debug.WriteLine($"Playing next: {nextTrack.Name}");
-                AppConsole.Log($"Playing next: {nextTrack.Name}");
                 _ = PlayTrack(nextTrack, false);
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("No next track available (End of playlist)");
-                AppConsole.Log("No next track available (End of playlist)");
             }
 
             MainWindow.UpdateOSD();
@@ -1360,7 +1366,6 @@ namespace QAMP.Services
             }
 
             System.Diagnostics.Debug.WriteLine($"[QUEUE] Queue updated with {newTracks.Count} tracks. Total: {_actualPlayingQueue.Count}");
-            AppConsole.Log($"[QUEUE] Queue updated with {newTracks.Count} tracks. Total: {_actualPlayingQueue.Count}");
         }
     }
 
