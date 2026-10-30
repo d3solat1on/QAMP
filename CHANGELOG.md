@@ -1,5 +1,5 @@
 # CHANGELOG
-# (XX.XX.2026) Version 1.8.7.7:
+# (31.10.2026) Version 1.8.7.7:
     - Added a new comands for the console: changeformatlibrary, changeaccentcolor, lyricsmode, clearcache and more. 
     - Minor changes to the GUI.
 
