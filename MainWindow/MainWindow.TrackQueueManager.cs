@@ -46,6 +46,7 @@ public partial class MainWindow
             _playService.ShuffledQueue.Clear();
         }
         SyncPlaybackQueueWithCurrentState();
+        UpdateShuffleUI();
     }
     public void SyncPlaybackQueueWithCurrentState()
     {
@@ -187,8 +188,6 @@ public partial class MainWindow
         _playService.IsShuffleEnabled = !_playService.IsShuffleEnabled;
 
         RebuildPlaybackQueue();
-
-        UpdateShuffleUI();
     }
 
     public void TogglePlayPause()
@@ -299,26 +298,20 @@ public partial class MainWindow
     }
     private void RepeatButton_Click(object? sender, RoutedEventArgs? e)
     {
-        var resources = Application.Current.Resources;
-
         switch (Player.RepeatMode)
         {
             case RepeatMode.NoRepeat:
                 Player.RepeatMode = RepeatMode.RepeatAll;
-                RepeatIcon.Data = (Geometry)resources["repeat_onGeometry"];
                 break;
 
             case RepeatMode.RepeatAll:
                 Player.RepeatMode = RepeatMode.RepeatOne;
-                RepeatIcon.Data = (Geometry)resources["repeat_one_onGeometry"];
                 break;
 
             case RepeatMode.RepeatOne:
                 Player.RepeatMode = RepeatMode.NoRepeat;
-                RepeatIcon.Data = (Geometry)resources["repeatGeometry"];
                 break;
         }
-        UpdateNextTrackUI();
     }
 
     private void PlayTrackMenuItem_Click(object sender, RoutedEventArgs e)
@@ -344,18 +337,6 @@ public partial class MainWindow
                 UpdateNextTrackUI();
             }
         }
-    }
-
-    private void TracksDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        _scrollCleanupTimer?.Stop();
-        _scrollCleanupTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-        _scrollCleanupTimer.Tick += (s, args) =>
-        {
-            _scrollCleanupTimer?.Stop();
-            CoverImageCacheService.ForceGarbageCollection();
-        };
-        _scrollCleanupTimer.Start();
     }
 
     private void TracksDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

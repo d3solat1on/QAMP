@@ -13,7 +13,10 @@ public partial class DebugConsoleView : UserControl
         "seek", "volume", "shuffle", "repeat", "queue", "search",
         "playlists", "playlist", "devices", "device", "readconfig",
         "changefontsize", "changefontsizedatagrid", "createplaylist",
-        "clear", "exit", "quit", "mute", "unmute", "trackinfo"
+        "clear", "exit", "quit", "mute", "unmute", "trackinfo", "clearcache",
+        "changeformatlibrary","changeaccentcolor","lyricsmode", "changeround",
+        "background", "getfonts", "setfont","getthemes", "settheme","setbg",
+        "addbg", "addtheme","addfont"
     ];
     public DebugConsoleView()
     {

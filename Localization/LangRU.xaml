@@ -1,6 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngDescriptionTracksWithoutListening">Треки, которые не были прослушаны</System:String>
+        <System:String x:Key="LngDescriptionTop50Tracks">Топ 50 треков по количеству прослушиваний</System:String>
+        <System:String x:Key="LngTrackWithoutListening">Треки без прослушивания</System:String>
+        <System:String x:Key="LngTop50Tracks">Ваш топ 50 треков</System:String>
         <System:String x:Key="LngConsole">Консоль</System:String>
         <System:String x:Key="LngLastListenedTrack">Последний прослушанный трек</System:String>
         <System:String x:Key="LngMostPopularGenre">Самый популярный жанр</System:String>

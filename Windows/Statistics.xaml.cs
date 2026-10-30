@@ -149,6 +149,7 @@ public partial class Statistics : Window
         if (newPlaylist != null)
         {
             ViewModels.MusicLibrary.Instance.Playlists.Add(newPlaylist);
+            ViewModels.MusicLibrary.Instance.RefreshSinglePlaylist(newPlaylist.Id);
         }
     }
 

@@ -33,8 +33,8 @@ namespace QAMP.Windows
             InitializeCustomThemes();
         }
 
-        private static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
-        private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
+        // private static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
+        // private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
 
 
         private void InitializeCustomThemes()
@@ -47,12 +47,12 @@ namespace QAMP.Windows
 
             try
             {
-                Debug.WriteLine($"[QAMP Theme Debug] Themes folder path: {ThemesFolderPath}");
+                Debug.WriteLine($"[QAMP Theme Debug] Themes folder path: {AppDataManager.ThemesFolderPath}");
 
-                if (!Directory.Exists(ThemesFolderPath))
+                if (!Directory.Exists(AppDataManager.ThemesFolderPath))
                 {
                     Debug.WriteLine("[QAMP Theme Debug] Themes folder not found. Creating directory...");
-                    Directory.CreateDirectory(ThemesFolderPath);
+                    Directory.CreateDirectory(AppDataManager.ThemesFolderPath);
                 }
                 else
                 {
@@ -168,9 +168,9 @@ namespace QAMP.Windows
             CustomThemesComboBox.SelectionChanged -= CustomThemesComboBox_SelectionChanged;
             CustomThemesComboBox.Items.Clear();
 
-            if (Directory.Exists(ThemesFolderPath))
+            if (Directory.Exists(AppDataManager.ThemesFolderPath))
             {
-                var xamlFiles = Directory.GetFiles(ThemesFolderPath, "*.xaml")
+                var xamlFiles = Directory.GetFiles(AppDataManager.ThemesFolderPath, "*.xaml")
                                          .Select(Path.GetFileName)
                                          .ToList();
 
@@ -184,52 +184,6 @@ namespace QAMP.Windows
             CustomThemesComboBox.UpdateLayout();
         }
 
-        private static bool IsThemeValid(string filePath, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-            try
-            {
-                var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 1024 * 1024)
-                {
-                    errorMessage = (string)Application.Current.FindResource("LngThemeFileMAX");
-                    return false;
-                }
-
-                ResourceDictionary? customDict;
-                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    customDict = System.Windows.Markup.XamlReader.Load(fs) as ResourceDictionary;
-                }
-
-                if (customDict == null)
-                {
-                    errorMessage = (string)Application.Current.FindResource("LngErrorResourceDictionary");
-                    return false;
-                }
-
-                var defaultThemeUri = new Uri(";component/Themes/DarkTheme.xaml", UriKind.RelativeOrAbsolute);
-                var baseThemeDict = new ResourceDictionary { Source = defaultThemeUri };
-
-                foreach (var key in baseThemeDict.Keys)
-                {
-                    if (!customDict.Contains(key))
-                    {
-                        string message = (string)Application.Current.FindResource("LngThemeMissingResource");
-                        errorMessage = $"{message} '{key}'";
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                string message = (string)Application.Current.FindResource("LngXAMLReadingError");
-                errorMessage = $"{message} {ex.Message}";
-                return false;
-            }
-        }
 
         private async void AddThemeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -243,9 +197,9 @@ namespace QAMP.Windows
             {
                 string selectedFilePath = openFileDialog.FileName;
                 string fileName = Path.GetFileName(selectedFilePath);
-                string destFilePath = Path.Combine(ThemesFolderPath, fileName);
+                string destFilePath = Path.Combine(AppDataManager.ThemesFolderPath, fileName);
 
-                if (!IsThemeValid(selectedFilePath, out string error))
+                if (!ThemeManager.IsThemeValid(selectedFilePath, out string error))
                 {
                     string message = (string)Application.Current.FindResource("LngFailedImportTheme");
                     NotificationWindow.Show($"{message}\n{error}", this);
@@ -720,9 +674,9 @@ namespace QAMP.Windows
 
         private async void ReplaceBG_Click(object sender, RoutedEventArgs e)
         {
-            if (!Directory.Exists(BGFolderPath))
+            if (!Directory.Exists(AppDataManager.BGFolderPath))
             {
-                Directory.CreateDirectory(BGFolderPath);
+                Directory.CreateDirectory(AppDataManager.ThemesFolderPath);
             }
 
             OpenFileDialog openFileDialog = new();
@@ -731,7 +685,7 @@ namespace QAMP.Windows
             {
                 string selectedFilePath = openFileDialog.FileName;
                 string fileName = Path.GetFileName(selectedFilePath);
-                string destFilePath = Path.Combine(BGFolderPath, fileName);
+                string destFilePath = Path.Combine(AppDataManager.ThemesFolderPath, fileName);
 
                 try
                 {

@@ -110,6 +110,52 @@ namespace QAMP.Services
             }
             catch { }
         }
+        public static bool IsThemeValid(string filePath, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            try
+            {
+                var fileInfo = new FileInfo(filePath);
+                if (fileInfo.Length > 1024 * 1024)
+                {
+                    errorMessage = (string)Application.Current.FindResource("LngThemeFileMAX");
+                    return false;
+                }
+
+                ResourceDictionary? customDict;
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    customDict = System.Windows.Markup.XamlReader.Load(fs) as ResourceDictionary;
+                }
+
+                if (customDict == null)
+                {
+                    errorMessage = (string)Application.Current.FindResource("LngErrorResourceDictionary");
+                    return false;
+                }
+
+                var defaultThemeUri = new Uri(";component/Themes/DarkTheme.xaml", UriKind.RelativeOrAbsolute);
+                var baseThemeDict = new ResourceDictionary { Source = defaultThemeUri };
+
+                foreach (var key in baseThemeDict.Keys)
+                {
+                    if (!customDict.Contains(key))
+                    {
+                        string message = (string)Application.Current.FindResource("LngThemeMissingResource");
+                        errorMessage = $"{message} '{key}'";
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string message = (string)Application.Current.FindResource("LngXAMLReadingError");
+                errorMessage = $"{message} {ex.Message}";
+                return false;
+            }
+        }
     }
     public class ThemeHelper
     {

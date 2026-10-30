@@ -48,6 +48,7 @@ public partial class MainWindow
 
                 UpdatePlayPauseIconState();
                 UpdateShuffleUI();
+                UpdateRepeatUI();
                 UpdateFavoriteIcon(track);
                 FavoriteButton1Grid.Visibility = Visibility.Visible;
 
@@ -60,6 +61,8 @@ public partial class MainWindow
 
                 NextTrack.Text = "Next Track";
                 NowPlaying.Text = "NOW PLAYING";
+                UpdateNextTrackUI(track);
+                if (_isLyricsMode) UpdateLyricsView();
 
 #if DEBUG
                 Title = $"{track.Executor} — {track.Name} | QAMP [DEBUG]";
@@ -172,6 +175,38 @@ public partial class MainWindow
             ShuffleImageContorlPanel.Data = (Geometry)Application.Current.Resources[isCurrentPlaylistShuffled ? "shuffle_OnGeometry" : "shuffleGeometry"];
             ShuffleImageContorlPanel.Fill = (Brush)Application.Current.Resources["AccentBrush"];
         }
+    }
+
+    private void OnRepeatModeChanged(RepeatMode repeatMode)
+    {
+        void UpdateRepeatState()
+        {
+            UpdateRepeatUI();
+            UpdateNextTrackUI();
+        }
+
+        if (Dispatcher.CheckAccess())
+        {
+            UpdateRepeatState();
+        }
+        else
+        {
+            Dispatcher.Invoke(UpdateRepeatState);
+        }
+    }
+
+    private void UpdateRepeatUI()
+    {
+        if (RepeatIcon == null) return;
+
+        string geometryResource = _playService.RepeatMode switch
+        {
+            RepeatMode.RepeatAll => "repeat_onGeometry",
+            RepeatMode.RepeatOne => "repeat_one_onGeometry",
+            _ => "repeatGeometry"
+        };
+
+        RepeatIcon.Data = (Geometry)Application.Current.Resources[geometryResource];
     }
 
     private void UpdatePlayPauseIconState()

@@ -172,6 +172,21 @@ public class DatabaseService
             {
                 System.Diagnostics.Debug.WriteLine("Column BPM already exists in Tracks");
             }
+
+            var addedDateCmd = connection.CreateCommand();
+            addedDateCmd.CommandText = @"
+                UPDATE PlaylistTracks
+                SET AddedDate = COALESCE(
+                    (SELECT NULLIF(CreatedDate, '') FROM Playlists WHERE Id = PlaylistTracks.PlaylistId),
+                    strftime('%Y-%m-%d %H:%M:%S', 'now'))
+                WHERE AddedDate IS NULL
+                    OR trim(AddedDate) = ''
+                    OR AddedDate LIKE '0001-%'";
+            int repairedAddedDates = addedDateCmd.ExecuteNonQuery();
+            if (repairedAddedDates > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"Repaired {repairedAddedDates} playlist track added dates.");
+            }
         }
         catch (Exception ex)
         {
@@ -1060,7 +1075,7 @@ public class DatabaseService
         connection.Open();
         var cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            SELECT Tracks.Name
+            SELECT Tracks.Name, Executor
             FROM TrackPlayHistory
             INNER JOIN Tracks ON Tracks.Id = TrackPlayHistory.TrackId
             ORDER BY TrackPlayHistory.PlayedAtUtc DESC, TrackPlayHistory.Id DESC
@@ -1069,7 +1084,9 @@ public class DatabaseService
         using var reader = cmd.ExecuteReader();
         if (reader.Read())
         {
-            return reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+            string name = reader.IsDBNull(0) ? "Unknown" : reader.GetString(0);
+            string executor = reader.IsDBNull(1) ? "Unknown" : reader.GetString(1);
+            return $"{name}  by {executor}";
         }
         return "Unknown";
     }
@@ -1218,13 +1235,15 @@ public class DatabaseService
 
     public static void CreatePlaylistWithTop50Tracks()
     {
-        long newPlaylistId = CreatePlaylist("Top 50 Tracks", null, null, true);
+        long newPlaylistId = CreatePlaylist("Top50Tracks", "Top 50 tracks by number of listens", null, true);
         var newPlaylist = GetPlaylistById((int)newPlaylistId);
 
         var topTracks = GetMostListenedTracksList(50);
+        var dateAdded = newPlaylist?.CreatedDate ?? DateTime.Now;
 
         foreach (var track in topTracks)
         {
+            track.AddedDate = dateAdded;
             SaveTrackToPlaylist((int)newPlaylistId, track);
         }
         if (newPlaylist != null)
@@ -1236,12 +1255,15 @@ public class DatabaseService
 
     public static void CreatePlaylistTracksWithoutListening()
     {
-        long newPlaylistId = CreatePlaylist("Tracks without listening", null, null, true);
+        long newPlaylistId = CreatePlaylist("TracksWithoutListening", "Tracks that haven't been listened", null, true);
         var newPlaylist = GetPlaylistById((int)newPlaylistId);
 
         var tracks = GetTracksWithoutListeningButton();
+        var dateAdded = newPlaylist?.CreatedDate ?? DateTime.Now;
+
         foreach (var track in tracks)
         {
+            track.AddedDate = dateAdded;
             SaveTrackToPlaylist((int)newPlaylistId, track);
         }
         if (newPlaylist != null)

@@ -38,6 +38,12 @@ public static class AppDataManager
         }
     }
 
+    // themes
+    public static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
+    // BG
+    public static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
+
+
     // Публичные свойства для путей к конкретным файлам
     public static string DatabasePath => GetFilePath("library.db");
     public static string SettingsPath => GetFilePath("settings.json");

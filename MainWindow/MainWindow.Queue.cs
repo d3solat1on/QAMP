@@ -30,6 +30,19 @@ public partial class MainWindow
                 }
 
                 QueueListBox.ItemsSource = MusicLibrary.Instance.PlaybackQueue;
+
+                var currentTrack = _playService.CurrentTrack;
+                var playingTrack = currentTrack == null
+                    ? null
+                    : MusicLibrary.Instance.PlaybackQueue.FirstOrDefault(track => track.Path == currentTrack.Path);
+
+                QueueListBox.SelectedItem = playingTrack;
+                if (playingTrack != null)
+                {
+                    Dispatcher.BeginInvoke(
+                        new Action(() => QueueListBox.ScrollIntoView(playingTrack)),
+                        System.Windows.Threading.DispatcherPriority.Loaded);
+                }
             }
         }
         else

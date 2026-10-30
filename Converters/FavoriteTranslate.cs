@@ -9,24 +9,22 @@ namespace QAMP.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Проверяем, что value не null и является Playlist
             if (value is Playlist playlist)
             {
-                // Для системных плейлистов - локализуем имя
                 if (playlist.IsSystemPlaylist)
                 {
                     return playlist.Name switch
                     {
                         "Favorites" => Application.Current.TryFindResource("LngFavoritesPlaylist")?.ToString() ?? "Favorites",
+                        "Top50Tracks" => Application.Current.TryFindResource("LngTop50Tracks")?.ToString() ?? "Top 50 tracks",
+                        "TracksWithoutListening" => Application.Current.TryFindResource("LngTrackWithoutListening")?.ToString() ?? "Tracks without listening",
                         _ => playlist.Name ?? "Favorites"
                     };
                 }
 
-                // Для обычных плейлистов - возвращаем их имя
                 return playlist.Name ?? string.Empty;
             }
 
-            // Если value не Playlist или null
             return value?.ToString() ?? string.Empty;
         }
 
@@ -47,6 +45,8 @@ namespace QAMP.Converters
                     return playlist.Name switch
                     {
                         "Favorites" => Application.Current.TryFindResource("LngFavoritesDescription")?.ToString() ?? "Your favorite tracks",
+                        "Top50Tracks" => Application.Current.TryFindResource("LngDescriptionTop50Tracks")?.ToString() ?? "Top 50 Tracks",
+                        "TracksWithoutListening" => Application.Current.TryFindResource("LngTrackWithoutListening")?.ToString() ?? "Tracks that haven't been listened",
                         _ => playlist.Description ?? string.Empty
                     };
                 }

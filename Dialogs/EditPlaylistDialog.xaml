@@ -149,7 +149,7 @@
                                         IsCancel="True"
                                         BorderThickness="0">
                                 </Button>
-                                <Button Content="{DynamicResource LngCreatePlaylist}"
+                                <Button Content="{DynamicResource LngOk}"
                                         Click="EditPlaylist_Click"
                                         Width="100"
                                         Height="35"

@@ -51,10 +51,14 @@ namespace QAMP
             Player.VolumeChanged += OnVolumeChanged;
             Player.DurationChanged += OnDurationChanged;
             _playService.TrackChanged += UpdateNextTrackUI;
+            _playService.RepeatModeChanged += OnRepeatModeChanged;
             PreviewKeyDown += Window_PreviewKeyDown;
             PreviewKeyDown += TracksDataGrid_PreviewKeyDown;
             PreviewMouseLeftButtonDown += Window_PreviewMouseLeftButtonDown;
             PlayerService.Instance.AddSpectrumControl(SpectrumViewer);
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"Memory usage on start: {MemoryProfiler.GetMemoryUsage()}");
+#endif
             Closing += (s, e) => OnClosing(e);
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -75,10 +79,6 @@ namespace QAMP
                 }
             }
 
-            if (SettingsManager.Instance.Config.IsCompactMode)
-            {
-                CoverImageCacheService.ClearDiskCache();
-            }
 
             string savedVolume = DatabaseService.GetSetting("Volume", "0.5");
 
@@ -272,6 +272,9 @@ namespace QAMP
                 System.Diagnostics.Debug.WriteLine($"No last playlist found");
                 OnTrackChanged(null);
             }
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"Memory usage after loading: {MemoryProfiler.GetMemoryUsage()}");
+#endif
         }
 
         private void OnPlaybackPaused(bool isPaused)

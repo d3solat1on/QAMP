@@ -244,18 +244,6 @@ public static class CoverImageCacheService
         _accessOrder.AddLast(key);
     }
 
-    public static void ForceGarbageCollection()
-    {
-        lock (_syncRoot)
-        {
-            _memoryCache.Clear();
-            _accessOrder.Clear();
-            _currentMemorySize = 0;
-        }
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive);
-        GC.WaitForPendingFinalizers();
-    }
-
     public static void ClearMemoryCache()
     {
         lock (_syncRoot)

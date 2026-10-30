@@ -17,6 +17,11 @@ public partial class MainWindow
         _isLyricsMode = !_isLyricsMode;
         UpdateInterfaceMode();
     }
+    public void UpdateFromConsole()
+    {
+        _isLyricsMode = !_isLyricsMode;
+        UpdateInterfaceMode();
+    }
 
     private void UpdateInterfaceMode()
     {

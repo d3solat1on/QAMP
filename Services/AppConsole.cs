@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Media;
 using QAMP.Models;
 using QAMP.ViewModels;
 
@@ -69,6 +72,19 @@ public class AppConsole
          exit
          quit
          clear
+         clearcache
+         changeformatlibrary
+         changeaccentcolor <#HEX>
+         lyricsmode
+         changeround <0-10>
+         background
+         getfonts
+         setfont
+         settheme
+         getthemes
+         addbg
+         setbg <path to img, with extension>
+         addfont
         """);
                 break;
 
@@ -339,13 +355,311 @@ public class AppConsole
                 player.ToggleMute();
                 Log($"Volume: {player.Volume * 100:0}%");
                 break;
+            case "clearcache":
+                CoverImageCacheService.ClearDiskCache();
+                Log("Disk cover cache cleared successfully.");
+                break;
+            case "changeformatlibrary":
+                ChangeFormatLibrary();
+                break;
+            case "changeaccentcolor":
+                ChangeAccentColor(args);
+                break;
+            case "lyricsmode":
+                if (Application.Current?.MainWindow is MainWindow mainWindowLyrics)
+                {
+                    mainWindowLyrics.UpdateFromConsole();
+                }
+                break;
+            case "changeround":
+                ChangeCurrentRound(args);
+                break;
+            case "bg":
+            case "background":
+                CheckUseCustomBG();
+                break;
+            case "setbg":
+                SetBG(args);
+                break;
+            case "getfonts":
+                GetFonts();
+                break;
+            case "setfont":
+                SetFont(args);
+                break;
+            case "getthemes":
+                GetThemes();
+                break;
+            case "settheme":
+                SetTheme(args);
+                break;
+            case "addfont":
+                AddFont(args);
+                break;
+            case "addtheme":
+                AddTheme(args);
+                break;
+            case "addbg":
+                AddImgForBG(args);
+                break;
+#if DEBUG
+            case "test":
+                FreeRam();
+                break;
+#endif
             default:
                 Log($"Unknown command: {tokens[0]}. Type 'help' for available commands.");
                 break;
         }
     }
 
-    public static void Trackinfo(Track? track)
+    private static void SetBG(string filePath)
+    {
+        var config = SettingsManager.Instance.Config;
+        string ext = Path.GetExtension(filePath).ToLowerInvariant();
+        if (ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp")
+        {
+            Debug.WriteLine("Error: Only image files (.jpg, .jpeg, .png, .webp) are allowed for background.");
+            Log("Error: Only image files (.jpg, .jpeg, .png, .webp) are allowed for background.");
+            return;
+        }
+        config.CustomBackgroundPath = filePath;
+    }
+    private static void AddImgForBG(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        {
+            Debug.WriteLine("Error: File path is invalid or file does not exist.");
+            return;
+        }
+
+        string ext = Path.GetExtension(filePath).ToLowerInvariant();
+        if (ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp")
+        {
+            Debug.WriteLine("Error: Only image files (.jpg, .jpeg, .png, .webp) are allowed for background.");
+            Log("Error: Only image files (.jpg, .jpeg, .png, .webp) are allowed for background.");
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(AppDataManager.BGFolderPath);
+
+            string fileName = Path.GetFileName(filePath);
+            string destPath = Path.Combine(AppDataManager.BGFolderPath, fileName);
+
+            File.Copy(filePath, destPath, overwrite: true);
+            Debug.WriteLine($"Background image added successfully: {fileName}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error AddImgForBG: {ex.Message}");
+        }
+    }
+
+    private static void AddTheme(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        {
+            Debug.WriteLine("Error: File path is invalid or file does not exist.");
+            Log("Error: File path is invalid or file does not exist.");
+            return;
+        }
+
+        if (!string.Equals(Path.GetExtension(filePath), ".xaml", StringComparison.OrdinalIgnoreCase))
+        {
+            Debug.WriteLine("Error: Only .xaml files are allowed for themes.");
+            Log("Error: Only .xaml files are allowed for themes.");
+            return;
+        }
+
+        if (!ThemeManager.IsThemeValid(filePath, out string errorMessage))
+        {
+            Debug.WriteLine($"Error: Theme is invalid. {errorMessage}");
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(AppDataManager.ThemesFolderPath);
+
+            string fileName = Path.GetFileName(filePath);
+            string destPath = Path.Combine(AppDataManager.ThemesFolderPath, fileName);
+
+            File.Copy(filePath, destPath, overwrite: true);
+            Debug.WriteLine($"Theme added successfully: {fileName}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error AddTheme: {ex.Message}");
+        }
+    }
+
+    private static void AddFont(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        {
+            Debug.WriteLine("Error: File path is invalid or file does not exist.");
+            return;
+        }
+
+        string ext = Path.GetExtension(filePath).ToLowerInvariant();
+        if (ext != ".ttf" && ext != ".otf")
+        {
+            Debug.WriteLine("Error: Only font files (.ttf, .otf) are allowed.");
+            return;
+        }
+
+        try
+        {
+            var fontService = FontService.Instance;
+            var imported = fontService.ImportFont(filePath);
+            if (imported != null)
+            {
+                Debug.WriteLine($"Font added successfully: {imported.DisplayName}");
+            }
+            else
+            {
+                Debug.WriteLine("Error: Failed to import font file.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error AddFont: {ex.Message}");
+        }
+    }
+
+    private static void SetTheme(string titleTheme)
+    {
+        bool success = ThemeManager.ApplyTheme(titleTheme);
+
+        if (!success)
+        {
+            Log("Usage: settheme LightTheme.xaml");
+        }
+    }
+    private static void GetThemes()
+    {
+        string[] files = Directory.GetFiles(AppDataManager.ThemesFolderPath);
+        foreach (string title in files)
+        {
+            Log(title);
+        }
+    }
+    private static void SetFont(string fontName)
+    {
+        if (string.IsNullOrWhiteSpace(fontName))
+        {
+            Log("Error: Font name cannot be empty.");
+            return;
+        }
+
+        var fontService = FontService.Instance;
+        var selectedFont = fontService.FindFont(fontName.Trim());
+
+        if (selectedFont is null)
+        {
+            Log($"Error: Font '{fontName}' not found. Use 'getfonts' to see available fonts.");
+            return;
+        }
+
+        var config = SettingsManager.Instance.Config;
+        config.SelectedFontName = selectedFont.DisplayName;
+
+        FontService.ApplyFontToApplication(selectedFont.Family);
+
+        SettingsManager.Instance.Save();
+        Log($"Font successfully changed to: {selectedFont.DisplayName}");
+    }
+    private static void GetFonts()
+    {
+        var fontService = FontService.Instance;
+        foreach (var fontOption in fontService.AvailableFonts)
+        {
+            Log($"{fontOption}");
+        }
+    }
+    private static void CheckUseCustomBG()
+    {
+        var config = SettingsManager.Instance.Config;
+        if (config.UseCustomBackground == true)
+        {
+            config.UseCustomBackground = false;
+        }
+        else
+        {
+            config.UseCustomBackground = true;
+        }
+    }
+    private static void ChangeCurrentRound(string args)
+    {
+        var config = SettingsManager.Instance.Config;
+        if (string.IsNullOrWhiteSpace(args)) return;
+        if (int.TryParse(args, out int parsedRound))
+        {
+            if (parsedRound >= 0 && parsedRound <= 10)
+            {
+                config.CurrentRound = parsedRound;
+                SettingsManager.Instance.Save();
+                Application.Current.Resources["AppCornerRadius"] = new CornerRadius(parsedRound);
+            }
+            else
+            {
+                Log("Usage: changeround <0-10>");
+            }
+        }
+
+    }
+    private static void ChangeAccentColor(string color)
+    {
+        var config = SettingsManager.Instance.Config;
+        Color parsedColor;
+
+        try
+        {
+            parsedColor = (Color)ColorConverter.ConvertFromString(color);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error: {ex.Message}");
+            Log("Usage: #color (HEX)");
+        }
+        var converter = System.ComponentModel.TypeDescriptor.GetConverter(parsedColor.GetType());
+
+        config.AccentColor = color;
+
+        string? result = converter.ConvertToString(parsedColor);
+        if (result != null)
+        {
+            ThemeManager.UpdateAccentColor(result);
+        }
+        if (Application.Current.MainWindow is MainWindow mainWin)
+        {
+            mainWin.UpdateIcons();
+        }
+        PlayerService.Instance.RefreshSpectrumControls();
+    }
+    private static void ChangeFormatLibrary()
+    {
+        var config = SettingsManager.Instance.Config;
+        if (config.IsCompactMode == true)
+        {
+            config.IsCompactMode = false;
+        }
+        else
+        {
+            config.IsCompactMode = true;
+        }
+    }
+#if DEBUG
+    private static void FreeRam()
+    {
+        Log($"Memory usage before cleaning: {MemoryProfiler.GetMemoryUsage()}");
+        MemoryOptimizer.FreeRam();
+        Log($"Memory usage after cleaning: {MemoryProfiler.GetMemoryUsage()}");
+    }
+#endif
+    private static void Trackinfo(Track? track)
     {
         if (track == null)
         {
@@ -367,7 +681,7 @@ public class AppConsole
         Log($"  Path: {track.Path}");
     }
 
-    public static void CreatePlaylist(string title)
+    private static void CreatePlaylist(string title)
     {
         long newPlaylist = DatabaseService.CreatePlaylist(title);
         var newPlaylistId = DatabaseService.GetPlaylistById((int)newPlaylist);
@@ -378,7 +692,7 @@ public class AppConsole
         }
     }
 
-    public static void ChangeFontSizeDataGrid(double size)
+    private static void ChangeFontSizeDataGrid(double size)
     {
         var config = SettingsManager.Instance.Config;
         config.FontSizeDataGrid = size;
@@ -386,7 +700,7 @@ public class AppConsole
         Application.Current.Resources["FontSizeDataGrid"] = size;
         Log($"New FontSizeDataGrid = {size}");
     }
-    public static void ChangeFontSize(double size)
+    private static void ChangeFontSize(double size)
     {
         var config = SettingsManager.Instance.Config;
         Application.Current.Resources["FontSize"] = size;
@@ -395,7 +709,7 @@ public class AppConsole
         Log($"New FontSize = {size}");
     }
 
-    public static async Task ReadConfigAsync()
+    private static async Task ReadConfigAsync()
     {
         string path = AppDataManager.SettingsPath;
 

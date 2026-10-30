@@ -1264,6 +1264,7 @@ namespace QAMP.Services
             if (queue == null || queue.Count == 0)
             {
                 System.Diagnostics.Debug.WriteLine("PlayNextTrack: Queue is empty");
+                StopAtEndOfQueue();
                 return;
             }
 
@@ -1309,6 +1310,7 @@ namespace QAMP.Services
             else
             {
                 System.Diagnostics.Debug.WriteLine("No next track available (End of playlist)");
+                StopAtEndOfQueue();
             }
 
             MainWindow.UpdateOSD();
@@ -1317,6 +1319,12 @@ namespace QAMP.Services
                 mainWin.UpdateLyricsView();
                 mainWin.UpdateNextTrackUI();
             }
+        }
+
+        private void StopAtEndOfQueue()
+        {
+            Stop();
+            PlaybackPaused?.Invoke(true);
         }
 
         public void Dispose()

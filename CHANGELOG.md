@@ -1,4 +1,8 @@
 # CHANGELOG
+# (XX.XX.2026) Version 1.8.7.7:
+    - Added a new comands for the console: changeformatlibrary, changeaccentcolor, lyricsmode, clearcache and more. 
+    - Minor changes to the GUI.
+
 # (27.10.2026) Version 1.8.7.6:
     - Added a new comands for the console: mute, unmute, trackinfo, createplayst, exit.  
     - Most of the "unnecessary" information from the console has been removed.  

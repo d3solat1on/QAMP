@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using Microsoft.Win32;
 using QAMP.Converters;
 using QAMP.Dialogs;
@@ -21,7 +20,6 @@ namespace QAMP
         private readonly SettingsManager _settingsManager = SettingsManager.Instance;
         private AppSettings AppSettings => _settingsManager.Config;
         private readonly LargeTrackImageConverter _imageConverter = new();
-        private DispatcherTimer? _scrollCleanupTimer;
         private async Task ProcessDroppedPaths(string[] paths)
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;

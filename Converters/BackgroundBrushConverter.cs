@@ -22,6 +22,7 @@ public class BackgroundBrushConverter : IValueConverter
                 "Cell" => "DataGridCellBackground",
                 "Row" => "DataGridRowBackground",
                 "RowAlt" => "DataGridRowAltBackground",
+                "Selected" => "DataGridRowSelectedBackground",
                 "Controls" => "CentralPanelHeaderBackground",
                 _ => "TertiaryBackgroundBrush"
             }, elementPart switch
@@ -31,6 +32,19 @@ public class BackgroundBrushConverter : IValueConverter
                 "RowAlt" => new SolidColorBrush(Color.FromRgb(0x1A, 0x1A, 0x1A)),
                 _ => Brushes.Transparent
             });
+        }
+
+        if (elementPart == "Selected")
+        {
+            var selectionBrush = GetThemeBrush("DataGridRowSelectedBackground", Brushes.Transparent).CloneCurrentValue();
+            selectionBrush.Opacity *= 0.4;
+
+            if (selectionBrush.CanFreeze)
+            {
+                selectionBrush.Freeze();
+            }
+
+            return selectionBrush;
         }
 
         if (elementPart == "Cell" || elementPart == "Row" || elementPart == "RowAlt")

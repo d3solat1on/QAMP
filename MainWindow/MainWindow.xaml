@@ -1204,7 +1204,6 @@
                                                           AlternationCount="2"
                                                           AllowDrop="True"
                                                           MouseDoubleClick="TracksDataGrid_MouseDoubleClick"
-                                                          SelectionChanged="TracksDataGrid_SelectionChanged"
                                                           PreviewMouseLeftButtonDown="TracksDataGrid_PreviewMouseLeftButtonDown"
                                                           MouseMove="TracksDataGrid_MouseMove"
                                                           Drop="TracksDataGrid_Drop"
@@ -1280,7 +1279,7 @@
                                                                                 <Trigger Property="IsSelected"
                                                                                          Value="True">
                                                                                         <Setter Property="Background"
-                                                                                                Value="{DynamicResource DataGridRowSelectedBackground}"/>
+                                                                                                Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Selected}"/>
                                                                                         <Setter Property="Foreground"
                                                                                                 Value="{DynamicResource DataGridCellSelectedForeground}"/>
                                                                                         <Setter Property="BorderBrush"
@@ -1304,7 +1303,7 @@
                                                                                 <Trigger Property="IsSelected"
                                                                                          Value="True">
                                                                                         <Setter Property="Background"
-                                                                                                Value="{DynamicResource DataGridRowSelectedBackground}"/>
+                                                                                                Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Selected}"/>
                                                                                 </Trigger>
                                                                         </Style.Triggers>
                                                                 </Style>
