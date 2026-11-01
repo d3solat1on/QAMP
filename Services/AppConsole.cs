@@ -30,61 +30,79 @@ public class AppConsole
 
     public static async Task InputCommand(string input)
     {
-        if (string.IsNullOrWhiteSpace(input)) return;
+        ReadOnlySpan<char> span = input.AsSpan().Trim();
+        if (span.IsEmpty) return;
 
-        string[] tokens = input.Trim().Split([' '], 2, StringSplitOptions.RemoveEmptyEntries);
-        string command = tokens[0].ToLowerInvariant();
-        string args = tokens.Length > 1 ? tokens[1].Trim() : string.Empty;
-        string value = args.Trim().Trim('"');
+        int spaceIdx = span.IndexOf(' ');
+
+        string command = (spaceIdx == -1 ? span : span[..spaceIdx]).ToString().ToLowerInvariant();
+
+        ReadOnlySpan<char> argsSpan;
+        if (spaceIdx == -1)
+        {
+            argsSpan = [];
+        }
+        else
+        {
+            argsSpan = span[(spaceIdx + 1)..].Trim();
+        }
+
+        string args = argsSpan.ToString();
+        string value = args.Trim('"');
 
         var player = PlayerService.Instance;
 
         switch (command)
         {
             case "help":
-                Log("""
-        Commands: 
-         help
-         status
-         play [track]
-         pause
-         stop
-         next
-         prev
-         seek <time|+/-seconds>
-         volume <0-100>
-         mute
-         unmute
-         toggleunmute
-         shuffle <on|off>
-         repeat <off|all|one>
-         queue
-         search <text>
-         playlists
-         playlist <name>
-         devices
-         device <id>
-         readconfig
-         changefontsize
-         changefontsizedatagrid
-         createplaylist <title>
-         trackinfo
-         exit
-         quit
-         clear
-         clearcache
-         changeformatlibrary
-         changeaccentcolor <#HEX>
-         lyricsmode
-         changeround <0-10>
-         background
-         getfonts
-         setfont
-         settheme
-         getthemes
-         addbg
-         setbg <path to img, with extension>
-         addfont
+                Log("""        
+        Playback Control:
+          play [track]          - Start playback or play a specific track
+          pause                 - Pause playback
+          stop                  - Stop playback
+          next                  - Play next track in queue
+          prev                  - Play previous track
+          seek <time|+/-sec>    - Jump to position (e.g. 1:30 or +10)
+          volume <0-100>        - Set player volume level
+          mute / unmute         - Mute or unmute audio
+          toggleunmute          - Toggle mute state
+          shuffle <on|off>      - Toggle or set shuffle mode
+          repeat <off|all|one>  - Set repeat mode
+          trackinfo             - Show info about current track
+
+        Queue & Library:
+          queue                 - Show current playback queue
+          search <text>         - Search tracks in library
+          playlists             - List all available playlists
+          playlist <name>       - Select or open a playlist
+          createplaylist <title>- Create a new playlist
+          devices               - List audio output devices
+          device <id>           - Switch audio output device
+
+        Customization & Appearance:
+          getfonts              - List all available font families
+          setfont <name>        - Set application font
+          getthemes             - List all available theme files
+          settheme <file.xaml>  - Apply a theme from file
+          changeaccentcolor <#> - Change accent color (HEX format)
+          togglebg              - Off/On custom backgroung
+          setbg <path>          - Set background image path
+          addfont <path>        - Import a new font (.ttf / .otf)
+          addtheme <path>       - Import and validate a new theme (.xaml)
+          addbg <path>          - Import a new background image
+          changeround <0-10>    - Change UI corner rounding
+          changefontsize <sz>   - Change main font size
+          changefontsizedg <sz> - Change DataGrid font size
+          lyricsmode            - Toggle lyrics display mode
+
+        System & Maintenance:
+          status                - Show current player status
+          readconfig            - Read config
+          clearcache            - Clear temporary files and cache
+          getfpsspectrum        - Get the FPS value for the spectrum
+          setfpsspectrum        - Set the FPS value for the spectrum
+          clear                 - Clear console screen
+          exit / quit           - Close the application
         """);
                 break;
 
@@ -374,8 +392,8 @@ public class AppConsole
             case "changeround":
                 ChangeCurrentRound(args);
                 break;
-            case "bg":
-            case "background":
+            case "togglebg":
+            case "togglebackground":
                 CheckUseCustomBG();
                 break;
             case "setbg":
@@ -402,17 +420,41 @@ public class AppConsole
             case "addbg":
                 AddImgForBG(args);
                 break;
+            case "getfpsspectrum":
+                GetFpsSpectrum();
+                break;
+            case "setfpsspectrum":
+                SetFpsSpectrum(args);
+                break;
 #if DEBUG
             case "test":
                 FreeRam();
                 break;
 #endif
             default:
-                Log($"Unknown command: {tokens[0]}. Type 'help' for available commands.");
+                Log($"Unknown command: {command}. Type 'help' for available commands.");
                 break;
         }
     }
 
+    private static void SetFpsSpectrum(string args)
+    {
+        var config = SettingsManager.Instance.Config;
+        if (string.IsNullOrWhiteSpace(args)) return;
+        if (int.TryParse(args, out int number))
+        {
+            config.SpectrumFps = number;
+        }
+        else
+        {
+            Log("Usage: setfpsspectum <0-N>");
+        }
+    }
+    private static void GetFpsSpectrum()
+    {
+        var config = SettingsManager.Instance.Config;
+        Log($"FPS Spectrum: {config.SpectrumFps}");
+    }
     private static void SetBG(string filePath)
     {
         var config = SettingsManager.Instance.Config;
@@ -578,6 +620,7 @@ public class AppConsole
         {
             Log($"{fontOption}");
         }
+        Log($"Current font: {SettingsManager.Instance.Config.SelectedFontName}");
     }
     private static void CheckUseCustomBG()
     {

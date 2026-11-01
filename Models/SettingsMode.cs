@@ -15,6 +15,7 @@ public class AppSettings : INotifyPropertyChanged
     public bool CloseToTray { get; set; } = true;
     // spectrum visualizer settings
 
+    public int SpectrumFps { get; set; } = 60;
     public bool IsVisualizerEnabled { get; set; } = true;
     public int VisualizerBarCount { get; set; } = 64;
     public bool UseSpectrumGradient { get; set; } = false;
@@ -46,7 +47,7 @@ public class AppSettings : INotifyPropertyChanged
     public bool CrossfadeEnabled { get; set; } = true;
     public double CrossfadeDuration { get; set; } = 3.0;
     public bool UseWASAPI { get; set; } = false;
-    public string SelectedFontName { get; set; } = "GOST Type A";
+    public string SelectedFontName { get; set; } = "GOST type A [GOSTA]";
     public double FontSize { get; set; } = 16.0; //test
     public double FontSizeDataGrid { get; set; } = 18; //test
     private bool _isCompactMode = true;

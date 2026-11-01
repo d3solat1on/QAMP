@@ -42,6 +42,7 @@
         <System:String x:Key="LngSpectrumType">Spectrum type</System:String>
         <System:String x:Key="LngSpectrumTypeBars">Bars</System:String>
         <System:String x:Key="LngSpectrumTypeLine">Line</System:String>
+        <System:String x:Key="LngSpectrumCenteredBars">Centered Bars</System:String>
         <System:String x:Key="LngGradientTypeHeightBased">By height</System:String>
         <System:String x:Key="LngGradientTypeFullHeight">Full height</System:String>
         <System:String x:Key="LngGradientTypeHorizontal">Horizontal</System:String>
@@ -147,6 +148,7 @@
         <System:String x:Key="LngTopTracksHeader">Top 10 most listened tracks:</System:String>
         <System:String x:Key="LngTrackFormat">{0}. {1} by {2} - Plays: {3}</System:String>
         <System:String x:Key="LngNoDataBitrate">No data on tracks with bitrate.</System:String>
+        <System:String x:Key="LngNoTracksInLibrary">No tracks in library.</System:String>
         <System:String x:Key="LngNoDataDuration">No data on track duration.</System:String>
         <System:String x:Key="LngNoDataArtist">No data on most listened artists.</System:String>
         <System:String x:Key="LngNoDataPlaylists">No playlist data available.</System:String>
@@ -219,13 +221,13 @@
         <System:String x:Key="LngRepeatTrack"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Repeat the current track</System:String>
         <System:String x:Key="LngSortNameAZ"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Name (A-Z)</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Title (A-Z)</System:String>
         <System:String x:Key="LngSortNameZA"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Name (Z-A)</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Title (Z-A)</System:String>
         <System:String x:Key="LngSortDateNewest"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Date Created (Newest first)</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Date Added (Newest first)</System:String>
         <System:String x:Key="LngSortDateOldest"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Date Created (Oldest first)</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Date Added (Oldest first)</System:String>
         <System:String x:Key="LngSortCustom"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Custom Order</System:String>
         <System:String x:Key="LngSortNone"

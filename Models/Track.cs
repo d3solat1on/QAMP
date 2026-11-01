@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using System.IO;
-using Newtonsoft.Json;
-using QAMP.Services;
 
 namespace QAMP.Models
 {

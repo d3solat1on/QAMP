@@ -42,6 +42,8 @@ public static class AppDataManager
     public static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
     // BG
     public static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
+    // fonts
+    public static string FontsFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts");
 
 
     // Публичные свойства для путей к конкретным файлам

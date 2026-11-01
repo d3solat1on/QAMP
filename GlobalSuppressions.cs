@@ -23,6 +23,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Services.MediaControlsManager.UpdateTrackInfo(System.String,System.String,System.String)")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Visualization.SpectrumControl.ClearSpectrum")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Visualization.SpectrumControl.UpdateSpectrum(System.Double[],System.Double[],System.Int32)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Visualization.SpectrumControl.ApplySpectrumValues")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Services.MemoryOptimizer.RunAsync(System.Windows.Threading.Dispatcher)")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.App.InitializeTray")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Services.MediaControlsManager.#ctor")]

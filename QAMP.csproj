@@ -31,7 +31,7 @@
   <ItemGroup>
     <Resource Include="Resources\**\*.png" />
     <Resource Include="Resources\**\*.svg" />
-    <Resource Include="Resources\Fonts\GOST_TYPE_A.ttf" />
+    <Resource Include="Resources\Fonts\GOST_A.TTF" />
     <Resource Include="icon\QAMP_icon.ico" />
   </ItemGroup>
 

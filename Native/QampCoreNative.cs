@@ -1,20 +1,37 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
 namespace QAMP.Native;
-
-public static class QampCoreNative
+public static partial class QampCoreNative
 {
     private const string DllName = "QampCore.dll";
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int GetCoreVersion();
+    public static bool CalculateSpectrumFromFFT(
+        ReadOnlySpan<float> fftData,
+        Span<float> mainBuffer,
+        Span<float> peakBuffer,
+        int bandsCount
+    )
+    {
+        var fftArray = fftData.ToArray();
+        var mainArray = new float[mainBuffer.Length];
+        var peakArray = new float[peakBuffer.Length];
+        var result = CalculateSpectrumFromFFTNative(fftArray, mainArray, peakArray, bandsCount);
+        mainArray.AsSpan().CopyTo(mainBuffer);
+        peakArray.AsSpan().CopyTo(peakBuffer);
+        return result;
+    }
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern bool GetSpectrumDataAdvanced(int channel, float[] mainBuffer, float[] peakBuffer, int bandsCount);
+    [LibraryImport(DllName, EntryPoint = "CalculateSpectrumFromFFT")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.U1)]
+    private static partial bool CalculateSpectrumFromFFTNative(
+        [In] float[] fftData,
+        [Out] float[] mainBuffer,
+        [Out] float[] peakBuffer,
+        int bandsCount
+    );
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern bool CalculateSpectrumFromFFT(float[] fftData, float[] mainBuffer, float[] peakBuffer, int bandsCount);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void ResetCorePeaks();
+    [LibraryImport(DllName, EntryPoint = "ResetCorePeaks")]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static partial void ResetCorePeaks();
 }

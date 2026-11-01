@@ -21,12 +21,14 @@ namespace QAMP.Models
         AlbumAZ = 1,            // По альбому (A-Z)
         ExecutorAZ = 2,         // По исполнителю (A-Z)
         NameAZ = 3,             // По названию (A-Z)
-        CustomOrder = 4         // Пользовательский порядок
+        CustomOrder = 4,       // Пользовательский порядок
+        AddedDateOldest = 5,      // По дате добавления (старые сверху)
     }
 
     public class Playlist : INotifyPropertyChanged
     {
         public bool IsSystemPlaylist { get; set; } //True dlya Favorite
+        public double CachedScrollOffset { get; set; } = 0;
         private string? _name;
         private string? _description;
 
@@ -190,6 +192,7 @@ namespace QAMP.Models
         public string SortTypeDisplay => SortType switch
         {
             TrackSortType.AddedDate => Application.Current.FindResource("LngSortDateNewest") as string ?? "By date added",
+            TrackSortType.AddedDateOldest => Application.Current.FindResource("LngSortDateOldest") as string ?? "By date added (oldest first)",
             TrackSortType.AlbumAZ => Application.Current.FindResource("LngSortAlbumAZ") as string ?? "By album (A-Z)",
             TrackSortType.ExecutorAZ => Application.Current.FindResource("LngSortExecutorAZ") as string ?? "By artist (A-Z)",
             TrackSortType.NameAZ => Application.Current.FindResource("LngSortNameAZ") as string ?? "By title (A-Z)",

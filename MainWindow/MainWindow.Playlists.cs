@@ -20,6 +20,11 @@ namespace QAMP
         private readonly SettingsManager _settingsManager = SettingsManager.Instance;
         private AppSettings AppSettings => _settingsManager.Config;
         private readonly LargeTrackImageConverter _imageConverter = new();
+        private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
+        };
+        private Playlist? _previousPlaylist;
         private async Task ProcessDroppedPaths(string[] paths)
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
@@ -29,22 +34,18 @@ namespace QAMP
 
             try
             {
-                var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
-                };
-
                 var allFiles = new List<string>();
 
                 foreach (var path in paths)
                 {
                     if (Directory.Exists(path))
                     {
-                        var folderFiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
-                            .Where(file => supportedExtensions.Contains(Path.GetExtension(file)));
+                        var folderFiles = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
+                            .Where(file => SupportedExtensions.Contains(Path.GetExtension(file)));
+
                         allFiles.AddRange(folderFiles);
                     }
-                    else if (File.Exists(path) && supportedExtensions.Contains(Path.GetExtension(path)))
+                    else if (File.Exists(path) && SupportedExtensions.Contains(Path.GetExtension(path)))
                     {
                         allFiles.Add(path);
                     }
@@ -237,11 +238,25 @@ namespace QAMP
         // ?
         private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (Mouse.RightButton == MouseButtonState.Pressed)
+            {
+                return;
+            }
+            if (_previousPlaylist != null)
+            {
+                var scrollViewer = FindVisualChild<ScrollViewer>(TracksDataGrid);
+                if (scrollViewer != null)
+                {
+                    _previousPlaylist.CachedScrollOffset = scrollViewer.VerticalOffset;
+                }
+            }
+
             if (PlaylistsListBox.SelectedItem is Playlist selected)
             {
+                _previousPlaylist = selected;
                 MusicLibrary.Instance.CurrentPlaylist = selected;
+
                 System.Diagnostics.Debug.WriteLine($"View playlist: {selected.Name} (Tracks: {selected.Tracks.Count})");
-                System.Diagnostics.Debug.WriteLine($"SortType from DB: {selected.SortType}");
                 ApplySort(selected.SortType);
 
                 if (selected.IsSystemPlaylist || selected.CoverImage == null)
@@ -252,16 +267,19 @@ namespace QAMP
                 {
                     UpdateUpperPanelGradient(bitmap);
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Бу-ба-бэ, что-то пошло не так");
-                }
+
                 if (Player.CurrentTrack != null)
                 {
                     UpdateFavoriteIcon(Player.CurrentTrack);
                     UpdatePlayPauseIconState();
                     UpdateShuffleUI();
                 }
+
+                Dispatcher.BeginInvoke(() =>
+                {
+                    ScrollViewer? scrollViewer = FindVisualChild<ScrollViewer>(TracksDataGrid);
+                    scrollViewer?.ScrollToVerticalOffset(selected.CachedScrollOffset);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
     }

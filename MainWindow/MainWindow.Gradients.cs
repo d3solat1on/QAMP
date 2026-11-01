@@ -38,6 +38,7 @@ public partial class MainWindow
 
             brush.GradientStops.Add(new GradientStop(dominant, 0));
             brush.GradientStops.Add(new GradientStop(secondary, 1));
+            brush.Freeze();
 
             UpperPanel.Background = brush;
         }
@@ -76,6 +77,7 @@ public partial class MainWindow
 
                 brush.GradientStops.Add(new GradientStop(primary, 0));
                 brush.GradientStops.Add(new GradientStop(secondary, 1));
+                brush.Freeze();
 
                 UpperPanel.Background = brush;
             }

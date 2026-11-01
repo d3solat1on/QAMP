@@ -16,8 +16,10 @@ public partial class DebugConsoleView : UserControl
         "clear", "exit", "quit", "mute", "unmute", "trackinfo", "clearcache",
         "changeformatlibrary","changeaccentcolor","lyricsmode", "changeround",
         "background", "getfonts", "setfont","getthemes", "settheme","setbg",
-        "addbg", "addtheme","addfont"
+        "addbg", "addtheme","addfont","getfpsspectrum","setfpsspectrum"
     ];
+    private readonly List<string> _commandHistory = [];
+    private int _historyIndex = -1;
     public DebugConsoleView()
     {
         InitializeComponent();
@@ -167,17 +169,60 @@ public partial class DebugConsoleView : UserControl
                 }
             }
         }
+        else
+        {
+            if (_commandHistory.Count > 0)
+            {
+                if (e.Key == Key.Up)
+                {
+                    if (_historyIndex == -1)
+                        _historyIndex = _commandHistory.Count - 1;
+                    else if (_historyIndex > 0)
+                        _historyIndex--;
+
+                    ConsoleInputBox.Text = _commandHistory[_historyIndex];
+                    ConsoleInputBox.CaretIndex = ConsoleInputBox.Text.Length;
+                    e.Handled = true;
+                    return;
+                }
+                else if (e.Key == Key.Down)
+                {
+                    if (_historyIndex != -1)
+                    {
+                        _historyIndex++;
+                        if (_historyIndex >= _commandHistory.Count)
+                        {
+                            _historyIndex = -1;
+                            ConsoleInputBox.Text = string.Empty;
+                        }
+                        else
+                        {
+                            ConsoleInputBox.Text = _commandHistory[_historyIndex];
+                        }
+                    }
+                    ConsoleInputBox.CaretIndex = ConsoleInputBox.Text.Length;
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
 
         if (e.Key == Key.Enter)
         {
             e.Handled = true;
 
-            string command = ConsoleInputBox.Text;
+            string command = ConsoleInputBox.Text.Trim();
 
             if (string.IsNullOrWhiteSpace(command))
             {
                 return;
             }
+
+            if (_commandHistory.Count == 0 || _commandHistory[^1] != command)
+            {
+                _commandHistory.Add(command);
+            }
+            _historyIndex = -1; 
 
             ConsoleInputBox.Clear();
             try
@@ -187,7 +232,6 @@ public partial class DebugConsoleView : UserControl
             }
             catch (Exception ex)
             {
-                AppConsole.Log($"Command failed: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Command failed: {ex.Message}");
                 App.LogException(ex, "ConsoleInput");
             }

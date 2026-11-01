@@ -19,10 +19,15 @@ namespace QAMP
             }
             var contextMenu = new ContextMenu();
 
+            // wtf, будет так
             // По дате добавления
-            var menuItemDate = new MenuItem { Header = Application.Current.FindResource("LngSortDateNewest") as string ?? "By date added" };
+            var menuItemDate = new MenuItem { Header = Application.Current.FindResource("LngSortDateOldest") as string ?? "By date added" };
             menuItemDate.Click += (s, args) => ApplySort(TrackSortType.AddedDate, true);
             _ = contextMenu.Items.Add(menuItemDate);
+
+            var menuItemDateOldest = new MenuItem { Header = Application.Current.FindResource("LngSortDateNewest") as string ?? "By date added (Newest first)" };
+            menuItemDateOldest.Click += (s, args) => ApplySort(TrackSortType.AddedDateOldest, true);
+            _ = contextMenu.Items.Add(menuItemDateOldest);
 
             // По альбому 
             var menuItemAlbum = new MenuItem { Header = Application.Current.FindResource("LngSortAlbumAZ") as string ?? "By album (A-Z)" };
@@ -85,7 +90,9 @@ namespace QAMP
                     TrackSortType.AlbumAZ => Application.Current.FindResource("LngSortAlbumAZ") as string ?? "by album (A-Z)",
                     TrackSortType.ExecutorAZ => Application.Current.FindResource("LngSortExecutorAZ") as string ?? "by artist (A-Z)",
                     TrackSortType.NameAZ => Application.Current.FindResource("LngSortNameAZ") as string ?? "by name (A-Z)",
-                    _ => "неизвестно"
+                    TrackSortType.CustomOrder => Application.Current.FindResource("LngSortCustom") as string ?? "by custom order",
+                    TrackSortType.AddedDateOldest => Application.Current.FindResource("LngSortDateOldest") as string ?? "by date added (oldest first)",
+                    _ => "Unknown"
                 };
                 string message = Application.Current.FindResource("LngPlaylistSorted") as string ?? $"Playlist sorted {sortName}";
                 await MyToast.ShowAsync($"{message} {sortName}");
@@ -100,6 +107,7 @@ namespace QAMP
             return sortType switch
             {
                 TrackSortType.AddedDate => [.. tracks.OrderBy(t => t.AddedDate)],
+                TrackSortType.AddedDateOldest => [.. tracks.OrderByDescending(t => t.AddedDate)],
                 // Сначала по альбому, потом по номеру трека в альбоме
                 TrackSortType.AlbumAZ => [.. tracks
                     .OrderBy(t => t.Album ?? "")

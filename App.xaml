@@ -18,7 +18,7 @@
             <CornerRadius x:Key="AppCornerRadius">0</CornerRadius>
 
 
-            <FontFamily x:Key="MainFont">pack://application:,,,/Resources/Fonts/GOST_TYPE_A.ttf#GOST type A</FontFamily>
+            <FontFamily x:Key="MainFont">pack://application:,,,/Resources/Fonts/GOST_A.TTF#GOST type A</FontFamily>
 
             <Style TargetType="Window">
                 <Setter Property="FontFamily"

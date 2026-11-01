@@ -3,13 +3,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using System.IO;
 using QAMP.Models;
 using QAMP.Services;
 using Microsoft.Win32;
 using QAMP.Dialogs;
-using System.Drawing.Printing;
 
 namespace QAMP.Windows
 {
@@ -32,10 +30,6 @@ namespace QAMP.Windows
             InitializeComponent();
             InitializeCustomThemes();
         }
-
-        // private static string ThemesFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes");
-        // private static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
-
 
         private void InitializeCustomThemes()
         {
@@ -359,15 +353,13 @@ namespace QAMP.Windows
             GradientDisabled.IsChecked = !config.UseSpectrumGradient;
             SpectrumBarsRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Bars;
             SpectrumLineRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.Line;
+            SpectrumCenteredBarsRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.CenteredBars;
             EnabledConsole.IsChecked = config.UseConsole;
             DisabledConsole.IsChecked = !config.UseConsole;
 
 
             InitFontSettingsUI();
 
-            // GradientHeightBasedRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.HeightBased;
-            // GradientFullHeightRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.FullHeight;
-            // GradientHorizontalRadio.IsChecked = config.GradientType == Visualization.SpectrumGradientType.Horizontal;
 
             isInitializing = false;
         }
@@ -404,9 +396,19 @@ namespace QAMP.Windows
             if (isInitializing) return;
 
             var config = SettingsManager.Instance.Config;
-            config.SpectrumType = SpectrumLineRadio.IsChecked == true
-                ? Visualization.SpectrumDisplayType.Line
-                : Visualization.SpectrumDisplayType.Bars;
+            switch (sender)
+            {
+                case RadioButton radio when radio == SpectrumBarsRadio:
+                    config.SpectrumType = Visualization.SpectrumDisplayType.Bars;
+                    break;
+                case RadioButton radio when radio == SpectrumLineRadio:
+                    config.SpectrumType = Visualization.SpectrumDisplayType.Line;
+                    break;
+                case RadioButton radio when radio == SpectrumCenteredBarsRadio:
+                    config.SpectrumType = Visualization.SpectrumDisplayType.CenteredBars;
+                    break;
+            }
+
             SettingsManager.Instance.Save();
             PlayerService.Instance.RefreshSpectrumControls();
         }
@@ -431,28 +433,6 @@ namespace QAMP.Windows
             PlayerService.Instance.RefreshSpectrumControls();
         }
 
-        // private void GradientType_Checked(object sender, RoutedEventArgs e)
-        // {
-        //     if (isInitializing) return;
-
-        //     var config = SettingsManager.Instance.Config;
-
-        //     // if (GradientHeightBasedRadio.IsChecked == true)
-        //     // {
-        //     //     config.GradientType = Visualization.SpectrumGradientType.HeightBased;
-        //     // }
-        //     // else if (GradientFullHeightRadio.IsChecked == true)
-        //     // {
-        //     //     config.GradientType = Visualization.SpectrumGradientType.FullHeight;
-        //     // }
-        //     // else if (GradientHorizontalRadio.IsChecked == true)
-        //     // {
-        //     config.GradientType = Visualization.SpectrumGradientType.Horizontal;
-        //     // }
-
-        //     SettingsManager.Instance.Save();
-        //     PlayerService.Instance.RefreshSpectrumControls();
-        // }
         private static bool IsHexColorValid(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -626,9 +606,6 @@ namespace QAMP.Windows
             GradientDisabled.IsChecked = !originalUseSpectrumGradient;
             SpectrumBarsRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Bars;
             SpectrumLineRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Line;
-            // GradientHeightBasedRadio.IsChecked = originalSpectrumGradientType == Visualization.SpectrumGradientType.HeightBased;
-            // GradientFullHeightRadio.IsChecked = originalSpectrumGradientType == Visualization.SpectrumGradientType.FullHeight;
-            // GradientHorizontalRadio.IsChecked = originalSpectrumGradientType == Visualization.SpectrumGradientType.Horizontal;
 
             AutoLaunchEnabled.IsChecked = originalIsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !originalIsAutoLaunchEnabled;

@@ -9,20 +9,20 @@ public class FontService
     private static FontService? _instance;
     public static FontService Instance => _instance ??= new FontService();
 
-    private readonly string _fontsFolder;
-    
-    public const string DefaultFontKey = "GOST type A";
-    private const string DefaultFontPackUri = "pack://application:,,,/Resources/Fonts/#GOST type A";
+    private readonly string _fontsFolder = AppDataManager.FontsFolderPath;
+
+    public const string DefaultFontKey = "GOST type A [GOSTA]";
+    private static readonly string DefaultFontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "GOST_A.TTF");
+    // private static readonly string DefaultFontPackUri = $"{DefaultFontPath.Replace('\\', '/')};#GOST type A";
 
     public List<FontOption> AvailableFonts { get; } = [];
 
     public record FontOption(string DisplayName, FontFamily Family, bool IsCustom, string? FilePath = null);
 
-    public FontOption DefaultFont => AvailableFonts.First(font => !font.IsCustom);
-
+    public FontOption DefaultFont => AvailableFonts.FirstOrDefault(font => font.DisplayName == DefaultFontKey) ?? AvailableFonts.First();
     private FontService()
     {
-        _fontsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts");
+        // _fontsFolder = AppDataManager.FontsFolderPath;
         if (!Directory.Exists(_fontsFolder))
         {
             Directory.CreateDirectory(_fontsFolder);
@@ -35,25 +35,42 @@ public class FontService
     {
         AvailableFonts.Clear();
 
-        AvailableFonts.Add(new FontOption("GOST Type A", new FontFamily(DefaultFontPackUri), false));
+        if (File.Exists(DefaultFontPath))
+        {
+            try
+            {
+                var family = new FontFamily(new Uri(DefaultFontPath), "./#GOST type A");
+                AvailableFonts.Add(new FontOption(DefaultFontKey, family, false, DefaultFontPath));
+            }
+            catch
+            {
+                AvailableFonts.Add(new FontOption(DefaultFontKey, new FontFamily("Consolas"), false));
+            }
+        }
 
         var fontFiles = Directory.GetFiles(_fontsFolder, "*.*")
-            .Where(f => f.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) || 
+            .Where(f => f.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
                          f.EndsWith(".otf", StringComparison.OrdinalIgnoreCase));
 
         foreach (var file in fontFiles)
         {
+            if (string.Equals(file, DefaultFontPath, StringComparison.OrdinalIgnoreCase)) continue;
+
             try
             {
                 var baseUri = new Uri(_fontsFolder + Path.DirectorySeparatorChar);
                 var families = Fonts.GetFontFamilies(baseUri, "./" + Path.GetFileName(file));
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+
                 foreach (var family in families)
                 {
                     string fontName = GetFamilyName(family);
-                    
-                    if (!AvailableFonts.Any(f => f.DisplayName == fontName))
+                    string displayName = $"{fontName} [{fileNameWithoutExt}]";
+
+                    if (!AvailableFonts.Any(f => f.FilePath == file))
                     {
-                        AvailableFonts.Add(new FontOption(fontName, family, true, file));
+                        AvailableFonts.Add(new FontOption(displayName, family, true, file));
                     }
                 }
             }
@@ -111,15 +128,17 @@ public class FontService
             if (family is not null)
             {
                 string fontName = GetFamilyName(family);
-                var existingFont = AvailableFonts.FirstOrDefault(font =>
-                    string.Equals(font.DisplayName, fontName, StringComparison.OrdinalIgnoreCase));
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+                string displayName = $"{fontName} [{fileNameWithoutExt}]";
+
+                var existingFont = AvailableFonts.FirstOrDefault(font => font.FilePath == destPath);
                 if (existingFont is not null)
                 {
                     return existingFont;
                 }
 
-                var option = new FontOption(fontName, family, true, destPath);
-                
+                var option = new FontOption(displayName, family, true, destPath);
+
                 AvailableFonts.Add(option);
                 return option;
             }

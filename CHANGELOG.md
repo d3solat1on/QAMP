@@ -1,4 +1,16 @@
 # CHANGELOG
+# (02.11.2026) Version 1.8.7.8:
+    - Optimizing memory and string handling: Implementing `Span<T>` and `ReadOnlySpan<char>` in key data-processing algorithms to reduce the load on the GC (garbage collector) and accelerate computations.  
+    - Updated P/Invoke: `DllImport` has been replaced with the modern `[LibraryImport]` source generator for interacting with the C++ library `QampCore.dll`, which reduces the overhead of calling native code.  
+    - Splitting monolithic classes: The `DatabaseService.cs` and `PlayerService.cs` classes have been broken down into partial modules to improve readability, maintainability, and the project's architecture.  
+    - WPF Resource Polish: Added calls to Freezable.Freeze().  
+    - New display mode: A third spectrum type has been added — CenteredBars (symmetrical/centered bars featuring a peak effect and smooth fade-in/fade-out animation).  
+    - New console commands:  
+    - getfpsspectrum - get the FPS value for the spectrum.   
+    - setfpsspectrum - set the FPS value for the spectrum.   
+    - Command History (History Navigation): Added the ability to navigate through previously entered commands using the Up and Down arrow keys.  
+    - Localization files have been updated.  
+    
 # (31.10.2026) Version 1.8.7.7:
     - Added a new comands for the console: changeformatlibrary, changeaccentcolor, lyricsmode, clearcache and more. 
     - Minor changes to the GUI.

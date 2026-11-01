@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Threading;
 using System.Windows.Threading;
 using QAMP.Models;
 

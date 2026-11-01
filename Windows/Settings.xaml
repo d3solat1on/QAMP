@@ -249,16 +249,23 @@
                                            Background="{DynamicResource BorderBrush}"/>
                                 <TextBlock Text="{DynamicResource LngSpectrumType}"
                                            Foreground="{DynamicResource ForegroundBrush}"
-                                           Margin="0,0,0,8"/>
+                                           Margin="0,0,0,10"/>
                                 <RadioButton x:Name="SpectrumBarsRadio"
                                              Content="{DynamicResource LngSpectrumTypeBars}"
                                              GroupName="SpectrumType"
-                                             Margin="0,0,0,8"
+                                             Margin="0,0,0,10"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="SpectrumType_Checked"/>
                                 <RadioButton x:Name="SpectrumLineRadio"
                                              Content="{DynamicResource LngSpectrumTypeLine}"
                                              GroupName="SpectrumType"
+                                             Margin="0,0,0,10"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="SpectrumType_Checked"/>
+                                <RadioButton x:Name="SpectrumCenteredBarsRadio"
+                                             Content="{DynamicResource LngSpectrumCenteredBars}"
+                                             GroupName="SpectrumType"
+                                             Margin="0,0,0,10"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="SpectrumType_Checked"/>
                             </StackPanel>

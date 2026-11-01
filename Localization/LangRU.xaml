@@ -42,6 +42,7 @@
         <System:String x:Key="LngSpectrumType">Тип спектра</System:String>
         <System:String x:Key="LngSpectrumTypeBars">Столбцы</System:String>
         <System:String x:Key="LngSpectrumTypeLine">Линия</System:String>
+        <System:String x:Key="LngSpectrumCenteredBars">Полосы по центру</System:String>
         <System:String x:Key="LngGradientTypeHeightBased">По высоте</System:String>
         <System:String x:Key="LngGradientTypeFullHeight">На всю высоту</System:String>
         <System:String x:Key="LngGradientTypeHorizontal">По горизонтали</System:String>
@@ -147,6 +148,7 @@
         <System:String x:Key="LngTopTracksHeader">Топ 10 самых прослушиваемых треков:</System:String>
         <System:String x:Key="LngTrackFormat">{0}. {1} by {2} - Прослушиваний: {3}</System:String>
         <System:String x:Key="LngNoDataBitrate">Нет данных о треках с битрейтом.</System:String>
+        <System:String x:Key="LngNoTracksInLibrary">Треки в библиотеке отсутсвуют.</System:String>
         <System:String x:Key="LngNoDataDuration">Нет данных о длительности треков.</System:String>
         <System:String x:Key="LngNoDataArtist">Нет данных о наиболее прослушиваемых исполнителях.</System:String>
         <System:String x:Key="LngNoDataPlaylists">Нет данных о плейлистах.</System:String>

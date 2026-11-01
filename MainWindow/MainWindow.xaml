@@ -1283,7 +1283,7 @@
                                                                                         <Setter Property="Foreground"
                                                                                                 Value="{DynamicResource DataGridCellSelectedForeground}"/>
                                                                                         <Setter Property="BorderBrush"
-                                                                                                Value="{DynamicResource DataGridSelectionBorderBrush}"/>
+                                                                                                Value="{DynamicResource AccentBrush}"/>
                                                                                 </Trigger>
                                                                         </Style.Triggers>
                                                                 </Style>

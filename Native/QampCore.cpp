@@ -2,11 +2,6 @@
 #include <math.h>
 #include "bass.h"
 
-extern "C" __declspec(dllexport) int GetCoreVersion()
-{
-    return 106;
-}
-
 float g_lastValues[512] = {0};
 float g_peakValues[512] = {0};
 float g_peakSpeeds[512] = {0};
@@ -141,16 +136,21 @@ extern "C" __declspec(dllexport) bool CalculateSpectrumFromFFT(const float *fft,
     const float gravity = 0.0022f;
     const float initialDelay = -0.010f;
 
+    const float log2_512 = log2f(512.0f);
+
     for (int i = 0; i < bandsCount; i++)
     {
         double interpolation = (double)i / bandsCount;
 
-        int startIdx = (int)(pow(2.0, pow(interpolation, 0.75) * log2(512.0)));
-        int endIdx = (int)(pow(2.0, pow((double)(i + 1) / bandsCount, 0.75) * log2(512.0)));
+        int startIdx = (int)(pow(2.0, pow(interpolation, 0.75) * log2_512));
+        int endIdx = (int)(pow(2.0, pow((double)(i + 1) / bandsCount, 0.75) * log2_512));
 
-        if (startIdx >= 512) startIdx = 511;
-        if (endIdx > 512) endIdx = 512;
-        if (endIdx <= startIdx) endIdx = startIdx + 1;
+        if (startIdx >= 512)
+            startIdx = 511;
+        if (endIdx > 512)
+            endIdx = 512;
+        if (endIdx <= startIdx)
+            endIdx = startIdx + 1;
 
         float maxVal = 0.0f;
         for (int j = startIdx; j < endIdx; j++)
@@ -161,28 +161,32 @@ extern "C" __declspec(dllexport) bool CalculateSpectrumFromFFT(const float *fft,
 
         if (maxVal < 0.0000001f)
             maxVal = 0.0000001f;
-            
+
         float db = 20.0f * log10f(maxVal);
 
         float minDb = -70.0f;
         float maxDb = -3.0f;
         float intensity = (db - minDb) / (maxDb - minDb);
-        if (intensity < 0.0f) intensity = 0.0f;
-        if (intensity > 1.0f) intensity = 1.0f;
+        if (intensity < 0.0f)
+            intensity = 0.0f;
+        if (intensity > 1.0f)
+            intensity = 1.0f;
 
         intensity = powf(intensity, 1.5f);
 
         float frequencyFactor = (float)i / bandsCount;
         float boost = 1.0f + frequencyFactor * 0.8f;
         intensity *= boost;
-        if (intensity > 0.95f) intensity = 0.95f;
+        if (intensity > 0.95f)
+            intensity = 0.95f;
 
         if (intensity >= g_lastValues[i])
             g_lastValues[i] = intensity;
         else
             g_lastValues[i] -= fallOffSpeed;
-            
-        if (g_lastValues[i] < 0.0f) g_lastValues[i] = 0.0f;
+
+        if (g_lastValues[i] < 0.0f)
+            g_lastValues[i] = 0.0f;
 
         mainBuffer[i] = g_lastValues[i];
 

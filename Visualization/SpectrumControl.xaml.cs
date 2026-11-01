@@ -1,18 +1,27 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using QAMP.Models;
-using ScottPlot;
 
 namespace QAMP.Visualization
 {
     public partial class SpectrumControl : UserControl
     {
         private ScottPlot.Plottables.BarPlot? myBars;
+        private ScottPlot.Plottables.BarPlot? _peakBars;
+        private ScottPlot.Plottables.BarPlot? _topPeakBars;
+        private ScottPlot.Plottables.BarPlot? _bottomPeakBars;
+        private double _fadeMultiplier = 0.0;
+        private readonly DispatcherTimer _fadeTimer;
+        private long _lastFadeTimestamp;
         private int _barCount;
         private double[] _smoothedValues;
         private double[] _peakValues;
-        private ScottPlot.Plottables.BarPlot? _peakBars;
+        private double[] _latestSpectrumValues;
+        private double[] _latestPeakValues;
+        private int _latestSampleCount;
+        private bool _hasSpectrumData;
         private readonly List<ScottPlot.Plottables.Scatter> _lineSegments = [];
         private readonly List<ScottPlot.Plottables.Scatter> _peakLineSegments = [];
         private readonly List<double[]> _lineSegmentValues = [];
@@ -28,21 +37,27 @@ namespace QAMP.Visualization
             _barCount = SettingsManager.Instance.Config.VisualizerBarCount;
             _smoothedValues = new double[_barCount];
             _peakValues = new double[_barCount];
+            _latestSpectrumValues = new double[_barCount];
+            _latestPeakValues = new double[_barCount];
             for (int i = 0; i < _barCount; i++)
             {
                 _smoothedValues[i] = 0.02;
                 _peakValues[i] = 0.02;
             }
+            _fadeTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(16)
+            };
+            _fadeTimer.Tick += FadeTimer_Tick;
             _peakBars = SpectrumPlot.Plot.Add.Bars(_peakValues);
-            // Дополнительная проверка
             System.Diagnostics.Debug.WriteLine($"SpectrumControl initialized, peakValues[0] = {_peakValues[0]}");
 
             Loaded += SpectrumControl_Loaded;
+            Unloaded += SpectrumControl_Unloaded;
         }
 
         private void SpectrumControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Еще раз сбрасываем при загрузке
             for (int i = 0; i < BarCount; i++)
             {
                 _peakValues[i] = 0.02;
@@ -50,6 +65,34 @@ namespace QAMP.Visualization
             }
 
             SetupPlot();
+            _lastFadeTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
+            _fadeTimer.Start();
+        }
+
+        private void SpectrumControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _fadeTimer.Stop();
+        }
+
+        private void FadeTimer_Tick(object? sender, EventArgs e)
+        {
+            long now = System.Diagnostics.Stopwatch.GetTimestamp();
+            double elapsedSeconds = System.Diagnostics.Stopwatch.GetElapsedTime(_lastFadeTimestamp, now).TotalSeconds;
+            _lastFadeTimestamp = now;
+
+            bool isPlaying = SettingsManager.Instance.Config.IsVisualizerEnabled &&
+                             Services.PlayerService.Instance.IsPlaying;
+            double target = isPlaying ? 1.0 : 0.0;
+            double responseTime = isPlaying ? 0.06 : 0.16;
+            double amount = 1.0 - Math.Exp(-elapsedSeconds / responseTime);
+            double previousFade = _fadeMultiplier;
+            _fadeMultiplier += (target - _fadeMultiplier) * amount;
+
+            if (Math.Abs(target - _fadeMultiplier) < 0.005)
+                _fadeMultiplier = target;
+
+            if (_hasSpectrumData && Math.Abs(previousFade - _fadeMultiplier) > 0.0001)
+                ApplySpectrumValues();
         }
 
         private void SetupPlot()
@@ -73,6 +116,10 @@ namespace QAMP.Visualization
 
                 myBars = null;
                 _peakBars = null;
+                _topPeakBars = null;
+                _bottomPeakBars = null;
+                _lineValues = [];
+                _linePeakValues = [];
                 _lineSegments.Clear();
                 _peakLineSegments.Clear();
                 _lineSegmentValues.Clear();
@@ -98,6 +145,25 @@ namespace QAMP.Visualization
                         _peakLineSegmentValues.Add(peakSegmentValues);
                     }
                 }
+                else if (SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.CenteredBars)
+                {
+                    _topPeakBars = SpectrumPlot.Plot.Add.Bars(peakValues);
+                    _bottomPeakBars = SpectrumPlot.Plot.Add.Bars(peakValues);
+                    myBars = SpectrumPlot.Plot.Add.Bars(barValues);
+
+                    for (int i = 0; i < BarCount; i++)
+                    {
+                        myBars.Bars[i].Position = i;
+                        myBars.Bars[i].Size = 0.78;
+
+                        _topPeakBars.Bars[i].Position = i;
+                        _topPeakBars.Bars[i].Size = 0.78;
+
+                        _bottomPeakBars.Bars[i].Position = i;
+                        _bottomPeakBars.Bars[i].Size = 0.78;
+                    }
+
+                }
                 else
                 {
                     _peakBars = SpectrumPlot.Plot.Add.Bars(peakValues);
@@ -118,7 +184,9 @@ namespace QAMP.Visualization
                 SpectrumPlot.Plot.HideGrid();
                 SpectrumPlot.Plot.HideAxesAndGrid();
 
-                SpectrumPlot.Plot.Axes.SetLimitsY(0.0, 1.0);
+                SpectrumPlot.Plot.Axes.SetLimitsY(
+                    SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.CenteredBars ? -1.0 : 0.0,
+                    1.0);
                 SpectrumPlot.Plot.Axes.SetLimitsX(0, BarCount);
                 SpectrumPlot.Plot.Axes.Top.FrameLineStyle.Width = 0;
                 SpectrumPlot.Plot.Axes.Right.FrameLineStyle.Width = 0;
@@ -128,6 +196,8 @@ namespace QAMP.Visualization
 
                 SpectrumPlot.IsEnabled = false;
                 ApplyColors();
+                if (_hasSpectrumData)
+                    ApplySpectrumValues();
                 SpectrumPlot.Refresh();
 
                 System.Diagnostics.Debug.WriteLine($"SetupPlot completed, type: {SettingsManager.Instance.Config.SpectrumType}");
@@ -138,53 +208,28 @@ namespace QAMP.Visualization
             }
         }
 
-        private void ApplyGradient()
+        private static void ApplyBarPlotColors(
+            ScottPlot.Plottables.BarPlot? bars,
+            bool useGradient,
+            System.Windows.Media.Color startColor,
+            System.Windows.Media.Color endColor,
+            ScottPlot.Color solidColor)
         {
-            if (myBars == null || _peakBars == null)
-            {
+            if (bars == null)
                 return;
-            }
 
-            var config = SettingsManager.Instance.Config;
-            if (!config.UseSpectrumGradient)
-            {
-                return;
-            }
-
-            var startColor = ParseHexColor(config.SpectrumGradientStartColor, System.Windows.Media.Colors.DeepSkyBlue);
-            var endColor = ParseHexColor(config.SpectrumGradientEndColor, System.Windows.Media.Colors.Violet);
-            int barCount = myBars.Bars.Count;
+            int barCount = bars.Bars.Count;
 
             for (int i = 0; i < barCount; i++)
             {
-                double horizontalT = barCount == 1 ? 0 : (double)i / (barCount - 1);
-                double heightT = Math.Clamp(myBars.Bars[i].Value, 0.0, 1.0);
+                double t = barCount == 1 ? 0 : (double)i / (barCount - 1);
+                ScottPlot.Color plotColor = useGradient
+                    ? ToScottPlotColor(InterpolateColor(startColor, endColor, t))
+                    : solidColor;
 
-                ScottPlot.Color plotColor;
-
-                // switch (config.GradientType)
-                // {
-                //     case SpectrumGradientType.Horizontal:
-                plotColor = ToScottPlotColor(InterpolateColor(startColor, endColor, horizontalT));
-                // break;
-
-                // case SpectrumGradientType.FullHeight:
-                //     plotColor = ToScottPlotColor(InterpolateColor(startColor, endColor, heightT));
-                //     break;
-
-                // case SpectrumGradientType.HeightBased:
-                // default:
-                //     double topBlend = 1.0 - Math.Abs(0.5 - heightT) * 2.0;
-                //     plotColor = ToScottPlotColor(InterpolateColor(startColor, endColor, Math.Clamp(topBlend, 0.0, 1.0)));
-                //     break;
-                // }
-
-                myBars.Bars[i].FillColor = plotColor;
-                myBars.Bars[i].LineStyle.Color = plotColor;
-                myBars.Bars[i].LineStyle.Width = 0;
-                _peakBars.Bars[i].FillColor = plotColor;
-                _peakBars.Bars[i].LineStyle.Color = plotColor;
-                _peakBars.Bars[i].LineStyle.Width = 0;
+                bars.Bars[i].FillColor = plotColor;
+                bars.Bars[i].LineStyle.Color = plotColor;
+                bars.Bars[i].LineStyle.Width = 0;
             }
         }
 
@@ -257,56 +302,24 @@ namespace QAMP.Visualization
                 }
             }
 
-            if (myBars != null && _peakBars != null)
-            {
-                if (config.UseSpectrumGradient)
-                {
-                    ApplyGradient();
-                }
-                else
-                {
-                    ScottPlot.Color plotColor;
+            ScottPlot.Color accentColor = GetAccentPlotColor();
+            bool useGradient = config.UseSpectrumGradient;
+            var startColor = ParseHexColor(config.SpectrumGradientStartColor, System.Windows.Media.Colors.DeepSkyBlue);
+            var endColor = ParseHexColor(config.SpectrumGradientEndColor, System.Windows.Media.Colors.Violet);
 
-                    if (Application.Current.Resources["AccentBrush"] is System.Windows.Media.SolidColorBrush accent)
-                    {
-                        var ac = accent.Color;
-                        int accentArgb = (ac.A << 24) | (ac.R << 16) | (ac.G << 8) | ac.B;
-
-                        plotColor = ScottPlot.Color.FromARGB(accentArgb);
-                    }
-                    else
-                    {
-                        plotColor = ScottPlot.Colors.LimeGreen;
-                    }
-
-                    myBars.Color = plotColor;
-                    _peakBars.Color = plotColor;
-
-                    foreach (var bar in myBars.Bars)
-                    {
-                        bar.FillColor = plotColor;
-                        bar.LineStyle.Color = plotColor;
-                        bar.LineStyle.Width = 0;
-                    }
-                    foreach (var bar in _peakBars.Bars)
-                    {
-                        bar.FillColor = plotColor;
-                        bar.LineStyle.Color = plotColor;
-                        bar.LineStyle.Width = 0;
-                    }
-                }
-            }
+            ApplyBarPlotColors(myBars, useGradient, startColor, endColor, accentColor);
+            ApplyBarPlotColors(_peakBars, useGradient, startColor, endColor, accentColor);
+            ApplyBarPlotColors(_topPeakBars, useGradient, startColor, endColor, accentColor);
+            ApplyBarPlotColors(_bottomPeakBars, useGradient, startColor, endColor, accentColor);
 
             if (_lineSegments.Count > 0 && _peakLineSegments.Count > 0)
             {
-                var startColor = ParseHexColor(config.SpectrumGradientStartColor, System.Windows.Media.Colors.DeepSkyBlue);
-                var endColor = ParseHexColor(config.SpectrumGradientEndColor, System.Windows.Media.Colors.Violet);
                 for (int i = 0; i < _lineSegments.Count; i++)
                 {
                     double t = (double)i / Math.Max(1, _lineSegments.Count - 1);
-                    ScottPlot.Color plotColor = config.UseSpectrumGradient
+                    ScottPlot.Color plotColor = useGradient
                         ? ToScottPlotColor(InterpolateColor(startColor, endColor, t))
-                        : GetAccentPlotColor();
+                        : accentColor;
                     _lineSegments[i].Color = plotColor;
                     _peakLineSegments[i].Color = plotColor;
                     _lineSegments[i].LineWidth = 1.5f;
@@ -330,52 +343,63 @@ namespace QAMP.Visualization
         }
         public void UpdateSpectrum(double[] spectrumData, double[] peakData, int incomingCount)
         {
+            if (!IsVisible || Visibility != Visibility.Visible) return;
             if (spectrumData == null || peakData == null) return;
-
-            if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
-            {
-                bool hasActiveValues = false;
-                for (int i = 0; i < BarCount; i++)
-                {
-                    if ((myBars?.Bars[i].Value ?? 0) > 0 || _lineValues[i] > 0)
-                    {
-                        hasActiveValues = true;
-                        break;
-                    }
-                }
-
-                if (hasActiveValues)
-                {
-                    ResetPeaks();
-                    SpectrumPlot.Refresh();
-                }
-                return;
-            }
 
             try
             {
-                int limit = Math.Min(incomingCount, BarCount);
-                for (int i = 0; i < limit; i++)
+                _latestSampleCount = Math.Min(Math.Min(incomingCount, BarCount), Math.Min(spectrumData.Length, peakData.Length));
+                Array.Copy(spectrumData, _latestSpectrumValues, _latestSampleCount);
+                Array.Copy(peakData, _latestPeakValues, _latestSampleCount);
+                _hasSpectrumData = true;
+                ApplySpectrumValues();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateSpectrum Error: {ex.Message}");
+            }
+        }
+
+        private void ApplySpectrumValues()
+        {
+            try
+            {
+                for (int i = 0; i < _latestSampleCount; i++)
                 {
-                    if (myBars != null && _peakBars != null)
+                    double value = _latestSpectrumValues[i] * _fadeMultiplier;
+                    double peak = _latestPeakValues[i] * _fadeMultiplier;
+
+                    if (SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.CenteredBars)
                     {
-                        myBars.Bars[i].Value = spectrumData[i];
-                        _peakBars.Bars[i].Value = peakData[i];
+                        if (myBars == null || _topPeakBars == null || _bottomPeakBars == null)
+                            continue;
+
+                        myBars.Bars[i].Value = value;
+                        myBars.Bars[i].ValueBase = -value;
+                        _topPeakBars.Bars[i].Value = peak + 0.03 * _fadeMultiplier;
+                        _topPeakBars.Bars[i].ValueBase = peak;
+                        _bottomPeakBars.Bars[i].Value = -peak;
+                        _bottomPeakBars.Bars[i].ValueBase = -(peak + 0.03 * _fadeMultiplier);
                     }
                     else if (_lineSegments.Count > 0)
                     {
-                        _lineValues[i] = spectrumData[i];
-                        _linePeakValues[i] = peakData[i];
+                        _lineValues[i] = value;
+                        _linePeakValues[i] = peak;
                         if (i > 0)
                         {
-                            _lineSegmentValues[i - 1][1] = _lineValues[i];
-                            _peakLineSegmentValues[i - 1][1] = _linePeakValues[i];
+                            _lineSegmentValues[i - 1][1] = value;
+                            _peakLineSegmentValues[i - 1][1] = peak;
                         }
                         if (i < _lineSegments.Count)
                         {
-                            _lineSegmentValues[i][0] = _lineValues[i];
-                            _peakLineSegmentValues[i][0] = _linePeakValues[i];
+                            _lineSegmentValues[i][0] = value;
+                            _peakLineSegmentValues[i][0] = peak;
                         }
+                    }
+                    else if (myBars != null && _peakBars != null)
+                    {
+                        myBars.Bars[i].Value = value;
+                        _peakBars.Bars[i].Value = peak;
                     }
                 }
 
@@ -383,7 +407,7 @@ namespace QAMP.Visualization
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"UpdateSpectrum Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"ApplySpectrumValues Error: {ex.Message}");
             }
         }
         public void ResetPeaks()
@@ -421,6 +445,15 @@ namespace QAMP.Visualization
                         _peakLineSegmentValues[i][0] = 0.01;
                     }
                 }
+                else if (_topPeakBars != null && _bottomPeakBars != null)
+                {
+                    myBars?.Bars[i].Value = 0.01;
+                    myBars?.Bars[i].ValueBase = -0.01;
+                    _topPeakBars?.Bars[i].Value = 0.02;
+                    _topPeakBars?.Bars[i].ValueBase = 0.01;
+                    _bottomPeakBars?.Bars[i].Value = -0.01;
+                    _bottomPeakBars?.Bars[i].ValueBase = -0.02;
+                }
             }
             SpectrumPlot.Refresh();
         }
@@ -438,6 +471,9 @@ namespace QAMP.Visualization
             _barCount = count;
             _smoothedValues = new double[_barCount];
             _peakValues = new double[_barCount];
+            Array.Resize(ref _latestSpectrumValues, _barCount);
+            Array.Resize(ref _latestPeakValues, _barCount);
+            _latestSampleCount = Math.Min(_latestSampleCount, _barCount);
 
             for (int i = 0; i < _barCount; i++)
             {
@@ -462,13 +498,12 @@ namespace QAMP.Visualization
     public enum SpectrumDisplayType
     {
         Bars,
-        Line
+        Line,
+        CenteredBars
     }
 
     public enum SpectrumGradientType
     {
-        // HeightBased,
-        // FullHeight,
         Horizontal
     }
 

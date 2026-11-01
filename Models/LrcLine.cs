@@ -84,19 +84,48 @@ public static partial class LyricsCache
         var lines = new List<LrcLine>();
         if (string.IsNullOrEmpty(lrcText)) return lines;
 
-        var regex = LrcRegex();
+        ReadOnlySpan<char> span = lrcText.AsSpan();
 
-        foreach (var line in lrcText.Split('\n'))
+        Span<char> tempTime = stackalloc char[11];
+        tempTime[0] = '0';
+        tempTime[1] = '0';
+        tempTime[2] = ':';
+
+        while (!span.IsEmpty)
         {
-            var trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed)) continue;
-
-            var match = regex.Match(line);
-            if (match.Success)
+            int lineEnd = span.IndexOf('\n');
+            ReadOnlySpan<char> line = lineEnd == -1 ? span : span[..lineEnd];
+            if (lineEnd == -1)
             {
-                if (TimeSpan.TryParse("00:" + match.Groups["time"].Value.Replace(".", ","), out TimeSpan time))
+                span = ReadOnlySpan<char>.Empty;
+            }
+            else
+            {
+                span = span[(lineEnd + 1)..];
+            }
+
+            line = line.Trim();
+            if (line.IsEmpty) continue;
+
+            if (line.Length > 10 && line[0] == '[' && line[9] == ']')
+            {
+                ReadOnlySpan<char> timeSpanStr = line.Slice(1, 8); // format "01:23.45"
+                ReadOnlySpan<char> textPart = line[10..].Trim();
+
+                timeSpanStr.CopyTo(tempTime[3..]);
+
+                for (int i = 0; i < tempTime.Length; i++)
                 {
-                    lines.Add(new LrcLine { Time = time, Text = match.Groups["text"].Value.Trim() });
+                    if (tempTime[i] == '.') tempTime[i] = ',';
+                }
+
+                if (TimeSpan.TryParse(tempTime, out TimeSpan time))
+                {
+                    lines.Add(new LrcLine
+                    {
+                        Time = time,
+                        Text = textPart.ToString()
+                    });
                 }
             }
         }
