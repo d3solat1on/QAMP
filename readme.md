@@ -74,6 +74,8 @@
    - `TertiaryBackgroundBrush` — подложка под визуализатор.
 5. Запустите плеер, зайдите в Настройки, нажмите кнопку **«Добавить тему»** и выберите ваш созданный `.xaml` файл.
 
+Встроенные примеры тем находятся в папке приложения и доступны только для чтения. Импортированные темы, языки и шрифты хранятся в `%LOCALAPPDATA%\QAMP`, поэтому их можно добавлять и при установке плеера в `Program Files`. Ранее импортированные файлы при первом запуске копируются из старых папок приложения; исходники не удаляются.
+
 При включенном пользовательском фоне полупрозрачные панели используют цвета `DataGridHeaderBackground`, `CentralPanelHeaderBackground` и `SecondaryBackgroundBrush` из выбранной темы. Оставьте эти ресурсы в файле темы, чтобы оверлеи соответствовали ее палитре.
 
 ## PRIVACY
@@ -153,6 +155,8 @@ QAMP supports fully customizable XAML themes. You can create your own look in ju
    - `ForegroundBrush` — text color.
    - `TertiaryBackgroundBrush` — visualizer background.
 5. Open QAMP, go to Settings, click **"Add Theme"**, and select your custom `.xaml` file.
+
+Bundled theme examples remain in the application folder and are read-only. Imported themes, languages, and fonts are stored in `%LOCALAPPDATA%\QAMP`, so they can be added when the player is installed under `Program Files`. Previously imported files are copied from the old application folders on first launch; the originals are not deleted.
 
 When a custom background is enabled, translucent panels use `DataGridHeaderBackground`, `CentralPanelHeaderBackground`, and `SecondaryBackgroundBrush` from the selected theme. Keep these resources in the theme file so the overlays match its palette.
 

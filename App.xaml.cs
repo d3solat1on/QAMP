@@ -51,6 +51,7 @@ namespace QAMP
 
             base.OnStartup(e);
 
+            AppDataManager.MigrateLegacyUserFiles();
             InitializeTray();
             InitializeBass();
             InitializeInterface();

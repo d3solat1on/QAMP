@@ -12,8 +12,6 @@ public class FontService
     private readonly string _fontsFolder = AppDataManager.FontsFolderPath;
 
     public const string DefaultFontKey = "GOST type A [GOSTA]";
-    private static readonly string DefaultFontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "GOST_A.TTF");
-    // private static readonly string DefaultFontPackUri = $"{DefaultFontPath.Replace('\\', '/')};#GOST type A";
 
     public List<FontOption> AvailableFonts { get; } = [];
 
@@ -22,7 +20,6 @@ public class FontService
     public FontOption DefaultFont => AvailableFonts.FirstOrDefault(font => font.DisplayName == DefaultFontKey) ?? AvailableFonts.First();
     private FontService()
     {
-        // _fontsFolder = AppDataManager.FontsFolderPath;
         if (!Directory.Exists(_fontsFolder))
         {
             Directory.CreateDirectory(_fontsFolder);
@@ -35,18 +32,9 @@ public class FontService
     {
         AvailableFonts.Clear();
 
-        if (File.Exists(DefaultFontPath))
-        {
-            try
-            {
-                var family = new FontFamily(new Uri(DefaultFontPath), "./#GOST type A");
-                AvailableFonts.Add(new FontOption(DefaultFontKey, family, false, DefaultFontPath));
-            }
-            catch
-            {
-                AvailableFonts.Add(new FontOption(DefaultFontKey, new FontFamily("Consolas"), false));
-            }
-        }
+        var defaultFont = Application.Current?.TryFindResource("MainFont") as FontFamily
+            ?? new FontFamily("pack://application:,,,/Resources/Fonts/GOST_A.TTF#GOST type A");
+        AvailableFonts.Add(new FontOption(DefaultFontKey, defaultFont, false));
 
         var fontFiles = Directory.GetFiles(_fontsFolder, "*.*")
             .Where(f => f.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
@@ -54,8 +42,6 @@ public class FontService
 
         foreach (var file in fontFiles)
         {
-            if (string.Equals(file, DefaultFontPath, StringComparison.OrdinalIgnoreCase)) continue;
-
             try
             {
                 var baseUri = new Uri(_fontsFolder + Path.DirectorySeparatorChar);
@@ -110,7 +96,7 @@ public class FontService
     }
 
     /// <summary>
-    /// Копирует новый файл шрифта в папку Fonts/ и возвращает созданный FontOption
+    /// Копирует новый шрифт в пользовательскую папку Fonts и возвращает созданный FontOption.
     /// </summary>
     public FontOption? ImportFont(string sourceFilePath)
     {

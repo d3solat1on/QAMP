@@ -8,6 +8,8 @@ namespace QAMP.Services
 {
     public static class ThemeManager
     {
+        private const string CustomThemeDictionaryTag = "QAMP.CustomTheme";
+
         public static void LoadThemeFromConfig()
         {
             var config = SettingsManager.Instance.Config;
@@ -60,7 +62,9 @@ namespace QAMP.Services
             string fileName = themeName.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)
                 ? themeName
                 : $"{themeName}Theme.xaml";
-            string themePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Themes", fileName);
+            string customThemePath = Path.Combine(AppDataManager.ThemesFolderPath, fileName);
+            string installedThemePath = Path.Combine(AppContext.BaseDirectory, "Themes", fileName);
+            string themePath = File.Exists(customThemePath) ? customThemePath : installedThemePath;
 
             if (!File.Exists(themePath))
             {
@@ -74,10 +78,10 @@ namespace QAMP.Services
                 {
                     Source = new Uri(themePath, UriKind.Absolute)
                 };
+                themeDict[CustomThemeDictionaryTag] = true;
                 var app = Application.Current;
                 var oldThemes = app.Resources.MergedDictionaries
-                    .Where(dictionary => dictionary.Source != null &&
-                        dictionary.Source.ToString().Contains("Themes/", StringComparison.OrdinalIgnoreCase))
+                    .Where(IsThemeDictionary)
                     .ToList();
 
                 foreach (var oldTheme in oldThemes)
@@ -93,6 +97,20 @@ namespace QAMP.Services
                 System.Diagnostics.Debug.WriteLine($"ThemeManager: Error loading theme '{themeName}': {ex}");
                 return false;
             }
+        }
+
+        private static bool IsThemeDictionary(ResourceDictionary dictionary)
+        {
+            if (dictionary.Contains(CustomThemeDictionaryTag))
+            {
+                return true;
+            }
+
+            string? source = dictionary.Source?.OriginalString;
+            return source != null &&
+                (source.StartsWith("Themes/", StringComparison.OrdinalIgnoreCase) ||
+                 source.Contains("/Themes/", StringComparison.OrdinalIgnoreCase) ||
+                 source.Contains("\\Themes\\", StringComparison.OrdinalIgnoreCase));
         }
 
         public static void UpdateAccentColor(string colorHex)

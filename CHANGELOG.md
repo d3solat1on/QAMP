@@ -1,4 +1,7 @@
 # CHANGELOG
+# (03.11.2026) Version 1.8.8.0:
+    - A critical bug has been fixed: user files—such as background images, localization files, themes, and more—are now stored in AppData.   
+
 # (03.11.2026) Version 1.8.7.9:
     - The application windows have been brought to a consistent style.  
     - The context menu has also been brought to a consistent style.  

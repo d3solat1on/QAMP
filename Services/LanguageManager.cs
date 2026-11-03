@@ -38,7 +38,8 @@ namespace QAMP.Services
             }
 
             var toRemove = resources
-                .Where(d => d.Source != null && IsLanguageDictionary(d.Source))
+                .Where(d => d.Contains(CustomLanguageDictTag) ||
+                    (d.Source != null && IsLanguageDictionary(d.Source)))
                 .ToList();
 
             foreach (var old in toRemove)
