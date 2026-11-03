@@ -44,6 +44,10 @@ public static class AppDataManager
     public static string BGFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Background");
     // fonts
     public static string FontsFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts");
+    // language
+    public static string LanguageFolderPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Localization");
+    // covercache
+    public static string CovercacheFolderPath => Path.Combine(_appDataPath, "covercache");
 
 
     // Публичные свойства для путей к конкретным файлам

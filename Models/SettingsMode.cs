@@ -111,7 +111,8 @@ public class AppSettings : INotifyPropertyChanged
             new HotkeyItem(HotkeyAction.ToggleShuffle, Key.S, ModifierKeys.Control),
             new HotkeyItem(HotkeyAction.OpenFullScreenSpectrum, Key.W, ModifierKeys.Control),
             new HotkeyItem(HotkeyAction.ToggleFocusGrid, Key.Tab, ModifierKeys.Control),
-            new HotkeyItem(HotkeyAction.ToggleFavorite, Key.F, ModifierKeys.Control)
+            new HotkeyItem(HotkeyAction.ToggleFavorite, Key.F, ModifierKeys.Control),
+            new HotkeyItem(HotkeyAction.OpenConsole, Key.F12, ModifierKeys.Control)
         ];
     }
 

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QAMP.Dialogs"
-        Background="Transparent"
+        Background="{DynamicResource BackgroundBrush}"
         AllowsTransparency="True"
         WindowStyle="None"
         Width="450"
@@ -12,10 +12,8 @@
         Title="{DynamicResource LngCreatePlaylist}"
         WindowStartupLocation="CenterOwner">
         <Border
-                Background="{DynamicResource SecondaryBackgroundBrush}"
-                CornerRadius="{DynamicResource AppCornerRadius}"
-                BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="1">
+                Background="{DynamicResource BackgroundBrush}"
+                CornerRadius="{DynamicResource AppCornerRadius}">
                 <Grid Margin="20">
 
                         <Grid.RowDefinitions>
@@ -25,13 +23,17 @@
                                 <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock x:Name="NewPlaylist"
-                                   Text="{DynamicResource LngNewPlaylist}"
-                                   Foreground="{DynamicResource TextBrush}"
-                                   FontSize="20"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,20"/>
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                Padding="8"
+                                Margin="0,0,0,20">
+                                <TextBlock x:Name="NewPlaylist"
+                                           Text="{DynamicResource LngNewPlaylist}"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                        </Border>
 
                         <Button Grid.Row="1"
                                 Width="180"
@@ -82,9 +84,10 @@
                                          AcceptsReturn="True"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="3"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Right">
+                        <Grid Grid.Row="3"
+                              Background="{DynamicResource SecondaryBackgroundBrush}">
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right">
                                 <Button x:Name="CancelPlaylist"
                                         Content="{DynamicResource LngCancelPlaylist}"
                                         Click="CancelButton_Click"
@@ -104,7 +107,8 @@
                                         Style="{StaticResource ModernPlayerButton}">
 
                                 </Button>
-                        </StackPanel>
+                            </StackPanel>
+                        </Grid>
                 </Grid>
         </Border>
 </Window>

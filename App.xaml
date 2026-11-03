@@ -11,7 +11,7 @@
                 <ResourceDictionary Source="Themes/DarkTheme.xaml"/>
                 <ResourceDictionary Source="Styles/Styles.xaml"/>
                 <ResourceDictionary Source="Resources/Icons.xaml"/>
-                <ResourceDictionary Source="Localization/LangRU.xaml"/>
+                <ResourceDictionary Source="Localization/LangENG.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 
@@ -21,6 +21,8 @@
             <FontFamily x:Key="MainFont">pack://application:,,,/Resources/Fonts/GOST_A.TTF#GOST type A</FontFamily>
 
             <Style TargetType="Window">
+                <Setter Property="Background"
+                        Value="{DynamicResource BackgroundBrush}"/>
                 <Setter Property="FontFamily"
                         Value="{DynamicResource MainFont}"/>
             </Style>

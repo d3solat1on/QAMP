@@ -90,8 +90,16 @@ namespace QAMP
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            var config = SettingsManager.Instance.Config;
+            if (config?.Hotkeys == null) return;
+            Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
 
-            if (e.Key == Key.F12 || e.Key == Key.OemTilde)
+            var matchedHotkey = config.Hotkeys.FirstOrDefault(h => h.Key == pressedKey && h.Modifiers == Keyboard.Modifiers);
+
+            if (matchedHotkey == null) return;
+
+
+            if (matchedHotkey.Action == HotkeyAction.OpenConsole || e.Key == Key.OemTilde)
             {
                 ToggleDebugConsole();
                 e.Handled = true;

@@ -133,12 +133,8 @@
                                                   VerticalContentAlignment="Center"
                                                   SelectionChanged="CustomThemesComboBox_SelectionChanged">
                                             <ComboBox.ItemContainerStyle>
-                                                <Style TargetType="ComboBoxItem">
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource ForegroundBrush}"/>
-                                                    <Setter Property="Background"
-                                                            Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                                </Style>
+                                                <Style TargetType="ComboBoxItem"
+                                                       BasedOn="{StaticResource ModernPlayerComboBox}"/>
                                             </ComboBox.ItemContainerStyle>
                                         </ComboBox>
 
@@ -208,8 +204,45 @@
                                 <RadioButton x:Name="LanguageEnRadio"
                                              Content="{DynamicResource LngLanguageEnglish}"
                                              Foreground="{DynamicResource ForegroundBrush}"
+                                             Margin="0,0,0,10"
                                              GroupName="Language"
                                              Checked="LanguageRadio_Checked"/>
+                                <RadioButton x:Name="CustomLanguageRadio"
+                                             Content="{DynamicResource LngCustomLanguage}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Margin="0,0,0,10"
+                                             GroupName="Language"
+                                             Checked="LanguageRadio_Checked"/>
+                                <GroupBox Header="{DynamicResource LngCustomLanguages}"
+                                          Margin="0,5,0,0"
+                                          Foreground="{DynamicResource ForegroundBrush}">
+                                    <Grid Margin="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <ComboBox x:Name="CustomLanguagesComboBox"
+                                                  Grid.Column="0"
+                                                  Margin="0,0,10,0"
+                                                  Height="25"
+                                                  VerticalContentAlignment="Center"
+                                                  SelectionChanged="CustomLanguagesComboBox_SelectionChanged">
+                                            <ComboBox.ItemContainerStyle>
+                                                <Style TargetType="ComboBoxItem"
+                                                       BasedOn="{StaticResource ModernPlayerComboBox}"/>
+                                            </ComboBox.ItemContainerStyle>
+                                        </ComboBox>
+
+                                        <Button x:Name="AddLanguageButton"
+                                                Grid.Column="1"
+                                                Style="{StaticResource ModernPlayerButton}"
+                                                Content="{DynamicResource LngAddLanguage}"
+                                                Padding="10,0"
+                                                Height="25"
+                                                Click="AddLanguageButton_Click"/>
+                                    </Grid>
+                                </GroupBox>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Header="{DynamicResource LngAccentFont}"
@@ -533,6 +566,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
@@ -729,6 +763,23 @@
                         <TextBox Grid.Row="10"
                                  Grid.Column="1"
                                  x:Name="TbFullSpectr"
+                                 Width="200"
+                                 HorizontalAlignment="Left"
+                                 Margin="0,5"
+                                 IsReadOnly="True"
+                                 PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                        <TextBlock Grid.Row="11"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngOpenConsole}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,5"
+                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                        <TextBox Grid.Row="11"
+                                 Grid.Column="1"
+                                 x:Name="TbOpenConsole"
                                  Width="200"
                                  HorizontalAlignment="Left"
                                  Margin="0,5"

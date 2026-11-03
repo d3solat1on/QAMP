@@ -9,15 +9,13 @@
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background="Transparent"
+        Background="{DynamicResource BackgroundBrush}"
         FontFamily="{DynamicResource MainFont}"
         FontSize="{DynamicResource FontSize}"
         WindowStartupLocation="CenterOwner"
         KeyDown="Window_KeyDown">
     <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-            CornerRadius="{DynamicResource AppCornerRadius}"
-            BorderBrush="{DynamicResource AccentBrush}"
-            BorderThickness="1">
+            CornerRadius="{DynamicResource AppCornerRadius}">
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -25,7 +23,8 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0"
-                  Margin="0,0,0,16"
+                  Margin="0,0,0,15"
+                  Background="{DynamicResource SecondaryBackgroundBrush}"
                   MouseDown="Header_MouseDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

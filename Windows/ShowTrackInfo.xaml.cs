@@ -383,9 +383,11 @@ namespace QAMP.Windows
                             tb.Text = lyrics;
                         });
                     }
+                    await TrackInfoToast.StopLoadingAsync();
                 }
                 else
                 {
+                    await TrackInfoToast.StopLoadingAsync();
                     string message = (string)Application.Current.FindResource("LngTextNotFound");
                     await TrackInfoToast.ShowAsync(message);
                 }
@@ -396,10 +398,6 @@ namespace QAMP.Windows
                 string message = (string)Application.Current.FindResource("LngError");
                 NotificationWindow.Show($"{message} {ex.Message}", this);
                 App.LogException(ex, "SearchLyrics_Click");
-            }
-            finally
-            {
-                await TrackInfoToast.StopLoadingAsync();
             }
         }
         private static async Task<string?> FetchLrcFromLrcLib(string artist, string title)

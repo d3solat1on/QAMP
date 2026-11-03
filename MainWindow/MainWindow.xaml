@@ -137,7 +137,7 @@
                                               VerticalAlignment="Center"/>
                                 </Button>
                                 <Button x:Name="Settings"
-                                        Style="{StaticResource TitleBarButtonStyle}"
+                                        Style="{StaticResource IconButton}"
                                         ToolTip="{DynamicResource LngSettings}"
                                         Click="Settings_Click"
                                         Margin="5,0,5,0">
@@ -591,32 +591,10 @@
                                                                         BorderBrush="Transparent"
                                                                         Click="AddMusicButton_Click"
                                                                         ToolTip="{DynamicResource LngAddMusic}">
-                                                                        <Button.Resources>
-                                                                                <Style TargetType="ContextMenu"
-                                                                                       x:Key="ModernMenu">
-                                                                                        <Setter Property="Background"
-                                                                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                                                                        <Setter Property="BorderBrush"
-                                                                                                Value="{DynamicResource AccentBrush}"/>
-                                                                                        <Setter Property="Template">
-                                                                                                <Setter.Value>
-                                                                                                        <ControlTemplate TargetType="ContextMenu">
-                                                                                                                <Border Background="{TemplateBinding Background}"
-                                                                                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                                                        BorderThickness="1"
-                                                                                                                        CornerRadius="{DynamicResource AppCornerRadius}">
-                                                                                                                        <StackPanel IsItemsHost="True"
-                                                                                                                                    Margin="5"/>
-                                                                                                                </Border>
-                                                                                                        </ControlTemplate>
-                                                                                                </Setter.Value>
-                                                                                        </Setter>
-                                                                                </Style>
-                                                                        </Button.Resources>
 
                                                                         <Button.ContextMenu>
                                                                                 <ContextMenu x:Name="AddMusicMenu"
-                                                                                             Style="{StaticResource ModernMenu}">
+                                                                                             Style="{StaticResource ModernContextMenu}">
                                                                                         <MenuItem x:Name="MenuAddFilesPlaylist"
                                                                                                   Header="{DynamicResource LngAddFiles}"
                                                                                                   Click="AddFilesToPlaylist_Click"/>
@@ -634,7 +612,6 @@
                                                                               HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                                 </Button>
-
                                                         </UniformGrid>
                                                 </Grid>
 
@@ -791,55 +768,15 @@
 
                                                                                         <StackPanel
                                                                                                 Grid.Column="1"
-                                                                                                Margin="8,0,0,0"
+                                                                                                Margin="10,0,0,0"
                                                                                                 VerticalAlignment="Center">
 
                                                                                                 <StackPanel.ContextMenu>
-                                                                                                        <ContextMenu Background="{DynamicResource ContextMenuBackground}"
-                                                                                                                     Foreground="{DynamicResource ForegroundBrush}"
-                                                                                                                     BorderBrush="{DynamicResource ContextMenuBorderBrush}">
-                                                                                                                <ContextMenu.Resources>
-                                                                                                                        <Style TargetType="ContextMenu">
-                                                                                                                                <Setter Property="Template">
-                                                                                                                                        <Setter.Value>
-                                                                                                                                                <ControlTemplate TargetType="ContextMenu">
-                                                                                                                                                        <Border Background="{TemplateBinding Background}"
-                                                                                                                                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                                                                                                BorderThickness="1"
-                                                                                                                                                                Padding="0">
-                                                                                                                                                                <StackPanel IsItemsHost="True"
-                                                                                                                                                                            KeyboardNavigation.DirectionalNavigation="Cycle"/>
-                                                                                                                                                        </Border>
-                                                                                                                                                </ControlTemplate>
-                                                                                                                                        </Setter.Value>
-                                                                                                                                </Setter>
-                                                                                                                        </Style>
-                                                                                                                        <Style TargetType="MenuItem">
-                                                                                                                                <Setter Property="Template">
-                                                                                                                                        <Setter.Value>
-                                                                                                                                                <ControlTemplate TargetType="MenuItem">
-                                                                                                                                                        <Border x:Name="Border"
-                                                                                                                                                                Background="Transparent"
-                                                                                                                                                                Padding="15,7">
-                                                                                                                                                                <ContentPresenter ContentSource="Header"
-                                                                                                                                                                                  RecognizesAccessKey="True"/>
-                                                                                                                                                        </Border>
-                                                                                                                                                        <ControlTemplate.Triggers>
-                                                                                                                                                                <Trigger Property="IsHighlighted"
-                                                                                                                                                                         Value="True">
-                                                                                                                                                                        <Setter TargetName="Border"
-                                                                                                                                                                                Property="Background"
-                                                                                                                                                                                Value="{DynamicResource BackgroundBrush}"/>
-                                                                                                                                                                </Trigger>
-                                                                                                                                                        </ControlTemplate.Triggers>
-                                                                                                                                                </ControlTemplate>
-                                                                                                                                        </Setter.Value>
-                                                                                                                                </Setter>
-                                                                                                                        </Style>
-                                                                                                                </ContextMenu.Resources>
+                                                                                                        <ContextMenu Style="{StaticResource ModernContextMenu}">
                                                                                                                 <MenuItem x:Name="EditPlaylist"
                                                                                                                           Header="{DynamicResource LngEditPlaylist}"
                                                                                                                           Click="EditPlaylist_Click"/>
+
                                                                                                                 <MenuItem x:Name="PinPlaylistMenuItem"
                                                                                                                           Click="PinPlaylist_Click">
                                                                                                                         <MenuItem.Style>
@@ -857,14 +794,18 @@
                                                                                                                                 </Style>
                                                                                                                         </MenuItem.Style>
                                                                                                                 </MenuItem>
+
                                                                                                                 <MenuItem x:Name="InfoPlaylist"
                                                                                                                           Header="{DynamicResource LngInfoPlaylist}"
                                                                                                                           Click="ShowPlaylistInfo_Click"/>
+
                                                                                                                 <MenuItem x:Name="RefreshPlaylist"
                                                                                                                           Header="{DynamicResource LngUpdatePlaylist}"
                                                                                                                           ToolTip="{DynamicResource LngRefreshPlaylist}"
                                                                                                                           Click="RefreshPlaylist_Click"/>
+
                                                                                                                 <Separator Background="{DynamicResource BorderBrush}"/>
+
                                                                                                                 <MenuItem x:Name="DeletePlaylist"
                                                                                                                           Header="{DynamicResource LngDeletePlaylist}"
                                                                                                                           Click="DeletePlaylist_Click"
@@ -1209,8 +1150,7 @@
                                                           Drop="TracksDataGrid_Drop"
                                                           DragOver="TracksDataGrid_DragOver">
                                                         <DataGrid.ContextMenu>
-                                                                <ContextMenu Background="{DynamicResource ContextMenuBackground}"
-                                                                             BorderBrush="{DynamicResource ContextMenuBorderBrush}"
+                                                                <ContextMenu Style="{StaticResource ModernContextMenu}"
                                                                              Opened="ContextMenu_Opened">
                                                                         <MenuItem x:Name="PlayTrackMenu"
                                                                                   Header="{DynamicResource LngPlayTrackMenu}"

@@ -204,7 +204,10 @@ public partial class MainWindow
     }
     public void SortByButton_Click(object sender, RoutedEventArgs e)
     {
-        var contextMenu = new ContextMenu();
+        var contextMenu = new ContextMenu
+        {
+            Style = Application.Current.FindResource("ModernContextMenu") as Style
+        };
 
         foreach (PlaylistSortOrder sortOrder in Enum.GetValues<PlaylistSortOrder>())
         {

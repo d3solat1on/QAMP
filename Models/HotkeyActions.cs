@@ -17,7 +17,8 @@ namespace QAMP.Models
         ToggleShuffle,
         OpenFullScreenSpectrum,
         ToggleFocusGrid,
-        ToggleFavorite
+        ToggleFavorite,
+        OpenConsole
     }
 }
 namespace QAMP.Models

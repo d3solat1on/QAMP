@@ -101,6 +101,8 @@ public class AppConsole
           clearcache            - Clear temporary files and cache
           getfpsspectrum        - Get the FPS value for the spectrum
           setfpsspectrum        - Set the FPS value for the spectrum
+          openappfolder         - Opens the application folder in File Explorer
+          opendatabasefolder    - Opens the database folder in File Explorer
           clear                 - Clear console screen
           exit / quit           - Close the application
         """);
@@ -425,6 +427,12 @@ public class AppConsole
                 break;
             case "setfpsspectrum":
                 SetFpsSpectrum(args);
+                break;
+            case "openappfolder":
+                Process.Start("explorer.exe", AppContext.BaseDirectory);
+                break;
+            case "opendatabasefolder":
+                Process.Start("explorer.exe", AppDataManager.AppDataPath);
                 break;
 #if DEBUG
             case "test":

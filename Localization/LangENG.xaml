@@ -1,6 +1,12 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngCombinationIsUsing">This combination is already in use for an action:</System:String>
+        <System:String x:Key="LngNotAssigned">Not Assigned</System:String>
+        <System:String x:Key="LngFailedImportLanguage">Failed to import language</System:String>
+        <System:String x:Key="LngLanguageAdded">Language successfully added</System:String>
+        <System:String x:Key="LngAddLanguage">Add language</System:String>
+        <System:String x:Key="LngCustomLanguages">Additional languages</System:String>
         <System:String x:Key="LngDescriptionTracksWithoutListening">Tracks that haven't been listened</System:String>
         <System:String x:Key="LngDescriptionTop50Tracks">Top 50 tracks by number of listens</System:String>
         <System:String x:Key="LngTrackWithoutListening">Tracks without listening</System:String>
@@ -244,6 +250,7 @@
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Added {0} tracks</System:String>
         <System:String x:Key="LngDeleteTracksConfirm"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Are you sure you want to delete the selected tracks?</System:String>
+        <System:String x:Key="LngOpenConsole">Open console</System:String>
         <System:String x:Key="LngPlayPause"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Play/Pause</System:String>
         <System:String x:Key="LngSettingsTitle"

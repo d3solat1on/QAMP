@@ -21,11 +21,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="HelpAndSupport"
-                   Text="{DynamicResource LngHelpAndSupport}"
-                   FontSize="24"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   Margin="0,0,0,15"/>
+        <Border Grid.Row="0"
+                Background="{DynamicResource SecondaryBackgroundBrush}"
+                Padding="0,0,0,15">
+            <TextBlock x:Name="HelpAndSupport"
+                       Text="{DynamicResource LngHelpAndSupport}"
+                       FontSize="24"
+                       Foreground="{DynamicResource ForegroundBrush}"/>
+        </Border>
         <!-- Стрелка вправо - 5 сек вперед -->
         <!-- Стрелка влево - 5 сек назад -->
         <!-- Пробел - Пауза/Плей -->
@@ -140,11 +143,12 @@
             </StackPanel>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,15,0,0">
-            <TextBox x:Name="CurrentVersion"
+        <Grid Grid.Row="2"
+              Background="{DynamicResource SecondaryBackgroundBrush}"
+              Margin="0,15,0,0">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <TextBox x:Name="CurrentVersion"
                      Width="100"
                      Height="35"
                      Background="{DynamicResource AccentBrush}"
@@ -166,13 +170,14 @@
                     Height="35"
                     Style="{StaticResource ModernPlayerButton}">
             </Button>
-            <Button Content="GitHub"
+                <Button Content="GitHub"
                     Margin="5,0,0,0"
                     Click="GitHubButton_Click"
                     Width="100"
                     Height="35"
                     Style="{StaticResource ModernPlayerButton}">
-            </Button>
-        </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

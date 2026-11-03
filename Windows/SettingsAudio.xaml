@@ -4,8 +4,8 @@
         xmlns:local="clr-namespace:QAMP.Windows"
         xmlns:converters="clr-namespace:QAMP.Converters"
         Title="{DynamicResource LngSettingsAudioTitle}"
-        Width="1000"
-        Height="800"
+        Height="900"
+        Width="1100"
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}"
         AllowsTransparency="True"
@@ -63,10 +63,8 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-            CornerRadius="{DynamicResource AppCornerRadius}"
-            BorderBrush="{DynamicResource AccentBrush}"
-            BorderThickness="1">
+    <Border Background="{DynamicResource BackgroundBrush}"
+            CornerRadius="{DynamicResource AppCornerRadius}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="40"/>
@@ -125,12 +123,8 @@
                                               Margin="0,0,10,0"
                                               SelectionChanged="PresetComboBox_SelectionChanged">
                                         <ComboBox.ItemContainerStyle>
-                                            <Style TargetType="ComboBoxItem">
-                                                <Setter Property="Foreground"
-                                                        Value="{DynamicResource ForegroundBrush}"/>
-                                                <Setter Property="Background"
-                                                        Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                            </Style>
+                                            <Style TargetType="ComboBoxItem"
+                                                   BasedOn="{StaticResource ModernPlayerComboBox}"/>
                                         </ComboBox.ItemContainerStyle>
                                         <ComboBoxItem Content="{DynamicResource LngCustom}"/>
                                         <ComboBoxItem Content="Default"/>
@@ -470,12 +464,8 @@
                                       Width="450"
                                       Height="30">
                                 <ComboBox.ItemContainerStyle>
-                                    <Style TargetType="ComboBoxItem">
-                                        <Setter Property="Foreground"
-                                                Value="{DynamicResource ForegroundBrush}"/>
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                    </Style>
+                                    <Style TargetType="ComboBoxItem"
+                                           BasedOn="{StaticResource ModernPlayerComboBox}"/>
                                 </ComboBox.ItemContainerStyle>
                             </ComboBox>
                         </StackPanel>
@@ -483,18 +473,19 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Background="{DynamicResource SecondaryBackgroundBrush}">
-                <Button Content="{DynamicResource LngCloseButton}"
-                        Style="{StaticResource ModernPlayerButton}"
-                        Margin="5,0,0,0"
-                        Width="100"
-                        Height="35"
-                        Click="CloseButton_Click"
-                        BorderBrush="{DynamicResource BorderBrush}"/>
-            </StackPanel>
+            <Grid Grid.Row="2"
+                  Background="{DynamicResource SecondaryBackgroundBrush}">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="{DynamicResource LngCloseButton}"
+                            Style="{StaticResource ModernPlayerButton}"
+                            Margin="5,0,0,0"
+                            Width="100"
+                            Height="35"
+                            Click="CloseButton_Click"
+                            BorderBrush="{DynamicResource BorderBrush}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Border>
 </Window>

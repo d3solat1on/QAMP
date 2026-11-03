@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:QAMP.Windows"
         xmlns:converters="clr-namespace:QAMP.Converters"
-        Background="Transparent"
+        Background="{DynamicResource BackgroundBrush}"
         AllowsTransparency="True"
         WindowStyle="None"
-        Width="1000"
-        Height="800"
+        Height="900"
+        Width="1100"
         Title="{DynamicResource LngInfoPlaylistTitle}"
         FontFamily="{DynamicResource MainFont}"
         FontSize="{DynamicResource FontSize}"
@@ -24,10 +24,8 @@
                                 Value="Transparent"/>
                 </Style>
         </Window.Resources>
-        <Border Background="{DynamicResource CentralPanelCardBackground}"
-                CornerRadius="{DynamicResource AppCornerRadius}"
-                BorderBrush="{DynamicResource AccentBrush}"
-                BorderThickness="1">
+        <Border Background="{DynamicResource BackgroundBrush}"
+                CornerRadius="{DynamicResource AppCornerRadius}">
                 <Grid Margin="0">
                         <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -36,7 +34,8 @@
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0"
                               Margin="20,15,20,0"
-                              Height="40">
+                              Height="40"
+                              Background="{DynamicResource SecondaryBackgroundBrush}">
                                 <TextBlock Text="{DynamicResource LngInfoPlaylistTitle}"
                                            FontSize="18"
                                            FontWeight="Bold"

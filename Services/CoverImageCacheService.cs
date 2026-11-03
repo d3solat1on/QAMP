@@ -17,8 +17,7 @@ public static class CoverImageCacheService
 
     private static string GetCacheDirectory()
     {
-        string basePath = AppDataManager.AppDataPath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "QAMP");
-        return Path.Combine(basePath, "cover_cache");
+        return AppDataManager.CovercacheFolderPath;
     }
 
     public static bool IsEnabled
@@ -171,7 +170,7 @@ public static class CoverImageCacheService
         {
             if (_diskCacheCleanupTriggered) return;
 
-            ClearDiskCache();
+            // ClearDiskCache();
             _diskCacheCleanupTriggered = true;
         }
     }
@@ -188,7 +187,7 @@ public static class CoverImageCacheService
                 File.Delete(filePath);
             }
 
-            Directory.Delete(cacheDir, recursive: true);
+            // Directory.Delete(cacheDir, recursive: true);
         }
         catch
         {

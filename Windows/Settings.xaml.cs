@@ -29,6 +29,7 @@ namespace QAMP.Windows
         {
             InitializeComponent();
             InitializeCustomThemes();
+            InitializeCustomLanguages();
         }
 
         private void InitializeCustomThemes()
@@ -218,6 +219,126 @@ namespace QAMP.Windows
             }
         }
 
+        private void InitializeCustomLanguages()
+        {
+            RefreshLanguagesList();
+            var config = SettingsManager.Instance.Config;
+            if (string.IsNullOrEmpty(config.Language)) return;
+
+            string languageFileName = $"{config.Language}.xaml";
+
+            var match = CustomLanguagesComboBox.Items.Cast<string>()
+                .FirstOrDefault(item => string.Equals(item, languageFileName,
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (match != null)
+            {
+                CustomLanguagesComboBox.SelectedItem = match;
+                if (CustomLanguageRadio != null)
+                    CustomLanguageRadio.IsChecked = true;
+            }
+            else
+            {
+                if (config.Language == "ru") LanguageRuRadio.IsChecked = true;
+                else if (config.Language == "en") LanguageEnRadio.IsChecked = true;
+            }
+        }
+        private void RefreshLanguagesList()
+        {
+            CustomLanguagesComboBox.SelectionChanged -= CustomLanguagesComboBox_SelectionChanged;
+            CustomLanguagesComboBox.Items.Clear();
+
+            if (!Directory.Exists(AppDataManager.LanguageFolderPath))
+            {
+                Directory.CreateDirectory(AppDataManager.LanguageFolderPath); 
+            }
+
+            var xamlFiles = Directory.GetFiles(AppDataManager.LanguageFolderPath, "*.xaml")
+                                     .Select(Path.GetFileName)
+                                     .ToList();
+
+            foreach (var file in xamlFiles)
+                CustomLanguagesComboBox.Items.Add(file);
+
+            CustomLanguagesComboBox.SelectionChanged += CustomLanguagesComboBox_SelectionChanged;
+            CustomLanguagesComboBox.UpdateLayout();
+        }
+
+        private void CustomLanguagesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (isInitializing) return;
+
+            if (CustomLanguagesComboBox.SelectedItem is string selectedLanguageFile)
+            {
+                var config = SettingsManager.Instance.Config;
+                config.Language = Path.GetFileNameWithoutExtension(selectedLanguageFile);
+                SettingsManager.Instance.Save();
+
+                try
+                {
+                    LanguageManager.ApplyLanguage(config.Language);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error occurred while applying language: {ex.Message}");
+                }
+            }
+        }
+
+        private async void AddLanguageButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "XAML |*.xaml"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string selectedFilePath = openFileDialog.FileName;
+                string fileName = Path.GetFileName(selectedFilePath);
+                string destFilePath = Path.Combine(AppDataManager.LanguageFolderPath, fileName);
+
+                if (!LanguageManager.IsLanguageAvailable(selectedFilePath, out string errorMessage))
+                {
+                    string message = (string)Application.Current.FindResource("LngFailedImportLanguage");
+                    NotificationWindow.Show($"{message}\n{errorMessage}", this);
+                    return;
+                }
+
+                try
+                {
+                    Directory.CreateDirectory(AppDataManager.LanguageFolderPath);
+                    File.Copy(selectedFilePath, destFilePath, overwrite: true);
+                    RefreshLanguagesList();
+
+                    // ✅ Правильный комбобокс
+                    if (CustomLanguagesComboBox.Items.Contains(fileName))
+                    {
+                        CustomLanguagesComboBox.SelectedItem = fileName;
+                    }
+
+                    // ✅ Явно применяем язык (не полагаемся на SelectionChanged)
+                    string newLang = Path.GetFileNameWithoutExtension(fileName);
+                    var config = SettingsManager.Instance.Config;
+                    config.Language = newLang;
+                    SettingsManager.Instance.Save();
+
+                    if (CustomLanguageRadio != null)
+                        CustomLanguageRadio.IsChecked = true;
+
+                    LanguageManager.ApplyLanguage(newLang);
+
+                    string message = (string)Application.Current.FindResource("LngLanguageAdded");
+                    await SettingsInfoToast.ShowAsync(message);
+                }
+                catch (Exception ex)
+                {
+                    string message = (string)Application.Current.FindResource("LngFailedToCopyFile");
+                    NotificationWindow.Show($"{message} {ex.Message}", this);
+                    Debug.WriteLine($"{message} {ex}");
+                }
+            }
+        }
         private void StandardThemeRadio_Checked(object sender, RoutedEventArgs e)
         {
             if (isInitializing) return;
@@ -329,14 +450,7 @@ namespace QAMP.Windows
             UseCoverCache.IsChecked = config.EnableCoverCache;
             NotUseCoverCache.IsChecked = !config.EnableCoverCache;
 
-            if (config.Language == "en")
-            {
-                LanguageEnRadio.IsChecked = true;
-            }
-            else
-            {
-                LanguageRuRadio.IsChecked = true;
-            }
+            InitializeCustomLanguages();
 
             if (config.IsCompactMode)
                 CompactModeRadio.IsChecked = true;
@@ -462,7 +576,31 @@ namespace QAMP.Windows
             if (isInitializing) return;
             if (sender is not RadioButton radio) return;
 
-            string lang = radio == LanguageEnRadio ? "en" : "ru";
+            string lang;
+            if (radio == LanguageEnRadio)
+            {
+                lang = "en";
+            }
+            else if (radio == LanguageRuRadio)
+            {
+                lang = "ru";
+            }
+            else if (radio == CustomLanguageRadio)
+            {
+                if (CustomLanguagesComboBox.SelectedItem is string selectedFile)
+                {
+                    lang = Path.GetFileNameWithoutExtension(selectedFile);
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+
             var config = SettingsManager.Instance.Config;
             if (config.Language == lang) return;
 
@@ -473,7 +611,10 @@ namespace QAMP.Windows
             {
                 LanguageManager.ApplyLanguage(lang);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Language] Apply error: {ex.Message}");
+            }
         }
 
         private void Format_Checked(object sender, RoutedEventArgs e)
@@ -606,6 +747,7 @@ namespace QAMP.Windows
             GradientDisabled.IsChecked = !originalUseSpectrumGradient;
             SpectrumBarsRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Bars;
             SpectrumLineRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Line;
+            SpectrumCenteredBarsRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.CenteredBars;
 
             AutoLaunchEnabled.IsChecked = originalIsAutoLaunchEnabled;
             AutoLaunchDisabled.IsChecked = !originalIsAutoLaunchEnabled;
@@ -662,7 +804,7 @@ namespace QAMP.Windows
             {
                 string selectedFilePath = openFileDialog.FileName;
                 string fileName = Path.GetFileName(selectedFilePath);
-                string destFilePath = Path.Combine(AppDataManager.ThemesFolderPath, fileName);
+                string destFilePath = Path.Combine(AppDataManager.BGFolderPath, fileName);
 
                 try
                 {
@@ -736,6 +878,7 @@ namespace QAMP.Windows
             UpdateHotkeyTextBox(Tb5secForward, HotkeyAction.SeekForward);
             UpdateHotkeyTextBox(Tb5secback, HotkeyAction.SeekBackward);
             UpdateHotkeyTextBox(TbFullSpectr, HotkeyAction.OpenFullScreenSpectrum);
+            UpdateHotkeyTextBox(TbOpenConsole, HotkeyAction.OpenConsole);
         }
 
         private static void UpdateHotkeyTextBox(TextBox textBox, HotkeyAction action)
@@ -750,7 +893,8 @@ namespace QAMP.Windows
             }
             else
             {
-                textBox.Text = "Не назначено";
+                string message = (string)Application.Current.FindResource("LngNotAssigned");
+                textBox.Text = $"{message}";
             }
         }
 
@@ -783,15 +927,16 @@ namespace QAMP.Windows
             else if (currentTextBox == Tb5secForward) targetAction = HotkeyAction.SeekForward;
             else if (currentTextBox == Tb5secback) targetAction = HotkeyAction.SeekBackward;
             else if (currentTextBox == TbFullSpectr) targetAction = HotkeyAction.OpenFullScreenSpectrum;
+            else if(currentTextBox == TbOpenConsole) targetAction = HotkeyAction.OpenConsole;
             else return;
 
             var config = SettingsManager.Instance.Config;
 
-            // Проверка на дубликаты
             var duplicate = config.Hotkeys.FirstOrDefault(h => h.Key == pressedKey && h.Modifiers == modifiers && h.Action != targetAction);
             if (duplicate != null)
             {
-                string errorMsg = $"Это сочетание уже используется для действия: {duplicate.Action}";
+                string message = (string)Application.Current.FindResource("LngCombinationIsUsing");
+                string errorMsg = $"{message} {duplicate.Action}";
                 NotificationWindow.Show(errorMsg, this);
                 e.Handled = true;
                 return;

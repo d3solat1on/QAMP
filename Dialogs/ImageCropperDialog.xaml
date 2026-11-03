@@ -1,7 +1,7 @@
 <Window x:Class="QAMP.Dialogs.ImageCropperDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Background="Transparent"
+        Background="{DynamicResource BackgroundBrush}"
         AllowsTransparency="True"
         WindowStyle="None"
         Width="450"
@@ -50,10 +50,8 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-            CornerRadius="{DynamicResource AppCornerRadius}"
-            BorderBrush="{DynamicResource BorderBrush}"
-            BorderThickness="1">
+    <Border Background="{DynamicResource BackgroundBrush}"
+            CornerRadius="{DynamicResource AppCornerRadius}">
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -61,13 +59,16 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock x:Name="CropCover"
-                       Text="{DynamicResource LngCropCover}"
-                       Foreground="{DynamicResource TextBrush}"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,20"/>
+            <Border Grid.Row="0"
+                    Background="{DynamicResource SecondaryBackgroundBrush}"
+                    Padding="0,0,0,20">
+                <TextBlock x:Name="CropCover"
+                           Text="{DynamicResource LngCropCover}"
+                           Foreground="{DynamicResource TextBrush}"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"/>
+            </Border>
 
             <Border Grid.Row="1"
                     Width="300"
@@ -112,11 +113,12 @@
                         ValueChanged="ZoomSlider_ValueChanged"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Margin="0,20,0,0">
-                <Button Content="{DynamicResource LngCancelPlaylist}"
+            <Grid Grid.Row="2"
+                  Background="{DynamicResource SecondaryBackgroundBrush}"
+                  Margin="0,20,0,0">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="{DynamicResource LngCancelPlaylist}"
                         Click="Cancel_Click"
                         Width="100"
                         Height="35"
@@ -125,14 +127,15 @@
                         IsCancel="True"
                         BorderThickness="0">
                 </Button>
-                <Button x:Name="Done"
+                    <Button x:Name="Done"
                         Content="{DynamicResource LngDone}"
                         Click="Done_Click"
                         Width="100"
                         Height="35"
                         Style="{StaticResource ModernPlayerButton}">
-                </Button>
-            </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Border>
 </Window>

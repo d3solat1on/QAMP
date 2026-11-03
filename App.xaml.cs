@@ -13,11 +13,27 @@ namespace QAMP
     {
         private static Mutex? _appMutex;
 
+#if DEBUG
+        private const string AppUserModelId = "QAMPCompany.QAMP.MusicPlayer.Debug";
+        private const string StartMenuShortcutName = "QAMP Debug";
+#else
+        private const string AppUserModelId = "QAMPCompany.QAMP.MusicPlayer";
+        private const string StartMenuShortcutName = "QAMP";
+#endif
+
         private static readonly int WM_SHOWME = RegisterWindowMessage("QAMP_UNIQUE_SHOW_ME_MSG");
         public static TaskbarIcon? TrayIcon { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            int appUserModelIdResult = SetCurrentProcessExplicitAppUserModelID(AppUserModelId);
+            if (appUserModelIdResult < 0)
+            {
+                var exception = Marshal.GetExceptionForHR(appUserModelIdResult);
+                Debug.WriteLine($"Setting AppUserModelID failed: 0x{appUserModelIdResult:X8}");
+                LogException(exception, "SetAppUserModelIdError");
+            }
+
 #if DEBUG
             const string appName = "Global\\QAMP_MusicPlayer_Unique_Mutex_Debug";
 #else
@@ -35,18 +51,15 @@ namespace QAMP
 
             base.OnStartup(e);
 
-            _ = SetCurrentProcessExplicitAppUserModelID("QAMPCompany.QAMP.MusicPlayer");
-
             InitializeTray();
             InitializeBass();
             InitializeInterface();
             InitializeUnhandledExceptions();
 
-            Task.Run(() => ShortcutHelpers.EnsureStartMenuShortcut(
-                "QAMP",
+            _ = Task.Run(() => ShortcutHelpers.EnsureStartMenuShortcut(
+                StartMenuShortcutName,
                 Path.Combine(AppContext.BaseDirectory, "QAMP.exe"),
-                "QAMPCompany.QAMP.MusicPlayer"
-            ));
+                AppUserModelId));
         }
 
         private static void SignalToExistingInstance()
@@ -97,8 +110,13 @@ namespace QAMP
                     ToolTipText = "QAMP",
 #endif             
                     Visibility = Visibility.Visible,
+#if DEBUG
+                    IconSource = new System.Windows.Media.ImageSourceConverter()
+                        .ConvertFromString("pack://application:,,,/icon/QAMP_icon_debug.ico") as System.Windows.Media.ImageSource
+#else
                     IconSource = new System.Windows.Media.ImageSourceConverter()
                         .ConvertFromString("pack://application:,,,/icon/QAMP_icon.ico") as System.Windows.Media.ImageSource
+#endif
                 };
 
                 TrayIcon.TrayMouseDoubleClick += (s, args) =>
@@ -304,62 +322,20 @@ namespace QAMP
 
         private const int HWND_BROADCAST = 0xffff;
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern int RegisterWindowMessage(string lpString);
+        [LibraryImport("user32.dll", EntryPoint = "RegisterWindowMessageW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        private static partial int RegisterWindowMessage(string lpString);
 
-        [DllImport("shell32.dll")]
-        private static extern int SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string appId);
+        [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
+        private static partial int SetCurrentProcessExplicitAppUserModelID(string appId);
 
         private class BassConfigDto
         {
             public string? BassEmail { get; set; }
             public string? BassKey { get; set; }
-        }
-    }
-}
-namespace QAMP
-{
-    internal static class ShortcutHelpers
-    {
-        public static void EnsureStartMenuShortcut(string shortcutName, string targetPath, string appId)
-        {
-            try
-            {
-                var programs = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Microsoft", "Windows", "Start Menu", "Programs"
-                );
-                var linkPath = Path.Combine(programs, shortcutName + ".lnk");
-
-                if (File.Exists(linkPath)) return;
-
-                var psScript = $@"
-                    $WshShell = New-Object -ComObject WScript.Shell
-                    $Shortcut = $WshShell.CreateShortcut(""{linkPath}"")
-                    $Shortcut.TargetPath = ""{targetPath}""
-                    $Shortcut.WorkingDirectory = ""{Path.GetDirectoryName(targetPath)}""
-                    $Shortcut.Save()
-                ";
-
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powershell.exe",
-                    Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{psScript}\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-
-                using var process = Process.Start(psi);
-                process?.WaitForExit(5000);
-            }
-            catch
-            {
-                // I
-            }
         }
     }
 }

@@ -17,7 +17,10 @@ namespace QAMP
                 _ = NotificationWindow.Show(Application.Current.FindResource("LngSelectPlaylistFirst") as string ?? "Please select a playlist first!", this);
                 return;
             }
-            var contextMenu = new ContextMenu();
+            var contextMenu = new ContextMenu
+            {
+                Style = Application.Current.FindResource("ModernContextMenu") as Style
+            };
 
             // wtf, будет так
             // По дате добавления

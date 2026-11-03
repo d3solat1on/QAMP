@@ -1,4 +1,9 @@
 # CHANGELOG
+# (03.11.2026) Version 1.8.7.9:
+    - The application windows have been brought to a consistent style.  
+    - The context menu has also been brought to a consistent style.  
+    - Added the ability to add languages.  
+    
 # (02.11.2026) Version 1.8.7.8:
     - Optimizing memory and string handling: Implementing `Span<T>` and `ReadOnlySpan<char>` in key data-processing algorithms to reduce the load on the GC (garbage collector) and accelerate computations.  
     - Updated P/Invoke: `DllImport` has been replaced with the modern `[LibraryImport]` source generator for interacting with the C++ library `QampCore.dll`, which reduces the overhead of calling native code.  

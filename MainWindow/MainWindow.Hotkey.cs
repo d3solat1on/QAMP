@@ -51,7 +51,7 @@ public partial class MainWindow
                 _playService.SeekRelative(-5);
                 break;
             case HotkeyAction.VolumeUp:
-                ChangeVolume(1); 
+                ChangeVolume(1);
                 break;
             case HotkeyAction.VolumeDown:
                 ChangeVolume(-1);
@@ -107,6 +107,9 @@ public partial class MainWindow
                 break;
             case HotkeyAction.ToggleFavorite:
                 FavoriteButton_Click(null, null);
+                break;
+            case HotkeyAction.OpenConsole:
+                ToggleDebugConsole();
                 break;
         }
     }

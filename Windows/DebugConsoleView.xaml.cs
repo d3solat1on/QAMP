@@ -16,7 +16,7 @@ public partial class DebugConsoleView : UserControl
         "clear", "exit", "quit", "mute", "unmute", "trackinfo", "clearcache",
         "changeformatlibrary","changeaccentcolor","lyricsmode", "changeround",
         "background", "getfonts", "setfont","getthemes", "settheme","setbg",
-        "addbg", "addtheme","addfont","getfpsspectrum","setfpsspectrum"
+        "addbg", "addtheme","addfont","getfpsspectrum","setfpsspectrum", "openappfolder","opendatabasefolder"
     ];
     private readonly List<string> _commandHistory = [];
     private int _historyIndex = -1;

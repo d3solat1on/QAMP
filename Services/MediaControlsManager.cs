@@ -82,6 +82,11 @@ namespace QAMP.Services
                 updater.MusicProperties.Artist = executor ?? "Unknown Artist";
                 updater.MusicProperties.AlbumTitle = album ?? "Unknown Album";
 
+#if DEBUG
+                updater.AppMediaId = "QAMP_Debug";
+#else
+                updater.AppMediaId = "QAMP";
+#endif
 
                 updater.Update();
             }
