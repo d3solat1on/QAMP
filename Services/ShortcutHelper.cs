@@ -2,7 +2,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-namespace QAMP;
+namespace QAMP.Services;
 
 internal static class ShortcutHelpers
 {

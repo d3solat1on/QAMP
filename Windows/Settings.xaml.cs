@@ -795,7 +795,7 @@ namespace QAMP.Windows
         {
             if (!Directory.Exists(AppDataManager.BGFolderPath))
             {
-                Directory.CreateDirectory(AppDataManager.ThemesFolderPath);
+                Directory.CreateDirectory(AppDataManager.BGFolderPath); //v pizdu nahuy 
             }
 
             OpenFileDialog openFileDialog = new();
