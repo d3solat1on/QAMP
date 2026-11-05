@@ -1,4 +1,8 @@
 # CHANGELOG
+# (06.11.2026) Version 1.8.8.1:
+    - Added the ability to create folders for playlists.  
+    - Minor application optimization.  
+    
 # (03.11.2026) Version 1.8.8.0:
     - A critical bug has been fixed: user files—such as background images, localization files, themes, and more—are now stored in AppData.   
 
