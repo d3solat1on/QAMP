@@ -87,8 +87,7 @@ public partial class MainWindow
                 double volume = VolumeSlider.Value / 100.0;
                 Player.Volume = volume;
 
-                string volumeStr = volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                _ = DatabaseService.SaveSetting("Volume", volumeStr);
+                _ = DatabaseService.SaveVolume(volume);
 
                 if (VolumeSlider.Value == 0)
                 {

@@ -14,7 +14,7 @@
         WindowStartupLocation="CenterOwner"
         KeyDown="Window_KeyDown">
         <Window.Resources>
-                <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
+                <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
                 <Style TargetType="ScrollViewer">
                         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
                                 Value="Disabled"/>
@@ -74,7 +74,7 @@
                                                 Padding="8"
                                                 ClipToBounds="True">
                                                 <Grid>
-                                                        <Image Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
+                                                        <Image Source="{Binding Converter={StaticResource ByteArrayToImageConverter}, ConverterParameter=Large}"
                                                                Stretch="UniformToFill"
                                                                Margin="2">
                                                                 <Image.Style>

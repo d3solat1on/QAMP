@@ -249,9 +249,11 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
@@ -264,7 +266,7 @@
                                    Grid.Column="1"
                                    x:Name="PlaylistCountText"
                                    Margin="10,5,0,5"/>
-
+                        
                         <TextBlock Grid.Row="1"
                                    Grid.Column="0"
                                    Text="{DynamicResource LngTrackCount}"
@@ -273,6 +275,16 @@
                         <TextBlock Grid.Row="1"
                                    Grid.Column="1"
                                    x:Name="TrackCountText"
+                                   Margin="10,5,0,5"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource LngFolderCount}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   x:Name="FolderCountText"
                                    Margin="10,5,0,5"/>
                     </Grid>
                 </GroupBox>

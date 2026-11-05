@@ -14,7 +14,7 @@
         Title="{DynamicResource LngEditPlaylist}"
         WindowStartupLocation="CenterOwner">
         <Window.Resources>
-                <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
+                <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
         </Window.Resources>
 
         <Border
@@ -48,7 +48,7 @@
                                 Background="{DynamicResource CentralPanelCardBackground}">
                                 <Grid>
                                         <Image x:Name="CoverImage"
-                                               Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
+                                               Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}}"
                                                Stretch="UniformToFill"
                                                Margin="2">
                                                 <Image.Style>
@@ -141,24 +141,24 @@
 
                         <Grid Grid.Row="3"
                               Background="{DynamicResource SecondaryBackgroundBrush}">
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Right">
-                                <Button Content="{DynamicResource LngCancelPlaylist}"
-                                        Click="CancelButton_Click"
-                                        Width="100"
-                                        Height="35"
-                                        Style="{StaticResource ModernPlayerButton}"
-                                        Margin="0,0,10,0"
-                                        IsCancel="True"
-                                        BorderThickness="0">
-                                </Button>
-                                <Button Content="{DynamicResource LngOk}"
-                                        Click="EditPlaylist_Click"
-                                        Width="100"
-                                        Height="35"
-                                        Style="{StaticResource ModernPlayerButton}">
-                                </Button>
-                            </StackPanel>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Right">
+                                        <Button Content="{DynamicResource LngCancelPlaylist}"
+                                                Click="CancelButton_Click"
+                                                Width="100"
+                                                Height="35"
+                                                Style="{StaticResource ModernPlayerButton}"
+                                                Margin="0,0,10,0"
+                                                IsCancel="True"
+                                                BorderThickness="0">
+                                        </Button>
+                                        <Button Content="{DynamicResource LngOk}"
+                                                Click="EditPlaylist_Click"
+                                                Width="100"
+                                                Height="35"
+                                                Style="{StaticResource ModernPlayerButton}">
+                                        </Button>
+                                </StackPanel>
                         </Grid>
                 </Grid>
         </Border>

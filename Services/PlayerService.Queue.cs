@@ -12,7 +12,13 @@ public partial class PlayerService
         Application.Current.Dispatcher.BeginInvoke(() =>
         {
             // The callback may already be queued when the user switches tracks.
-            if (channel != _currentStream || CurrentTrack == null || _crossfadeStream != 0) return;
+            if (channel != _currentStream || CurrentTrack == null) return;
+
+            if (_crossfadeStream != 0)
+            {
+                CompleteCrossfade();
+                return;
+            }
 
             IncrementCurrentTrackPlayCount();
 

@@ -367,7 +367,11 @@ public class AppConsole
             case "exit":
             case "quit":
                 Log("Shutting down application...");
-                Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
+                if (Application.Current?.MainWindow is MainWindow mainWindowWindow)
+                {
+                    mainWindowWindow.SaveCurrentState();
+                    Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
+                }
                 break;
             case "mute":
             case "unmute":

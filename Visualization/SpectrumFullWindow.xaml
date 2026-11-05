@@ -13,7 +13,7 @@
         Loaded="SpectrumFullWindow_Loaded"
         Closed="SpectrumFullWindow_Closed">
     <Window.Resources>
-        <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
+        <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
     </Window.Resources>
 
     <Grid>
@@ -41,7 +41,7 @@
                           Stretch="Uniform"
                           HorizontalAlignment="Center"
                           VerticalAlignment="Center"/>
-                    <Image Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
+                    <Image Source="{Binding CoverImage, Converter={StaticResource ByteArrayToImageConverter}, ConverterParameter=DataGrid}"
                            Stretch="UniformToFill"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center">

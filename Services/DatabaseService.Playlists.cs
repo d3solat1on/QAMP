@@ -92,10 +92,12 @@ public partial class DatabaseService
         try
         {
             bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+            bool hasFolderId = ColumnExists(connection, "Playlists", "FolderId");
 
-            string selectQuery = hasIsSystemPlaylist
-                ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists WHERE Id = $id"
-                : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists WHERE Id = $id";
+            string selectQuery = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType";
+            if (hasIsSystemPlaylist) selectQuery += ", IsSystemPlaylist";
+            if (hasFolderId) selectQuery += ", FolderId";
+            selectQuery += " FROM Playlists WHERE Id = $id";
 
             command.CommandText = selectQuery;
             command.Parameters.AddWithValue("$id", playlistId);
@@ -151,9 +153,10 @@ public partial class DatabaseService
                     playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
                 }
 
-                if (!reader.IsDBNull(7))
+                int folderIdIndex = 8 + (hasIsSystemPlaylist ? 1 : 0);
+                if (hasFolderId && !reader.IsDBNull(folderIdIndex))
                 {
-                    playlist.SortType = (TrackSortType)reader.GetInt32(7);
+                    playlist.FolderId = reader.GetInt32(folderIdIndex);
                 }
 
                 var tracks = GetTracksForPlaylist(playlist.Id, playlist.SortType);
@@ -690,10 +693,12 @@ public partial class DatabaseService
                 try
                 {
                     bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+                    bool hasFolderId = ColumnExists(connection, "Playlists", "FolderId");
 
-                    string selectQuery = hasIsSystemPlaylist
-                        ? "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType, IsSystemPlaylist FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC"
-                        : "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
+                    string selectQuery = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType";
+                    if (hasIsSystemPlaylist) selectQuery += ", IsSystemPlaylist";
+                    if (hasFolderId) selectQuery += ", FolderId";
+                    selectQuery += " FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
 
                     command.CommandText = selectQuery;
                     using var reader = command.ExecuteReader();
@@ -745,6 +750,12 @@ public partial class DatabaseService
                         if (hasIsSystemPlaylist && !reader.IsDBNull(8))
                         {
                             playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
+                        }
+
+                        int folderIdIndex = 8 + (hasIsSystemPlaylist ? 1 : 0);
+                        if (hasFolderId && !reader.IsDBNull(folderIdIndex))
+                        {
+                            playlist.FolderId = reader.GetInt32(folderIdIndex);
                         }
 
                         playlists.Add(playlist);

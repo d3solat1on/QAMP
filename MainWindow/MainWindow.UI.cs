@@ -15,23 +15,7 @@ public partial class MainWindow
         if (track != null)
         {
             string path = track.Path ?? string.Empty;
-            _ = Task.Run(() => DatabaseService.SaveSettingSync("LastTrackPath", path));
-        }
-
-        System.Windows.Media.ImageSource? preparedCover = null;
-        if (track != null && track.CoverImage != null)
-        {
-            preparedCover = await Task.Run(() =>
-            {
-                try
-                {
-                    return _imageConverter.Convert(track.CoverImage, typeof(System.Windows.Media.Imaging.BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) as System.Windows.Media.ImageSource;
-                }
-                catch
-                {
-                    return null;
-                }
-            });
+            _ = Task.Run(() => DatabaseService.SaveLastTrackPath(path));
         }
 
         Dispatcher.Invoke(() =>
@@ -79,13 +63,15 @@ public partial class MainWindow
                 if (Player.Duration <= 0) CheckDurationAsync();
                 TotalTimeText.Text = totalTime;
 
-                if (preparedCover != null)
+                if (track.CoverImage != null && track.CoverImage.Length > 0 && track.Path != null) 
                 {
-                    CurrentTrackImage.Source = preparedCover;
-                    CurrentTrackImage.Visibility = Visibility.Visible;
-                    DefaultCoverPath.Visibility = Visibility.Collapsed;
-                    CurrentTrackImage.Stretch = System.Windows.Media.Stretch.UniformToFill;
-                    CurrentTrackImage.Margin = new Thickness(0);
+                    var cover = CoverImageCacheService.GetImage(track.Path, track.CoverImage, 700);
+                    if (cover != null)
+                    {
+                        CurrentTrackImage.Source = cover;
+                        CurrentTrackImage.Visibility = Visibility.Visible;
+                        DefaultCoverPath.Visibility = Visibility.Collapsed;
+                    }
                 }
                 else
                 {

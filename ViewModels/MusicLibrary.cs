@@ -9,8 +9,7 @@ namespace QAMP.ViewModels
     {
         private static MusicLibrary? _instance;
         public static MusicLibrary Instance => _instance ??= new MusicLibrary();
-
-        // Коллекция плейлистов
+        public const string FavoritesName = "Favorites";
         private ObservableCollection<Playlist> _playlists = [];
         public ObservableCollection<Playlist> Playlists
         {
@@ -21,11 +20,6 @@ namespace QAMP.ViewModels
                 OnPropertyChanged(nameof(Playlists));
             }
         }
-
-        // public const string FavoritesName = "Избранное"; //Favorites
-        public const string FavoritesName = "Favorites";
-
-        // Текущий выбранный плейлист
         private Playlist? _currentPlaylist;
         public Playlist? CurrentPlaylist
         {
@@ -37,13 +31,12 @@ namespace QAMP.ViewModels
                     _currentPlaylist = value;
                     if (value != null)
                     {
-                        _ = DatabaseService.SaveSetting("LastPlaylistId", value.Id.ToString());
+                        _ = DatabaseService.SaveLastPlaylistId(value.Id);
                     }
                     OnPropertyChanged(nameof(CurrentPlaylist));
                 }
             }
         }
-        // Плейлист из которого воспроизводится музыка (отличается от CurrentPlaylist который для просмотра)
         private Playlist? _playingPlaylist;
         public Playlist? PlayingPlaylist
         {
@@ -68,32 +61,78 @@ namespace QAMP.ViewModels
             }
         }
         public Track? CurrentTrack { get; set; }
+        public ObservableCollection<PlaylistFolder> PlaylistFolders { get; } = [];
+        public ObservableCollection<object> PlaylistSidebarItems { get; } = [];
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        // НОВЫЙ МЕТОД: для воспроизведения плейлиста
-        // public void PlayPlaylist(Playlist playlist)
-        // {
-        //     if (playlist == null) return;
+        public MusicLibrary()
+        {
+            PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(CurrentPlaylist) && CurrentPlaylist != null)
+                {
+                    CurrentPlaylist.Tracks.CollectionChanged += (sender, args) =>
+                    {
+                        UpdatePlaybackQueue();
+                        OnPropertyChanged(nameof(PlaybackQueue));
+                    };
+                }
+            };
+        }
 
-        //     System.Diagnostics.Debug.WriteLine($"=== ВОСПРОИЗВЕДЕНИЕ ПЛЕЙЛИСТА: {playlist.Name} ===");
+        private IEnumerable<Playlist> OrderPlaylistsForSidebar()
+        {
+            IOrderedEnumerable<Playlist> ordered = Playlists
+                .OrderByDescending(playlist => playlist.IsPinned);
 
-        //     // Устанавливаем плейлист из которого воспроизводится музыка
-        //     PlayingPlaylist = playlist;
+            return SettingsManager.Instance.Config.CurrentPlaylistSort switch
+            {
+                PlaylistSortOrder.NameAZ => ordered.ThenBy(playlist => playlist.Name),
+                PlaylistSortOrder.NameZA => ordered.ThenByDescending(playlist => playlist.Name),
+                PlaylistSortOrder.CreatedDateNewest => ordered.ThenByDescending(playlist => playlist.Id),
+                PlaylistSortOrder.CreatedDateOldest => ordered.ThenBy(playlist => playlist.Id),
+                PlaylistSortOrder.Custom or PlaylistSortOrder.Manual =>
+                    ordered.ThenBy(playlist => playlist.SortOrder).ThenBy(playlist => playlist.Name),
+                _ => ordered.ThenBy(playlist => playlist.SortOrder).ThenBy(playlist => playlist.Name)
+            };
+        }
 
-        //     // Обновляем очередь воспроизведения
-        //     PlaybackQueue.Clear();
-        //     foreach (var track in playlist.Tracks)
-        //     {
-        //         PlaybackQueue.Add(track);
-        //     }
 
-        //     // Начинаем с первого трека
-        //     if (PlaybackQueue.Count > 0)
-        //     {
-        //         _ = PlayerService.Instance.PlayTrack(PlaybackQueue[0]);
-        //     }
-        // }
+        public void RefreshPlaylistSidebarItems()
+        {
+            foreach (var folder in PlaylistFolders.OrderByDescending(folder => folder.IsPinned).ThenBy(folder => folder.Id))
+            {
+                folder.PlaylistInFolder.Clear();
+            }
 
-        //// <summary>
+            var unfiledPlaylists = new List<Playlist>();
+            var orderedPlaylists = OrderPlaylistsForSidebar();
+            foreach (var playlist in orderedPlaylists)
+            {
+                var folder = PlaylistFolders.FirstOrDefault(folder => folder.Id == playlist.FolderId);
+                if (folder == null)
+                {
+                    unfiledPlaylists.Add(playlist);
+                }
+                else
+                {
+                    folder.PlaylistInFolder.Add(playlist);
+                }
+            }
+
+            PlaylistSidebarItems.Clear();
+            foreach (var folder in PlaylistFolders.OrderByDescending(folder => folder.IsPinned).ThenBy(folder => folder.Id))
+            {
+                PlaylistSidebarItems.Add(folder);
+            }
+
+            foreach (var playlist in unfiledPlaylists)
+            {
+                PlaylistSidebarItems.Add(playlist);
+            }
+        }
+
+        /// <summary>
         /// Воспроизводит трек из плейлиста с учетом отображаемого порядка (например, при сортировке)
         /// </summary>
         public void PlayTrackFromPlaylist(Track track, Playlist playlist, IEnumerable<Track>? displayOrder = null, bool bypassShuffle = false)
@@ -121,58 +160,6 @@ namespace QAMP.ViewModels
             }
             _ = PlayerService.Instance.PlayTrack(track, true);
         }
-        // public void AddTrackToPlayNext(Track track)
-        // {
-        //     if (track == null) return;
-
-        //     Track? currentTrack = PlayerService.Instance.CurrentTrack;
-
-        //     int targetIndex = 0;
-
-        //     if (PlayerService.Instance.IsShuffleEnabled)
-        //     {
-        //         if (currentTrack != null)
-        //         {
-        //             targetIndex = PlayerService.Instance.ShuffledQueue.IndexOf(currentTrack) + 1;
-        //         }
-        //         targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance.ShuffledQueue.Count);
-        //         PlayerService.Instance.ShuffledQueue.Insert(targetIndex, track);
-        //     }
-        //     else
-        //     {
-        //         if (currentTrack != null)
-        //         {
-        //             targetIndex = PlayerService.Instance._actualPlayingQueue.IndexOf(currentTrack) + 1;
-        //         }
-        //         targetIndex = Math.Clamp(targetIndex, 0, PlayerService.Instance._actualPlayingQueue.Count); 
-        //         PlayerService.Instance._actualPlayingQueue.Insert(targetIndex, track);
-        //     }
-
-        //     int uiTargetIndex = 0;
-        //     if (currentTrack != null)
-        //     {
-        //         uiTargetIndex = PlaybackQueue.IndexOf(currentTrack) + 1;
-        //     }
-        //     uiTargetIndex = Math.Clamp(uiTargetIndex, 0, PlaybackQueue.Count);
-
-        //     PlaybackQueue.Insert(uiTargetIndex, track);
-
-        //     System.Diagnostics.Debug.WriteLine($"Трек '{track.Name}' добавлен как следующий. Позиция в UI: {uiTargetIndex}");
-        // }
-        public MusicLibrary()
-        {
-            PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(CurrentPlaylist) && CurrentPlaylist != null)
-                {
-                    CurrentPlaylist.Tracks.CollectionChanged += (sender, args) =>
-                    {
-                        UpdatePlaybackQueue();
-                        OnPropertyChanged(nameof(PlaybackQueue));
-                    };
-                }
-            };
-        }
 
         private void UpdatePlaybackQueue()
         {
@@ -188,23 +175,20 @@ namespace QAMP.ViewModels
 
         public void UpdatePlaylist(Playlist updatedPlaylist)
         {
-            // Находим существующий плейлист в коллекции
             var existingPlaylist = Playlists.FirstOrDefault(p => p.Id == updatedPlaylist.Id);
             if (existingPlaylist != null)
             {
-                // Обновляем свойства
                 existingPlaylist.Name = updatedPlaylist.Name;
                 existingPlaylist.Description = updatedPlaylist.Description;
                 existingPlaylist.CoverImage = updatedPlaylist.CoverImage;
+                existingPlaylist.FolderId = updatedPlaylist.FolderId;
 
-                // Обновляем коллекцию треков
                 existingPlaylist.Tracks.Clear();
                 foreach (var track in updatedPlaylist.Tracks)
                 {
                     existingPlaylist.Tracks.Add(track);
                 }
 
-                // Если это текущий плейлист, обновляем отображение
                 if (CurrentPlaylist?.Id == updatedPlaylist.Id)
                 {
                     OnPropertyChanged(nameof(CurrentPlaylist));
@@ -212,9 +196,9 @@ namespace QAMP.ViewModels
             }
             else
             {
-                // Если плейлиста нет, добавляем новый
                 Playlists.Add(updatedPlaylist);
             }
+            RefreshPlaylistSidebarItems();
         }
 
         public void RefreshSinglePlaylist(int playlistId)
@@ -222,14 +206,11 @@ namespace QAMP.ViewModels
             var freshPlaylist = DatabaseService.GetPlaylistById(playlistId);
             if (freshPlaylist != null)
             {
-                UpdatePlaylist(freshPlaylist); // Обновляем данные в общем списке
+                UpdatePlaylist(freshPlaylist);
 
-                // Вместо жесткого CurrentPlaylist = updatedPlaylist, 
-                // просто уведомляем UI, что свойства изменились
                 var updatedPlaylist = Playlists.FirstOrDefault(p => p.Id == playlistId);
                 if (updatedPlaylist != null && CurrentPlaylist?.Id == playlistId)
                 {
-                    // Мы НЕ ПЕРЕПРИВЯЗЫВАЕМ объект, мы просто говорим UI обновиться
                     OnPropertyChanged(nameof(CurrentPlaylist));
 
                 }
@@ -243,8 +224,8 @@ namespace QAMP.ViewModels
         {
             System.Diagnostics.Debug.WriteLine($"Adding new playlist: {newPlaylist.Name} (ID={newPlaylist.Id})");
 
-            // Добавляем в коллекцию
             Playlists.Add(newPlaylist);
+            RefreshPlaylistSidebarItems();
 
             System.Diagnostics.Debug.WriteLine($"Playlist '{newPlaylist.Name}' added. Total playlists: {Playlists.Count}");
         }
@@ -257,13 +238,18 @@ namespace QAMP.ViewModels
             System.Diagnostics.Debug.WriteLine("Async loading playlists from DB...");
 
             var list = await DatabaseService.GetPlaylistsAsync();
+            var folders = DatabaseService.GetAllPlaylistFolders();
+            PlaylistFolders.Clear();
+            foreach (var folder in folders)
+            {
+                PlaylistFolders.Add(folder);
+            }
             System.Diagnostics.Debug.WriteLine($"Loaded playlists from DB: {list.Count}");
             foreach (var p in list)
             {
                 System.Diagnostics.Debug.WriteLine($"  - {p.Name} (ID={p.Id})");
             }
 
-            // Проверяем, существует ли плейлист "Избранное"
             var favoritesPlaylist = list.FirstOrDefault(p => p.Name == FavoritesName);
             if (favoritesPlaylist == null)
             {
@@ -297,8 +283,8 @@ namespace QAMP.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Adding playlist: '{p.Name}'");
                 Playlists.Add(p);
             }
+            RefreshPlaylistSidebarItems();
 
-            // Восстанавливаем текущий плейлист, если он был выбран
             if (CurrentPlaylist != null)
             {
                 var restoredPlaylist = Playlists.FirstOrDefault(p => p.Id == CurrentPlaylist.Id);
@@ -320,22 +306,17 @@ namespace QAMP.ViewModels
         {
             if (playlist == null) return;
 
-            System.Diagnostics.Debug.WriteLine($"ASYNC LOADING TRACKS FOR PLAYLIST: {playlist.Name} (ID={playlist.Id})");
 
             var tracks = await DatabaseService.GetTracksForPlaylistAsync(playlist.Id, playlist.SortType);
 
-            // Очищаем старые треки
             playlist.Tracks.Clear();
 
-            // Добавляем новые треки
             foreach (var track in tracks)
             {
                 playlist.Tracks.Add(track);
             }
 
-            System.Diagnostics.Debug.WriteLine($"Loaded {tracks.Count} tracks for playlist '{playlist.Name}' (ID={playlist.Id})");
 
-            // Уведомляем об изменении
             OnPropertyChanged(nameof(Playlists));
         }
 
@@ -344,7 +325,6 @@ namespace QAMP.ViewModels
         /// </summary>
         public async Task LoadAllPlaylistsTracksAsync(Action<int, int>? onProgress = null)
         {
-            System.Diagnostics.Debug.WriteLine("ASYNC LOADING ALL TRACKS");
 
             int totalPlaylists = Playlists.Count;
             for (int i = 0; i < totalPlaylists; i++)
@@ -352,14 +332,11 @@ namespace QAMP.ViewModels
                 var playlist = Playlists[i];
                 await LoadPlaylistTracksAsync(playlist);
 
-                System.Diagnostics.Debug.WriteLine($"Progress: {i + 1}/{totalPlaylists}");
                 onProgress?.Invoke(i + 1, totalPlaylists);
             }
 
-            System.Diagnostics.Debug.WriteLine($"END ASYNC TRACK LOADING");
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

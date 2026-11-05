@@ -105,7 +105,7 @@ namespace QAMP.Services
         private double _lastVolume = 0.5;  //
         private double _volume = 0.5;
         // Множитель громкости для быстрой регулировки (1.0 = без изменения)
-        private readonly double _masterGain = 3.0;
+        private readonly double _masterGain = 1.0;
         public double Volume
         {
             get => _volume;
@@ -150,7 +150,7 @@ namespace QAMP.Services
             _positionTimer.Tick += PositionTimer_Tick;
 
             UpdateSpectrumTimerInterval();
-             _spectrumTimer.Tick += SpectrumTimer_Tick;
+            _spectrumTimer.Tick += SpectrumTimer_Tick;
 
             EqGains = new float[10];
 

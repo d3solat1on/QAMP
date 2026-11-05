@@ -73,6 +73,7 @@ public partial class Statistics : Window
             var mostPopularGenre = await Task.Run(() => DatabaseService.GetMostPopularGenre());
             var lastListenedTrack = await Task.Run(() => DatabaseService.GetLastListenedTrack());
             var genreStatistics = await Task.Run(() => DatabaseService.GetGenreStatistics());
+            var folderCount = await Task.Run(() => DatabaseService.GetFolderCount());
 
             await Dispatcher.InvokeAsync(() =>
             {
@@ -83,6 +84,7 @@ public partial class Statistics : Window
                 MostPopularAlbum.Text = mostPopularAlbum;
                 MostPopularGenre.Text = mostPopularGenre;
                 PlaylistCountText.Text = playlistCount;
+                FolderCountText.Text = folderCount;
                 TrackCountText.Text = trackCount;
                 MostListenedTrackText.Text = LocalizationService.GetFormattedString("LngMostListenedTrackValue", mostListened);
                 HighestBitrateText.Text = hiResKing;

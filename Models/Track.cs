@@ -6,20 +6,20 @@ namespace QAMP.Models
     public class Track : INotifyPropertyChanged
     {
         public DateTime AddedDate { get; set; }
-        public string AddedDateDisplay => AddedDate.ToString("dd.MM.yyyy HH:mm:ss");
+        public string AddedDateDisplay => AddedDate.ToString("dd.MM.yyyy HH:mm:ss"); // do not delete
         public int Id { get; set; }
         public string? Extension { get; set; }
         public string Path { get; set; } = string.Empty;
-
         private string _name = "Unknown Title";
         public string Name
         {
             get => _name;
             set
             {
-                if (_name != value)
+                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
+                if (_name != interned)
                 {
-                    _name = value;
+                    _name = interned;
                     OnPropertyChanged(nameof(Name));
                 }
             }
@@ -31,9 +31,10 @@ namespace QAMP.Models
             get => _executor;
             set
             {
-                if (_executor != value)
+                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
+                if (_executor != interned)
                 {
-                    _executor = value;
+                    _executor = interned;
                     OnPropertyChanged(nameof(Executor));
                 }
             }
@@ -45,9 +46,10 @@ namespace QAMP.Models
             get => _album;
             set
             {
-                if (_album != value)
+                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
+                if (_album != interned)
                 {
-                    _album = value;
+                    _album = interned;
                     OnPropertyChanged(nameof(Album));
                 }
             }
@@ -73,9 +75,11 @@ namespace QAMP.Models
             get => _genre;
             set
             {
-                if (_genre != value)
+                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
+
+                if (_genre != interned)
                 {
-                    _genre = value;
+                    _genre = interned;
                     OnPropertyChanged(nameof(Genre));
                 }
             }
@@ -122,27 +126,25 @@ namespace QAMP.Models
                 }
             }
         }
-
+        private double? _size; // do not delete
         public double Size
         {
             get
             {
+                if (_size.HasValue) return _size.Value;
+
                 try
                 {
                     FileInfo fi = new(Path);
-                    if (fi.Exists)
-                    {
-                        return fi.Length / (1024.0 * 1024.0);
-                    }
+                    _size = fi.Exists ? fi.Length / (1024.0 * 1024.0) : 0;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    System.Diagnostics.Debug.WriteLine($"Ошибка: {ex.Message}");
+                    _size = 0;
                 }
-                return 0;
+                return _size.Value;
             }
         }
-
         private int _playCount;
         public int PlayCount
         {
@@ -247,9 +249,10 @@ namespace QAMP.Models
             get => _composer;
             set
             {
-                if (_composer != value)
+                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
+                if (_composer != interned)
                 {
-                    _composer = value;
+                    _composer = interned;
                     OnPropertyChanged(nameof(Composer));
                 }
             }
@@ -261,9 +264,10 @@ namespace QAMP.Models
             get => _albumArtist;
             set
             {
-                if (_albumArtist != value)
+                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
+                if (_albumArtist != interned)
                 {
-                    _albumArtist = value;
+                    _albumArtist = interned;
                     OnPropertyChanged(nameof(AlbumArtist));
                 }
             }
@@ -282,9 +286,8 @@ namespace QAMP.Models
                 }
             }
         }
-        
-        private byte[]? _coverImage;
 
+        private byte[]? _coverImage;
         public byte[]? CoverImage
         {
             get

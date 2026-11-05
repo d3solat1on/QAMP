@@ -79,18 +79,10 @@ namespace QAMP
             }
 
 
-            string savedVolume = DatabaseService.GetSetting("Volume", "0.5");
-
-            if (double.TryParse(savedVolume, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double vol))
-            {
-                VolumeSlider.Value = vol * 100;
-                if (Math.Abs(Player.Volume - vol) > 0.01)
-                {
-                    Player.Volume = vol;
-                }
-            }
-
-            VolumePercentage?.Text = $"{VolumeSlider.Value:F0}%";
+            double savedVolume = DatabaseService.GetVolume();
+            Player.Volume = savedVolume;
+            VolumeSlider.Value = savedVolume * 100;
+            VolumePercentage?.Text = $"{savedVolume * 100:F0}%";
 
             var savedSort = AppSettings.CurrentPlaylistSort;
             ApplyPlaylistSorting(savedSort);
@@ -211,17 +203,14 @@ namespace QAMP
         private async Task RestoreLastPlaylistAndTrackAsync()
         {
             // Загружаем последний выбранный плейлист
-            string lastPlaylistIdStr = DatabaseService.GetSetting("LastPlaylistId", "-1");
-
-            int lastPlaylistId = -1;
-            if (int.TryParse(lastPlaylistIdStr, out int id) && id != -1)
+            int lastPlaylistId = DatabaseService.GetLastPlaylistId();
+            if (lastPlaylistId != -1)
             {
-                var playlist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == id);
+                var playlist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == lastPlaylistId);
 
                 if (playlist != null)
                 {
-                    lastPlaylistId = id;
-                    PlaylistsListBox.SelectedItem = playlist;
+                    SelectPlaylist(playlist);
                     MusicLibrary.Instance.PlayingPlaylist = playlist;
                     MusicLibrary.Instance.PlaybackQueue.Clear();
                     foreach (var t in playlist.Tracks)
@@ -229,7 +218,7 @@ namespace QAMP
                         MusicLibrary.Instance.PlaybackQueue.Add(t);
                     }
 
-                    string lastTrackPath = DatabaseService.GetSetting("LastTrackPath", "");
+                    string lastTrackPath = DatabaseService.GetLastTrackPath();
                     System.Diagnostics.Debug.WriteLine($"RestoreLastPlaylistAndTrackAsync - LastTrackPath={lastTrackPath}");
 
                     if (!string.IsNullOrEmpty(lastTrackPath))
@@ -240,13 +229,10 @@ namespace QAMP
                             System.Diagnostics.Debug.WriteLine($"Loading track: {lastTrack.Name}");
                             _playService.LoadTrack(lastTrack);
 
-                            // Восстанавливаем позицию проигрывания
-                            string positionStr = DatabaseService.GetSetting("LastTrackPosition", "0");
-                            if (double.TryParse(positionStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double position))
-                            {
-                                _playService.Seek(position);
-                                System.Diagnostics.Debug.WriteLine($"Position is set to {position}s");
-                            }
+                            double positionStr = DatabaseService.GetLastTrackPosition();
+
+                            _playService.Seek(positionStr);
+
                         }
                         else
                         {
@@ -289,6 +275,11 @@ namespace QAMP
             {
                 var config = SettingsManager.Instance.Config;
 
+                if (config == null || !config.CloseToTray)
+                {
+                    SaveCurrentState();
+                }
+
                 if (config != null && config.CloseToTray)
                 {
                     e.Cancel = true;
@@ -298,20 +289,9 @@ namespace QAMP
                 }
 
                 _isClosing = true;
-
-                _playService.Dispose();
+                _playService?.Dispose();
                 LyricsCache.Clear();
-
-                var volumeStr = _playService.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                DatabaseService.SaveSettingSync("Volume", volumeStr);
-
-                if (_playService.CurrentTrack != null)
-                {
-                    DatabaseService.SaveSettingSync("LastTrackPath", _playService.CurrentTrack.Path ?? "");
-                    DatabaseService.SaveSettingSync("LastTrackPosition", _playService.Position.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                }
                 SettingsManager.Instance.Save();
-
             }
             catch (Exception ex)
             {
@@ -324,6 +304,31 @@ namespace QAMP
                     base.OnClosing(e);
                     Environment.Exit(0);
                 }
+            }
+        }
+        public void SaveCurrentState()
+        {
+            try
+            {
+                double volume = _playService.Volume;
+                double pos = _playService.Position;
+                string? path = _playService.CurrentTrack?.Path;
+                int? playlistId = MusicLibrary.Instance.CurrentPlaylist?.Id;
+
+                System.Diagnostics.Debug.WriteLine($"[SAVE] Vol: {volume}, Pos: {pos}, Track: {path}");
+
+                DatabaseService.SaveVolume(volume).GetAwaiter().GetResult();
+                DatabaseService.SavePosition(pos);
+
+                if (!string.IsNullOrEmpty(path))
+                    DatabaseService.SaveLastTrackPath(path).GetAwaiter().GetResult();
+
+                if (playlistId.HasValue)
+                    DatabaseService.SaveLastPlaylistId(playlistId.Value).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                App.LogException(ex, "SaveCurrentState");
             }
         }
         private void Close_Click(object sender, RoutedEventArgs e) => Close();

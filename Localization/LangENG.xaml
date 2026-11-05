@@ -1,6 +1,24 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngPinFolder">Pin Folder</System:String>
+        <System:String x:Key="LngUnpinFolder">Unpin Folder</System:String>
+        <System:String x:Key="LngFolderCount">Folder Count:</System:String>
+        <System:String x:Key="LngEmptyTitle">Folder name cannot be empty</System:String>
+        <System:String x:Key="LngCreatedFolder">Folder "{0}" created</System:String>
+        <System:String x:Key="LngCreateFolder">Create folder</System:String>
+        <System:String x:Key="LngNewFolder">New Folder</System:String>
+        <System:String x:Key="LngRenameFolder">Rename folder</System:String>
+        <System:String x:Key="LngDeleteFolder">Delete folder</System:String>
+        <System:String x:Key="LngFolderDeleted">Folder deleted</System:String>
+        <System:String x:Key="LngPinnedFolder">Folder pinned</System:String>
+        <System:String x:Key="LngUnpinnedFolder">Folder unpinned</System:String>
+        <System:String x:Key="LngPlaylistsInFolder">playlists</System:String>
+        <System:String x:Key="LngAddToFolder">Add to folder</System:String>
+        <System:String x:Key="LngNoPlaylistFolders">No folders</System:String>
+        <System:String x:Key="LngMoveOutOfFolder">Remove from folder</System:String>
+        <System:String x:Key="LngFolderAlreadyExists">A folder with this name already exists</System:String>
+        <System:String x:Key="LngDeleteFolderConfirm">Delete folder "{0}"? Its playlists will be left unfiled.</System:String>
         <System:String x:Key="LngCombinationIsUsing">This combination is already in use for an action:</System:String>
         <System:String x:Key="LngNotAssigned">Not Assigned</System:String>
         <System:String x:Key="LngFailedImportLanguage">Failed to import language</System:String>

@@ -31,13 +31,20 @@ namespace QAMP.Models
         public double CachedScrollOffset { get; set; } = 0;
         private string? _name;
         private string? _description;
-
-        [JsonIgnore]
+        private int? _folderId;
         private byte[]? _coverImage;
-
         private ObservableCollection<Track> _tracks = [];
         public int Id { get; set; }
-
+        public int? FolderId
+        {
+            get => _folderId;
+            set
+            {
+                if (_folderId == value) return;
+                _folderId = value;
+                OnPropertyChanged(nameof(FolderId));
+            }
+        }
         public string? Name
         {
             get => _name;

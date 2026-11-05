@@ -1,6 +1,7 @@
 using System.Windows.Interop;
 using QAMP.Models;
 using QAMP.Services;
+using QAMP.ViewModels;
 using QAMP.Windows;
 
 namespace QAMP;
@@ -99,9 +100,9 @@ public partial class MainWindow
                 else
                 {
                     PlaylistsListBox.Focus();
-                    if (PlaylistsListBox.SelectedItem == null && PlaylistsListBox.Items.Count > 0)
+                    if (PlaylistsListBox.SelectedItem is not Playlist && MusicLibrary.Instance.Playlists.Count > 0)
                     {
-                        PlaylistsListBox.SelectedIndex = 0;
+                        SelectPlaylist(MusicLibrary.Instance.Playlists[0]);
                     }
                 }
                 break;

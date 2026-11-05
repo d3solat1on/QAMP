@@ -16,7 +16,7 @@
         MouseDown="Window_MouseDown">
 
         <Window.Resources>
-                <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
+                <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
                 <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
                 <Style TargetType="ScrollViewer">
@@ -156,7 +156,7 @@
                                                                               Stretch="Uniform"
                                                                               HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
-                                                                        <Image Source="{Binding CoverImage, Converter={StaticResource LargeTrackImageConverter}}"
+                                                                        <Image Source="{Binding Converter={StaticResource ByteArrayToImageConverter}, ConverterParameter=Large}"
                                                                                Stretch="UniformToFill"
                                                                                HorizontalAlignment="Center"
                                                                                VerticalAlignment="Center">

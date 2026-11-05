@@ -28,13 +28,11 @@
 
         <Window.Resources>
                 <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
-                <converters:LargeTrackImageConverter x:Key="LargeTrackImageConverter"/>
                 <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
                 <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
                 <converters:PlaylistNameLocalizationConverter x:Key="PlaylistNameLocalizationConverter"/>
                 <converters:PlaylistDescriptionLocalizationConverter x:Key="PlaylistDescriptionLocalizationConverter"/>
                 <converters:BackgroundBrushConverter x:Key="BackgroundBrushConverter"/>
-                <converters:ImageLoadConverter x:Key="ImageLoadConverter"/>
                 <converters:BindingProxy x:Key="Proxy"
                                          Data="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config}"/>
                 <ObjectDataProvider x:Key="HeartProvider"
@@ -264,141 +262,130 @@
                                                         <StackPanel Grid.Column="0"
                                                                     Orientation="Horizontal"
                                                                     HorizontalAlignment="Right">
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="FullSpectrumWindowButton"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Click="FullSpectrumWindowButton_Click"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                ToolTip="{DynamicResource LngFullSpectrumWindow}">
-                                                                                <Path x:Name="FullSpectrumWindowImage"
-                                                                                      Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource FullSpectrumWindowGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"/>
-                                                                        </Button>
-                                                                </Grid>
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="Shuffle_button"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Click="ShuffleButton_Click"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                ToolTip="{DynamicResource LngShuffle}">
-                                                                                <Path x:Name="ShuffleImage"
-                                                                                      Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource shuffleGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"/>
-                                                                        </Button>
-                                                                </Grid>
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="PrevButton"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                ToolTip="{DynamicResource LngPrev}"
-                                                                                Click="PrevButton_Click">
-                                                                                <Path Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource fast_rewindGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"
-                                                                                      HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"/>
-                                                                        </Button>
-                                                                </Grid>
+                                                                <Button x:Name="FullSpectrumWindowButton"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0"
+                                                                        ToolTip="{DynamicResource LngFullSpectrumWindow}"
+                                                                        Click="FullSpectrumWindowButton_Click">
+                                                                        <Path x:Name="FullSpectrumWindowImage"
+                                                                              Width="25"
+                                                                              Height="25"
+                                                                              Margin="5"
+                                                                              Data="{StaticResource FullSpectrumWindowGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"/>
+                                                                </Button>
+
+                                                                <Button x:Name="Shuffle_button"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0"
+                                                                        ToolTip="{DynamicResource LngShuffle}"
+                                                                        Click="ShuffleButton_Click">
+                                                                        <Path x:Name="ShuffleImage"
+                                                                              Width="25"
+                                                                              Height="25"
+                                                                              Margin="5"
+                                                                              Data="{StaticResource shuffleGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"/>
+                                                                </Button>
+
+                                                                <Button x:Name="PrevButton"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0"
+                                                                        ToolTip="{DynamicResource LngPrev}"
+                                                                        Click="PrevButton_Click">
+                                                                        <Path Width="25"
+                                                                              Height="25"
+                                                                              Margin="5"
+                                                                              Data="{StaticResource fast_rewindGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                </Button>
                                                         </StackPanel>
 
-                                                        <Grid Grid.Column="1"
-                                                              HorizontalAlignment="Center">
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="PlayPauseButton"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                Click="PlayPauseButton_Click"
-                                                                                ToolTip="{DynamicResource LngPlayPause}">
-                                                                                <Path x:Name="PlayPauseIcon"
-                                                                                      Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource playGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"
-                                                                                      HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"/>
-                                                                        </Button>
-                                                                </Grid>
-                                                        </Grid>
+                                                        <Button x:Name="PlayPauseButton"
+                                                                Grid.Column="1"
+                                                                Style="{StaticResource IconButton}"
+                                                                Width="40"
+                                                                Height="40"
+                                                                Margin="5,0"
+                                                                ToolTip="{DynamicResource LngPlayPause}"
+                                                                Click="PlayPauseButton_Click"
+                                                                HorizontalAlignment="Center">
+                                                                <Path x:Name="PlayPauseIcon"
+                                                                      Width="25"
+                                                                      Height="25"
+                                                                      Margin="5"
+                                                                      Data="{StaticResource playGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Button>
 
                                                         <StackPanel Grid.Column="2"
                                                                     Orientation="Horizontal"
                                                                     HorizontalAlignment="Left">
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="NextButton"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                Click="NextButton_Click"
-                                                                                ToolTip="{DynamicResource LngNext}">
-                                                                                <Path Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource fast_forwardGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"
-                                                                                      HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"/>
-                                                                        </Button>
-                                                                </Grid>
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="RepeatButton"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Click="RepeatButton_Click"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                ToolTip="{DynamicResource LngRepeat}">
-                                                                                <Path x:Name="RepeatIcon"
-                                                                                      Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource repeatGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"
-                                                                                      HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"/>
-                                                                        </Button>
-                                                                </Grid>
-                                                                <Grid Height="40">
-                                                                        <Button x:Name="ViewLyrics"
-                                                                                Style="{StaticResource IconButton}"
-                                                                                Click="ViewLyricsButton_Click"
-                                                                                Width="40"
-                                                                                Height="40"
-                                                                                Margin="5,0"
-                                                                                ToolTip="{DynamicResource LngViewLyrics}">
-                                                                                <Path Width="25"
-                                                                                      Height="25"
-                                                                                      Margin="5"
-                                                                                      Data="{StaticResource lyricsGeometry}"
-                                                                                      Fill="{DynamicResource AccentBrush}"
-                                                                                      Stretch="Uniform"
-                                                                                      HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"/>
-                                                                        </Button>
-                                                                </Grid>
+                                                                <Button x:Name="NextButton"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0"
+                                                                        ToolTip="{DynamicResource LngNext}"
+                                                                        Click="NextButton_Click">
+                                                                        <Path Width="25"
+                                                                              Height="25"
+                                                                              Margin="5"
+                                                                              Data="{StaticResource fast_forwardGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                </Button>
+
+                                                                <Button x:Name="RepeatButton"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0"
+                                                                        ToolTip="{DynamicResource LngRepeat}"
+                                                                        Click="RepeatButton_Click">
+                                                                        <Path x:Name="RepeatIcon"
+                                                                              Width="25"
+                                                                              Height="25"
+                                                                              Margin="5"
+                                                                              Data="{StaticResource repeatGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                </Button>
+
+                                                                <Button x:Name="ViewLyrics"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Width="40"
+                                                                        Height="40"
+                                                                        Margin="5,0"
+                                                                        ToolTip="{DynamicResource LngViewLyrics}"
+                                                                        Click="ViewLyricsButton_Click">
+                                                                        <Path Width="25"
+                                                                              Height="25"
+                                                                              Margin="5"
+                                                                              Data="{StaticResource lyricsGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                </Button>
                                                         </StackPanel>
                                                 </Grid>
 
@@ -495,7 +482,7 @@
                                         <ColumnDefinition Width="300"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Image Source="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource ImageLoadConverter}}"
+                                <Image Source="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource ByteArrayToImageConverter}}"
                                        Grid.Column="0"
                                        Grid.ColumnSpan="3"
                                        Stretch="UniformToFill"
@@ -521,7 +508,7 @@
                                                         <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
                                                 <Grid Grid.Row="0"
-                                                      Margin="10,0,10,15">
+                                                      Margin="10,0,0,15">
                                                         <Grid.RowDefinitions>
                                                                 <RowDefinition Height="Auto"/>
                                                                 <RowDefinition Height="Auto"/>
@@ -534,11 +521,11 @@
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource ForegroundBrush}"
                                                                    HorizontalAlignment="Center"
-                                                                   Margin="0,0,0,12"/>
+                                                                   Margin="0,0,0,10"/>
 
                                                         <UniformGrid Grid.Row="1"
-                                                                     Columns="4"
-                                                                     Height="40">
+                                                                     Columns="5"
+                                                                     Height="65">
 
                                                                 <Button x:Name="SortByButton"
                                                                         Style="{StaticResource IconButton}"
@@ -549,8 +536,8 @@
                                                                         <Path Data="{StaticResource sortGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"
-                                                                              Width="40"
-                                                                              Height="40"
+                                                                              Width="35"
+                                                                              Height="35"
                                                                               HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                                 </Button>
@@ -564,8 +551,8 @@
                                                                         <Path Data="{StaticResource create_playlistGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"
-                                                                              Width="40"
-                                                                              Height="40"
+                                                                              Width="35"
+                                                                              Height="35"
                                                                               HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                                 </Button>
@@ -579,8 +566,8 @@
                                                                         <Path Data="{StaticResource playlist_removeGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"
-                                                                              Width="40"
-                                                                              Height="40"
+                                                                              Width="35"
+                                                                              Height="35"
                                                                               HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                                 </Button>
@@ -607,8 +594,23 @@
                                                                         <Path Data="{StaticResource add_musicGeometry}"
                                                                               Fill="{DynamicResource AccentBrush}"
                                                                               Stretch="Uniform"
-                                                                              Width="40"
-                                                                              Height="40"
+                                                                              Width="35"
+                                                                              Height="35"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                                </Button>
+
+                                                                <Button x:Name="CreateFolderButton"
+                                                                        Style="{StaticResource IconButton}"
+                                                                        Background="Transparent"
+                                                                        BorderBrush="Transparent"
+                                                                        Click="CreateFolderButton_Click"
+                                                                        ToolTip="{DynamicResource LngCreateFolder}">
+                                                                        <Path Data="{StaticResource CreateFolderGeometry}"
+                                                                              Fill="{DynamicResource AccentBrush}"
+                                                                              Stretch="Uniform"
+                                                                              Width="35"
+                                                                              Height="35"
                                                                               HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                                 </Button>
@@ -648,30 +650,284 @@
                                                         </StackPanel>
                                                 </Grid>
 
-                                                <ListBox Grid.Row="1"
-                                                         x:Name="PlaylistsListBox"
-                                                         Background="Transparent"
-                                                         BorderThickness="0"
-                                                         Foreground="{DynamicResource ForegroundBrush}"
-                                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                         SelectionChanged="PlaylistsListBox_SelectionChanged"
-                                                         Height="Auto"
-                                                         AllowDrop="True"
-                                                         ItemsSource="{Binding Playlists, Source={x:Static local:ViewModels.MusicLibrary.Instance}}">
-                                                        <ListBox.ItemContainerStyle>
-                                                                <Style TargetType="ListBoxItem">
+                                                <TreeView Grid.Row="1"
+                                                          x:Name="PlaylistsListBox"
+                                                          Background="Transparent"
+                                                          BorderThickness="0"
+                                                          Foreground="{DynamicResource ForegroundBrush}"
+                                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                          SelectedItemChanged="PlaylistsListBox_SelectedItemChanged"
+                                                          Height="Auto"
+                                                          AllowDrop="True"
+                                                          Loaded="PlaylistTree_Loaded"
+                                                          Drop="PlaylistTree_Drop"
+                                                          ItemsSource="{Binding PlaylistSidebarItems, Source={x:Static local:ViewModels.MusicLibrary.Instance}}">
+                                                        <TreeView.ItemContainerStyle>
+                                                                <Style TargetType="TreeViewItem">
                                                                         <EventSetter Event="PreviewMouseMove"
                                                                                      Handler="Playlist_MouseMove"/>
                                                                         <EventSetter Event="Drop"
                                                                                      Handler="Playlist_Drop"/>
+                                                                        <EventSetter Event="Expanded"
+                                                                                     Handler="PlaylistFolder_Expanded"/>
+                                                                        <EventSetter Event="Collapsed"
+                                                                                     Handler="PlaylistFolder_Collapsed"/>
                                                                         <Setter Property="Background"
                                                                                 Value="Transparent"/>
                                                                         <Setter Property="BorderThickness"
                                                                                 Value="0"/>
+                                                                        <Setter Property="HorizontalContentAlignment"
+                                                                                Value="Stretch"/>
+                                                                        <Setter Property="AllowDrop"
+                                                                                Value="True"/>
+                                                                        <Setter Property="Template">
+                                                                                <Setter.Value>
+                                                                                        <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                                                                                                <Grid>
+                                                                                                        <Grid.RowDefinitions>
+                                                                                                                <RowDefinition Height="Auto"/>
+                                                                                                                <RowDefinition Height="Auto"/>
+                                                                                                        </Grid.RowDefinitions>
+                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                <ColumnDefinition Width="18"/>
+                                                                                                                <ColumnDefinition Width="*"/>
+                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                        <Border x:Name="ItemBorder"
+                                                                                                                Grid.Row="0"
+                                                                                                                Grid.ColumnSpan="2"
+                                                                                                                Background="{TemplateBinding Background}"
+                                                                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                                                                                CornerRadius="{DynamicResource AppCornerRadius}">
+                                                                                                                <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                                <ColumnDefinition Width="18"/>
+                                                                                                                                <ColumnDefinition Width="*"/>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <ToggleButton x:Name="Expander"
+                                                                                                                                      Grid.Column="0"
+                                                                                                                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                                                                                                                      Focusable="False"
+                                                                                                                                      Background="Transparent"
+                                                                                                                                      BorderThickness="0">
+                                                                                                                                <ToggleButton.Template>
+                                                                                                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                                                                                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                                                                                                                  VerticalAlignment="Center"/>
+                                                                                                                                        </ControlTemplate>
+                                                                                                                                </ToggleButton.Template>
+                                                                                                                                <Path x:Name="ExpanderArrow"
+                                                                                                                                      Data="M 0 0 L 4 4 L 0 8"
+                                                                                                                                      Stroke="{DynamicResource SecondaryForegroundBrush}"
+                                                                                                                                      StrokeThickness="1.5"
+                                                                                                                                      HorizontalAlignment="Center"
+                                                                                                                                      VerticalAlignment="Center"/>
+                                                                                                                        </ToggleButton>
+                                                                                                                        <ContentPresenter x:Name="Header"
+                                                                                                                                          Grid.Column="1"
+                                                                                                                                          ContentSource="Header"
+                                                                                                                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                                                                                                </Grid>
+                                                                                                        </Border>
+                                                                                                        <ItemsPresenter x:Name="ItemsHost"
+                                                                                                                        Grid.Row="1"
+                                                                                                                        Grid.Column="1"
+                                                                                                                        Visibility="Collapsed"/>
+                                                                                                </Grid>
+                                                                                                <ControlTemplate.Triggers>
+                                                                                                        <Trigger Property="HasItems"
+                                                                                                                 Value="False">
+                                                                                                                <Setter TargetName="Expander"
+                                                                                                                        Property="Visibility"
+                                                                                                                        Value="Collapsed"/>
+                                                                                                        </Trigger>
+                                                                                                        <Trigger Property="IsExpanded"
+                                                                                                                 Value="True">
+                                                                                                                <Setter TargetName="ItemsHost"
+                                                                                                                        Property="Visibility"
+                                                                                                                        Value="Visible"/>
+                                                                                                                <Setter TargetName="ExpanderArrow"
+                                                                                                                        Property="RenderTransform">
+                                                                                                                        <Setter.Value>
+                                                                                                                                <RotateTransform Angle="90"/>
+                                                                                                                        </Setter.Value>
+                                                                                                                </Setter>
+                                                                                                        </Trigger>
+                                                                                                        <Trigger Property="IsSelected"
+                                                                                                                 Value="True">
+                                                                                                                <Setter Property="Background"
+                                                                                                                        Value="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Selected}"/>
+                                                                                                                <Setter Property="BorderBrush"
+                                                                                                                        Value="{DynamicResource AccentBrush}"/>
+                                                                                                                <Setter Property="BorderThickness"
+                                                                                                                        Value="1"/>
+                                                                                                        </Trigger>
+                                                                                                        <Trigger Property="IsEnabled"
+                                                                                                                 Value="False">
+                                                                                                                <Setter Property="Opacity"
+                                                                                                                        Value="0.5"/>
+                                                                                                        </Trigger>
+                                                                                                </ControlTemplate.Triggers>
+                                                                                        </ControlTemplate>
+                                                                                </Setter.Value>
+                                                                        </Setter>
                                                                 </Style>
-                                                        </ListBox.ItemContainerStyle>
-                                                        <ListBox.ItemTemplate>
-                                                                <DataTemplate>
+                                                        </TreeView.ItemContainerStyle>
+                                                        <TreeView.Resources>
+                                                                <HierarchicalDataTemplate DataType="{x:Type models:PlaylistFolder}"
+                                                                                          ItemsSource="{Binding PlaylistInFolder}">
+                                                                        <Border x:Name="FolderItemBorder"
+                                                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                                                BorderThickness="0,0,0,1"
+                                                                                Padding="8"
+                                                                                Margin="0,2"
+                                                                                Background="{Binding Background, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}">
+                                                                                <Grid>
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                                <ColumnDefinition Width="*"/>
+                                                                                        </Grid.ColumnDefinitions>
+                                                                                        <Border x:Name="FolderIconBorder"
+                                                                                                Grid.Column="0"
+                                                                                                Width="45"
+                                                                                                Height="45"
+                                                                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                                                                BorderThickness="1"
+                                                                                                CornerRadius="{DynamicResource AppCornerRadius}"
+                                                                                                Background="{DynamicResource CentralPanelCardBackground}">
+                                                                                                <Path Data="{StaticResource FolderGeometry}"
+                                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                                      Width="22"
+                                                                                                      Height="22"
+                                                                                                      Stretch="Uniform"
+                                                                                                      HorizontalAlignment="Center"
+                                                                                                      VerticalAlignment="Center"/>
+                                                                                        </Border>
+                                                                                        <StackPanel x:Name="FolderTextPanel"
+                                                                                                    Grid.Column="2"
+                                                                                                    Margin="10,0,0,0"
+                                                                                                    VerticalAlignment="Center">
+                                                                                                <StackPanel Orientation="Horizontal"
+                                                                                                            VerticalAlignment="Center">
+                                                                                                        <Viewbox x:Name="FolderPinContainer"
+                                                                                                                 Width="14"
+                                                                                                                 Height="14"
+                                                                                                                 Margin="0,0,5,0"
+                                                                                                                 VerticalAlignment="Center"
+                                                                                                                 Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisConverter}}">
+                                                                                                                <Path Data="{StaticResource PinForPlaylistGeometry}"
+                                                                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                                                                      Stretch="Uniform"/>
+                                                                                                        </Viewbox>
+                                                                                                        <TextBlock x:Name="FolderTitleText"
+                                                                                                                   Text="{Binding Title}"
+                                                                                                                   FontWeight="Bold"
+                                                                                                                   FontSize="14"
+                                                                                                                   Foreground="{DynamicResource ForegroundBrush}"
+                                                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                                                   VerticalAlignment="Center"
+                                                                                                                   MouseDown="FolderTitle_MouseDown">
+                                                                                                                <TextBlock.Style>
+                                                                                                                        <Style TargetType="TextBlock">
+                                                                                                                                <Setter Property="Visibility"
+                                                                                                                                        Value="Visible"/>
+                                                                                                                                <Style.Triggers>
+                                                                                                                                        <DataTrigger Binding="{Binding IsEditing}"
+                                                                                                                                                     Value="True">
+                                                                                                                                                <Setter Property="Visibility"
+                                                                                                                                                        Value="Collapsed"/>
+                                                                                                                                        </DataTrigger>
+                                                                                                                                </Style.Triggers>
+                                                                                                                        </Style>
+                                                                                                                </TextBlock.Style>
+                                                                                                        </TextBlock>
+                                                                                                        <TextBox x:Name="FolderNameEditor"
+                                                                                                                 Text="{Binding EditingTitle, UpdateSourceTrigger=PropertyChanged}"
+                                                                                                                 MinWidth="100"
+                                                                                                                 Foreground="{DynamicResource ForegroundBrush}"
+                                                                                                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                                                                                                 VerticalContentAlignment="Center"
+                                                                                                                 KeyDown="FolderTitle_KeyDown"
+                                                                                                                 LostFocus="FolderTitle_LostFocus">
+                                                                                                                <TextBox.Style>
+                                                                                                                        <Style TargetType="TextBox">
+                                                                                                                                <Setter Property="Visibility"
+                                                                                                                                        Value="Collapsed"/>
+                                                                                                                                <Style.Triggers>
+                                                                                                                                        <DataTrigger Binding="{Binding IsEditing}"
+                                                                                                                                                     Value="True">
+                                                                                                                                                <Setter Property="Visibility"
+                                                                                                                                                        Value="Visible"/>
+                                                                                                                                        </DataTrigger>
+                                                                                                                                </Style.Triggers>
+                                                                                                                        </Style>
+                                                                                                                </TextBox.Style>
+                                                                                                        </TextBox>
+                                                                                                </StackPanel>
+                                                                                                <TextBlock x:Name="FolderSubText"
+                                                                                                           FontSize="10"
+                                                                                                           Foreground="{DynamicResource CentralPanelMutedForeground}"
+                                                                                                           Margin="0,2,0,0">
+                                                                                                        <Run Text="{Binding PlaylistInFolder.Count, Mode=OneWay}"/>
+                                                                                                        <Run Text=" "/>
+                                                                                                        <Run Text="{DynamicResource LngPlaylistsInFolder}"/>
+                                                                                                </TextBlock>
+                                                                                        </StackPanel>
+                                                                                </Grid>
+                                                                                <Border.ContextMenu>
+                                                                                        <ContextMenu Style="{StaticResource ModernContextMenu}"
+                                                                                                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                                                                <MenuItem x:Name="PinFolderMenuItem"
+                                                                                                          Click="PinPlaylistFolder_Click">
+                                                                                                        <MenuItem.Style>
+                                                                                                                <Style TargetType="MenuItem"
+                                                                                                                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                                                                                        <Setter Property="Header"
+                                                                                                                                Value="{DynamicResource LngPinFolder}"/>
+                                                                                                                        <Style.Triggers>
+                                                                                                                                <DataTrigger Binding="{Binding IsPinned}"
+                                                                                                                                             Value="True">
+                                                                                                                                        <Setter Property="Header"
+                                                                                                                                                Value="{DynamicResource LngUnpinFolder}"/>
+                                                                                                                                </DataTrigger>
+                                                                                                                        </Style.Triggers>
+                                                                                                                </Style>
+                                                                                                        </MenuItem.Style>
+                                                                                                </MenuItem>
+                                                                                                <MenuItem Header="{DynamicResource LngRenameFolder}"
+                                                                                                          Click="RenamePlaylistFolder_Click"/>
+                                                                                                <MenuItem Header="{DynamicResource LngDeleteFolder}"
+                                                                                                          Click="DeletePlaylistFolder_Click"
+                                                                                                          Foreground="Red"/>
+                                                                                        </ContextMenu>
+                                                                                </Border.ContextMenu>
+                                                                        </Border>
+                                                                        <HierarchicalDataTemplate.Triggers>
+                                                                                <DataTrigger Binding="{Binding Data.IsCompactMode, Source={StaticResource Proxy}}"
+                                                                                             Value="True">
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Width"
+                                                                                                Value="24"/>
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Height"
+                                                                                                Value="24"/>
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Padding"
+                                                                                                Value="2"/>
+                                                                                        <Setter TargetName="FolderSubText"
+                                                                                                Property="Visibility"
+                                                                                                Value="Collapsed"/>
+                                                                                        <Setter TargetName="FolderTextPanel"
+                                                                                                Property="Margin"
+                                                                                                Value="6,0,0,0"/>
+                                                                                        <Setter TargetName="FolderItemBorder"
+                                                                                                Property="Padding"
+                                                                                                Value="6,2,6,2"/>
+                                                                                </DataTrigger>
+                                                                        </HierarchicalDataTemplate.Triggers>
+                                                                </HierarchicalDataTemplate>
+                                                                <DataTemplate DataType="{x:Type models:Playlist}">
                                                                         <Border x:Name="PlaylistItemBorder"
                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                 BorderThickness="0,0,0,1"
@@ -772,7 +1028,8 @@
                                                                                                 VerticalAlignment="Center">
 
                                                                                                 <StackPanel.ContextMenu>
-                                                                                                        <ContextMenu Style="{StaticResource ModernContextMenu}">
+                                                                                                        <ContextMenu Style="{StaticResource ModernContextMenu}"
+                                                                                                                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                                                                                                 <MenuItem x:Name="EditPlaylist"
                                                                                                                           Header="{DynamicResource LngEditPlaylist}"
                                                                                                                           Click="EditPlaylist_Click"/>
@@ -789,6 +1046,30 @@
                                                                                                                                                              Value="True">
                                                                                                                                                         <Setter Property="Header"
                                                                                                                                                                 Value="{DynamicResource LngUnpinPlaylist}"/>
+                                                                                                                                                </DataTrigger>
+                                                                                                                                        </Style.Triggers>
+                                                                                                                                </Style>
+                                                                                                                        </MenuItem.Style>
+                                                                                                                </MenuItem>
+
+                                                                                                                <MenuItem x:Name="PlaylistFolderMenuItem"
+                                                                                                                          Header="{DynamicResource LngAddToFolder}"
+                                                                                                                          SubmenuOpened="PlaylistFolderMenu_SubmenuOpened">
+                                                                                                                        <MenuItem Header="{DynamicResource LngNoPlaylistFolders}"
+                                                                                                                                  IsEnabled="False"/>
+                                                                                                                </MenuItem>
+                                                                                                                <MenuItem Header="{DynamicResource LngMoveOutOfFolder}"
+                                                                                                                          Click="RemovePlaylistFromFolder_Click">
+                                                                                                                        <MenuItem.Style>
+                                                                                                                                <Style TargetType="MenuItem"
+                                                                                                                                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                                                                                                        <Setter Property="Visibility"
+                                                                                                                                                Value="Visible"/>
+                                                                                                                                        <Style.Triggers>
+                                                                                                                                                <DataTrigger Binding="{Binding FolderId}"
+                                                                                                                                                             Value="{x:Null}">
+                                                                                                                                                        <Setter Property="Visibility"
+                                                                                                                                                                Value="Collapsed"/>
                                                                                                                                                 </DataTrigger>
                                                                                                                                         </Style.Triggers>
                                                                                                                                 </Style>
@@ -882,8 +1163,8 @@
                                                                                 </DataTrigger>
                                                                         </DataTemplate.Triggers>
                                                                 </DataTemplate>
-                                                        </ListBox.ItemTemplate>
-                                                </ListBox>
+                                                        </TreeView.Resources>
+                                                </TreeView>
                                         </Grid>
                                 </Border>
 
@@ -1040,59 +1321,58 @@
                                                 Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"
                                                 BorderBrush="{DynamicResource GridHeaderSeperatorBrush}"
                                                 BorderThickness="0,0,0,1">
+
                                                 <StackPanel VerticalAlignment="Bottom"
                                                             Orientation="Horizontal"
                                                             Margin="0,20,0,0">
-                                                        <Grid Height="40">
-                                                                <Button x:Name="PlayPauseButton1"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0"
-                                                                        Click="PlayPlaylistButton_Click">
-                                                                        <Path x:Name="PlayPauseIcon1"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource playGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"
-                                                                              HorizontalAlignment="Center"
-                                                                              VerticalAlignment="Center"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button x:Name="Shuffle_buttonContorlPanel"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Click="ShuffleButton_Click"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0">
-                                                                        <Path x:Name="ShuffleImageContorlPanel"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource shuffleGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"/>
-                                                                </Button>
-                                                        </Grid>
-                                                        <Grid Height="40">
-                                                                <Button x:Name="Sort_button1"
-                                                                        Style="{StaticResource IconButton}"
-                                                                        Click="SortButton_Click"
-                                                                        Width="40"
-                                                                        Height="40"
-                                                                        Margin="5,0">
-                                                                        <Path x:Name="sortImage1"
-                                                                              Width="25"
-                                                                              Height="25"
-                                                                              Margin="5"
-                                                                              Data="{StaticResource sortGeometry}"
-                                                                              Fill="{DynamicResource AccentBrush}"
-                                                                              Stretch="Uniform"/>
-                                                                </Button>
-                                                        </Grid>
+
+                                                        <Button x:Name="PlayPauseButton1"
+                                                                Style="{StaticResource IconButton}"
+                                                                Width="40"
+                                                                Height="40"
+                                                                Margin="5,0"
+                                                                Click="PlayPlaylistButton_Click">
+                                                                <Path x:Name="PlayPauseIcon1"
+                                                                      Width="25"
+                                                                      Height="25"
+                                                                      Margin="5"
+                                                                      Data="{StaticResource playGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Button>
+
+                                                        <Button x:Name="Shuffle_buttonContorlPanel"
+                                                                Style="{StaticResource IconButton}"
+                                                                Width="40"
+                                                                Height="40"
+                                                                Margin="5,0"
+                                                                Click="ShuffleButton_Click">
+                                                                <Path x:Name="ShuffleImageContorlPanel"
+                                                                      Width="25"
+                                                                      Height="25"
+                                                                      Margin="5"
+                                                                      Data="{StaticResource shuffleGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"/>
+                                                        </Button>
+
+                                                        <Button x:Name="Sort_button1"
+                                                                Style="{StaticResource IconButton}"
+                                                                Width="40"
+                                                                Height="40"
+                                                                Margin="5,0"
+                                                                Click="SortButton_Click">
+                                                                <Path x:Name="sortImage1"
+                                                                      Width="25"
+                                                                      Height="25"
+                                                                      Margin="5"
+                                                                      Data="{StaticResource sortGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"/>
+                                                        </Button>
+
                                                 </StackPanel>
                                         </Border>
 
@@ -1271,7 +1551,7 @@
                                                                                                               Margin="5"
                                                                                                               HorizontalAlignment="Center"
                                                                                                               VerticalAlignment="Center"/>
-                                                                                                        <Image Source="{Binding Converter={StaticResource ByteArrayToImageConverter}}"
+                                                                                                        <Image Source="{Binding Converter={StaticResource ByteArrayToImageConverter}, ConverterParameter=DataGrid}"
                                                                                                                Stretch="UniformToFill"
                                                                                                                HorizontalAlignment="Center"
                                                                                                                VerticalAlignment="Center"
@@ -1300,7 +1580,6 @@
                                                                                         </Border>
                                                                                 </DataTemplate>
                                                                         </DataGridTemplateColumn.CellTemplate>
-
                                                                 </DataGridTemplateColumn>
                                                                 <DataGridTextColumn Header="TITLE"
                                                                                     Binding="{Binding Name}"
@@ -1420,7 +1699,8 @@
                                                                  VerticalAlignment="Stretch"
                                                                  HorizontalContentAlignment="Center"
                                                                  ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                                                                 VirtualizingStackPanel.IsVirtualizing="False"
+                                                                 VirtualizingStackPanel.IsVirtualizing="True"
+                                                                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                                                                  PreviewKeyDown="LyricsListBox_PreviewKeyDown"
                                                                  MouseWheel="LyricsListBox_MouseWheel">
 
@@ -1620,13 +1900,11 @@
                                                                                                    Foreground="{DynamicResource CentralPanelSecondaryForeground}"/>
                                                                                 </StackPanel>
 
-                                                                                <Grid>
-                                                                                        <vis:SpectrumControl x:Name="SpectrumViewer"
-                                                                                                             Height="150"
-                                                                                                             VerticalAlignment="Bottom"
-                                                                                                             HorizontalAlignment="Stretch"
-                                                                                                             BorderThickness="2"/>
-                                                                                </Grid>
+                                                                                <vis:SpectrumControl x:Name="SpectrumViewer"
+                                                                                                     Height="150"
+                                                                                                     VerticalAlignment="Bottom"
+                                                                                                     HorizontalAlignment="Stretch"
+                                                                                                     BorderThickness="2"/>
                                                                         </StackPanel>
                                                                 </Grid>
                                                         </ScrollViewer>

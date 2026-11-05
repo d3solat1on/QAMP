@@ -7,10 +7,13 @@ namespace QAMP.Windows;
 public partial class OSDWindow : Window
 {
     private const int GWL_EXSTYLE = -20;
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+    
+    [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "GetWindowLongW")]
+    private static partial int GetWindowLong(IntPtr hWnd, int nIndex);
+    
+    [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "SetWindowLongW")]
+    private static partial int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+    
     private readonly System.Windows.Threading.DispatcherTimer _timer;
 
     public OSDWindow()

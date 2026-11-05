@@ -1,6 +1,24 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngPinFolder">Закрепить папку</System:String>
+        <System:String x:Key="LngUnpinFolder">Открепить папку</System:String>
+        <System:String x:Key="LngFolderCount">Количество папок:</System:String>
+        <System:String x:Key="LngEmptyTitle">Имя папки не может быть пустым</System:String>
+        <System:String x:Key="LngCreatedFolder">Папка "{0}" создана</System:String>
+        <System:String x:Key="LngCreateFolder">Создать папку</System:String>
+        <System:String x:Key="LngNewFolder">Новая папка</System:String>
+        <System:String x:Key="LngRenameFolder">Переименовать папку</System:String>
+        <System:String x:Key="LngDeleteFolder">Удалить папку</System:String>
+        <System:String x:Key="LngFolderDeleted">Папка удалена</System:String>
+        <System:String x:Key="LngPinnedFolder">Папка закреплена</System:String>
+        <System:String x:Key="LngUnpinnedFolder">Папка откреплена</System:String>
+        <System:String x:Key="LngPlaylistsInFolder">плейлистов</System:String>
+        <System:String x:Key="LngAddToFolder">Добавить в папку</System:String>
+        <System:String x:Key="LngNoPlaylistFolders">Нет папок</System:String>
+        <System:String x:Key="LngMoveOutOfFolder">Убрать из папки</System:String>
+        <System:String x:Key="LngFolderAlreadyExists">Папка с таким названием уже существует</System:String>
+        <System:String x:Key="LngDeleteFolderConfirm">Удалить папку "{0}"? Плейлисты останутся без папки.</System:String>
         <System:String x:Key="LngCombinationIsUsing">Это сочетание клавиш уже используется для действия:</System:String>
         <System:String x:Key="LngNotAssigned">Не назначено</System:String>
         <System:String x:Key="LngFailedImportLanguage">Не удалось импортировать язык</System:String>

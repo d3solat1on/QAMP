@@ -28,3 +28,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Services.MediaControlsManager.#ctor")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.App.OnExit(System.Windows.ExitEventArgs)")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Services.ShortcutHelpers.EnsureStartMenuShortcut(System.String,System.String,System.String)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Проверка совместимости платформы", Justification = "<Ожидание>", Scope = "member", Target = "~M:QAMP.Converters.ByteArrayToImageConverter.GetBytesFromImage(System.String)~System.Byte[]")]

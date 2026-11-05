@@ -78,7 +78,7 @@ namespace QAMP
             var wih = new System.Windows.Interop.WindowInteropHelper(window);
             var hWnd = wih.EnsureHandle();
 
-            System.Windows.Interop.HwndSource.FromHwnd(hWnd)?.AddHook((IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) =>
+            System.Windows.Interop.HwndSource.FromHwnd(hWnd)?.AddHook((hwnd, msg, wParam, lParam, ref handled) =>
             {
                 if (msg == WM_SHOWME && msg != 0)
                 {
@@ -310,6 +310,8 @@ namespace QAMP
 
         private void Exit_Click(object? sender, RoutedEventArgs e)
         {
+            (Current.MainWindow as MainWindow)?.SaveCurrentState();
+            System.Threading.Thread.Sleep(200);
             Current.Shutdown();
         }
         protected override void OnExit(ExitEventArgs e)

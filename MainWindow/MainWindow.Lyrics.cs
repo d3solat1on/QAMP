@@ -39,6 +39,7 @@ public partial class MainWindow
             CreatePlaylistButton.Visibility = Visibility.Collapsed;
             RemovePlaylistButton.Visibility = Visibility.Collapsed;
             AddMusicButton.Visibility = Visibility.Collapsed;
+            CreateFolderButton.Visibility = Visibility.Collapsed;
 
             LyricsOverlay.Visibility = Visibility.Visible;
 
@@ -95,6 +96,7 @@ public partial class MainWindow
             LeftZona.Visibility = Visibility.Visible;
             ControlsPanel.Visibility = Visibility.Visible;
             UpperPanel.Visibility = Visibility.Visible;
+            CreateFolderButton.Visibility = Visibility.Visible;
             LyricsOverlay.Visibility = Visibility.Collapsed;
         }
     }

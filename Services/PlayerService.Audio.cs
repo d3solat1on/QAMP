@@ -1,8 +1,9 @@
 using System.IO;
+using QAMP.Models;
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Alac;
 using Un4seen.Bass.AddOn.Flac;
 using Un4seen.Bass.AddOn.Fx;
-using QAMP.Models;
 
 namespace QAMP.Services;
 
@@ -20,6 +21,11 @@ public partial class PlayerService
         if (extension == ".flac")
         {
             stream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0, 0, streamFlags);
+        }
+
+        if (extension == ".m4a" || extension == ".alac")
+        {
+            stream = BassAlac.BASS_ALAC_StreamCreateFile(filePath, 0, 0, streamFlags);
         }
 
         if (stream == 0)

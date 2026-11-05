@@ -18,7 +18,9 @@ public partial class MainWindow
 
     private async void RemovePlaylist_Click(object sender, RoutedEventArgs e)
     {
-        if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
+        var selectedPlaylist = (sender as MenuItem)?.DataContext as Playlist ??
+                               PlaylistsListBox.SelectedItem as Playlist;
+        if (selectedPlaylist != null)
         {
             if (selectedPlaylist.Name == MusicLibrary.FavoritesName)
             {
@@ -41,19 +43,20 @@ public partial class MainWindow
                 {
                     MusicLibrary.Instance.Playlists.Remove(playlistToRemove);
                 }
+                MusicLibrary.Instance.RefreshPlaylistSidebarItems();
 
                 if (previouslySelectedPlaylist != null)
                 {
                     var stillExistsPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == previouslySelectedPlaylist.Id);
                     if (stillExistsPlaylist != null)
                     {
-                        PlaylistsListBox.SelectedItem = stillExistsPlaylist;
+                        SelectPlaylist(stillExistsPlaylist);
                     }
                     else
                     {
                         if (MusicLibrary.Instance.Playlists.Count > 0)
                         {
-                            PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
+                            SelectPlaylist(MusicLibrary.Instance.Playlists.FirstOrDefault());
                         }
                         else
                         {
@@ -65,7 +68,7 @@ public partial class MainWindow
                 {
                     if (MusicLibrary.Instance.Playlists.Count > 0)
                     {
-                        PlaylistsListBox.SelectedItem = MusicLibrary.Instance.Playlists.FirstOrDefault();
+                        SelectPlaylist(MusicLibrary.Instance.Playlists.FirstOrDefault());
                     }
                 }
 
@@ -94,7 +97,7 @@ public partial class MainWindow
             {
                 MusicLibrary.Instance.AddNewPlaylist(newPlaylist);
 
-                PlaylistsListBox.SelectedItem = newPlaylist;
+                SelectPlaylist(newPlaylist);
 
                 TracksDataGrid.ItemsSource = newPlaylist.Tracks;
 
@@ -120,17 +123,17 @@ public partial class MainWindow
             if (dialog.ShowDialog() == true)
             {
                 MusicLibrary.Instance.RefreshSinglePlaylist(selectedPlaylist.Id);
-                PlaylistsListBox.SelectionChanged -= PlaylistsListBox_SelectionChanged;
                 var updatedPlaylist = MusicLibrary.Instance.Playlists.FirstOrDefault(p => p.Id == selectedPlaylist.Id);
-                PlaylistsListBox.SelectedItem = updatedPlaylist;
+                SelectPlaylist(updatedPlaylist);
                 TracksDataGrid.ItemsSource = updatedPlaylist?.Tracks;
-                PlaylistsListBox.SelectionChanged += PlaylistsListBox_SelectionChanged;
             }
         }
     }
     public async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
     {
-        if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
+        var selectedPlaylist = (sender as MenuItem)?.DataContext as Playlist ??
+                               PlaylistsListBox.SelectedItem as Playlist;
+        if (selectedPlaylist != null)
         {
             var updatedPlaylist = DatabaseService.GetPlaylistById(selectedPlaylist.Id);
             if (updatedPlaylist != null)
@@ -154,8 +157,9 @@ public partial class MainWindow
 
             ICollectionView view = CollectionViewSource.GetDefaultView(MusicLibrary.Instance.Playlists);
             view?.Refresh();
+            MusicLibrary.Instance.RefreshPlaylistSidebarItems();
 
-            PlaylistsListBox.SelectedItem = selectedPlaylist;
+            SelectPlaylist(selectedPlaylist);
 
             var message = newPinnedState ? (Application.Current.Resources["LngPinnedPlaylist"] as string ?? "Плейсит закреплен")
                                         : (Application.Current.Resources["LngUnpinnedPlaylist"] as string ?? "Плейсит откреплен");
@@ -164,42 +168,48 @@ public partial class MainWindow
     }
     private void Playlist_MouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed && sender is ListBoxItem item)
+        if (e.LeftButton == MouseButtonState.Pressed &&
+            sender is TreeViewItem { DataContext: Playlist } item)
         {
             DragDrop.DoDragDrop(item, item.DataContext, DragDropEffects.Move);
         }
     }
 
-    private void Playlist_Drop(object sender, DragEventArgs e) //???
+    private void Playlist_Drop(object sender, DragEventArgs e)
     {
-        var currentSort = AppSettings.CurrentPlaylistSort;
-        if (currentSort != PlaylistSortOrder.Custom && currentSort != PlaylistSortOrder.Manual)
+        if (e.Data.GetData(typeof(Playlist)) is not Playlist droppedPlaylist ||
+            sender is not TreeViewItem targetItem)
         {
             return;
         }
 
-        if (e.Data.GetData(typeof(Playlist)) is Playlist droppedPlaylist &&
-            sender is ListBoxItem { DataContext: Playlist targetPlaylist } &&
-            droppedPlaylist != targetPlaylist)
+        if (targetItem.DataContext is PlaylistFolder folder)
         {
-            if (droppedPlaylist.IsPinned != targetPlaylist.IsPinned)
+            MovePlaylistToFolder(droppedPlaylist, folder);
+            e.Handled = true;
+            return;
+        }
+
+        if (targetItem.DataContext is Playlist targetPlaylist)
+        {
+            if (droppedPlaylist != targetPlaylist &&
+                droppedPlaylist.FolderId == targetPlaylist.FolderId &&
+                droppedPlaylist.IsPinned == targetPlaylist.IsPinned &&
+                AppSettings.CurrentPlaylistSort is PlaylistSortOrder.Custom or PlaylistSortOrder.Manual)
             {
-                return;
+                var playlists = MusicLibrary.Instance.Playlists;
+                int oldIndex = playlists.IndexOf(droppedPlaylist);
+                int newIndex = playlists.IndexOf(targetPlaylist);
+                if (oldIndex != -1 && newIndex != -1)
+                {
+                    playlists.Move(oldIndex, newIndex);
+                    DatabaseService.SavePlaylistsOrder(playlists);
+                    MusicLibrary.Instance.RefreshPlaylistSidebarItems();
+                    SelectPlaylist(droppedPlaylist);
+                }
             }
 
-            var playlists = MusicLibrary.Instance.Playlists;
-            int oldIndex = playlists.IndexOf(droppedPlaylist);
-            int newIndex = playlists.IndexOf(targetPlaylist);
-
-            if (oldIndex != -1 && newIndex != -1)
-            {
-                playlists.Move(oldIndex, newIndex);
-
-                DatabaseService.SavePlaylistsOrder(playlists);
-
-                ICollectionView view = CollectionViewSource.GetDefaultView(playlists);
-                view?.Refresh();
-            }
+            e.Handled = true;
         }
     }
     public void SortByButton_Click(object sender, RoutedEventArgs e)
@@ -237,6 +247,7 @@ public partial class MainWindow
 
                 AppSettings.CurrentPlaylistSort = sortOrder;
                 SettingsManager.Instance.Save();
+                MusicLibrary.Instance.RefreshPlaylistSidebarItems();
                 string toastMessage = Application.Current.FindResource("LngSortingChanged") as string ?? "Сортировка изменена";
                 _ = MyToast.ShowAsync(toastMessage);
             };
@@ -285,10 +296,13 @@ public partial class MainWindow
                 break;
         }
         view.Refresh();
+        MusicLibrary.Instance.RefreshPlaylistSidebarItems();
     }
     private void ShowPlaylistInfo_Click(object sender, RoutedEventArgs e)
     {
-        if (PlaylistsListBox.SelectedItem is Playlist selectedPlaylist)
+        var selectedPlaylist = (sender as MenuItem)?.DataContext as Playlist ??
+                               PlaylistsListBox.SelectedItem as Playlist;
+        if (selectedPlaylist != null)
         {
             var infoWindow = new ShowInfoPlaylist(selectedPlaylist)
             {

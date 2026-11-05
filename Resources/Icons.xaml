@@ -2,6 +2,26 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Geometry x:Key="CreateFolderGeometry">M14,16h2V14h2V12H16V10H14v2H12v2h2v2ZM4,20q-0.82,0-1.41-0.59T2,18V6Q2,5.18 2.59,4.59T4,4h6l2,2h8q0.83,0 1.41,0.59Q22,7.18 22,8V18q0,0.82-0.59,1.41T20,20H4Zm0-2H20V8H11.18l-2-2H4V18Zm0,0V6V8V18Z</Geometry>
+    <DrawingGroup x:Key="CreateFolderDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource CreateFolderGeometry}"/>
+    </DrawingGroup>
+    <Geometry x:Key="FolderGeometry">M4,20q-0.82,0-1.41-0.59T2,18V6Q2,5.18 2.59,4.59T4,4h6l2,2h8q0.83,0 1.41,0.59Q22,7.18 22,8V18q0,0.82-0.59,1.41T20,20H4Zm0-2H20V8H11.18l-2-2H4V18Zm0,0V6V8V18Z</Geometry>
+    <DrawingGroup x:Key="FolderDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource FolderGeometry}"/>
+    </DrawingGroup>
     <Geometry x:Key="StatisticsGeometry">M160-200h160v-320H160v320Zm240 0h160v-560H400v560Zm240 0h160v-240H640v240ZM80-120v-480h240v-240h320v320h240v400H80Z</Geometry>
     <DrawingGroup x:Key="StatisticsDrawingGroup"
                   ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">

@@ -116,8 +116,25 @@ public partial class MainWindow
         }
         else
         {
-            var bitmap = _imageConverter.Convert(currentPlaylist.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) as BitmapSource;
-            UpdateUpperPanelGradient(bitmap!);
+            if (currentPlaylist.CoverImage == null)
+            {
+                UpdateUpperPanelGradientForFavorites();
+                return;
+            }
+
+            var bitmap = CoverImageCacheService.GetImage(
+                $"playlist_{currentPlaylist.Id}",
+                currentPlaylist.CoverImage,
+                200);
+
+            if (bitmap != null)
+            {
+                UpdateUpperPanelGradient(bitmap);
+            }
+            else
+            {
+                UpdateUpperPanelGradientForFavorites();
+            }
         }
     }
 }

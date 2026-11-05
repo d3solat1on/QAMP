@@ -15,8 +15,9 @@ public partial class DebugConsoleView : UserControl
         "changefontsize", "changefontsizedatagrid", "createplaylist",
         "clear", "exit", "quit", "mute", "unmute", "trackinfo", "clearcache",
         "changeformatlibrary","changeaccentcolor","lyricsmode", "changeround",
-        "background", "getfonts", "setfont","getthemes", "settheme","setbg",
-        "addbg", "addtheme","addfont","getfpsspectrum","setfpsspectrum", "openappfolder","opendatabasefolder"
+        "togglebackground", "getfonts", "setfont","getthemes", "settheme","setbg",
+        "addbg", "addtheme","addfont","getfpsspectrum","setfpsspectrum", "openappfolder","opendatabasefolder",
+        "togglebg"
     ];
     private readonly List<string> _commandHistory = [];
     private int _historyIndex = -1;

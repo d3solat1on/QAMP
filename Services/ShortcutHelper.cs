@@ -42,6 +42,11 @@ internal static class ShortcutHelpers
             Marshal.ThrowExceptionForHR(propertyStore.Commit());
             Marshal.ThrowExceptionForHR(persistFile.Save(linkPath, true));
         }
+
+        catch (COMException ex) when (ex.HResult == unchecked((int)0x80030005))
+        {
+            Debug.WriteLine($"Start menu shortcut update failed with E_FAIL: {ex}");
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"Start menu shortcut update failed: {ex}");

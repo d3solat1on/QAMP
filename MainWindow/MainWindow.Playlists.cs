@@ -19,7 +19,6 @@ namespace QAMP
     {
         private readonly SettingsManager _settingsManager = SettingsManager.Instance;
         private AppSettings AppSettings => _settingsManager.Config;
-        private readonly LargeTrackImageConverter _imageConverter = new();
         private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
@@ -158,11 +157,7 @@ namespace QAMP
         {
             if (PlaylistsListBox.SelectedItem is not Playlist selectedPlaylist) return;
 
-            var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                ".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".ape", ".opus", ".mpc", ".alac"
-            };
-            string extensionsPattern = string.Join(";", supportedExtensions.Select(ext => $"*{ext}"));
+            string extensionsPattern = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
 
             var openFileDialog = new OpenFileDialog { Multiselect = true, Filter = $"Music Files|{extensionsPattern}" };
             if (openFileDialog.ShowDialog() == true)
@@ -236,7 +231,7 @@ namespace QAMP
             return null;
         }
         // ?
-        private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PlaylistsListBox_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (Mouse.RightButton == MouseButtonState.Pressed)
             {
@@ -263,9 +258,21 @@ namespace QAMP
                 {
                     UpdateUpperPanelGradientForFavorites();
                 }
-                else if (_imageConverter.Convert(selected.CoverImage, typeof(BitmapSource), null, System.Globalization.CultureInfo.InvariantCulture) is BitmapSource bitmap)
+                else
                 {
-                    UpdateUpperPanelGradient(bitmap);
+                    var bitmap = CoverImageCacheService.GetImage(
+                        $"playlist_{selected.Id}",
+                        selected.CoverImage,
+                        200); 
+
+                    if (bitmap != null)
+                    {
+                        UpdateUpperPanelGradient(bitmap);
+                    }
+                    else
+                    {
+                        UpdateUpperPanelGradientForFavorites();
+                    }
                 }
 
                 if (Player.CurrentTrack != null)
