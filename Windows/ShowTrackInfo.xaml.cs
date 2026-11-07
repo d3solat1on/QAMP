@@ -10,8 +10,8 @@ using QAMP.Dialogs;
 using QAMP.Models;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
-using Un4seen.Bass.AddOn.Flac;
 using QAMP.Services;
+using System.Text.Json;
 
 
 namespace QAMP.Windows
@@ -19,6 +19,18 @@ namespace QAMP.Windows
     public partial class ShowTrackInfo : Window
     {
         private readonly Track _track;
+
+        private static bool IsInvalidSearchValue(string? value, string localizedUnknown) =>
+            string.IsNullOrWhiteSpace(value) ||
+            value.Equals(localizedUnknown, StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsInvalidExecutor(string? executor) =>
+            IsInvalidSearchValue(executor, "Неизвестный");
+
+        private static bool IsInvalidTrackName(string? name) =>
+            IsInvalidSearchValue(name, "Неизвестно");
+
         public ShowTrackInfo(Track track)
         {
             InitializeComponent();
@@ -122,18 +134,7 @@ namespace QAMP.Windows
             {
                 var (bpm, error) = await Task.Run(() =>
                 {
-                    int decodeStream = 0;
-                    string extension = System.IO.Path.GetExtension(filePath).ToLower();
-
-                    if (extension == ".flac")
-                    {
-                        decodeStream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0L, 0L, BASSFlag.BASS_STREAM_DECODE);
-                    }
-                    else
-                    {
-                        decodeStream = Bass.BASS_StreamCreateFile(filePath, 0L, 0L,
-                            BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_STREAM_PRESCAN);
-                    }
+                    int decodeStream = PlayerService.CreateDecodeStreamFromFile(filePath);
 
                     if (decodeStream == 0)
                     {
@@ -300,6 +301,47 @@ namespace QAMP.Windows
             }
         }
 
+        private async void RemoveCover_Click(object sender, RoutedEventArgs e)
+        {
+            bool isCurrentTrack = PlayerService.Instance.CurrentTrack?.Path == _track.Path;
+            if (isCurrentTrack)
+            {
+                PlayerService.Instance.PrepareForTagEdit();
+            }
+
+            try
+            {
+                using (var file = TagLib.File.Create(_track.Path))
+                {
+                    file.Tag.Pictures = [];
+                    file.Save();
+                }
+
+                _track.CoverImage = [];
+
+                if (Application.Current.MainWindow is MainWindow mainWin)
+                {
+                    mainWin.RefreshSingleTrackInUI(_track);
+                }
+
+                string message = (string)Application.Current.FindResource("LngCoverRemoved");
+                await TrackInfoToast.ShowAsync(message);
+            }
+            catch (Exception ex)
+            {
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message} {ex.Message}", this);
+                App.LogException(ex, "RemoveCover_Click");
+            }
+            finally
+            {
+                if (isCurrentTrack)
+                {
+                    PlayerService.Instance.ResumeAfterTagEdit(_track);
+                }
+            }
+        }
+
         private async void ChangeCover_Click(object sender, MouseButtonEventArgs e)
         {
             if (EditModeButton.IsChecked != true) return;
@@ -346,20 +388,295 @@ namespace QAMP.Windows
             }
         }
 
+        private async void SearchMetadata_Click(object sender, RoutedEventArgs e)
+        {
+            var track = _track;
+            if (IsInvalidExecutor(track.Executor) || IsInvalidTrackName(track.Name))
+            {
+                string message = (string)Application.Current.FindResource("LngNoDataToSeacrh");
+                NotificationWindow.Show(message, this);
+                return;
+            }
+
+            string messageSearching = (string)Application.Current.FindResource("LngSearchMusicBrainz");
+            TrackInfoToast.StartLoading(messageSearching);
+
+            try
+            {
+                var meta = await FetchMetadataFromMusicBrainzAsync(_track.Executor, _track.Name);
+
+                await TrackInfoToast.StopLoadingAsync();
+
+                if (meta != null)
+                {
+                    if (!string.IsNullOrEmpty(meta.Album) && string.IsNullOrEmpty(_track.Album))
+                        _track.Album = meta.Album;
+
+                    if (meta.Year > 0 && _track.Year == 0)
+                        _track.Year = meta.Year;
+
+                    if (!string.IsNullOrEmpty(meta.Genre) && string.IsNullOrEmpty(_track.Genre))
+                        _track.Genre = meta.Genre;
+
+                    string message = (string)Application.Current.FindResource("LngSuccessfully");
+                    await TrackInfoToast.ShowAsync(message);
+                    AlbumTextBox.Text = meta.Album ?? string.Empty;
+                    YearTextBox.Text = meta.Year > 0 ? meta.Year.ToString() : string.Empty;
+                    GenreTextBox.Text = meta.Genre ?? string.Empty;
+                }
+                else
+                {
+                    string message = (string)Application.Current.FindResource("LngUnsuccessful");
+                    await TrackInfoToast.ShowAsync(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                await TrackInfoToast.StopLoadingAsync();
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message}: {ex.Message}", this);
+            }
+        }
+        public static async Task<MusicBrainzResult?> FetchMetadataFromMusicBrainzAsync(string artist, string title)
+        {
+            using HttpClient client = new();
+            try
+            {
+                string query = $"artist:\"{artist}\" AND recording:\"{title}\"";
+                string url = $"https://musicbrainz.org/ws/2/recording/?query={Uri.EscapeDataString(query)}&fmt=json";
+
+                client.DefaultRequestHeaders.Add("User-Agent", "QAMP-MusicPlayer/1.0 (https://github.com/d3solat1on/QAMP)");
+
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return null;
+
+                string json = await response.Content.ReadAsStringAsync();
+                using JsonDocument doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("recordings", out var recordings) && recordings.GetArrayLength() > 0)
+                {
+                    var bestMatch = recordings[0];
+                    var result = new MusicBrainzResult();
+
+                    if (bestMatch.TryGetProperty("releases", out var releases) && releases.GetArrayLength() > 0)
+                    {
+                        var firstRelease = releases[0];
+                        if (firstRelease.TryGetProperty("title", out var albumTitle))
+                        {
+                            result.Album = albumTitle.GetString();
+                        }
+
+                        if (firstRelease.TryGetProperty("date", out var dateProp))
+                        {
+                            string? dateStr = dateProp.GetString();
+                            if (!string.IsNullOrEmpty(dateStr) && dateStr.Length >= 4)
+                            {
+                                if (int.TryParse(dateStr.AsSpan(0, 4), out int year))
+                                {
+                                    result.Year = year;
+                                }
+                            }
+                        }
+                    }
+
+                    if (bestMatch.TryGetProperty("tags", out var tags) && tags.GetArrayLength() > 0)
+                    {
+                        var firstTag = tags[0];
+                        if (firstTag.TryGetProperty("name", out var tagName))
+                        {
+                            result.Genre = tagName.GetString();
+                        }
+                    }
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MusicBrainz API Error: {ex.Message}");
+            }
+
+            return null;
+        }
+        private async void SearchCover_Click(object sender, RoutedEventArgs e)
+        {
+            var track = _track;
+            if (IsInvalidExecutor(track.Executor) || IsInvalidTrackName(track.Name))
+            {
+                string message = (string)Application.Current.FindResource("LngNoDataToSeacrh");
+                NotificationWindow.Show(message, this);
+                return;
+            }
+
+            string messageSearching = (string)Application.Current.FindResource("LngSearchingCover");
+            TrackInfoToast.StartLoading(messageSearching);
+            byte[]? coverBytes = null;
+            try
+            {
+                coverBytes = await FetchAlbumCoverFromItunesAsync(track.Executor!, track.Album, track.Name!);
+            }
+            catch (Exception ex)
+            {
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message} {ex.Message}", this);
+                App.LogException(ex, "SearchCover_Click");
+                return;
+            }
+            finally
+            {
+                await TrackInfoToast.StopLoadingAsync();
+            }
+
+            if (coverBytes is not { Length: > 0 })
+            {
+                string message = (string)Application.Current.FindResource("LngCoverNotFound");
+                await TrackInfoToast.ShowAsync(message);
+                return;
+            }
+
+            try
+            {
+                SaveCoverToTrackFile(track.Path, coverBytes, "image/jpeg");
+                track.CoverImage = coverBytes;
+
+                if (Application.Current.MainWindow is MainWindow mainWin)
+                {
+                    mainWin.RefreshSingleTrackInUI(track);
+                }
+
+                string successMessage = (string)Application.Current.FindResource("LngCoverArtUpdate");
+                await TrackInfoToast.ShowAsync(successMessage);
+            }
+            catch (Exception ex)
+            {
+                string message = (string)Application.Current.FindResource("LngError");
+                NotificationWindow.Show($"{message} {ex.Message}", this);
+                App.LogException(ex, "SearchCover_Click");
+            }
+        }
+        public void SaveCoverToTrackFile(string filePath, byte[] coverBytes, string mimeType = "image/jpeg")
+        {
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+                throw new FileNotFoundException("The audio file for the cover could not be found.", filePath);
+            if (coverBytes == null || coverBytes.Length == 0)
+                throw new ArgumentException("Cover image data is empty.", nameof(coverBytes));
+
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+            var fileAbstraction = new StreamFileAbstraction(filePath, fileStream, fileStream);
+
+            using var file = TagLib.File.Create(fileAbstraction);
+
+            IPicture picture = new Picture([.. coverBytes])
+            {
+                Type = PictureType.FrontCover, // Указываем, что это обложка (лицевая сторона)
+                MimeType = mimeType            // "image/jpeg" или "image/png"
+            };
+
+            file.Tag.Pictures = [picture];
+
+            file.Save();
+
+            if (FindName("CoverImage") is System.Windows.Controls.Image img)
+            {
+                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                using var imageStream = new MemoryStream(coverBytes);
+                bitmap.BeginInit();
+                bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = imageStream;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                img.Source = bitmap;
+            }
+        }
+        public static async Task<byte[]?> FetchAlbumCoverFromItunesAsync(string artist, string album) =>
+            await FetchAlbumCoverFromItunesAsync(artist, album, album);
+
+        public static async Task<byte[]?> FetchAlbumCoverFromItunesAsync(string artist, string? album, string title)
+        {
+            using HttpClient client = new();
+            try
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("QAMP-MusicPlayer (https://github.com/d3solat1on/QAMP)");
+
+                if (!IsInvalidSearchValue(album, "Неизвестный"))
+                {
+                    var albumResults = await SearchItunesArtworkAsync(client, $"{artist} {album}", artist, album!, "album", "collectionName");
+                    if (albumResults != null)
+                        return albumResults;
+                }
+
+                return await SearchItunesArtworkAsync(client, $"{artist} {title}", artist, title, "song", "trackName");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"iTunes API Error: {ex.Message}");
+                App.LogException(ex, "FetchAlbumCoverFromItunesAsync");
+            }
+
+            return null;
+        }
+
+        private static async Task<byte[]?> SearchItunesArtworkAsync(
+            HttpClient client,
+            string term,
+            string artist,
+            string expectedTitle,
+            string entity,
+            string titleProperty)
+        {
+            string url = $"https://itunes.apple.com/search?term={Uri.EscapeDataString(term)}&entity={entity}&limit=10";
+            using var response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode) return null;
+
+            using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            if (!doc.RootElement.TryGetProperty("results", out var results) ||
+                results.ValueKind != JsonValueKind.Array)
+                return null;
+
+            string normalizedArtist = NormalizeSearchText(artist);
+            string normalizedTitle = NormalizeSearchText(expectedTitle);
+            var candidates = results.EnumerateArray()
+                .OrderByDescending(result =>
+                {
+                    string resultArtist = result.TryGetProperty("artistName", out var artistProp)
+                        ? NormalizeSearchText(artistProp.GetString())
+                        : string.Empty;
+                    string resultTitle = result.TryGetProperty(titleProperty, out var titleProp)
+                        ? NormalizeSearchText(titleProp.GetString())
+                        : string.Empty;
+                    return (resultArtist == normalizedArtist ? 2 : 0) +
+                           (resultTitle == normalizedTitle ? 1 : 0);
+                });
+
+            foreach (var result in candidates)
+            {
+                if (!result.TryGetProperty("artworkUrl100", out var artworkProp))
+                    continue;
+
+                string? artworkUrl = artworkProp.GetString();
+                if (string.IsNullOrWhiteSpace(artworkUrl))
+                    continue;
+
+                string highResolutionUrl = artworkUrl.Replace("100x100bb", "600x600bb", StringComparison.OrdinalIgnoreCase);
+                using var imageResponse = await client.GetAsync(highResolutionUrl);
+                if (!imageResponse.IsSuccessStatusCode)
+                    continue;
+
+                byte[] imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
+                if (imageBytes.Length > 0)
+                    return imageBytes;
+            }
+
+            return null;
+        }
+
+        private static string NormalizeSearchText(string? value) =>
+            string.Concat((value ?? string.Empty).Where(char.IsLetterOrDigit)).ToLowerInvariant();
         private async void SearchLyrics_Click(object sender, RoutedEventArgs e)
         {
             var track = _track;
-            if (track == null) return;
-
-            bool isInvalidExecutor = string.IsNullOrWhiteSpace(track.Executor) ||
-                                     track.Executor.Equals("Неизвестный", StringComparison.OrdinalIgnoreCase) ||
-                                     track.Executor.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
-
-            bool isInvalidName = string.IsNullOrWhiteSpace(track.Name) ||
-                                 track.Name.Equals("Неизвестно", StringComparison.OrdinalIgnoreCase) ||
-                                 track.Name.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
-
-            if (isInvalidExecutor || isInvalidName)
+            if (IsInvalidExecutor(track.Executor) || IsInvalidTrackName(track.Name))
             {
                 string message = (string)Application.Current.FindResource("LngNoDataToSeacrh");
                 NotificationWindow.Show(message, this);
@@ -428,6 +745,7 @@ namespace QAMP.Windows
             }
             catch (Exception ex)
             {
+                App.LogException(ex, "FetchLrcFromLrcLib");
                 Debug.WriteLine($"LRCLIB Error: {ex.Message}");
             }
             return null;
@@ -453,5 +771,11 @@ namespace QAMP.Windows
             }
             Services.MemoryOptimizer.RunAsync(this.Dispatcher);
         }
+    }
+    public class MusicBrainzResult
+    {
+        public string? Album { get; set; }
+        public int Year { get; set; }
+        public string? Genre { get; set; }
     }
 }

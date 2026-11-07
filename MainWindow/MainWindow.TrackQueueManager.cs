@@ -401,6 +401,16 @@ public partial class MainWindow
 
             if (paths != null && paths.Length > 0)
             {
+                string firstFile = paths[0];
+                string extension = System.IO.Path.GetExtension(firstFile).ToLowerInvariant();
+
+                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".bmp")
+                {
+                    await ReplaceBackgroundImageFromPath(firstFile);
+                    e.Handled = true;
+                    return;
+                }
+
                 await ProcessDroppedPaths(paths);
             }
             return;
@@ -412,27 +422,18 @@ public partial class MainWindow
         }
 
         var currentPlaylist = Library.CurrentPlaylist;
-        if (currentPlaylist == null)
-        {
-            return;
-        }
+        if (currentPlaylist == null) return;
 
         var targetTrack = FindTrackFromDependencyObject(e.OriginalSource as DependencyObject);
         targetTrack ??= currentPlaylist.Tracks.LastOrDefault();
 
-        if (targetTrack == null || targetTrack == droppedTrack)
-        {
-            return;
-        }
+        if (targetTrack == null || targetTrack == droppedTrack) return;
 
-        _trackReorderUndoStack.Push(currentPlaylist.Tracks.Select(t => t.Id).ToList());
+        _trackReorderUndoStack.Push([.. currentPlaylist.Tracks.Select(t => t.Id)]);
 
         int oldIndex = currentPlaylist.Tracks.IndexOf(droppedTrack);
         int newIndex = currentPlaylist.Tracks.IndexOf(targetTrack);
-        if (oldIndex < 0 || newIndex < 0)
-        {
-            return;
-        }
+        if (oldIndex < 0 || newIndex < 0) return;
 
         currentPlaylist.Tracks.RemoveAt(oldIndex);
         currentPlaylist.Tracks.Insert(newIndex, droppedTrack);

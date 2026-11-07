@@ -250,7 +250,7 @@ namespace QAMP.Windows
 
             if (!Directory.Exists(AppDataManager.LanguageFolderPath))
             {
-                Directory.CreateDirectory(AppDataManager.LanguageFolderPath); 
+                Directory.CreateDirectory(AppDataManager.LanguageFolderPath);
             }
 
             var xamlFiles = Directory.GetFiles(AppDataManager.LanguageFolderPath, "*.xaml")
@@ -768,8 +768,7 @@ namespace QAMP.Windows
 
             var config = SettingsManager.Instance.Config;
             config.IsVisualizerEnabled = VisualizerEnabled.IsChecked ?? false;
-            var spectrumControls = new Visualization.SpectrumControl();
-            spectrumControls.ClearSpectrum();
+            Services.PlayerService.Instance.RefreshSpectrumControls();
             SettingsManager.Instance.Save();
         }
 
@@ -927,7 +926,7 @@ namespace QAMP.Windows
             else if (currentTextBox == Tb5secForward) targetAction = HotkeyAction.SeekForward;
             else if (currentTextBox == Tb5secback) targetAction = HotkeyAction.SeekBackward;
             else if (currentTextBox == TbFullSpectr) targetAction = HotkeyAction.OpenFullScreenSpectrum;
-            else if(currentTextBox == TbOpenConsole) targetAction = HotkeyAction.OpenConsole;
+            else if (currentTextBox == TbOpenConsole) targetAction = HotkeyAction.OpenConsole;
             else return;
 
             var config = SettingsManager.Instance.Config;

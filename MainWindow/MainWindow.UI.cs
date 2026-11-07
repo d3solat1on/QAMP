@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using QAMP.Models;
@@ -63,7 +64,7 @@ public partial class MainWindow
                 if (Player.Duration <= 0) CheckDurationAsync();
                 TotalTimeText.Text = totalTime;
 
-                if (track.CoverImage != null && track.CoverImage.Length > 0 && track.Path != null) 
+                if (track.CoverImage != null && track.CoverImage.Length > 0 && track.Path != null)
                 {
                     var cover = CoverImageCacheService.GetImage(track.Path, track.CoverImage, 700);
                     if (cover != null)
@@ -268,6 +269,28 @@ public partial class MainWindow
                 }
             }
         });
+    }
+    private async Task ReplaceBackgroundImageFromPath(string path)
+    {
+        var config = _settingsManager.Config;
+        if (config == null) return;
+
+        try
+        {
+            string imageKey = $"bg_{path}_{File.GetLastWriteTime(path).Ticks}";
+            byte[]? imageBytes = File.ReadAllBytes(path);
+            CoverImageCacheService.GetImage(imageKey, imageBytes, 1920);
+
+            config.CustomBackgroundPath = path;
+            config.UseCustomBackground = true;
+            SettingsManager.Instance.Save();
+
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error replacing background: {ex.Message}");
+            App.LogException(ex, "ReplaceBackgroundImageFromPath");
+        }
     }
     private void ToggleDebugConsole()
     {

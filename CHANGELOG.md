@@ -1,4 +1,9 @@
 # CHANGELOG
+# (07.11.2026) Version 1.8.8.2:
+    - Added the ability to remove the cover art from a track.  
+    - Support for playing 'opus' format files has been added.  
+    - Added support for changing the custom background via drag-and-drop.  
+
 # (06.11.2026) Version 1.8.8.1:
     - Added the ability to create folders for playlists.  
     - Minor application optimization.  

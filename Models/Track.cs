@@ -298,7 +298,14 @@ namespace QAMP.Models
                 }
                 return _coverImage;
             }
-            set => _coverImage = value;
+            set
+            {
+                if (_coverImage != value)
+                {
+                    _coverImage = value;
+                    OnPropertyChanged(nameof(CoverImage));
+                }
+            }
         }
         private byte[]? LoadCoverFromFile()
         {

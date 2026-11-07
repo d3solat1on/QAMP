@@ -1,6 +1,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngFindCover">Найти обложку</System:String>
+        <System:String x:Key="LngFindData">Найти данные</System:String>
+        <System:String x:Key="LngSearchMusicBrainz">Поиск данных в MusicBrainz...</System:String>
+        <System:String x:Key="LngSearchingCover">Поиск обложки...</System:String>
+        <System:String x:Key="LngRemoveCover">Удалить обложку</System:String>
+        <System:String x:Key="LngCoverRemoved">Обложка удалена из трека</System:String>
+        <System:String x:Key="LngCoverNotFound">Обложка не найдена</System:String>
+        <System:String x:Key="LngCoverFound">Обложка найдена</System:String>
         <System:String x:Key="LngPinFolder">Закрепить папку</System:String>
         <System:String x:Key="LngUnpinFolder">Открепить папку</System:String>
         <System:String x:Key="LngFolderCount">Количество папок:</System:String>
@@ -163,7 +171,7 @@
         <System:String x:Key="LngNo"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Нет</System:String>
         <System:String x:Key="LngAPILyrics"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">Функция поиска текста использует открытые API исключительно для ознакомительных целей и личного использования</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Функция поиска данных использует открытые API исключительно для ознакомительных целей и личного использования</System:String>
         <System:String x:Key="LngMenuAddFilesTo"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Добавить файлы в "{0}"</System:String>
         <System:String x:Key="LngMenuAddFolderTo"

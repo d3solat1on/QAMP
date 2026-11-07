@@ -97,9 +97,8 @@ namespace QAMP
                         TracksDataGrid.ItemsSource = null;
                         TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     }
-
+                    Cursor = Cursors.Arrow;
                     UpdateNextTrackUI();
-
                     string toastTemplate = Application.Current.FindResource("LngTracksAddedToast") as string ?? "Добавлено \"{0}\" треков";
                     string toastMessage = string.Format(toastTemplate, addedCount);
                     await MyToast.ShowAsync(toastMessage);
@@ -108,10 +107,6 @@ namespace QAMP
             catch (Exception ex)
             {
                 App.LogException(ex, "ProcessDroppedPaths");
-            }
-            finally
-            {
-                Cursor = Cursors.Arrow;
             }
         }
         private void AddMusicButton_Click(object sender, RoutedEventArgs e)
@@ -263,7 +258,7 @@ namespace QAMP
                     var bitmap = CoverImageCacheService.GetImage(
                         $"playlist_{selected.Id}",
                         selected.CoverImage,
-                        200); 
+                        200);
 
                     if (bitmap != null)
                     {

@@ -1,6 +1,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngFindCover">Find Cover</System:String>
+        <System:String x:Key="LngFindData">Find Data</System:String>
+        <System:String x:Key="LngSearchMusicBrainz">Search data in MusicBrainz...</System:String>
+        <System:String x:Key="LngSearchingCover">Searching for cover...</System:String>
+        <System:String x:Key="LngRemoveCover">Remove Cover</System:String>
+        <System:String x:Key="LngCoverRemoved">Cover removed from track</System:String>
+        <System:String x:Key="LngCoverNotFound">Cover not found</System:String>
+        <System:String x:Key="LngCoverFound">Cover found</System:String>
         <System:String x:Key="LngPinFolder">Pin Folder</System:String>
         <System:String x:Key="LngUnpinFolder">Unpin Folder</System:String>
         <System:String x:Key="LngFolderCount">Folder Count:</System:String>
@@ -163,7 +171,7 @@
         <System:String x:Key="LngNo"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">No</System:String>
         <System:String x:Key="LngAPILyrics"
-                       xmlns:System="clr-namespace:System;assembly=mscorlib">The text search function uses open APIs for informational and personal use only</System:String>
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">The data search function uses open APIs for informational and personal use only</System:String>
         <System:String x:Key="LngMenuAddFilesTo"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Add files to "{0}"</System:String>
         <System:String x:Key="LngMenuAddFolderTo"

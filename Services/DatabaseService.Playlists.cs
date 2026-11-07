@@ -357,7 +357,6 @@ public partial class DatabaseService
                 command.Parameters.AddWithValue("$pId", playlistId);
 
                 using var reader = command.ExecuteReader();
-                int count = 0;
                 while (reader.Read())
                 {
                     var track = new Track
@@ -377,7 +376,6 @@ public partial class DatabaseService
                         PlayCount = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"Track {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                     tracks.Add(track);
                 }
                 System.Diagnostics.Debug.WriteLine($"Total tracks loaded: {tracks.Count}");
@@ -399,7 +397,6 @@ public partial class DatabaseService
                 command.Parameters.AddWithValue("$pId", playlistId);
 
                 using var reader = command.ExecuteReader();
-                int count = 0;
                 while (reader.Read())
                 {
                     var track = new Track
@@ -419,7 +416,6 @@ public partial class DatabaseService
                         PlayCount = reader.IsDBNull(12) ? 0 : reader.GetInt32(12)
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"Track {++count}: ID={track.Id}, Name={track.Name}, PlayCount={track.PlayCount}, Executor={track.Executor}, TrackNumber={track.TrackNumber}, AddedDate={track.AddedDate:dd.MM.yyyy HH:mm}");
                     tracks.Add(track);
                 }
                 System.Diagnostics.Debug.WriteLine($"Total tracks loaded: {tracks.Count}");

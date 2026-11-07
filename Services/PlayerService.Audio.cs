@@ -4,16 +4,17 @@ using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Alac;
 using Un4seen.Bass.AddOn.Flac;
 using Un4seen.Bass.AddOn.Fx;
+using Un4seen.Bass.AddOn.Opus;
 
 namespace QAMP.Services;
 
 public partial class PlayerService
 {
-    private static int CreateStreamFromFile(string filePath, bool decodeForWasapi = false)
+    private static int CreateStreamFromFile(string filePath, bool useDecodeFlags = false)
     {
         string extension = Path.GetExtension(filePath).ToLowerInvariant();
 
-        BASSFlag streamFlags = decodeForWasapi
+        BASSFlag streamFlags = useDecodeFlags
             ? BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_PRESCAN
             : BASSFlag.BASS_DEFAULT;
 
@@ -22,10 +23,13 @@ public partial class PlayerService
         {
             stream = BassFlac.BASS_FLAC_StreamCreateFile(filePath, 0, 0, streamFlags);
         }
-
-        if (extension == ".m4a" || extension == ".alac")
+        else if (extension == ".m4a" || extension == ".alac")
         {
             stream = BassAlac.BASS_ALAC_StreamCreateFile(filePath, 0, 0, streamFlags);
+        }
+        else if (extension == ".opus")
+        {
+            stream = BassOpus.BASS_OPUS_StreamCreateFile(filePath, 0, 0, streamFlags);
         }
 
         if (stream == 0)
@@ -35,6 +39,9 @@ public partial class PlayerService
 
         return stream;
     }
+
+    internal static int CreateDecodeStreamFromFile(string filePath) =>
+        CreateStreamFromFile(filePath, useDecodeFlags: true);
 
     private void RemoveEffectsFromStream(int stream)
     {
