@@ -31,7 +31,10 @@ public partial class PlayerService
             _usesWasapiCurrentStream = SettingsManager.Instance.Config.UseWASAPI;
 
             int stream = 0;
-
+            if (!_usesWasapiCurrentStream && WasapiEngine.Instance.IsInitialized)
+            {
+                WasapiEngine.Instance.Stop();
+            }
             await Task.Run(() =>
             {
                 stream = CreateStreamFromFile(track.Path, _usesWasapiCurrentStream);

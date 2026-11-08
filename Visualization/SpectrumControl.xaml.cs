@@ -241,7 +241,7 @@ namespace QAMP.Visualization
             }
 
             var normalized = value.Trim();
-            if (!normalized.StartsWith("#"))
+            if (!normalized.StartsWith('#'))
             {
                 normalized = $"#{normalized}";
             }

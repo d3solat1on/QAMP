@@ -17,26 +17,17 @@ public partial class ModernNotice : UserControl
     }
     public async Task ShowAsync(string message)
     {
-        System.Diagnostics.Debug.WriteLine($"[TOAST] Method ShowAsync called with message: \"{message}\"");
-
         Window parentWindow = Window.GetWindow(this);
         if (parentWindow == null)
         {
-            System.Diagnostics.Debug.WriteLine("[TOAST] Error: parentWindow is null. The ModernNotice control is not attached to any window.");
             return;
         }
-        else
-        {
-            System.Diagnostics.Debug.WriteLine($"[TOAST] Parent window found: {parentWindow.Title}. Window visibility: {parentWindow.Visibility}");
-        }
 
-        System.Diagnostics.Debug.WriteLine($"[TOAST] Sizes before showing: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}, Visibility = {this.Visibility}");
 
         ToastMessageText.Text = message;
         this.Visibility = Visibility.Visible;
 
         this.UpdateLayout();
-        System.Diagnostics.Debug.WriteLine($"[TOAST] Sizes after UpdateLayout: ActualWidth = {this.ActualWidth}, ActualHeight = {this.ActualHeight}");
 
         var duration = TimeSpan.FromMilliseconds(250);
         var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -44,10 +35,6 @@ public partial class ModernNotice : UserControl
         var fadeIn = new DoubleAnimation(0, 1, duration);
         var slideIn = new DoubleAnimation(30, 0, duration) { EasingFunction = ease };
 
-        fadeIn.Completed += (s, e) =>
-        {
-            System.Diagnostics.Debug.WriteLine($"[TOAST] Animation completed. Current Opacity of the element = {this.Opacity}");
-        };
 
         this.BeginAnimation(OpacityProperty, fadeIn);
         ToastTranslate.BeginAnimation(TranslateTransform.YProperty, slideIn);
@@ -62,7 +49,6 @@ public partial class ModernNotice : UserControl
 
         await Task.Delay(250);
         this.Visibility = Visibility.Collapsed;
-        System.Diagnostics.Debug.WriteLine("[TOAST] Notification show cycle completed successfully.");
     }
     public void StartLoading(string baseMessage)
     {

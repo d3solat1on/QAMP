@@ -3,9 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using QAMP.Converters;
 using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
@@ -107,6 +105,7 @@ namespace QAMP
             catch (Exception ex)
             {
                 App.LogException(ex, "ProcessDroppedPaths");
+                Cursor = Cursors.Arrow;
             }
         }
         private void AddMusicButton_Click(object sender, RoutedEventArgs e)
@@ -205,8 +204,6 @@ namespace QAMP
                     TracksDataGrid.ItemsSource = null;
                     TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                     UpdateNextTrackUI();
-                    DatabaseService.OnStatisticsChanged();
-
                 }
             }
         }

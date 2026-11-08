@@ -12,6 +12,7 @@ namespace QAMP
     public partial class App : Application
     {
         private static Mutex? _appMutex;
+        private static EventWaitHandle? _singleInstanceWaitHandle;
 
 #if DEBUG
         private const string AppUserModelId = "QAMPCompany.QAMP.MusicPlayer.Debug";
@@ -21,7 +22,6 @@ namespace QAMP
         private const string StartMenuShortcutName = "QAMP";
 #endif
 
-        private static readonly int WM_SHOWME = RegisterWindowMessage("QAMP_UNIQUE_SHOW_ME_MSG");
         public static TaskbarIcon? TrayIcon { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -36,18 +36,28 @@ namespace QAMP
 
 #if DEBUG
             const string appName = "Global\\QAMP_MusicPlayer_Unique_Mutex_Debug";
+            const string eventName = "Global\\QAMP_MusicPlayer_Unique_Event_Debug";
 #else
             const string appName = "Global\\QAMP_MusicPlayer_Unique_Mutex";
+            const string eventName = "Global\\QAMP_MusicPlayer_Unique_Event";
 #endif            
 
             _appMutex = new Mutex(true, appName, out bool createdNew);
 
             if (!createdNew)
             {
-                SignalToExistingInstance();
+                try
+                {
+                    using var h = EventWaitHandle.OpenExisting(eventName);
+                    h.Set();
+                }
+                catch { }
+
                 Current.Shutdown();
                 return;
             }
+            _singleInstanceWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset, eventName);
+            _ = Task.Run(ListenForNewInstances);
 
             base.OnStartup(e);
 
@@ -63,42 +73,33 @@ namespace QAMP
                 AppUserModelId));
         }
 
-        private static void SignalToExistingInstance()
+        private static void ListenForNewInstances()
         {
-            PostMessage(
-                HWND_BROADCAST,
-                WM_SHOWME,
-                IntPtr.Zero,
-                IntPtr.Zero
-            );
-        }
-
-        public static void RegisterWindowForSingleInstance(Window window)
-        {
-            var wih = new System.Windows.Interop.WindowInteropHelper(window);
-            var hWnd = wih.EnsureHandle();
-
-            System.Windows.Interop.HwndSource.FromHwnd(hWnd)?.AddHook((hwnd, msg, wParam, lParam, ref handled) =>
+            while (_singleInstanceWaitHandle != null)
             {
-                if (msg == WM_SHOWME && msg != 0)
+                if (_singleInstanceWaitHandle.WaitOne())
                 {
-                    if (window.Visibility != Visibility.Visible)
+                    Current.Dispatcher.Invoke(() =>
                     {
-                        window.Show();
-                    }
+                        if (Current.MainWindow is MainWindow mainWindow)
+                        {
+                            if (mainWindow.Visibility != Visibility.Visible)
+                            {
+                                mainWindow.Show();
+                            }
 
-                    if (window.WindowState == WindowState.Minimized)
-                    {
-                        window.WindowState = WindowState.Normal;
-                    }
+                            if (mainWindow.WindowState == WindowState.Minimized)
+                            {
+                                mainWindow.WindowState = App.SavedState;
+                            }
 
-                    window.Activate();
-                    handled = true;
+                            mainWindow.Activate();
+                        }
+                    });
                 }
-                return IntPtr.Zero;
-            });
+            }
         }
-
+         
         private static void InitializeTray()
         {
             try
@@ -124,8 +125,22 @@ namespace QAMP
                 {
                     if (Current.MainWindow is MainWindow mainWindow)
                     {
+                        if (App.SavedWidth > 0 && App.SavedHeight > 0)
+                        {
+                            mainWindow.Width = App.SavedWidth;
+                            mainWindow.Height = App.SavedHeight;
+                        }
+
+                        if (App.SavedLeft >= 0 && App.SavedTop >= 0 &&
+                            App.SavedLeft < SystemParameters.VirtualScreenWidth &&
+                            App.SavedTop < SystemParameters.VirtualScreenHeight)
+                        {
+                            mainWindow.Left = App.SavedLeft;
+                            mainWindow.Top = App.SavedTop;
+                        }
+
+                        mainWindow.WindowState = App.SavedState;
                         mainWindow.Show();
-                        mainWindow.WindowState = WindowState.Normal;
                         mainWindow.Activate();
                     }
                 };
@@ -268,12 +283,26 @@ namespace QAMP
             };
         }
 
-        private void OpenQAMP_Click(object? sender, RoutedEventArgs e)
+        private void OpenQAMP_Click(object sender, RoutedEventArgs e)
         {
             if (Current.MainWindow is MainWindow mainWindow)
             {
+                if (App.SavedWidth > 0 && App.SavedHeight > 0)
+                {
+                    mainWindow.Width = App.SavedWidth;
+                    mainWindow.Height = App.SavedHeight;
+                }
+
+                if (App.SavedLeft >= 0 && App.SavedTop >= 0 &&
+                    App.SavedLeft < SystemParameters.VirtualScreenWidth &&
+                    App.SavedTop < SystemParameters.VirtualScreenHeight)
+                {
+                    mainWindow.Left = App.SavedLeft;
+                    mainWindow.Top = App.SavedTop;
+                }
+
+                mainWindow.WindowState = App.SavedState;
                 mainWindow.Show();
-                mainWindow.WindowState = WindowState.Maximized;
                 mainWindow.Activate();
             }
         }
@@ -316,21 +345,13 @@ namespace QAMP
         }
         protected override void OnExit(ExitEventArgs e)
         {
+            _singleInstanceWaitHandle?.Dispose();
             TrayIcon?.Dispose();
             _appMutex?.Dispose();
             WasapiEngine.Instance.Stop();
             Bass.BASS_Free();
             base.OnExit(e);
         }
-
-        private const int HWND_BROADCAST = 0xffff;
-
-        [LibraryImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
-
-        [LibraryImport("user32.dll", EntryPoint = "RegisterWindowMessageW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-        private static partial int RegisterWindowMessage(string lpString);
 
         [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
         private static partial int SetCurrentProcessExplicitAppUserModelID(string appId);
@@ -340,5 +361,13 @@ namespace QAMP
             public string? BassEmail { get; set; }
             public string? BassKey { get; set; }
         }
+    }
+    public partial class App : Application
+    {
+        public static double SavedLeft { get; set; }
+        public static double SavedTop { get; set; }
+        public static double SavedWidth { get; set; }
+        public static double SavedHeight { get; set; }
+        public static WindowState SavedState { get; set; } = WindowState.Normal;
     }
 }

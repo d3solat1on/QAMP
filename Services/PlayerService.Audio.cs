@@ -264,7 +264,74 @@ public partial class PlayerService
             Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, balance);
         }
     }
+    public async Task SwitchOutputModeAsync(bool enableWasapi)
+    {
+        System.Diagnostics.Debug.WriteLine($"[AUDIO] Switching output mode. WASAPI enabled: {enableWasapi}");
 
+        await _playSemaphore.WaitAsync();
+        try
+        {
+            double currentPosition = Position;
+            bool wasPlaying = IsPlaying;
+            Track? track = CurrentTrack;
+
+            if (track == null) return;
+
+            StopInternal();
+
+            if (!enableWasapi && WasapiEngine.Instance.IsInitialized)
+            {
+                WasapiEngine.Instance.Stop();
+            }
+
+            _usesWasapiCurrentStream = enableWasapi;
+
+            int stream = CreateStreamFromFile(track.Path, _usesWasapiCurrentStream);
+            if (stream == 0)
+            {
+                throw new Exception($"Failed to create stream. Error: {Bass.BASS_ErrorGetCode()}");
+            }
+
+            Bass.BASS_ChannelGetInfo(stream, _channelInfo);
+            _currentStream = stream;
+            ApplyEqualizerToStream();
+
+            if (_usesWasapiCurrentStream)
+            {
+                WasapiEngine.Instance.Start(
+                    _currentStream,
+                    _channelInfo,
+                    SettingsManager.Instance.Config.OutputDeviceId,
+                    (float)(_volume * _masterGain));
+            }
+            else
+            {
+                int targetDeviceId = SettingsManager.Instance.Config.OutputDeviceId;
+                Bass.BASS_ChannelSetDevice(_currentStream, targetDeviceId);
+                if (!Bass.BASS_ChannelPlay(_currentStream, false))
+                {
+                    throw new Exception($"Failed to play stream. Error: {Bass.BASS_ErrorGetCode()}");
+                }
+            }
+
+            Seek(currentPosition);
+
+            IsPlaying = wasPlaying;
+            if (wasPlaying)
+            {
+                _positionTimer.Start();
+                _spectrumTimer.Start();
+            }
+            else
+            {
+                await PauseAsync();
+            }
+        }
+        finally
+        {
+            _playSemaphore.Release();
+        }
+    }
     public static List<OutputDeviceInfo> GetOutputDevices()
     {
         var devices = new List<OutputDeviceInfo>();

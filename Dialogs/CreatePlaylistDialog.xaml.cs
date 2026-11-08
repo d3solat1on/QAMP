@@ -11,19 +11,19 @@ namespace QAMP.Dialogs
     {
         public string PlaylistName { get; private set; } = "";
         public string PlaylistDescription { get; private set; } = "";
-        public byte[]? PlaylistCoverImage { get; private set; } 
+        public byte[]? PlaylistCoverImage { get; private set; }
 
         public CreatePlaylistDialog(Playlist? existingPlaylist = null)
         {
             InitializeComponent();
             Owner = Application.Current.MainWindow;
-            
+
             if (existingPlaylist != null)
             {
                 Title = Application.Current.Resources["LngEditPlaylistTitle"] as string ?? "Редактировать плейлист";
                 PlaylistNameTextBox.Text = existingPlaylist.Name;
                 PlaylistDescriptionTextBox.Text = existingPlaylist.Description;
-                
+
                 if (existingPlaylist.CoverImage != null && existingPlaylist.CoverImage.Length > 0)
                 {
                     PlaylistCoverImage = existingPlaylist.CoverImage;
@@ -71,7 +71,7 @@ namespace QAMP.Dialogs
                     {
                         CoverImage.Source = bitmap;
                         PlaceholderText?.Visibility = Visibility.Collapsed;
-                        
+
                         PlaylistCoverImage = BitmapSourceToByteArray(bitmap);
                     }
                     else
@@ -85,7 +85,7 @@ namespace QAMP.Dialogs
                         {
                             CoverImage.Source = cropper.ResultImage;
                             PlaceholderText?.Visibility = Visibility.Collapsed;
-                            
+
                             PlaylistCoverImage = BitmapSourceToByteArray(cropper.ResultImage);
                         }
                     }
@@ -95,7 +95,7 @@ namespace QAMP.Dialogs
                     var errorMsg = (Application.Current.Resources["LngImageLoadError"] as string ?? "Ошибка загрузки изображения: {0}")
                         .Replace("{0}", ex.Message);
                     NotificationWindow.Show(errorMsg, this);
-                    System.Diagnostics.Debug.WriteLine($"ImageLoaError: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"ImageLoadError: {ex.Message}");
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace QAMP.Dialogs
         {
             var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-            
+
             using var ms = new MemoryStream();
             encoder.Save(ms);
             return ms.ToArray();
@@ -114,14 +114,14 @@ namespace QAMP.Dialogs
         {
             string name = PlaylistNameTextBox.Text?.Trim() ?? "";
             string description = PlaylistDescriptionTextBox.Text?.Trim() ?? "";
-            
+
             if (string.IsNullOrWhiteSpace(name))
             {
                 string message = Application.Current.Resources["LngPlaylistNameEmpty"] as string ?? "Пожалуйста, введите название плейлиста";
                 NotificationWindow.Show(message, this);
                 return;
             }
-            
+
             if (Title == (Application.Current.Resources["LngCreatePlaylistTitle"] as string ?? "Создать плейлист"))
             {
                 if (DatabaseService.PlaylistExists(name, -1))
@@ -131,10 +131,10 @@ namespace QAMP.Dialogs
                     return;
                 }
             }
-            
+
             PlaylistName = name;
             PlaylistDescription = description;
-            
+
             DialogResult = true;
             Close();
         }

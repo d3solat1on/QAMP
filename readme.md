@@ -11,8 +11,9 @@
 
 ## Основные возможности
 
-    Поддержка Hi-Res Audio (FLAC, WAW, MP3 и другие)  
+    Поддержка Hi-Res Audio (FLAC, WAW, MP3 и другие) и WASAPI  
     Визуализация: Встроенный и отключаемый спектр и эквалайзер  
+    Кастомизация: Смена заднего фона, замена главного шрифта и смена его размера, градиенты для спектрограммы и другое 
     Статистика: Подробный анализ прослушиваний (Топ 10 треков, вес библиотеки, длительность библиотеки и другое)  
     Современный UX: Сворачивание в трей, предотварщение запуска несколько копий  
 
@@ -94,8 +95,9 @@ QAMP работает полностью локально. Для повышен
 
 ## Key features
 
-    Hi-Res Audio support (FLAC, WAW, MP3, and others)  
+    Hi-Res Audio support (FLAC, WAW, MP3, and others) and WASAPI  
     Visualization: Built-in and deactivable spectrum and equalizer  
+    Customization: Changing the background, replacing the main font and adjusting its size, gradients for the spectrogram, and more  
     Statistics: Detailed listening analysis (Top 10 tracks, library size, library duration, and more)  
     Modern UX: Minimize to tray, prevent multiple instances from launching  
 

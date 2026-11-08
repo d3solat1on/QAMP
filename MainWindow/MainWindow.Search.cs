@@ -30,26 +30,33 @@ public partial class MainWindow
             return;
         }
 
-        var searchResults = new List<Track>();
-        string searchLower = searchQuery.ToLower();
-
-        foreach (var playlist in ViewModels.MusicLibrary.Instance.Playlists)
+        List<Track> results = await Task.Run(() =>
         {
-            foreach (var track in playlist.Tracks)
+            string query = searchQuery.ToLowerInvariant();
+            List<Track> matchedTracks = [];
+            HashSet<string> seenPaths = []; 
+
+            foreach (Playlist playlist in ViewModels.MusicLibrary.Instance.Playlists)
             {
-                if (track.Name.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
-                    track.Executor.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
-                    track.Album.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
-                    track.Genre.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase))
+                foreach (Track track in playlist.Tracks)
                 {
-                    if (!searchResults.Any(t => t.Path == track.Path))
+                    if (seenPaths.Contains(track.Path)) continue;
+
+                    if ((track.Name?.Contains(query, StringComparison.OrdinalIgnoreCase) == true) ||
+                        (track.Executor?.Contains(query, StringComparison.OrdinalIgnoreCase) == true) ||
+                        (track.Album?.Contains(query, StringComparison.OrdinalIgnoreCase) == true) ||
+                        (track.Genre?.Contains(query, StringComparison.OrdinalIgnoreCase) == true))
                     {
-                        searchResults.Add(track);
+                        seenPaths.Add(track.Path);
+                        matchedTracks.Add(track);
                     }
                 }
             }
-        }
-        ShowSearchResults(searchResults, searchQuery);
+
+            return matchedTracks;
+        });
+
+        ShowSearchResults(results, searchQuery);
     }
     private async void ShowSearchResults(List<Track> results, string searchQuery)
     {

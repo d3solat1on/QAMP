@@ -1821,6 +1821,7 @@
                                                                                         ClipToBounds="True"
                                                                                         Height="300"
                                                                                         Width="300"
+                                                                                        SizeChanged="CurrentTrackImageBorder_SizeChanged"
                                                                                         Background="{DynamicResource CentralPanelCardBackground}"
                                                                                         BorderBrush="{DynamicResource CentralPanelCardBorderBrush}"
                                                                                         BorderThickness="1">

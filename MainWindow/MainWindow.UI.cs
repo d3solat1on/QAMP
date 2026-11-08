@@ -56,7 +56,7 @@ public partial class MainWindow
 
                 if (_mediaManager != null)
                 {
-                    _mediaManager.UpdateTrackInfo(track.Name, track.Executor, track.Album);
+                    _mediaManager.UpdateTrackInfo(track.Name, track.Executor, track.Album, track.CoverImage);
                     _mediaManager.UpdatePlaybackStatus(PlayerService.Instance.IsPlaying);
                 }
 
@@ -64,20 +64,7 @@ public partial class MainWindow
                 if (Player.Duration <= 0) CheckDurationAsync();
                 TotalTimeText.Text = totalTime;
 
-                if (track.CoverImage != null && track.CoverImage.Length > 0 && track.Path != null)
-                {
-                    var cover = CoverImageCacheService.GetImage(track.Path, track.CoverImage, 700);
-                    if (cover != null)
-                    {
-                        CurrentTrackImage.Source = cover;
-                        CurrentTrackImage.Visibility = Visibility.Visible;
-                        DefaultCoverPath.Visibility = Visibility.Collapsed;
-                    }
-                }
-                else
-                {
-                    SetDefaultCover();
-                }
+                UpdateTrackCover();
 
                 System.Diagnostics.Debug.WriteLine($"OnTrackChanged successful: {track.Name}");
             }
@@ -86,6 +73,35 @@ public partial class MainWindow
                 System.Diagnostics.Debug.WriteLine($"Error in OnTrackChanged UI: {ex.Message}");
             }
         });
+    }
+    private void CurrentTrackImageBorder_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateTrackCover();
+    }
+    private void UpdateTrackCover()
+    {
+        var track = PlayerService.Instance.CurrentTrack;
+
+        if (track?.CoverImage != null && track.CoverImage.Length > 0 && track.Path != null)
+        {
+            double controlSize = CurrentTrackImage1.ActualWidth > 0 ? CurrentTrackImage1.ActualWidth : CurrentTrackImage1.Width;
+            if (controlSize <= 0) controlSize = 300; // fallback
+
+            var dpiInfo = VisualTreeHelper.GetDpi(CurrentTrackImage1);
+            int targetPixelSize = Math.Max(700, (int)(controlSize * dpiInfo.PixelsPerDip));
+
+            var cover = CoverImageCacheService.GetImage(track.Path, track.CoverImage, targetPixelSize);
+
+            if (cover != null)
+            {
+                CurrentTrackImage.Source = cover;
+                CurrentTrackImage.Visibility = Visibility.Visible;
+                DefaultCoverPath.Visibility = Visibility.Collapsed;
+                return;
+            }
+        }
+
+        SetDefaultCover();
     }
 
     private void ResetPlayerUI()

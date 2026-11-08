@@ -235,7 +235,7 @@ namespace QAMP.Windows
             SettingsManager.Instance.Save();
             if (wasapiModeChanged)
             {
-                await _player.ApplyOutputModeAsync();
+                await _player.SwitchOutputModeAsync(config.UseWASAPI);
             }
             _player.ApplyAudioEffects();
         }

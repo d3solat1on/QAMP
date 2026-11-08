@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace QAMP.Services;
 
-internal static class ShortcutHelpers
+internal static partial class ShortcutHelpers
 {
     public static void EnsureStartMenuShortcut(string shortcutName, string targetPath, string appId)
     {

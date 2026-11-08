@@ -64,8 +64,6 @@ namespace QAMP
         {
             System.Diagnostics.Debug.WriteLine("MainWindow Loaded start");
 
-            App.RegisterWindowForSingleInstance(this);
-
             if (_mediaManager == null)
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
@@ -283,6 +281,14 @@ namespace QAMP
                 if (config != null && config.CloseToTray)
                 {
                     e.Cancel = true;
+                    if (this.WindowState == WindowState.Normal)
+                    {
+                        App.SavedLeft = this.Left;
+                        App.SavedTop = this.Top;
+                        App.SavedWidth = this.Width;
+                        App.SavedHeight = this.Height;
+                    }
+                    App.SavedState = this.WindowState;
                     Hide();
                     MemoryOptimizer.RunAsync(Dispatcher);
                     return;

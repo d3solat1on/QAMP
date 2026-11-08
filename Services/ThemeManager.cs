@@ -22,25 +22,6 @@ namespace QAMP.Services
 
             UpdateAccentColor(config.AccentColor);
         }
-
-        public static void SetTheme(string themeName)
-        {
-            var config = SettingsManager.Instance.Config;
-
-            if (themeName.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
-            {
-                config.ColorScheme = themeName;
-            }
-            else
-            {
-                config.ColorScheme = themeName;
-            }
-
-            SettingsManager.Instance.Save();
-
-            System.Diagnostics.Debug.WriteLine($"ThemeManager: Theme saved in config: {themeName}");
-        }
-
         public static bool ApplyTheme(string themeName)
         {
             if (!TryApplyThemeResources(themeName))

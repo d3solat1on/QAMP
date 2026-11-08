@@ -1,4 +1,10 @@
 # CHANGELOG
+# (09.11.2026) Version 1.8.8.3:
+    - Fixed the position of the Notification window.  
+    - Fixed a bug that occurred when switching between WASAPI mode and the standard stream (and vice versa).  
+    - Optimized native data exchange for analysis: removed excessive array copying and memory allocation by utilizing `Span<T>` within `LibraryImport`.  
+    - Minor app improvements.  
+
 # (07.11.2026) Version 1.8.8.2:
     - Added the ability to remove the cover art from a track.  
     - Support for playing 'opus' format files has been added.  

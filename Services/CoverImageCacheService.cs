@@ -54,18 +54,19 @@ public static class CoverImageCacheService
         }
 
         string key = GetCacheKeyFromPath(trackPath);
+        string memoryKey = $"{key}_{decodePixelWidth}";
 
         lock (_syncRoot)
         {
-            if (_memoryCache.TryGetValue(key, out var entry))
+            if (_memoryCache.TryGetValue(memoryKey, out var entry))
             {
-                Touch(key);
+                Touch(memoryKey);
                 return entry.Image;
             }
         }
 
         string cacheDir = GetCacheDirectory();
-        string cacheFilePath = Path.Combine(cacheDir, $"{key}.bin");
+        string cacheFilePath = Path.Combine(cacheDir, $"{key}.source.bin");
         BitmapImage? image = null;
 
         if (File.Exists(cacheFilePath))
@@ -84,7 +85,7 @@ public static class CoverImageCacheService
 
         if (image != null)
         {
-            StoreInMemory(key, image);
+            StoreInMemory(memoryKey, image);
         }
 
         return image;
@@ -114,8 +115,7 @@ public static class CoverImageCacheService
     {
         try
         {
-            byte[] fileBytes = File.ReadAllBytes(filePath);
-            using var stream = new MemoryStream(fileBytes);
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             var image = new BitmapImage();
             image.BeginInit();
@@ -142,11 +142,12 @@ public static class CoverImageCacheService
             }
 
             if (File.Exists(filePath)) return;
+
             File.WriteAllBytes(filePath, bytes);
         }
-        catch
+        catch (Exception ex)
         {
-            //I
+            System.Diagnostics.Debug.WriteLine($"Failed to save cached image: {ex.Message}");
         }
     }
 

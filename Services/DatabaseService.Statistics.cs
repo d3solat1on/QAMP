@@ -469,14 +469,4 @@ public partial class DatabaseService
         }
         return result.ToString();
     }
-
-    public static void OnStatisticsChanged()
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = "UPDATE Settings SET Value = $value WHERE Key = 'StatisticsChanged'";
-        cmd.Parameters.AddWithValue("$value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-        cmd.ExecuteNonQuery();
-    }
 }

@@ -1,15 +1,14 @@
-#pragma warning disable SYSLIB1054
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-namespace QAMP.Services;
-public static class HotKeyManager
-{
-    [DllImport("user32.dll")]
-    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
-    [DllImport("user32.dll")]
-    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+namespace QAMP.Services;
+
+public static partial class HotKeyManager
+{
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
     public const uint VK_MEDIA_PLAY_PAUSE = 0xB3;
     public const uint VK_MEDIA_NEXT = 0xB0;

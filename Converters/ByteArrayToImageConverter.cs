@@ -31,12 +31,8 @@ namespace QAMP.Converters
                 if (playlist.CoverImage != null && playlist.CoverImage.Length > 0)
                 {
                     string playlistKey = $"playlist_{playlist.Name}";
-                    return CoverImageCacheService.GetImage(playlistKey, playlist.CoverImage, 200);
-                }
-                if (playlist.CoverImage != null && playlist.CoverImage.Length > 0 && ConverterParameter == "Large")
-                {
-                    string playlistKey = $"playlist_{playlist.Name}";
-                    return CoverImageCacheService.GetImage(playlistKey, playlist.CoverImage, 700);
+                    int decodePixelWidth = ConverterParameter == "Large" ? 700 : 200;
+                    return CoverImageCacheService.GetImage(playlistKey, playlist.CoverImage, decodePixelWidth);
                 }
                 return null;
             }

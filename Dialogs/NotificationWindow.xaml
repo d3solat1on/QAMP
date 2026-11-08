@@ -5,7 +5,8 @@
         AllowsTransparency="True"
         WindowStyle="None"
         ShowInTaskbar="False"
-        WindowStartupLocation="Manual">
+        WindowStartupLocation="Manual"
+        PreviewKeyDown="Window_PreviewKeyDown">
         <Grid>
                 <Border x:Name="ToastBorder"
                         Background="{DynamicResource SecondaryBackgroundBrush}"
