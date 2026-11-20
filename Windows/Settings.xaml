@@ -404,6 +404,23 @@
                                              Checked="CheckUseCustomBG"/>
                             </StackPanel>
                         </GroupBox>
+                        <GroupBox Header="{DynamicResource LngBGUpDown}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{DynamicResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="NotUseCustomBGUpDownradio"
+                                             Content="{DynamicResource LngUseDefaultBG}"
+                                             GroupName="BgGroup"
+                                             Margin="0,0,0,10"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="CheckUseCustomBGUpDown"/>
+                                <RadioButton x:Name="UseCustomBGUpDownradio"
+                                             Content="{DynamicResource LngUseCustomBG}"
+                                             GroupName="BgGroup"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="CheckUseCustomBGUpDown"/>
+                            </StackPanel>
+                        </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngDopolnitelno}"
                                   Margin="0,0,0,0"
@@ -503,6 +520,22 @@
                                              Checked="CheckUseConsole"/>
                             </StackPanel>
                         </GroupBox>
+                        <GroupBox Header="{DynamicResource LngDiscordRpc}"
+                                  ToolTip="{DynamicResource LngWhatIsDiscordRpc}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{DynamicResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="EnabledDiscordRpc"
+                                             Content="{DynamicResource LngVisualizerEnabled}"
+                                             Margin="0,0,0,10"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="CheckDiscordRpc"/>
+                                <RadioButton x:Name="DisabledDiscordRpc"
+                                             Content="{DynamicResource LngVisualizerDisabled}"
+                                             Foreground="{DynamicResource ForegroundBrush}"
+                                             Checked="CheckDiscordRpc"/>
+                            </StackPanel>
+                        </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngSystem}"
                                   Margin="0,0,0,0"
@@ -532,6 +565,13 @@
                                         Height="30"
                                         Content="{DynamicResource LngReplaceBG}"
                                         Click="ReplaceBG_Click"/>
+                                <Button Style="{StaticResource ModernPlayerButton}"
+                                        x:Name="ReplaceBGUpDown"
+                                        Margin="0,0,0,10"
+                                        Width="Auto"
+                                        Height="30"
+                                        Content="{DynamicResource LngReplaceBGUpDown}"
+                                        Click="ReplaceBGUpDown_Click"/>
                                 <Button Style="{StaticResource ModernPlayerButton}"
                                         x:Name="ReplaceFont"
                                         Margin="0,0,0,10"

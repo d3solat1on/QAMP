@@ -95,6 +95,7 @@ public partial class PlayerService
             _spectrumTimer.Start();
 
             TrackChanged?.Invoke(track);
+            RefreshDiscordPresence();
         }
         catch (Exception ex)
         {
@@ -237,6 +238,7 @@ public partial class PlayerService
             }
 
             TrackChanged?.Invoke(track);
+            RefreshDiscordPresence();
         }
         catch (Exception ex)
         {
@@ -304,6 +306,7 @@ public partial class PlayerService
             }
 
             TrackChanged?.Invoke(track);
+            RefreshDiscordPresence();
         }
         catch (Exception ex)
         {
@@ -397,6 +400,7 @@ public partial class PlayerService
             _positionTimer.Stop();
             _spectrumTimer.Stop();
             PlaybackPaused?.Invoke(true);
+            RefreshDiscordPresence();
             await Task.CompletedTask;
         }
     }
@@ -432,6 +436,7 @@ public partial class PlayerService
             _positionTimer.Start();
             _spectrumTimer.Start();
             PlaybackPaused?.Invoke(false);
+            RefreshDiscordPresence();
         }
         else if (CurrentTrack != null)
         {
@@ -445,6 +450,7 @@ public partial class PlayerService
         try
         {
             StopInternal();
+            DiscordRpcService.ClearPresence();
         }
         finally
         {
@@ -499,6 +505,7 @@ public partial class PlayerService
             Bass.BASS_ChannelSetPosition(_currentStream, position, BASSMode.BASS_POS_BYTE);
             Position = seconds;
             _lastCountPosition = seconds;
+            RefreshDiscordPresence();
         }
     }
 

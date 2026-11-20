@@ -446,6 +446,8 @@ namespace QAMP.Windows
 
             UseCustomBGradio.IsChecked = config.UseCustomBackground;
             NotUseCustomBGradio.IsChecked = !config.UseCustomBackground;
+            UseCustomBGUpDownradio.IsChecked = config.UseCustomBackgroundUpDown;
+            NotUseCustomBGUpDownradio.IsChecked = !config.UseCustomBackgroundUpDown;
 
             UseCoverCache.IsChecked = config.EnableCoverCache;
             NotUseCoverCache.IsChecked = !config.EnableCoverCache;
@@ -470,12 +472,22 @@ namespace QAMP.Windows
             SpectrumCenteredBarsRadio.IsChecked = config.SpectrumType == Visualization.SpectrumDisplayType.CenteredBars;
             EnabledConsole.IsChecked = config.UseConsole;
             DisabledConsole.IsChecked = !config.UseConsole;
-
+            EnabledDiscordRpc.IsChecked = config.EnableDiscordRpc;
+            DisabledDiscordRpc.IsChecked = !config.EnableDiscordRpc;
 
             InitFontSettingsUI();
 
 
             isInitializing = false;
+        }
+
+        private void CheckDiscordRpc(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+            var config = SettingsManager.Instance.Config;
+            config.EnableDiscordRpc = EnabledDiscordRpc.IsChecked ?? false;
+            SettingsManager.Instance.Save();
+            PlayerService.Instance.RefreshDiscordPresence();
         }
 
         private void CheckUseConsole(object sender, RoutedEventArgs e)
@@ -629,6 +641,19 @@ namespace QAMP.Windows
                 {
                     config.IsCompactMode = isCompact;
                     Debug.WriteLine($"Mode changed: Compact = {isCompact}");
+                }
+            }
+        }
+        private void CheckUseCustomBGUpDown(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing) return;
+            if (sender is RadioButton radio && radio.IsChecked == true)
+            {
+                bool useCustomBGUpDown = radio == UseCustomBGUpDownradio;
+                var config = SettingsManager.Instance.Config;
+                if (config.UseCustomBackgroundUpDown != useCustomBGUpDown)
+                {
+                    config.UseCustomBackgroundUpDown = useCustomBGUpDown;
                 }
             }
         }
@@ -811,6 +836,41 @@ namespace QAMP.Windows
 
                     var config = SettingsManager.Instance.Config;
                     config.CustomBackgroundPath = destFilePath;
+
+                    string message = (string)Application.Current.FindResource("LngSuccessfullyBG");
+                    await SettingsInfoToast.ShowAsync(message);
+                    SettingsManager.Instance.Save();
+                    config.UseCustomBackground = true;
+                }
+                catch (Exception ex)
+                {
+                    string errorMessage = (string)Application.Current.FindResource("LngError");
+                    NotificationWindow.Show($"{errorMessage} {ex.Message}", this);
+                    Debug.WriteLine($"[DEBUG] {ex.Message}");
+                }
+            }
+        }
+        private async void ReplaceBGUpDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Directory.Exists(AppDataManager.BGFolderPath))
+            {
+                Directory.CreateDirectory(AppDataManager.BGFolderPath);
+            }
+
+            OpenFileDialog openFileDialog = new();
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string selectedFilePath = openFileDialog.FileName;
+                string fileName = Path.GetFileName(selectedFilePath);
+                string destFilePath = Path.Combine(AppDataManager.BGFolderPath, fileName);
+
+                try
+                {
+                    File.Copy(selectedFilePath, destFilePath, overwrite: true);
+
+                    var config = SettingsManager.Instance.Config;
+                    config.CustomBackgroundUpDownPath = destFilePath;
 
                     string message = (string)Application.Current.FindResource("LngSuccessfullyBG");
                     await SettingsInfoToast.ShowAsync(message);

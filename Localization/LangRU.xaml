@@ -1,6 +1,12 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngBGUpDown">Фон для верхней и нижней панели</System:String>
+        <System:String x:Key="LngReplaceBGUpDown">Заменить фон для верхней и нижней панели</System:String>
+        <System:String x:Key="LngDiscordRpc">DiscordRPC</System:String>
+        <System:String x:Key="LngWhatIsDiscordRpc">В статусе Discord будет отображаться данные о треке, такие как длительность, текущая позиция, артист и название трека</System:String>
+        <System:String x:Key="LngTryLyricsfyTimeCode">В LRCLIB удалось найти только обычный текст песни — без временных меток. Хотите поискать синхронизированный текст на Lyricsify?</System:String>
+        <System:String x:Key="LngTryLyricsfyNoLyrics">Похоже, LRCLIB не удалось найти текст для этого трека; хотите попробовать поискать через Lyricsify?</System:String>
         <System:String x:Key="LngFindCover">Найти обложку</System:String>
         <System:String x:Key="LngFindData">Найти данные</System:String>
         <System:String x:Key="LngSearchMusicBrainz">Поиск данных в MusicBrainz...</System:String>

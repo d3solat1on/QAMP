@@ -12,6 +12,8 @@ using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using QAMP.Services;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Net;
 
 
 namespace QAMP.Windows
@@ -20,6 +22,10 @@ namespace QAMP.Windows
     {
         private readonly Track _track;
 
+        private static readonly HttpClient _httpClient = new()
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        };
         private static bool IsInvalidSearchValue(string? value, string localizedUnknown) =>
             string.IsNullOrWhiteSpace(value) ||
             value.Equals(localizedUnknown, StringComparison.OrdinalIgnoreCase) ||
@@ -514,7 +520,7 @@ namespace QAMP.Windows
             byte[]? coverBytes = null;
             try
             {
-                coverBytes = await FetchAlbumCoverFromItunesAsync(track.Executor!, track.Album, track.Name!);
+                coverBytes = await CoverSearch.FetchAlbumCoverFromItunesAsync(track.Executor, track.Album, track.Name);
             }
             catch (Exception ex)
             {
@@ -589,90 +595,6 @@ namespace QAMP.Windows
                 img.Source = bitmap;
             }
         }
-        public static async Task<byte[]?> FetchAlbumCoverFromItunesAsync(string artist, string album) =>
-            await FetchAlbumCoverFromItunesAsync(artist, album, album);
-
-        public static async Task<byte[]?> FetchAlbumCoverFromItunesAsync(string artist, string? album, string title)
-        {
-            using HttpClient client = new();
-            try
-            {
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("QAMP-MusicPlayer (https://github.com/d3solat1on/QAMP)");
-
-                if (!IsInvalidSearchValue(album, "Неизвестный"))
-                {
-                    var albumResults = await SearchItunesArtworkAsync(client, $"{artist} {album}", artist, album!, "album", "collectionName");
-                    if (albumResults != null)
-                        return albumResults;
-                }
-
-                return await SearchItunesArtworkAsync(client, $"{artist} {title}", artist, title, "song", "trackName");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"iTunes API Error: {ex.Message}");
-                App.LogException(ex, "FetchAlbumCoverFromItunesAsync");
-            }
-
-            return null;
-        }
-
-        private static async Task<byte[]?> SearchItunesArtworkAsync(
-            HttpClient client,
-            string term,
-            string artist,
-            string expectedTitle,
-            string entity,
-            string titleProperty)
-        {
-            string url = $"https://itunes.apple.com/search?term={Uri.EscapeDataString(term)}&entity={entity}&limit=10";
-            using var response = await client.GetAsync(url);
-            if (!response.IsSuccessStatusCode) return null;
-
-            using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-            if (!doc.RootElement.TryGetProperty("results", out var results) ||
-                results.ValueKind != JsonValueKind.Array)
-                return null;
-
-            string normalizedArtist = NormalizeSearchText(artist);
-            string normalizedTitle = NormalizeSearchText(expectedTitle);
-            var candidates = results.EnumerateArray()
-                .OrderByDescending(result =>
-                {
-                    string resultArtist = result.TryGetProperty("artistName", out var artistProp)
-                        ? NormalizeSearchText(artistProp.GetString())
-                        : string.Empty;
-                    string resultTitle = result.TryGetProperty(titleProperty, out var titleProp)
-                        ? NormalizeSearchText(titleProp.GetString())
-                        : string.Empty;
-                    return (resultArtist == normalizedArtist ? 2 : 0) +
-                           (resultTitle == normalizedTitle ? 1 : 0);
-                });
-
-            foreach (var result in candidates)
-            {
-                if (!result.TryGetProperty("artworkUrl100", out var artworkProp))
-                    continue;
-
-                string? artworkUrl = artworkProp.GetString();
-                if (string.IsNullOrWhiteSpace(artworkUrl))
-                    continue;
-
-                string highResolutionUrl = artworkUrl.Replace("100x100bb", "600x600bb", StringComparison.OrdinalIgnoreCase);
-                using var imageResponse = await client.GetAsync(highResolutionUrl);
-                if (!imageResponse.IsSuccessStatusCode)
-                    continue;
-
-                byte[] imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
-                if (imageBytes.Length > 0)
-                    return imageBytes;
-            }
-
-            return null;
-        }
-
-        private static string NormalizeSearchText(string? value) =>
-            string.Concat((value ?? string.Empty).Where(char.IsLetterOrDigit)).ToLowerInvariant();
         private async void SearchLyrics_Click(object sender, RoutedEventArgs e)
         {
             var track = _track;
@@ -683,30 +605,60 @@ namespace QAMP.Windows
                 return;
             }
 
-            string SearchMessage = (string)Application.Current.FindResource("LngSearchInLRCLIB");
-            TrackInfoToast.StartLoading(SearchMessage);
+            string searchMessage = (string)Application.Current.FindResource("LngSearchInLRCLIB");
+            TrackInfoToast.StartLoading(searchMessage);
 
             try
             {
                 string? lyrics = await FetchLrcFromLrcLib(track.Executor, track.Name);
+                bool hasTimestamps = HasTimestamps(lyrics);
+
+                if (!string.IsNullOrEmpty(lyrics) && hasTimestamps)
+                {
+                    ApplyLyricsToUi(track, lyrics);
+                    await TrackInfoToast.StopLoadingAsync();
+                    return;
+                }
+
+                await TrackInfoToast.StopLoadingAsync();
 
                 if (!string.IsNullOrEmpty(lyrics))
                 {
-                    track.Lyrics = lyrics;
-                    if (FindName("LyricsTextBox") is System.Windows.Controls.TextBox tb)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            tb.Text = lyrics;
-                        });
-                    }
-                    await TrackInfoToast.StopLoadingAsync();
+                    ApplyLyricsToUi(track, lyrics);
+                }
+
+                string promptMessage;
+                if (string.IsNullOrEmpty(lyrics))
+                {
+                    promptMessage = (string)Application.Current.FindResource("LngTryLyricsfyNoLyrics");
                 }
                 else
                 {
+                    promptMessage = (string)Application.Current.FindResource("LngTryLyricsfyTimeCode");
+                }
+
+                bool? searchOnLyricsify = NotificationWindow.Show(promptMessage, this, NotificationWindow.NotificationMode.Confirm);
+
+                if (searchOnLyricsify == true)
+                {
+                    TrackInfoToast.StartLoading("Searching in Lyricsify...");
+                    string? lyricsifyResult = await FetchLrcFromLyricsify(track.Executor, track.Name);
                     await TrackInfoToast.StopLoadingAsync();
-                    string message = (string)Application.Current.FindResource("LngTextNotFound");
-                    await TrackInfoToast.ShowAsync(message);
+
+                    if (!string.IsNullOrEmpty(lyricsifyResult))
+                    {
+                        ApplyLyricsToUi(track, lyricsifyResult);
+                    }
+                    else if (string.IsNullOrEmpty(lyrics))
+                    {
+                        string notFoundMsg = (string)Application.Current.FindResource("LngTextNotFound");
+                        await TrackInfoToast.ShowAsync(notFoundMsg);
+                    }
+                }
+                else if (string.IsNullOrEmpty(lyrics))
+                {
+                    string notFoundMsg = (string)Application.Current.FindResource("LngTextNotFound");
+                    await TrackInfoToast.ShowAsync(notFoundMsg);
                 }
             }
             catch (Exception ex)
@@ -750,6 +702,71 @@ namespace QAMP.Windows
             }
             return null;
         }
+        private static async Task<string?> FetchLrcFromLyricsify(string executor, string name)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get,
+                    $"https://www.lyricsify.com/search?q={Uri.EscapeDataString($"{executor} {name}")}");
+                request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+
+                using var searchResponse = await _httpClient.SendAsync(request);
+                if (!searchResponse.IsSuccessStatusCode)
+                    return null;
+
+                string searchHtml = await searchResponse.Content.ReadAsStringAsync();
+
+                var linkMatch = MyRegex.Match(searchHtml);
+                if (!linkMatch.Success)
+                    return null;
+
+                string trackUrl = "https://www.lyricsify.com" + linkMatch.Groups[1].Value;
+
+                using var pageRequest = new HttpRequestMessage(HttpMethod.Get, trackUrl);
+                pageRequest.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+
+                using var pageResponse = await _httpClient.SendAsync(pageRequest);
+                if (!pageResponse.IsSuccessStatusCode)
+                    return null;
+
+                string pageHtml = await pageResponse.Content.ReadAsStringAsync();
+
+                var entryMatch = MyRegex1.Match(pageHtml);
+                if (!entryMatch.Success)
+                    return null;
+
+                string rawHtml = entryMatch.Groups[1].Value;
+
+                string withNewLines = MyRegex2.Replace(rawHtml, "\n");
+                string noTags = MyRegex3().Replace(withNewLines, string.Empty);
+                string cleanLyrics = WebUtility.HtmlDecode(noTags).Trim();
+
+                return string.IsNullOrWhiteSpace(cleanLyrics) ? null : cleanLyrics;
+            }
+            catch (Exception ex)
+            {
+                App.LogException(ex, "FetchLrcFromLyricsify");
+                return null;
+            }
+        }
+        private static bool HasTimestamps(string? lyrics)
+        {
+            if (string.IsNullOrWhiteSpace(lyrics))
+                return false;
+
+            return MyRegex4.IsMatch(lyrics);
+        }
+        private void ApplyLyricsToUi(Track track, string lyrics)
+        {
+            track.Lyrics = lyrics;
+            if (FindName("LyricsTextBox") is System.Windows.Controls.TextBox tb)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    tb.Text = lyrics;
+                });
+            }
+        }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -771,6 +788,21 @@ namespace QAMP.Windows
             }
             Services.MemoryOptimizer.RunAsync(this.Dispatcher);
         }
+
+        [GeneratedRegex(@"\[\d{2}:\d{2}\.\d{2,3}\]")]
+        private static partial Regex MyRegex4 { get; }
+
+        [GeneratedRegex(@"href=[""'](/lyrics/[^""']+)[""']", RegexOptions.IgnoreCase, "ru-RU")]
+        private static partial Regex MyRegex { get; }
+
+        [GeneratedRegex(@"<div[^>]*id=[""']entry[""'][^>]*>(.*?)</div>", RegexOptions.IgnoreCase | RegexOptions.Singleline, "ru-RU")]
+        private static partial Regex MyRegex1 { get; }
+
+        [GeneratedRegex(@"<[^>]+>")]
+        private static partial Regex MyRegex3();
+
+        [GeneratedRegex(@"<br\s*/?>", RegexOptions.IgnoreCase, "ru-RU")]
+        private static partial Regex MyRegex2 { get; }
     }
     public class MusicBrainzResult
     {

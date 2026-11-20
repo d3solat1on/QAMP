@@ -66,6 +66,7 @@ namespace QAMP
             InitializeBass();
             InitializeInterface();
             InitializeUnhandledExceptions();
+            InitializeDiscord();
 
             _ = Task.Run(() => ShortcutHelpers.EnsureStartMenuShortcut(
                 StartMenuShortcutName,
@@ -99,7 +100,7 @@ namespace QAMP
                 }
             }
         }
-         
+
         private static void InitializeTray()
         {
             try
@@ -282,6 +283,31 @@ namespace QAMP
                 ex.SetObserved();
             };
         }
+        private static void InitializeDiscord()
+        {
+            try
+            {
+                string configPath = Path.Combine(AppContext.BaseDirectory, "discord_settings.json");
+                string discordKey = "key-example-1234567890";
+                if (File.Exists(configPath))
+                {
+                    string json = File.ReadAllText(configPath);
+                    DiscordConfigDto? data = System.Text.Json.JsonSerializer.Deserialize<DiscordConfigDto>(json);
+                    if (data != null)
+                    {
+                        if (!string.IsNullOrEmpty(data.DiscordKey)) discordKey = data.DiscordKey;
+                    }
+                }
+                DiscordRpcService.Initialize(discordKey);
+                System.Diagnostics.Debug.WriteLine($"InitializeDiscord with key {discordKey}");
+
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error InitializeDiscord: {ex.Message}");
+                App.LogException(ex, "Error InitializeDiscord");
+            }
+        }
 
         private void OpenQAMP_Click(object sender, RoutedEventArgs e)
         {
@@ -360,6 +386,10 @@ namespace QAMP
         {
             public string? BassEmail { get; set; }
             public string? BassKey { get; set; }
+        }
+        private class DiscordConfigDto
+        {
+            public string? DiscordKey { get; set; }
         }
     }
     public partial class App : Application

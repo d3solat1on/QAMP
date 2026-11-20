@@ -12,9 +12,8 @@ public class AppSettings : INotifyPropertyChanged
     {
         if (Hotkeys == null || Hotkeys.Count == 0) InitializeDefaultHotkeys();
     }
+    public bool EnableDiscordRpc { get; set; } = false;
     public bool CloseToTray { get; set; } = true;
-    // spectrum visualizer settings
-
     public int SpectrumFps { get; set; } = 60;
     public bool IsVisualizerEnabled { get; set; } = true;
     public int VisualizerBarCount { get; set; } = 64;
@@ -73,7 +72,30 @@ public class AppSettings : INotifyPropertyChanged
             OnPropertyChanged(nameof(CustomBackgroundPath));
         }
     }
-
+    // for me
+    public string? CustomBackgroundUpDownPath
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged(nameof(CustomBackgroundUpDownPath));
+        }
+    }
+    public bool _useCustomBackgroundUpDown;
+    public bool UseCustomBackgroundUpDown
+    {
+        get => _useCustomBackgroundUpDown;
+        set
+        {
+            if (_useCustomBackgroundUpDown != value)
+            {
+                _useCustomBackgroundUpDown = value;
+                OnPropertyChanged(nameof(UseCustomBackgroundUpDown));
+                OnPropertyChanged(nameof(CustomBackgroundUpDownPath));
+            }
+        }
+    }
     public void NotifyThemeResourcesChanged() =>
         OnPropertyChanged(nameof(CustomBackgroundPath));
 

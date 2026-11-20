@@ -44,7 +44,6 @@ namespace QAMP.Dialogs
             try
             {
                 DialogResult = e.Key == Key.Enter;
-                DialogResult = e.Key == Key.Escape;
             }
             catch (InvalidOperationException)
             {

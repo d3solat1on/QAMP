@@ -275,6 +275,7 @@ public partial class MainWindow
                         t.Executor = updatedTrack.Executor;
                         t.Genre = updatedTrack.Genre;
                         t.Album = updatedTrack.Album;
+                        t.Year = updatedTrack.Year;
 
                         if (TracksDataGrid.ItemContainerGenerator.ContainerFromItem(t) is FrameworkElement itemProperties)
                         {

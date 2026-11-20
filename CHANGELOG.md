@@ -1,4 +1,8 @@
 # CHANGELOG
+# (21.11.2026) Version 1.8.8.4:
+    - Added the ability to display track information in Discord, including: position, duration, title, album, artist, and album art.  
+    - Lyricsify has been added as a fallback site for finding song lyrics, in case LRCLIB fails to find them.  
+    - Added the option to replace the image on the bottom and top panels.  
 # (09.11.2026) Version 1.8.8.3:
     - Fixed the position of the Notification window.  
     - Fixed a bug that occurred when switching between WASAPI mode and the standard stream (and vice versa).  

@@ -121,11 +121,20 @@
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
                                    Foreground="{DynamicResource ForegroundBrush}">
-                            <Run x:Name="Lirycs"
+                            <Run x:Name="LRCLIB"
                                  Text="{DynamicResource LngLirycs}"/>
                             <Hyperlink NavigateUri="https://lrclib.net/"
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 LrcLib
+                            </Hyperlink>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap"
+                                   Foreground="{DynamicResource ForegroundBrush}">
+                            <Run x:Name="Lyricsify"
+                                 Text="{DynamicResource LngLirycs}"/>
+                            <Hyperlink NavigateUri="https://www.lyricsify.com/"
+                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                Lyricsify
                             </Hyperlink>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap"
@@ -149,33 +158,33 @@
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <TextBox x:Name="CurrentVersion"
-                     Width="100"
-                     Height="35"
-                     Background="{DynamicResource AccentBrush}"
-                     Foreground="{DynamicResource BackgroundBrush}"
-                     FontWeight="Bold">
-                <TextBox.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius"
-                                Value="{DynamicResource AppCornerRadius}"/>
-                    </Style>
-                </TextBox.Resources>
-            </TextBox>
+                         Width="100"
+                         Height="35"
+                         Background="{DynamicResource AccentBrush}"
+                         Foreground="{DynamicResource BackgroundBrush}"
+                         FontWeight="Bold">
+                    <TextBox.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius"
+                                    Value="{DynamicResource AppCornerRadius}"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
 
-            <Button x:Name="CloseButton"
-                    Content="{DynamicResource LngCloseButton}"
-                    Margin="5,0,0,0"
-                    Click="CloseButton_Click"
-                    Width="100"
-                    Height="35"
-                    Style="{StaticResource ModernPlayerButton}">
-            </Button>
+                <Button x:Name="CloseButton"
+                        Content="{DynamicResource LngCloseButton}"
+                        Margin="5,0,0,0"
+                        Click="CloseButton_Click"
+                        Width="100"
+                        Height="35"
+                        Style="{StaticResource ModernPlayerButton}">
+                </Button>
                 <Button Content="GitHub"
-                    Margin="5,0,0,0"
-                    Click="GitHubButton_Click"
-                    Width="100"
-                    Height="35"
-                    Style="{StaticResource ModernPlayerButton}">
+                        Margin="5,0,0,0"
+                        Click="GitHubButton_Click"
+                        Width="100"
+                        Height="35"
+                        Style="{StaticResource ModernPlayerButton}">
                 </Button>
             </StackPanel>
         </Grid>

@@ -5,18 +5,12 @@ namespace QAMP.Services;
 
 public partial class DatabaseService
 {
-    // Событие для уведомления об изменении статистики
     public static event Action? StatisticsChanged;
-
-    // Используем AppDataManager для управления путями
     private static readonly string _connectionString = $"Data Source={AppDataManager.DatabasePath}";
-
-    // Публичное свойство для доступа к пути (для отладки)
     public static string DatabasePath => AppDataManager.DatabasePath;
 
     public static void EnsureDatabaseCreated()
     {
-        // Создаем папку, если её нет
         AppDataManager.EnsureAppDataFolderExists();
 
         if (!File.Exists(AppDataManager.DatabasePath))
@@ -69,7 +63,8 @@ public partial class DatabaseService
             SampleRate INTEGER,
             Year INTEGER,
             TrackNumber INTEGER DEFAULT 0,
-            PlayCount INTEGER DEFAULT 0
+            PlayCount INTEGER DEFAULT 0,
+            BPM INTEGER DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS PlaylistTracks (
             PlaylistId INTEGER,
@@ -241,9 +236,6 @@ public partial class DatabaseService
                 ON TrackPlayHistory (TrackId, PlayedAtUtc);";
         command.ExecuteNonQuery();
     }
-
-
-
 
     private static void PerformDatabaseMigration()
     {

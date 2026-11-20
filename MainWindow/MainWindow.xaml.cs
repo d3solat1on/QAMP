@@ -296,6 +296,7 @@ namespace QAMP
 
                 _isClosing = true;
                 _playService?.Dispose();
+                DiscordRpcService.Shutdown();
                 LyricsCache.Clear();
                 SettingsManager.Instance.Save();
             }

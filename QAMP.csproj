@@ -49,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
     <PackageReference Include="FftSharp" Version="2.2.0" />
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
@@ -75,6 +76,9 @@
 
   <ItemGroup>
     <None Include="bass_settings.json" Condition="Exists('bass_settings.json')">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="discord_settings.json" Condition="Exists('discord_settings.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,6 +1,12 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngBGUpDown">Background for the top and bottom panels</System:String>
+        <System:String x:Key="LngReplaceBGUpDown">Replace background for the top and bottom panels</System:String>
+        <System:String x:Key="LngDiscordRpc">DiscordRPC</System:String>
+        <System:String x:Key="LngWhatIsDiscordRpc">Your Discord status will display track information, such as duration, current position, artist, and track title.</System:String>
+        <System:String x:Key="LngTryLyricsfyTimeCode">LRCLIB only found plain lyrics without timestamps. Would you like to search for synced lyrics on Lyricsify?</System:String>
+        <System:String x:Key="LngTryLyricsfyNoLyrics">It seems LRCLIB couldn't find the lyrics for this track; would you like to try searching via Lyricsify?</System:String>
         <System:String x:Key="LngFindCover">Find Cover</System:String>
         <System:String x:Key="LngFindData">Find Data</System:String>
         <System:String x:Key="LngSearchMusicBrainz">Search data in MusicBrainz...</System:String>

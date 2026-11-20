@@ -174,6 +174,7 @@ public partial class PlayerService
         IsPlaying = true;
         Position = 0;
         TrackChanged?.Invoke(CurrentTrack);
+        RefreshDiscordPresence();
         MainWindow.UpdateOSD();
         if (Application.Current.MainWindow is MainWindow mainWin)
         {
@@ -181,7 +182,21 @@ public partial class PlayerService
             mainWin.UpdateNextTrackUI();
         }
     }
-
+    public void RefreshDiscordPresence()
+    {
+        if (CurrentTrack == null)
+        {
+            DiscordRpcService.ClearPresence();
+            return;
+        }
+        DiscordRpcService.UpdatePresence(
+        CurrentTrack.Name,
+        CurrentTrack.Executor,
+        CurrentTrack.Album,
+        IsPlaying,
+        TimeSpan.FromSeconds(Math.Max(0, Duration)),
+        TimeSpan.FromSeconds(Math.Max(0, Position)));
+    }
     public Track? GetNextTrack()
     {
         var queue = IsShuffleEnabled ? ShuffledQueue : _actualPlayingQueue;
