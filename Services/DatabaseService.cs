@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.Data.Sqlite;
+using QAMP.Models;
 
 namespace QAMP.Services;
 
@@ -49,6 +50,8 @@ public partial class DatabaseService
             SortOrder INTEGER DEFAULT 0,
             SortType INTEGER DEFAULT 0,
             IsSystemPlaylist INTEGER DEFAULT 0,
+            IsDynamicPlaylist INTEGER DEFAULT 0,
+            DynamicPlaylistType INTEGER DEFAULT 0,
             FolderId INTEGER DEFAULT NULL
         );
         CREATE TABLE IF NOT EXISTS Tracks (
@@ -116,6 +119,8 @@ public partial class DatabaseService
         { "SortType", "INTEGER DEFAULT 0" },
         { "CreatedDate", "TEXT" },
         { "IsSystemPlaylist", "INTEGER DEFAULT 0" },
+        { "IsDynamicPlaylist", "INTEGER DEFAULT 0" },
+        { "DynamicPlaylistType", "INTEGER DEFAULT 0" },
         { "FolderId", "INTEGER DEFAULT NULL" }
     };
 
@@ -247,29 +252,36 @@ public partial class DatabaseService
 
         try
         {
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = "PRAGMA table_info(Playlists)";
-            using var reader = cmd.ExecuteReader();
-            bool hasIsSystemPlaylist = false;
-
-            while (reader.Read())
-            {
-                string columnName = reader.GetString(1);
-                if (columnName == "IsSystemPlaylist")
-                {
-                    hasIsSystemPlaylist = true;
-                    break;
-                }
-            }
-
-            if (!hasIsSystemPlaylist)
+            var columns = GetTableColumns(connection, "Playlists");
+            if (!columns.Contains("IsSystemPlaylist"))
             {
                 System.Diagnostics.Debug.WriteLine("Column IsSystemPlaylist not found, adding...");
-                var alterCmd = connection.CreateCommand();
-                alterCmd.CommandText = "ALTER TABLE Playlists ADD COLUMN IsSystemPlaylist INTEGER DEFAULT 0";
-                alterCmd.ExecuteNonQuery();
+                AddColumn(connection, "Playlists", "IsSystemPlaylist", "INTEGER DEFAULT 0");
                 System.Diagnostics.Debug.WriteLine("Column IsSystemPlaylist added successfully");
             }
+            if (!columns.Contains("IsDynamicPlaylist"))
+            {
+                AddColumn(connection, "Playlists", "IsDynamicPlaylist", "INTEGER DEFAULT 0");
+            }
+            if (!columns.Contains("DynamicPlaylistType"))
+            {
+                AddColumn(connection, "Playlists", "DynamicPlaylistType", "INTEGER DEFAULT 0");
+            }
+
+            using var backfillCommand = connection.CreateCommand();
+            backfillCommand.CommandText = @"
+                UPDATE Playlists
+                SET DynamicPlaylistType = CASE
+                    WHEN Name = $top50Name THEN $top50Type
+                    WHEN Name = $unlistenedName THEN $unlistenedType
+                    ELSE 0
+                END
+                WHERE IsDynamicPlaylist = 1 AND DynamicPlaylistType = 0";
+            backfillCommand.Parameters.AddWithValue("$top50Name", Top50PlaylistName);
+            backfillCommand.Parameters.AddWithValue("$unlistenedName", TracksWithoutListeningPlaylistName);
+            backfillCommand.Parameters.AddWithValue("$top50Type", (int)DynamicPlaylistType.Top50Tracks);
+            backfillCommand.Parameters.AddWithValue("$unlistenedType", (int)DynamicPlaylistType.TracksWithoutListening);
+            backfillCommand.ExecuteNonQuery();
         }
         catch (Exception ex)
         {

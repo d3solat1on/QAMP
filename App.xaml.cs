@@ -202,6 +202,7 @@ namespace QAMP
             {
                 LanguageManager.ApplyLanguage(SettingsManager.Instance.Config.Language);
                 ThemeManager.UpdateAccentColor(SettingsManager.Instance.Config.AccentColor);
+                ThemeManager.UpdateTextBrush(SettingsManager.Instance.Config.TextBrush);
                 ThemeManager.LoadThemeFromConfig();
                 var config = SettingsManager.Instance.Config;
                 var fontService = FontService.Instance;

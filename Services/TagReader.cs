@@ -6,6 +6,10 @@ namespace QAMP.Services
 {
     public class TagReader
     {
+        private static readonly ParallelOptions _scanParallelOptions = new()
+        {
+            MaxDegreeOfParallelism = Math.Clamp(Environment.ProcessorCount / 2, 2, 6)
+        };
         public static Track? ReadTrackFromFile(string filePath)
         {
             if (!File.Exists(filePath)) return null;
@@ -102,7 +106,7 @@ namespace QAMP.Services
 
             var tracksList = new System.Collections.Concurrent.ConcurrentBag<Track>();
 
-            Parallel.ForEach(filePaths, filePath =>
+            Parallel.ForEach(filePaths, _scanParallelOptions, filePath =>
             {
                 var track = ReadTrackFromFile(filePath);
                 if (track != null)

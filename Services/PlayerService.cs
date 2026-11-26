@@ -39,7 +39,7 @@ namespace QAMP.Services
 
         private sealed class StreamEffects
         {
-            public int[] EqFxHandles { get; } = new int[10];
+            public int EqFxHandle { get; set; }
             public int ReverbFxHandle { get; set; }
             public int EchoFxHandle { get; set; }
             public int CompressorFxHandle { get; set; }
@@ -52,10 +52,10 @@ namespace QAMP.Services
         private readonly DispatcherTimer _spectrumTimer = new();
 
         // Buffer
-        private readonly float[] _nativeSpectrumBuffer = new float[128];
-        private readonly float[] _nativePeakBuffer = new float[128];
-        private readonly double[] _scottPlotBuffer = new double[128];
-        private readonly double[] _scottPlotPeakBuffer = new double[128];
+        private readonly float[] _nativeSpectrumBuffer = new float[SpectrumControl.MaximumBarCount];
+        private readonly float[] _nativePeakBuffer = new float[SpectrumControl.MaximumBarCount];
+        private readonly double[] _scottPlotBuffer = new double[SpectrumControl.MaximumBarCount];
+        private readonly double[] _scottPlotPeakBuffer = new double[SpectrumControl.MaximumBarCount];
         private readonly float[] _fftBuffer = new float[512]; // buffer for FFT data
 
         // События

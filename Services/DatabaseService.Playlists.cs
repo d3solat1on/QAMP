@@ -5,6 +5,9 @@ namespace QAMP.Services;
 
 public partial class DatabaseService
 {
+    private const string Top50PlaylistName = "Top50Tracks";
+    private const string TracksWithoutListeningPlaylistName = "TracksWithoutListening";
+
     public static void UpdatePlaylist(int id, string name, string description, byte[]? cover)
     {
         using var connection = new SqliteConnection(_connectionString);
@@ -92,10 +95,14 @@ public partial class DatabaseService
         try
         {
             bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+            bool hasIsDynamicPlaylist = ColumnExists(connection, "Playlists", "IsDynamicPlaylist");
+            bool hasDynamicPlaylistType = ColumnExists(connection, "Playlists", "DynamicPlaylistType");
             bool hasFolderId = ColumnExists(connection, "Playlists", "FolderId");
 
             string selectQuery = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType";
             if (hasIsSystemPlaylist) selectQuery += ", IsSystemPlaylist";
+            if (hasIsDynamicPlaylist) selectQuery += ", IsDynamicPlaylist";
+            if (hasDynamicPlaylistType) selectQuery += ", DynamicPlaylistType";
             if (hasFolderId) selectQuery += ", FolderId";
             selectQuery += " FROM Playlists WHERE Id = $id";
 
@@ -153,7 +160,19 @@ public partial class DatabaseService
                     playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
                 }
 
-                int folderIdIndex = 8 + (hasIsSystemPlaylist ? 1 : 0);
+                int dynamicPlaylistIndex = 8 + (hasIsSystemPlaylist ? 1 : 0);
+                if (hasIsDynamicPlaylist && !reader.IsDBNull(dynamicPlaylistIndex))
+                {
+                    playlist.IsDynamicPlaylist = reader.GetInt32(dynamicPlaylistIndex) != 0;
+                }
+
+                int dynamicTypeIndex = dynamicPlaylistIndex + (hasIsDynamicPlaylist ? 1 : 0);
+                if (hasDynamicPlaylistType && !reader.IsDBNull(dynamicTypeIndex))
+                {
+                    playlist.DynamicType = (DynamicPlaylistType)reader.GetInt32(dynamicTypeIndex);
+                }
+
+                int folderIdIndex = dynamicTypeIndex + (hasDynamicPlaylistType ? 1 : 0);
                 if (hasFolderId && !reader.IsDBNull(folderIdIndex))
                 {
                     playlist.FolderId = reader.GetInt32(folderIdIndex);
@@ -306,19 +325,58 @@ public partial class DatabaseService
 
     public static void RemoveTrackFromPlaylist(int playlistId, int trackId)
     {
+        RemoveTracksFromPlaylist(playlistId, [trackId], deleteUnusedTracks: false);
+    }
+
+    public static void RemoveTracksFromPlaylist(int playlistId, IReadOnlyCollection<int> trackIds, bool deleteUnusedTracks)
+    {
+        if (trackIds.Count == 0) return;
+
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
-        var command = connection.CreateCommand();
+        using var transaction = connection.BeginTransaction();
 
-        command.CommandText = @"
-            DELETE FROM PlaylistTracks 
+        using var removeCommand = connection.CreateCommand();
+        removeCommand.Transaction = transaction;
+        removeCommand.CommandText = @"
+            DELETE FROM PlaylistTracks
             WHERE PlaylistId = $pId AND TrackId = $tId";
+        var playlistIdParameter = removeCommand.Parameters.Add("$pId", SqliteType.Integer);
+        var trackIdParameter = removeCommand.Parameters.Add("$tId", SqliteType.Integer);
 
-        command.Parameters.AddWithValue("$pId", playlistId);
-        command.Parameters.AddWithValue("$tId", trackId);
+        using var otherPlaylistCommand = connection.CreateCommand();
+        otherPlaylistCommand.Transaction = transaction;
+        otherPlaylistCommand.CommandText = "SELECT COUNT(*) FROM PlaylistTracks WHERE TrackId = $tId";
+        var otherPlaylistTrackIdParameter = otherPlaylistCommand.Parameters.Add("$tId", SqliteType.Integer);
 
-        command.ExecuteNonQuery();
+        using var deleteHistoryCommand = connection.CreateCommand();
+        deleteHistoryCommand.Transaction = transaction;
+        deleteHistoryCommand.CommandText = "DELETE FROM TrackPlayHistory WHERE TrackId = $tId";
+        var historyTrackIdParameter = deleteHistoryCommand.Parameters.Add("$tId", SqliteType.Integer);
 
+        using var deleteTrackCommand = connection.CreateCommand();
+        deleteTrackCommand.Transaction = transaction;
+        deleteTrackCommand.CommandText = "DELETE FROM Tracks WHERE Id = $tId";
+        var deleteTrackIdParameter = deleteTrackCommand.Parameters.Add("$tId", SqliteType.Integer);
+
+        foreach (int trackId in trackIds.Distinct())
+        {
+            playlistIdParameter.Value = playlistId;
+            trackIdParameter.Value = trackId;
+            removeCommand.ExecuteNonQuery();
+
+            if (!deleteUnusedTracks) continue;
+
+            otherPlaylistTrackIdParameter.Value = trackId;
+            if (Convert.ToInt64(otherPlaylistCommand.ExecuteScalar()) != 0) continue;
+
+            historyTrackIdParameter.Value = trackId;
+            deleteHistoryCommand.ExecuteNonQuery();
+            deleteTrackIdParameter.Value = trackId;
+            deleteTrackCommand.ExecuteNonQuery();
+        }
+
+        transaction.Commit();
         ReindexPlaylistTrackOrder(connection, playlistId);
     }
 
@@ -517,15 +575,21 @@ public partial class DatabaseService
         }
     }
 
-    public static long CreatePlaylist(string name, string? description = "", byte[]? coverImage = null, bool isSystemPlaylist = false)
+    public static long CreatePlaylist(
+        string name,
+        string? description = "",
+        byte[]? coverImage = null,
+        bool isSystemPlaylist = false,
+        bool isDynamic = false,
+        DynamicPlaylistType dynamicType = DynamicPlaylistType.None)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
         command.CommandText = @"
-        INSERT INTO Playlists (Name, Description, CoverImage, CreatedDate, IsSystemPlaylist)
-        VALUES ($name, $desc, $cover, $date, $isSystem);
+        INSERT INTO Playlists (Name, Description, CoverImage, CreatedDate, IsSystemPlaylist, IsDynamicPlaylist, DynamicPlaylistType)
+        VALUES ($name, $desc, $cover, $date, $isSystem, $isDynamic, $dynamicType);
         SELECT last_insert_rowid();";
 
         command.Parameters.AddWithValue("$name", name ?? "");
@@ -535,6 +599,8 @@ public partial class DatabaseService
             coverImage ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("$date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         command.Parameters.AddWithValue("$isSystem", isSystemPlaylist ? 1 : 0);
+        command.Parameters.AddWithValue("$isDynamic", isDynamic ? 1 : 0);
+        command.Parameters.AddWithValue("$dynamicType", (int)dynamicType);
 
         try
         {
@@ -633,43 +699,82 @@ public partial class DatabaseService
         }
     }
 
-    public static void CreatePlaylistWithTop50Tracks()
+    public static Playlist CreatePlaylistWithTop50Tracks(bool dynamic)
     {
-        long newPlaylistId = CreatePlaylist("Top50Tracks", "Top 50 tracks by number of listens", null, true);
-        var newPlaylist = GetPlaylistById((int)newPlaylistId);
-
-        var topTracks = GetMostListenedTracksList(50);
-        var dateAdded = newPlaylist?.CreatedDate ?? DateTime.Now;
-
-        foreach (var track in topTracks)
-        {
-            track.AddedDate = dateAdded;
-            SaveTrackToPlaylist((int)newPlaylistId, track);
-        }
-        if (newPlaylist != null)
-        {
-            Windows.Statistics.RefreshRightPanel(newPlaylist);
-        }
-        System.Diagnostics.Debug.WriteLine($"Created 'Top 50 Tracks' with ID={newPlaylistId} and {topTracks.Count} tracks added.");
+        return CreateGeneratedPlaylist(
+            Top50PlaylistName,
+            "Top 50 tracks by number of listens",
+            dynamic,
+            DynamicPlaylistType.Top50Tracks);
     }
 
-    public static void CreatePlaylistTracksWithoutListening()
+    public static Playlist CreatePlaylistTracksWithoutListening(bool dynamic)
     {
-        long newPlaylistId = CreatePlaylist("TracksWithoutListening", "Tracks that haven't been listened", null, true);
-        var newPlaylist = GetPlaylistById((int)newPlaylistId);
+        return CreateGeneratedPlaylist(
+            TracksWithoutListeningPlaylistName,
+            "Tracks that haven't been listened",
+            dynamic,
+            DynamicPlaylistType.TracksWithoutListening);
+    }
 
-        var tracks = GetTracksWithoutListeningButton();
-        var dateAdded = newPlaylist?.CreatedDate ?? DateTime.Now;
+    private static Playlist CreateGeneratedPlaylist(
+        string name,
+        string description,
+        bool isDynamic,
+        DynamicPlaylistType type)
+    {
+        DateTime createdDate = DateTime.Now;
+        string createdDateValue = createdDate.ToString("yyyy-MM-dd HH:mm:ss");
+        string addedDateValue = createdDate.ToString("o");
+        int playlistId;
 
-        foreach (var track in tracks)
+        using (var connection = new SqliteConnection(_connectionString))
         {
-            track.AddedDate = dateAdded;
-            SaveTrackToPlaylist((int)newPlaylistId, track);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            using var createCommand = connection.CreateCommand();
+            createCommand.Transaction = transaction;
+            createCommand.CommandText = @"
+                INSERT INTO Playlists (Name, Description, CreatedDate, IsSystemPlaylist, IsDynamicPlaylist, DynamicPlaylistType)
+                VALUES ($name, $description, $createdDate, 1, $isDynamic, $dynamicType);
+                SELECT last_insert_rowid();";
+            createCommand.Parameters.AddWithValue("$name", name);
+            createCommand.Parameters.AddWithValue("$description", description);
+            createCommand.Parameters.AddWithValue("$createdDate", createdDateValue);
+            createCommand.Parameters.AddWithValue("$isDynamic", isDynamic ? 1 : 0);
+            createCommand.Parameters.AddWithValue(
+                "$dynamicType",
+                (int)(isDynamic ? type : DynamicPlaylistType.None));
+            playlistId = Convert.ToInt32(createCommand.ExecuteScalar());
+
+            using var addTracksCommand = connection.CreateCommand();
+            addTracksCommand.Transaction = transaction;
+            addTracksCommand.CommandText = type == DynamicPlaylistType.Top50Tracks
+                ? @"
+                    INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate, OrderIndex)
+                    SELECT $playlistId, Id, $addedDate,
+                           ROW_NUMBER() OVER (ORDER BY PlayCount DESC, Id ASC) - 1
+                    FROM Tracks
+                    WHERE COALESCE(PlayCount, 0) > 0
+                    ORDER BY PlayCount DESC, Id ASC
+                    LIMIT 50"
+                : @"
+                    INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate, OrderIndex)
+                    SELECT $playlistId, Id, $addedDate,
+                           ROW_NUMBER() OVER (ORDER BY Id ASC) - 1
+                    FROM Tracks
+                    WHERE COALESCE(PlayCount, 0) = 0
+                    ORDER BY Id ASC";
+            addTracksCommand.Parameters.AddWithValue("$playlistId", playlistId);
+            addTracksCommand.Parameters.AddWithValue("$addedDate", addedDateValue);
+            addTracksCommand.ExecuteNonQuery();
+
+            transaction.Commit();
         }
-        if (newPlaylist != null)
-        {
-            Windows.Statistics.RefreshRightPanel(newPlaylist);
-        }
+
+        return GetPlaylistById(playlistId)
+            ?? throw new InvalidOperationException($"Created playlist {playlistId} could not be loaded.");
     }
 
     /// <summary>
@@ -689,10 +794,14 @@ public partial class DatabaseService
                 try
                 {
                     bool hasIsSystemPlaylist = ColumnExists(connection, "Playlists", "IsSystemPlaylist");
+                    bool hasIsDynamicPlaylist = ColumnExists(connection, "Playlists", "IsDynamicPlaylist");
+                    bool hasDynamicPlaylistType = ColumnExists(connection, "Playlists", "DynamicPlaylistType");
                     bool hasFolderId = ColumnExists(connection, "Playlists", "FolderId");
 
                     string selectQuery = "SELECT Id, Name, Description, CoverImage, IsPinned, SortOrder, CreatedDate, SortType";
                     if (hasIsSystemPlaylist) selectQuery += ", IsSystemPlaylist";
+                    if (hasIsDynamicPlaylist) selectQuery += ", IsDynamicPlaylist";
+                    if (hasDynamicPlaylistType) selectQuery += ", DynamicPlaylistType";
                     if (hasFolderId) selectQuery += ", FolderId";
                     selectQuery += " FROM Playlists ORDER BY IsPinned DESC, SortOrder ASC, Name ASC";
 
@@ -748,7 +857,19 @@ public partial class DatabaseService
                             playlist.IsSystemPlaylist = reader.GetInt32(8) != 0;
                         }
 
-                        int folderIdIndex = 8 + (hasIsSystemPlaylist ? 1 : 0);
+                        int dynamicPlaylistIndex = 8 + (hasIsSystemPlaylist ? 1 : 0);
+                        if (hasIsDynamicPlaylist && !reader.IsDBNull(dynamicPlaylistIndex))
+                        {
+                            playlist.IsDynamicPlaylist = reader.GetInt32(dynamicPlaylistIndex) != 0;
+                        }
+
+                        int dynamicTypeIndex = dynamicPlaylistIndex + (hasIsDynamicPlaylist ? 1 : 0);
+                        if (hasDynamicPlaylistType && !reader.IsDBNull(dynamicTypeIndex))
+                        {
+                            playlist.DynamicType = (DynamicPlaylistType)reader.GetInt32(dynamicTypeIndex);
+                        }
+
+                        int folderIdIndex = dynamicTypeIndex + (hasDynamicPlaylistType ? 1 : 0);
                         if (hasFolderId && !reader.IsDBNull(folderIdIndex))
                         {
                             playlist.FolderId = reader.GetInt32(folderIdIndex);
@@ -765,6 +886,59 @@ public partial class DatabaseService
             System.Diagnostics.Debug.WriteLine($"Loaded playlists: {playlists.Count}");
             return playlists;
         });
+    }
+
+    private static void RefreshDynamicPlaylistTracks(SqliteConnection connection, SqliteTransaction transaction)
+    {
+        var dynamicPlaylists = new List<(int Id, DynamicPlaylistType Type)>();
+        using (var command = connection.CreateCommand())
+        {
+            command.Transaction = transaction;
+            command.CommandText = @"
+                SELECT Id, DynamicPlaylistType
+                FROM Playlists
+                WHERE IsDynamicPlaylist = 1
+                    AND DynamicPlaylistType IN ($top50Type, $unlistenedType)";
+            command.Parameters.AddWithValue("$top50Type", (int)DynamicPlaylistType.Top50Tracks);
+            command.Parameters.AddWithValue("$unlistenedType", (int)DynamicPlaylistType.TracksWithoutListening);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                dynamicPlaylists.Add((reader.GetInt32(0), (DynamicPlaylistType)reader.GetInt32(1)));
+            }
+        }
+
+        foreach (var playlist in dynamicPlaylists)
+        {
+            using var deleteCommand = connection.CreateCommand();
+            deleteCommand.Transaction = transaction;
+            deleteCommand.CommandText = "DELETE FROM PlaylistTracks WHERE PlaylistId = $playlistId";
+            deleteCommand.Parameters.AddWithValue("$playlistId", playlist.Id);
+            deleteCommand.ExecuteNonQuery();
+
+            using var insertCommand = connection.CreateCommand();
+            insertCommand.Transaction = transaction;
+            insertCommand.CommandText = playlist.Type == DynamicPlaylistType.Top50Tracks
+                ? @"
+                    INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate, OrderIndex)
+                    SELECT $playlistId, Id, $addedDate,
+                           ROW_NUMBER() OVER (ORDER BY PlayCount DESC, Id ASC) - 1
+                    FROM Tracks
+                    WHERE COALESCE(PlayCount, 0) > 0
+                    ORDER BY PlayCount DESC, Id ASC
+                    LIMIT 50"
+                : @"
+                    INSERT INTO PlaylistTracks (PlaylistId, TrackId, AddedDate, OrderIndex)
+                    SELECT $playlistId, Id, $addedDate,
+                           ROW_NUMBER() OVER (ORDER BY Id ASC) - 1
+                    FROM Tracks
+                    WHERE COALESCE(PlayCount, 0) = 0
+                    ORDER BY Id ASC";
+            insertCommand.Parameters.AddWithValue("$playlistId", playlist.Id);
+            insertCommand.Parameters.AddWithValue("$addedDate", DateTime.Now.ToString("o"));
+            insertCommand.ExecuteNonQuery();
+        }
     }
 
     /// <summary>

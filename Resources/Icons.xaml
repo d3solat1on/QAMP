@@ -2,6 +2,38 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Geometry x:Key="SearchOtherGeometry">M8.2 41.95L21.35 28.8C22.35 29.6667 23.5167 30.3417 24.85 30.825C26.1833 31.3083 27.6 31.55 29.1 31.55C32.7 31.55 35.75 30.3 38.25 27.8C40.75 25.3 42 22.2833 42 18.75C42 15.2167 40.75 12.2 38.25 9.7C35.75 7.2 32.7167 5.95 29.15 5.95C25.6167 5.95 22.6083 7.2 20.125 9.7C17.6417 12.2 16.4 15.2167 16.4 18.75C16.4 20.1833 16.6333 21.5667 17.1 22.9C17.5667 24.2333 18.2667 25.4833 19.2 26.65L6 39.75L8.2 41.95ZM29.15 28.55C26.45 28.55 24.15 27.5917 22.25 25.675C20.35 23.7583 19.4 21.45 19.4 18.75C19.4 16.05 20.35 13.7417 22.25 11.825C24.15 9.90833 26.45 8.95 29.15 8.95C31.8833 8.95 34.2083 9.90833 36.125 11.825C38.0417 13.7417 39 16.05 39 18.75C39 21.45 38.0417 23.7583 36.125 25.675C34.2083 27.5917 31.8833 28.55 29.15 28.55Z</Geometry>
+    <DrawingGroup x:Key="SearchOtherDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource SearchOtherGeometry}"/>
+    </DrawingGroup>
+
+    <Geometry x:Key="ArrowRightGeometry">M10,17V7l5,5l-5,5Z</Geometry>
+    <DrawingGroup x:Key="ArrowRightDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource ArrowRightGeometry}"/>
+    </DrawingGroup>
+    <Geometry x:Key="ArrowLeftGeometry">M14,17L9,12l5-5V17Z</Geometry>
+    <DrawingGroup x:Key="ArrowLeftDrawingGroup"
+                  ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">
+        <DrawingGroup.Transform>
+            <TranslateTransform X="0"
+                                Y="960"/>
+        </DrawingGroup.Transform>
+        <GeometryDrawing Brush="#FFE3E3E3"
+                         Geometry="{StaticResource ArrowLeftGeometry}"/>
+    </DrawingGroup>
+    
     <Geometry x:Key="CreateFolderGeometry">M14,16h2V14h2V12H16V10H14v2H12v2h2v2ZM4,20q-0.82,0-1.41-0.59T2,18V6Q2,5.18 2.59,4.59T4,4h6l2,2h8q0.83,0 1.41,0.59Q22,7.18 22,8V18q0,0.82-0.59,1.41T20,20H4Zm0-2H20V8H11.18l-2-2H4V18Zm0,0V6V8V18Z</Geometry>
     <DrawingGroup x:Key="CreateFolderDrawingGroup"
                   ClipGeometry="M0,-960 V0 H960 V0 H-960 Z">

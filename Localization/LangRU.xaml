@@ -1,6 +1,28 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngSystemPlaylistCannotBeEdited">Системный плейлист не может быть отредактирован</System:String>
+        <System:String x:Key="LngCreateDynamicPlaylist">Создать динамический плейлист?</System:String>
+        <System:String x:Key="LngVisible">Видимая</System:String>
+        <System:String x:Key="LngCollapsed">Спрятана</System:String>
+        <System:String x:Key="LngInfoTrackPanelIsVisible">Видимость панели с информацией о треке</System:String>
+        <System:String x:Key="LngTextBrush">Цвет кисти для текста</System:String>
+        <System:String x:Key="LngRight">Справа</System:String>
+        <System:String x:Key="LngLeft">Слева</System:String>
+        <System:String x:Key="LngUp">Сверху</System:String>
+        <System:String x:Key="LngDown">Снизу</System:String>
+        <System:String x:Key="LngPanels">Панели</System:String>
+        <System:String x:Key="LngInfoTrackPanel">Панель с информацией о треке</System:String>
+        <System:String x:Key="LngControlPanel">Панель управления</System:String>
+        <System:String x:Key="LngTrackGridColumns">Колонки списка треков</System:String>
+        <System:String x:Key="LngTrackCoverColumn">Обложка</System:String>
+        <System:String x:Key="LngTrackTitleColumn">Название</System:String>
+        <System:String x:Key="LngTrackArtistColumn">Исполнитель</System:String>
+        <System:String x:Key="LngTrackAlbumColumn">Альбом</System:String>
+        <System:String x:Key="LngTrackDurationColumn">Длительность</System:String>
+        <System:String x:Key="LngTrackBitrateColumn">Битрейт</System:String>
+        <System:String x:Key="LngTrackGenreColumn">Жанр</System:String>
+        <System:String x:Key="LngTrackDateColumn">Дата добавления</System:String>
         <System:String x:Key="LngBGUpDown">Фон для верхней и нижней панели</System:String>
         <System:String x:Key="LngReplaceBGUpDown">Заменить фон для верхней и нижней панели</System:String>
         <System:String x:Key="LngDiscordRpc">DiscordRPC</System:String>
@@ -81,6 +103,7 @@
         <System:String x:Key="LngSpectrumTypeBars">Столбцы</System:String>
         <System:String x:Key="LngSpectrumTypeLine">Линия</System:String>
         <System:String x:Key="LngSpectrumCenteredBars">Полосы по центру</System:String>
+        <System:String x:Key="LngSpectrumColumns">Количество столбцов</System:String>
         <System:String x:Key="LngGradientTypeHeightBased">По высоте</System:String>
         <System:String x:Key="LngGradientTypeFullHeight">На всю высоту</System:String>
         <System:String x:Key="LngGradientTypeHorizontal">По горизонтали</System:String>
@@ -578,6 +601,8 @@ FN+F3 - Пред. трек
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Закреплен:</System:String>
         <System:String x:Key="LngSystemPlaylist"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Системный:</System:String>
+        <System:String x:Key="LngDynamicPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Динамический:</System:String>
         <System:String x:Key="LngSortType"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Сортировка:</System:String>
         <!-- ShowTrackInfo -->

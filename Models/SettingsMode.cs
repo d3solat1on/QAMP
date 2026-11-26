@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows.Input;
 using QAMP.Services;
@@ -8,10 +9,18 @@ namespace QAMP.Models;
 
 public class AppSettings : INotifyPropertyChanged
 {
+    private const int EqualizerBandCount = 10;
+    private bool _isCompactMode = true;
+    private string? _customBackgroundPath;
+    private string? _customBackgroundUpDownPath;
+    private bool _useCustomBackgroundUpDown;
+    private bool _useCustomBackground;
     public AppSettings()
     {
-        if (Hotkeys == null || Hotkeys.Count == 0) InitializeDefaultHotkeys();
+        if (Hotkeys == null || Hotkeys.Count == 0)
+            InitializeDefaultHotkeys();
     }
+
     public bool EnableDiscordRpc { get; set; } = false;
     public bool CloseToTray { get; set; } = true;
     public int SpectrumFps { get; set; } = 60;
@@ -24,10 +33,10 @@ public class AppSettings : INotifyPropertyChanged
     public Visualization.SpectrumGradientType GradientType { get; set; } = Visualization.SpectrumGradientType.Horizontal;
     public string ColorScheme { get; set; } = "Dark";
     public string AccentColor { get; set; } = "#1db954";
+    public string TextBrush { get; set; } = "#FFFFFF";
     public int CurrentRound { get; set; } = 0;
-    public double[] EqualizerGains { get; set; } = new double[10];
-    public double[] CustomEqualizerGains { get; set; } = new double[10];
-    public double[] CurrentEqualizerValues { get; set; } = new double[10];
+    public double[] EqualizerGains { get; set; } = new double[EqualizerBandCount];
+    public double[] CustomEqualizerGains { get; set; } = new double[EqualizerBandCount];
     public string EqualizerPreset { get; set; } = "Default";
     public bool ReverbEnabled { get; set; } = false;
     public double ReverbLevel { get; set; } = 50.0;
@@ -47,75 +56,86 @@ public class AppSettings : INotifyPropertyChanged
     public double CrossfadeDuration { get; set; } = 3.0;
     public bool UseWASAPI { get; set; } = false;
     public string SelectedFontName { get; set; } = "GOST type A [GOSTA]";
-    public double FontSize { get; set; } = 16.0; //test
-    public double FontSizeDataGrid { get; set; } = 18; //test
-    private bool _isCompactMode = true;
+    public double FontSize { get; set; } = 16.0;
+    public double FontSizeDataGrid { get; set; } = 18.0;
     public bool UseAdaptiveGradients { get; set; } = true;
     public bool EnableCoverCache { get; set; } = true;
     public bool IsAutoLaunchEnabled { get; set; } = false;
+    public bool IsControlPanelOnTop { get; set; } = false;
+    public bool IsNowPlayingOnLeft { get; set; } = false;
+    public bool IsNowPlayingIsVisible { get; set; } = true;
+    public bool? ShowTrackCoverColumn { get; set; }
+    public bool? ShowTrackTitleColumn { get; set; }
+    public bool? ShowTrackArtistColumn { get; set; }
+    public bool? ShowTrackAlbumColumn { get; set; }
+    public bool? ShowTrackDurationColumn { get; set; }
+    public bool? ShowTrackBitrateColumn { get; set; }
+    public bool? ShowTrackGenreColumn { get; set; }
+    public bool? ShowTrackDateColumn { get; set; }
+    public PlaylistSortOrder CurrentPlaylistSort { get; set; } = PlaylistSortOrder.Manual;
+    public string Language { get; set; } = "eng";
+    public List<HotkeyItem> Hotkeys { get; set; } = [];
+
     public bool IsCompactMode
     {
         get => _isCompactMode;
-        set
-        {
-            _isCompactMode = value;
-            OnPropertyChanged(nameof(IsCompactMode));
-        }
+        set => SetField(ref _isCompactMode, value);
     }
 
     public string? CustomBackgroundPath
     {
-        get;
-        set
-        {
-            field = value;
-            OnPropertyChanged(nameof(CustomBackgroundPath));
-        }
+        get => _customBackgroundPath;
+        set => SetField(ref _customBackgroundPath, value);
     }
-    // for me
+
     public string? CustomBackgroundUpDownPath
     {
-        get;
-        set
-        {
-            field = value;
-            OnPropertyChanged(nameof(CustomBackgroundUpDownPath));
-        }
+        get => _customBackgroundUpDownPath;
+        set => SetField(ref _customBackgroundUpDownPath, value);
     }
-    public bool _useCustomBackgroundUpDown;
+
     public bool UseCustomBackgroundUpDown
     {
         get => _useCustomBackgroundUpDown;
         set
         {
-            if (_useCustomBackgroundUpDown != value)
-            {
-                _useCustomBackgroundUpDown = value;
-                OnPropertyChanged(nameof(UseCustomBackgroundUpDown));
+            if (SetField(ref _useCustomBackgroundUpDown, value))
                 OnPropertyChanged(nameof(CustomBackgroundUpDownPath));
-            }
         }
     }
-    public void NotifyThemeResourcesChanged() =>
-        OnPropertyChanged(nameof(CustomBackgroundPath));
 
-    private bool _useCustomBackground;
     public bool UseCustomBackground
     {
         get => _useCustomBackground;
         set
         {
-            if (_useCustomBackground != value)
-            {
-                _useCustomBackground = value;
-                OnPropertyChanged(nameof(UseCustomBackground));
+            if (SetField(ref _useCustomBackground, value))
                 OnPropertyChanged(nameof(CustomBackgroundPath));
-            }
         }
     }
-    public PlaylistSortOrder CurrentPlaylistSort { get; set; } = PlaylistSortOrder.Manual;
-    public string Language { get; set; } = "eng";
-    public List<HotkeyItem> Hotkeys { get; set; } = [];
+
+    public void NotifyThemeResourcesChanged() =>
+        OnPropertyChanged(nameof(CustomBackgroundPath));
+
+    // public void NormalizeAfterLoad()
+    // {
+    //     EqualizerGains = NormalizeBandArray(EqualizerGains);
+    //     CustomEqualizerGains = NormalizeBandArray(CustomEqualizerGains);
+
+    //     if (Hotkeys.Count == 0)
+    //         InitializeDefaultHotkeys();
+    // }
+
+    // private static double[] NormalizeBandArray(double[]? source)
+    // {
+    //     var result = new double[EqualizerBandCount];
+    //     if (source is null || source.Length == 0)
+    //         return result;
+
+    //     Array.Copy(source, result, Math.Min(source.Length, EqualizerBandCount));
+    //     return result;
+    // }
+
     public void InitializeDefaultHotkeys()
     {
         Hotkeys =
@@ -138,7 +158,18 @@ public class AppSettings : INotifyPropertyChanged
         ];
     }
 
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
+
+        field = value;
+        OnPropertyChanged(propertyName!);
+        return true;
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
+
     protected void OnPropertyChanged(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
@@ -146,6 +177,10 @@ public class SettingsManager
 {
     private static SettingsManager? _instance;
     public static SettingsManager Instance => _instance ??= new SettingsManager();
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true
+    };
 
     private readonly string _path = AppDataManager.SettingsPath;
     private AppSettings _config = new();
@@ -179,12 +214,7 @@ public class SettingsManager
 
     public void Save()
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
-
-        string json = JsonSerializer.Serialize(Config, options);
+        string json = JsonSerializer.Serialize(Config, SerializerOptions);
         File.WriteAllText(_path, json);
     }
 }

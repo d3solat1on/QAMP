@@ -32,6 +32,7 @@ public partial class DatabaseService
             historyCommand.Parameters.AddWithValue("$playedAt", DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture));
             historyCommand.ExecuteNonQuery();
 
+            RefreshDynamicPlaylistTracks(connection, transaction);
             transaction.Commit();
             StatisticsChanged?.Invoke();
             return true;

@@ -1,6 +1,28 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
+        <System:String x:Key="LngSystemPlaylistCannotBeEdited">System playlist cannot be edited</System:String>
+        <System:String x:Key="LngCreateDynamicPlaylist">Create a dynamic playlist?</System:String>
+        <System:String x:Key="LngVisible">Visible</System:String>
+        <System:String x:Key="LngCollapsed">Collapsed</System:String>
+        <System:String x:Key="LngInfoTrackPanelIsVisible">Track information panel visibility</System:String>
+        <System:String x:Key="LngTextBrush">Text brush color</System:String>
+        <System:String x:Key="LngRight">Right</System:String>
+        <System:String x:Key="LngLeft">Left</System:String>
+        <System:String x:Key="LngUp">Up</System:String>
+        <System:String x:Key="LngDown">Down</System:String>
+        <System:String x:Key="LngPanels">Panels</System:String>
+        <System:String x:Key="LngInfoTrackPanel">Track information panel</System:String>
+        <System:String x:Key="LngControlPanel">Control panel</System:String>
+        <System:String x:Key="LngTrackGridColumns">Track list columns</System:String>
+        <System:String x:Key="LngTrackCoverColumn">Cover art</System:String>
+        <System:String x:Key="LngTrackTitleColumn">Title</System:String>
+        <System:String x:Key="LngTrackArtistColumn">Artist</System:String>
+        <System:String x:Key="LngTrackAlbumColumn">Album</System:String>
+        <System:String x:Key="LngTrackDurationColumn">Duration</System:String>
+        <System:String x:Key="LngTrackBitrateColumn">Bitrate</System:String>
+        <System:String x:Key="LngTrackGenreColumn">Genre</System:String>
+        <System:String x:Key="LngTrackDateColumn">Date added</System:String>
         <System:String x:Key="LngBGUpDown">Background for the top and bottom panels</System:String>
         <System:String x:Key="LngReplaceBGUpDown">Replace background for the top and bottom panels</System:String>
         <System:String x:Key="LngDiscordRpc">DiscordRPC</System:String>
@@ -81,6 +103,7 @@
         <System:String x:Key="LngSpectrumTypeBars">Bars</System:String>
         <System:String x:Key="LngSpectrumTypeLine">Line</System:String>
         <System:String x:Key="LngSpectrumCenteredBars">Centered Bars</System:String>
+        <System:String x:Key="LngSpectrumColumns">Number of columns</System:String>
         <System:String x:Key="LngGradientTypeHeightBased">By height</System:String>
         <System:String x:Key="LngGradientTypeFullHeight">Full height</System:String>
         <System:String x:Key="LngGradientTypeHorizontal">Horizontal</System:String>
@@ -572,6 +595,8 @@ FN+F3 - Previous track
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Pinned:</System:String>
         <System:String x:Key="LngSystemPlaylist"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">System Playlist:</System:String>
+        <System:String x:Key="LngDynamicPlaylist"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib">Dynamic Playlist:</System:String>
         <System:String x:Key="LngSortType"
                        xmlns:System="clr-namespace:System;assembly=mscorlib">Sort Type:</System:String>
 

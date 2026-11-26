@@ -67,9 +67,56 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Row="1"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="190"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <ListBox x:Name="SettingsSectionList"
+                     Grid.Column="0"
+                     Margin="12"
+                     Background="{DynamicResource SecondaryBackgroundBrush}"
+                     BorderBrush="{DynamicResource BorderBrush}"
+                     Foreground="{DynamicResource ForegroundBrush}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Padding" Value="12,10"/>
+                        <Setter Property="Margin" Value="0,0,0,4"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border x:Name="ItemBorder"
+                                            Background="{TemplateBinding Background}"
+                                            CornerRadius="{DynamicResource AppCornerRadius}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBorder"
+                                                    Property="Background"
+                                                    Value="{DynamicResource AccentBrush}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBoxItem Content="{DynamicResource LngInterface}"/>
+                <ListBoxItem Content="{DynamicResource LngGraphics}"/>
+                <ListBoxItem Content="{DynamicResource LngSystem}"/>
+                <ListBoxItem Content="{DynamicResource LngHotKeys}"/>
+            </ListBox>
+
+            <ScrollViewer x:Name="SettingsContentScrollViewer"
+                          Grid.Column="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -86,7 +133,8 @@
                            FontWeight="Bold"
                            Margin="0,0,0,20"/>
 
-                <GroupBox Grid.Row="1"
+                <GroupBox x:Name="InterfaceSettingsSection"
+                          Grid.Row="1"
                           Header="{DynamicResource LngInterface}"
                           Margin="0,0,0,20"
                           Foreground="{DynamicResource ForegroundBrush}">
@@ -171,6 +219,27 @@
                                            Foreground="{DynamicResource ForegroundBrush}"/>
                             </StackPanel>
                         </GroupBox>
+                        <GroupBox Header="{DynamicResource LngTextBrush}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{DynamicResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <TextBlock x:Name="SelectColorTextBrush"
+                                           Text="{DynamicResource LngMainColor}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="TextBrushTextBox"
+                                         Width="200"
+                                         HorizontalAlignment="Left"
+                                         TextChanged="TextBrushTextBox_TextChanged"
+                                         Foreground="{DynamicResource ForegroundBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"
+                                         BorderBrush="{DynamicResource BorderBrush}"/>
+                                <TextBlock x:Name="ColorPreviewTextBrush"
+                                           Margin="0,10,0,0"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource ForegroundBrush}"/>
+                            </StackPanel>
+                        </GroupBox>
 
                         <GroupBox Header="{DynamicResource LngRounding}"
                                   Margin="0,0,0,10"
@@ -188,6 +257,119 @@
                                          Foreground="{DynamicResource ForegroundBrush}"
                                          Background="{DynamicResource TertiaryBackgroundBrush}"
                                          BorderBrush="{DynamicResource BorderBrush}"/>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="{DynamicResource LngPanels}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{DynamicResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <GroupBox Header="{DynamicResource LngControlPanel}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}">
+                                    <StackPanel Margin="10">
+                                        <RadioButton x:Name="ControlPanelTopRadio"
+                                                     Content="{DynamicResource LngUp}"
+                                                     GroupName="ControlPanel"
+                                                     Margin="0,0,0,10"
+                                                     Foreground="{DynamicResource ForegroundBrush}"
+                                                     Checked="PanelLayout_Changed"/>
+                                        <RadioButton x:Name="ControlPanelBottomRadio"
+                                                     Content="{DynamicResource LngDown}"
+                                                     GroupName="ControlPanel"
+                                                     Margin="0,0,0,10"
+                                                     Foreground="{DynamicResource ForegroundBrush}"
+                                                     Checked="PanelLayout_Changed"/>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="{DynamicResource LngInfoTrackPanel}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}">
+                                    <StackPanel Margin="10">
+                                        <RadioButton x:Name="NowPlayingRightRadio"
+                                                     Content="{DynamicResource LngRight}"
+                                                     GroupName="TrackPanel"
+                                                     Margin="0,0,0,10"
+                                                     Foreground="{DynamicResource ForegroundBrush}"
+                                                     Checked="PanelLayout_Changed"/>
+                                        <RadioButton x:Name="NowPlayingLeftRadio"
+                                                     Content="{DynamicResource LngLeft}"
+                                                     GroupName="TrackPanel"
+                                                     Margin="0,0,0,10"
+                                                     Foreground="{DynamicResource ForegroundBrush}"
+                                                     Checked="PanelLayout_Changed"/>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="{DynamicResource LngInfoTrackPanelIsVisible}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}">
+                                    <StackPanel Margin="10">
+                                        <RadioButton x:Name="NowPlayingPanelVisible"
+                                                     Content="{DynamicResource LngVisible}"
+                                                     GroupName="TrackPanelVisible"
+                                                     Margin="0,0,0,10"
+                                                     Foreground="{DynamicResource ForegroundBrush}"
+                                                     Checked="NowPlayingPanelVisbile_Changed"/>
+                                        <RadioButton x:Name="NowPlayingPanelHidden"
+                                                     Content="{DynamicResource LngCollapsed}"
+                                                     GroupName="TrackPanelVisible"
+                                                     Margin="0,0,0,10"
+                                                     Foreground="{DynamicResource ForegroundBrush}"
+                                                     Checked="NowPlayingPanelVisbile_Changed"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="{DynamicResource LngTrackGridColumns}"
+                                  Margin="0,0,0,10"
+                                  Foreground="{DynamicResource ForegroundBrush}">
+                            <StackPanel Margin="10">
+                                <CheckBox x:Name="ShowTrackCoverColumnCheckBox"
+                                          Content="{DynamicResource LngTrackCoverColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackTitleColumnCheckBox"
+                                          Content="{DynamicResource LngTrackTitleColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackArtistColumnCheckBox"
+                                          Content="{DynamicResource LngTrackArtistColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackAlbumColumnCheckBox"
+                                          Content="{DynamicResource LngTrackAlbumColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackDurationColumnCheckBox"
+                                          Content="{DynamicResource LngTrackDurationColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackBitrateColumnCheckBox"
+                                          Content="{DynamicResource LngTrackBitrateColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackGenreColumnCheckBox"
+                                          Content="{DynamicResource LngTrackGenreColumn}"
+                                          Margin="0,0,0,10"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
+                                <CheckBox x:Name="ShowTrackDateColumnCheckBox"
+                                          Content="{DynamicResource LngTrackDateColumn}"
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Checked="TrackColumnVisibility_Changed"
+                                          Unchecked="TrackColumnVisibility_Changed"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -255,9 +437,11 @@
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="2"
+                <GroupBox x:Name="GraphicsSettingsSection"
+                          Grid.Row="2"
                           Header="{DynamicResource LngGraphics}"
                           Margin="0,0,0,20"
+                          Visibility="Collapsed"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
 
@@ -301,6 +485,26 @@
                                              Margin="0,0,0,10"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="SpectrumType_Checked"/>
+                                <Separator Margin="0,0,0,10"
+                                           Background="{DynamicResource BorderBrush}"/>
+                                <TextBlock Text="{DynamicResource LngSpectrumColumns}"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           Margin="0,0,0,5"/>
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock x:Name="SpectrumColumnsValueText"
+                                               DockPanel.Dock="Right"
+                                               Width="40"
+                                               TextAlignment="Right"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource ForegroundBrush}"/>
+                                    <Slider x:Name="SpectrumColumnsSlider"
+                                            Value="64"
+                                            Minimum="16"
+                                            Maximum="256"
+                                            TickFrequency="16"
+                                            IsSnapToTickEnabled="True"
+                                            ValueChanged="SpectrumColumnsSlider_ValueChanged"/>
+                                </DockPanel>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Header="{DynamicResource LngGradientSpectrum}"
@@ -393,13 +597,13 @@
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="NotUseCustomBGradio"
                                              Content="{DynamicResource LngUseDefaultBG}"
-                                             GroupName="BgGroup"
+                                             GroupName="BackgroundGroup"
                                              Margin="0,0,0,10"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCustomBG"/>
                                 <RadioButton x:Name="UseCustomBGradio"
                                              Content="{DynamicResource LngUseCustomBG}"
-                                             GroupName="BgGroup"
+                                             GroupName="BackgroundGroup"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCustomBG"/>
                             </StackPanel>
@@ -410,13 +614,13 @@
                             <StackPanel Margin="10">
                                 <RadioButton x:Name="NotUseCustomBGUpDownradio"
                                              Content="{DynamicResource LngUseDefaultBG}"
-                                             GroupName="BgGroup"
+                                             GroupName="BackgroundUpDownGroup"
                                              Margin="0,0,0,10"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCustomBGUpDown"/>
                                 <RadioButton x:Name="UseCustomBGUpDownradio"
                                              Content="{DynamicResource LngUseCustomBG}"
-                                             GroupName="BgGroup"
+                                             GroupName="BackgroundUpDownGroup"
                                              Foreground="{DynamicResource ForegroundBrush}"
                                              Checked="CheckUseCustomBGUpDown"/>
                             </StackPanel>
@@ -443,9 +647,11 @@
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="3"
+                <GroupBox x:Name="SystemSettingsSection"
+                          Grid.Row="3"
                           Header="{DynamicResource LngSystem}"
                           Margin="0,0,0,20"
+                          Visibility="Collapsed"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <StackPanel Margin="10">
 
@@ -585,9 +791,11 @@
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="4"
+                <GroupBox x:Name="HotKeysSettingsSection"
+                          Grid.Row="4"
                           Header="{DynamicResource LngHotKeys}"
                           Margin="0,0,0,20"
+                          Visibility="Collapsed"
                           Foreground="{DynamicResource ForegroundBrush}">
                     <Grid Margin="10">
                         <Grid.ColumnDefinitions>
@@ -832,7 +1040,8 @@
                 </GroupBox>
 
             </Grid>
-        </ScrollViewer>
+            </ScrollViewer>
+        </Grid>
 
         <Grid Grid.Row="2"
               Background="{DynamicResource SecondaryBackgroundBrush}">

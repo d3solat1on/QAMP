@@ -53,6 +53,7 @@ public partial class PlayerService
             {
                 track.PlayCount++;
                 PlayCountUpdated?.Invoke(trackId);
+                _ = MusicLibrary.Instance.RefreshDynamicPlaylistsAsync();
             });
         });
     }

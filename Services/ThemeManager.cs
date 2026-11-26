@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -98,7 +99,7 @@ namespace QAMP.Services
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(colorHex) || !colorHex.StartsWith("#")) return;
+                if (string.IsNullOrWhiteSpace(colorHex) || !colorHex.StartsWith('#')) return;
 
                 var app = Application.Current;
                 var color = (Color)ColorConverter.ConvertFromString(colorHex);
@@ -107,7 +108,26 @@ namespace QAMP.Services
                 app.Resources["AccentColor"] = color;
                 app.Resources["AccentBrush"] = accentBrush;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error UpdateAccentColor: {ex.Message}");
+            }
+        }
+        public static void UpdateTextBrush(string colorHex)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(colorHex) || !colorHex.StartsWith('#')) return;
+                var app = Application.Current;
+                var color = (Color)ColorConverter.ConvertFromString(colorHex);
+                var textBrush = new SolidColorBrush(color);
+                textBrush.Freeze();
+                app.Resources["TextBrush"] = textBrush;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.WriteLine($"Error UpdateTextBrush: {ex.Message}");
+            }
         }
         public static bool IsThemeValid(string filePath, out string errorMessage)
         {

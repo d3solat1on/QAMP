@@ -16,10 +16,9 @@ namespace QAMP.Models
             get => _name;
             set
             {
-                string? interned = string.IsNullOrEmpty(value) ? value : string.Intern(value);
-                if (_name != interned)
+                if (_name != value)
                 {
-                    _name = interned;
+                    _name = value;
                     OnPropertyChanged(nameof(Name));
                 }
             }

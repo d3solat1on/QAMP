@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using QAMP.Models;
 using QAMP.Services;
 
@@ -178,27 +179,33 @@ namespace QAMP.ViewModels
             var existingPlaylist = Playlists.FirstOrDefault(p => p.Id == updatedPlaylist.Id);
             if (existingPlaylist != null)
             {
+                bool sidebarNeedsRefresh =
+                    existingPlaylist.Name != updatedPlaylist.Name ||
+                    existingPlaylist.FolderId != updatedPlaylist.FolderId ||
+                    existingPlaylist.IsPinned != updatedPlaylist.IsPinned ||
+                    existingPlaylist.SortOrder != updatedPlaylist.SortOrder;
+
                 existingPlaylist.Name = updatedPlaylist.Name;
                 existingPlaylist.Description = updatedPlaylist.Description;
                 existingPlaylist.CoverImage = updatedPlaylist.CoverImage;
                 existingPlaylist.FolderId = updatedPlaylist.FolderId;
+                existingPlaylist.IsPinned = updatedPlaylist.IsPinned;
+                existingPlaylist.SortOrder = updatedPlaylist.SortOrder;
+                existingPlaylist.IsDynamicPlaylist = updatedPlaylist.IsDynamicPlaylist;
+                existingPlaylist.DynamicType = updatedPlaylist.DynamicType;
 
-                existingPlaylist.Tracks.Clear();
-                foreach (var track in updatedPlaylist.Tracks)
-                {
-                    existingPlaylist.Tracks.Add(track);
-                }
+                existingPlaylist.ReplaceTracks(updatedPlaylist.Tracks);
 
-                if (CurrentPlaylist?.Id == updatedPlaylist.Id)
+                if (sidebarNeedsRefresh)
                 {
-                    OnPropertyChanged(nameof(CurrentPlaylist));
+                    RefreshPlaylistSidebarItems();
                 }
             }
             else
             {
                 Playlists.Add(updatedPlaylist);
+                RefreshPlaylistSidebarItems();
             }
-            RefreshPlaylistSidebarItems();
         }
 
         public void RefreshSinglePlaylist(int playlistId)
@@ -207,13 +214,41 @@ namespace QAMP.ViewModels
             if (freshPlaylist != null)
             {
                 UpdatePlaylist(freshPlaylist);
+            }
+        }
+        public async Task RefreshDynamicPlaylistsAsync()
+        {
+            try
+            {
+                int[] playlistIds = await Application.Current.Dispatcher.InvokeAsync(
+                    () => Playlists
+                        .Where(playlist => playlist.IsDynamicPlaylist)
+                        .Select(playlist => playlist.Id)
+                        .ToArray()).Task;
+                if (playlistIds.Length == 0) return;
 
-                var updatedPlaylist = Playlists.FirstOrDefault(p => p.Id == playlistId);
-                if (updatedPlaylist != null && CurrentPlaylist?.Id == playlistId)
+                Playlist[] refreshedPlaylists = await Task.Run(() =>
+                    playlistIds
+                        .Select(DatabaseService.GetPlaylistById)
+                        .Where(playlist => playlist != null)
+                        .Cast<Playlist>()
+                        .ToArray());
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    OnPropertyChanged(nameof(CurrentPlaylist));
-
-                }
+                    foreach (var playlist in refreshedPlaylists)
+                    {
+                        if (Playlists.Any(existing => existing.Id == playlist.Id))
+                        {
+                            UpdatePlaylist(playlist);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error refreshing dynamic playlists: {ex.Message}");
+                App.LogException(ex, "RefreshDynamicPlaylistsAsync");
             }
         }
 

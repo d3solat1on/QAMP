@@ -63,52 +63,7 @@
                                            FontWeight="Bold"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    WindowChrome.IsHitTestVisibleInChrome="True">
-                                <TextBox x:Name="SearchBox"
-                                         Width="300"
-                                         Height="30"
-                                         Padding="8,4"
-                                         Background="{DynamicResource TertiaryBackgroundBrush}"
-                                         Foreground="{DynamicResource ForegroundBrush}"
-                                         BorderBrush="{DynamicResource BorderBrush}"
-                                         BorderThickness="1"
-                                         VerticalContentAlignment="Center"
-                                         Text=""
-                                         KeyDown="SearchBox_KeyDown"/>
-                                <Button x:Name="SearchButton"
-                                        Style="{StaticResource IconButton}"
-                                        Width="30"
-                                        Height="30"
-                                        Margin="5,0,0,0"
-                                        BorderThickness="1"
-                                        Click="SearchButton_Click">
-                                        <Path Data="{StaticResource searchGeometry}"
-                                              Fill="{DynamicResource AccentBrush}"
-                                              Stretch="Uniform"
-                                              Width="25"
-                                              Height="25"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                                </Button>
-                                <Button x:Name="ClearSearchButton"
-                                        Style="{StaticResource IconButton}"
-                                        Width="30"
-                                        Height="30"
-                                        Margin="5,0,0,0"
-                                        BorderThickness="1"
-                                        Click="ClearSearchButton_Click">
-                                        <Path Data="{StaticResource closeGeometry}"
-                                              Fill="{DynamicResource AccentBrush}"
-                                              Stretch="Uniform"
-                                              Width="25"
-                                              Height="25"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                                </Button>
-                        </StackPanel>
+
 
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
@@ -196,13 +151,14 @@
                         <ContentControl x:Name="DebugConsoleContainer"
                                         DockPanel.Dock="Bottom"
                                         Visibility="Collapsed"/>
-                        <Border DockPanel.Dock="Bottom"
+                        <!-- ?? -->
+                        <Border x:Name="BottomControlPanel"
+                                DockPanel.Dock="Bottom"
                                 ClipToBounds="False"
                                 Height="100"
                                 Background="{DynamicResource SecondaryBackgroundBrush}"
                                 BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="0,1,0,0"
-                                Padding="15,0">
+                                BorderThickness="0,1,0,0">
                                 <Grid>
                                         <Image Source="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundUpDownPath, Converter={StaticResource ByteArrayToImageConverter}}"
                                                Stretch="UniformToFill"
@@ -489,9 +445,14 @@
                         <Grid>
 
                                 <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="300"/>
+                                        <ColumnDefinition x:Name="LeftColumn"
+                                                          Width="250"
+                                                          MinWidth="45"
+                                                          MaxWidth="300"/>
+                                        <ColumnDefinition x:Name="CenterColumn"
+                                                          Width="*"/>
+                                        <ColumnDefinition x:Name="RightColumn"
+                                                          Width="300"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Image Source="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource ByteArrayToImageConverter}}"
@@ -508,25 +469,32 @@
                                 </Image>
                                 <!-- Playlists -->
                                 <Border x:Name="LeftZona"
-                                        Width="250"
                                         Grid.Column="0"
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="0,0,1,0"
                                         Margin="0,0,0,0"
                                         Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}">
-                                        <Grid Margin="10">
+                                        <Grid x:Name="LeftZonaContentGrid"
+                                              Margin="10">
                                                 <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
-                                                <Grid Grid.Row="0"
+                                                <Grid x:Name="LeftZonaHeaderGrid"
+                                                      Grid.Row="0"
                                                       Margin="10,0,0,15">
                                                         <Grid.RowDefinitions>
                                                                 <RowDefinition Height="Auto"/>
                                                                 <RowDefinition Height="Auto"/>
                                                         </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
 
                                                         <TextBlock Grid.Row="0"
+                                                                   Grid.Column="0"
+                                                                   Grid.ColumnSpan="2"
                                                                    x:Name="LibraryTextBlock"
                                                                    Text="LIBRARY"
                                                                    FontSize="28"
@@ -534,6 +502,26 @@
                                                                    Foreground="{DynamicResource ForegroundBrush}"
                                                                    HorizontalAlignment="Center"
                                                                    Margin="0,0,0,10"/>
+                                                        <Button x:Name="ToggleLeftZonaButton"
+                                                                Grid.Row="0"
+                                                                Grid.Column="1"
+                                                                HorizontalAlignment="Right"
+                                                                Width="35"
+                                                                Height="35"
+                                                                Margin="0,0,-5,10"
+                                                                Style="{StaticResource IconButton}"
+                                                                Background="Transparent"
+                                                                BorderBrush="Transparent"
+                                                                Click="ToggleLeftZona_Click">
+                                                                <Path x:Name="ToggleLeftZonaIcon"
+                                                                      Data="{StaticResource ArrowLeftGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"
+                                                                      Width="35"
+                                                                      Height="35"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Button>
 
                                                         <UniformGrid Grid.Row="1"
                                                                      Columns="5"
@@ -690,18 +678,21 @@
                                                                                 Value="0"/>
                                                                         <Setter Property="HorizontalContentAlignment"
                                                                                 Value="Stretch"/>
+                                                                        <Setter Property="Padding"
+                                                                                Value="0"/>
                                                                         <Setter Property="AllowDrop"
                                                                                 Value="True"/>
                                                                         <Setter Property="Template">
                                                                                 <Setter.Value>
                                                                                         <ControlTemplate TargetType="{x:Type TreeViewItem}">
-                                                                                                <Grid>
+                                                                                                <Grid x:Name="TreeItemGrid">
                                                                                                         <Grid.RowDefinitions>
                                                                                                                 <RowDefinition Height="Auto"/>
                                                                                                                 <RowDefinition Height="Auto"/>
                                                                                                         </Grid.RowDefinitions>
                                                                                                         <Grid.ColumnDefinitions>
-                                                                                                                <ColumnDefinition Width="18"/>
+                                                                                                                <ColumnDefinition x:Name="ExpanderColumn"
+                                                                                                                                  Width="18"/>
                                                                                                                 <ColumnDefinition Width="*"/>
                                                                                                         </Grid.ColumnDefinitions>
                                                                                                         <Border x:Name="ItemBorder"
@@ -747,6 +738,21 @@
                                                                                                                         Visibility="Collapsed"/>
                                                                                                 </Grid>
                                                                                                 <ControlTemplate.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding LeftPanelIsOpen, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"
+                                                                                                                     Value="False">
+                                                                                                                <Setter TargetName="Expander"
+                                                                                                                        Property="Visibility"
+                                                                                                                        Value="Collapsed"/>
+                                                                                                                <Setter TargetName="ExpanderColumn"
+                                                                                                                        Property="Width"
+                                                                                                                        Value="0"/>
+                                                                                                                <Setter TargetName="Header"
+                                                                                                                        Property="Grid.Column"
+                                                                                                                        Value="0"/>
+                                                                                                                <Setter TargetName="Header"
+                                                                                                                        Property="Grid.ColumnSpan"
+                                                                                                                        Value="2"/>
+                                                                                                        </DataTrigger>
                                                                                                         <Trigger Property="HasItems"
                                                                                                                  Value="False">
                                                                                                                 <Setter TargetName="Expander"
@@ -916,6 +922,24 @@
                                                                                 </Border.ContextMenu>
                                                                         </Border>
                                                                         <HierarchicalDataTemplate.Triggers>
+                                                                                <DataTrigger Binding="{Binding LeftPanelIsOpen, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"
+                                                                                             Value="False">
+                                                                                        <Setter TargetName="FolderTextPanel"
+                                                                                                Property="Visibility"
+                                                                                                Value="Collapsed"/>
+                                                                                        <Setter TargetName="FolderItemBorder"
+                                                                                                Property="Padding"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="FolderItemBorder"
+                                                                                                Property="Margin"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Width"
+                                                                                                Value="45"/>
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Height"
+                                                                                                Value="45"/>
+                                                                                </DataTrigger>
                                                                                 <DataTrigger Binding="{Binding Data.IsCompactMode, Source={StaticResource Proxy}}"
                                                                                              Value="True">
                                                                                         <Setter TargetName="FolderIconBorder"
@@ -936,6 +960,24 @@
                                                                                         <Setter TargetName="FolderItemBorder"
                                                                                                 Property="Padding"
                                                                                                 Value="6,2,6,2"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding LeftPanelIsOpen, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"
+                                                                                             Value="False">
+                                                                                        <Setter TargetName="FolderTextPanel"
+                                                                                                Property="Visibility"
+                                                                                                Value="Collapsed"/>
+                                                                                        <Setter TargetName="FolderItemBorder"
+                                                                                                Property="Padding"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="FolderItemBorder"
+                                                                                                Property="Margin"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Width"
+                                                                                                Value="45"/>
+                                                                                        <Setter TargetName="FolderIconBorder"
+                                                                                                Property="Height"
+                                                                                                Value="45"/>
                                                                                 </DataTrigger>
                                                                         </HierarchicalDataTemplate.Triggers>
                                                                 </HierarchicalDataTemplate>
@@ -1034,10 +1076,10 @@
                                                                                                 </Grid>
                                                                                         </Border>
 
-                                                                                        <StackPanel
-                                                                                                Grid.Column="1"
-                                                                                                Margin="10,0,0,0"
-                                                                                                VerticalAlignment="Center">
+                                                                                        <StackPanel x:Name="PlaylistTextPanel"
+                                                                                                    Grid.Column="1"
+                                                                                                    Margin="10,0,0,0"
+                                                                                                    VerticalAlignment="Center">
 
                                                                                                 <StackPanel.ContextMenu>
                                                                                                         <ContextMenu Style="{StaticResource ModernContextMenu}"
@@ -1152,6 +1194,24 @@
                                                                                 </Grid>
                                                                         </Border>
                                                                         <DataTemplate.Triggers>
+                                                                                <DataTrigger Binding="{Binding LeftPanelIsOpen, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"
+                                                                                             Value="False">
+                                                                                        <Setter TargetName="PlaylistTextPanel"
+                                                                                                Property="Visibility"
+                                                                                                Value="Collapsed"/>
+                                                                                        <Setter TargetName="PlaylistItemBorder"
+                                                                                                Property="Padding"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="PlaylistItemBorder"
+                                                                                                Property="Margin"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="PlaylistCoverBorder"
+                                                                                                Property="Width"
+                                                                                                Value="45"/>
+                                                                                        <Setter TargetName="PlaylistCoverBorder"
+                                                                                                Property="Height"
+                                                                                                Value="45"/>
+                                                                                </DataTrigger>
                                                                                 <DataTrigger Binding="{Binding Data.IsCompactMode, Source={StaticResource Proxy}}"
                                                                                              Value="True">
                                                                                         <Setter TargetName="PlaylistCoverBorder"
@@ -1173,6 +1233,24 @@
                                                                                                 Property="Margin"
                                                                                                 Value="6,0,0,0"/>
                                                                                 </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding LeftPanelIsOpen, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"
+                                                                                             Value="False">
+                                                                                        <Setter TargetName="PlaylistTextPanel"
+                                                                                                Property="Visibility"
+                                                                                                Value="Collapsed"/>
+                                                                                        <Setter TargetName="PlaylistItemBorder"
+                                                                                                Property="Padding"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="PlaylistItemBorder"
+                                                                                                Property="Margin"
+                                                                                                Value="0"/>
+                                                                                        <Setter TargetName="PlaylistCoverBorder"
+                                                                                                Property="Width"
+                                                                                                Value="45"/>
+                                                                                        <Setter TargetName="PlaylistCoverBorder"
+                                                                                                Property="Height"
+                                                                                                Value="45"/>
+                                                                                </DataTrigger>
                                                                         </DataTemplate.Triggers>
                                                                 </DataTemplate>
                                                         </TreeView.Resources>
@@ -1181,13 +1259,13 @@
                                 </Border>
 
 
-
                                 <Grid Grid.Column="1"
                                       Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}">
                                         <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="*"/>
+                                                <RowDefinition Height="30"/>
                                         </Grid.RowDefinitions>
 
                                         <Border x:Name="UpperPanel"
@@ -1543,10 +1621,8 @@
                                                         </DataGrid.Resources>
 
                                                         <DataGrid.Columns>
-                                                                <DataGridTemplateColumn Header=""
-                                                                                        Visibility="{Binding Data.IsCompactMode, 
-                                                                                                Source={StaticResource Proxy}, 
-                                                                                                Converter={StaticResource InverseBoolToVisConverter}}"
+                                                                <DataGridTemplateColumn x:Name="CoverColumn"
+                                                                                        Header=""
                                                                                         Width="75">
                                                                         <DataGridTemplateColumn.CellTemplate>
                                                                                 <DataTemplate>
@@ -1593,7 +1669,8 @@
                                                                                 </DataTemplate>
                                                                         </DataGridTemplateColumn.CellTemplate>
                                                                 </DataGridTemplateColumn>
-                                                                <DataGridTextColumn Header="TITLE"
+                                                                <DataGridTextColumn x:Name="TitleColumn"
+                                                                                    Header="TITLE"
                                                                                     Binding="{Binding Name}"
                                                                                     Width="3*">
                                                                         <DataGridTextColumn.ElementStyle>
@@ -1608,7 +1685,8 @@
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
 
-                                                                <DataGridTextColumn Header="ARTIST"
+                                                                <DataGridTextColumn x:Name="ArtistColumn"
+                                                                                    Header="ARTIST"
                                                                                     Binding="{Binding Executor}"
                                                                                     Width="2*">
                                                                         <DataGridTextColumn.ElementStyle>
@@ -1623,7 +1701,8 @@
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
 
-                                                                <DataGridTextColumn Header="ALBUM"
+                                                                <DataGridTextColumn x:Name="AlbumColumn"
+                                                                                    Header="ALBUM"
                                                                                     Binding="{Binding Album}"
                                                                                     Width="2*">
                                                                         <DataGridTextColumn.ElementStyle>
@@ -1638,7 +1717,8 @@
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
 
-                                                                <DataGridTextColumn Header="DURATION"
+                                                                <DataGridTextColumn x:Name="DurationColumn"
+                                                                                    Header="DURATION"
                                                                                     Binding="{Binding Duration}"
                                                                                     Width="1*">
                                                                         <DataGridTextColumn.ElementStyle>
@@ -1653,11 +1733,9 @@
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
 
-                                                                <DataGridTextColumn Header="BITRATE"
+                                                                <DataGridTextColumn x:Name="BitrateColumn"
+                                                                                    Header="BITRATE"
                                                                                     Binding="{Binding Bitrate}"
-                                                                                    Visibility="{Binding Data.IsCompactMode, 
-                                                                                        Source={StaticResource Proxy}, 
-                                                                                        Converter={StaticResource InverseBoolToVisConverter}}"
                                                                                     Width="1*">
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
@@ -1670,11 +1748,9 @@
                                                                                 </Style>
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
-                                                                <DataGridTextColumn Header="GENRE"
+                                                                <DataGridTextColumn x:Name="GenreColumn"
+                                                                                    Header="GENRE"
                                                                                     Binding="{Binding Genre}"
-                                                                                    Visibility="{Binding Data.IsCompactMode, 
-                                                                                                Source={StaticResource Proxy}, 
-                                                                                                Converter={StaticResource InverseBoolToVisConverter}}"
                                                                                     Width="1*">
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
@@ -1685,9 +1761,9 @@
                                                                                 </Style>
                                                                         </DataGridTextColumn.ElementStyle>
                                                                 </DataGridTextColumn>
-                                                                <DataGridTextColumn Header="DATE ADDED"
+                                                                <DataGridTextColumn x:Name="DateColumn"
+                                                                                    Header="DATE ADDED"
                                                                                     Binding="{Binding AddedDate, StringFormat=\{0:dd.MM.yyyy HH:mm\}}"
-                                                                                    Visibility="{Binding Data.IsCompactMode, Source={StaticResource Proxy}, Converter={StaticResource InverseBoolToVisConverter}}"
                                                                                     Width="1*">
                                                                         <DataGridTextColumn.ElementStyle>
                                                                                 <Style TargetType="TextBlock">
@@ -1700,76 +1776,71 @@
                                                                 </DataGridTextColumn>
                                                         </DataGrid.Columns>
                                                 </DataGrid>
-                                                <Grid x:Name="LyricsOverlay"
-                                                      Visibility="Collapsed"
-                                                      Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}">
+                                        </Grid>
+                                        <Grid x:Name="PanelUnderTracks"
+                                              Grid.Row="3"
+                                              Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"
+                                              WindowChrome.IsHitTestVisibleInChrome="True">
+                                                <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                                        <ListBox x:Name="LyricsListBox"
-                                                                 Margin="50,20"
-                                                                 Background="Transparent"
-                                                                 BorderThickness="0"
-                                                                 VerticalAlignment="Stretch"
-                                                                 HorizontalContentAlignment="Center"
-                                                                 ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                                                                 VirtualizingStackPanel.IsVirtualizing="True"
-                                                                 VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                                                 PreviewKeyDown="LyricsListBox_PreviewKeyDown"
-                                                                 MouseWheel="LyricsListBox_MouseWheel">
+                                                <TextBox x:Name="SearchBox"
+                                                         Grid.Column="0"
+                                                         HorizontalAlignment="Stretch"
+                                                         VerticalAlignment="Center"
+                                                         Height="30"
+                                                         Padding="8,4"
+                                                         Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}"
+                                                         Foreground="{DynamicResource TextBrush}"
+                                                         BorderBrush="{DynamicResource BorderBrush}"
+                                                         BorderThickness="1"
+                                                         VerticalContentAlignment="Center"
+                                                         Text=""
+                                                         KeyDown="SearchBox_KeyDown"/>
 
-                                                                <ListBox.ItemContainerStyle>
-                                                                        <Style TargetType="ListBoxItem">
-                                                                                <Setter Property="Template">
-                                                                                        <Setter.Value>
-                                                                                                <ControlTemplate TargetType="ListBoxItem">
-                                                                                                        <ContentPresenter/>
-                                                                                                </ControlTemplate>
-                                                                                        </Setter.Value>
-                                                                                </Setter>
-                                                                                <Setter Property="Cursor"
-                                                                                        Value="Hand"/>
-                                                                                <EventSetter Event="PreviewMouseLeftButtonDown"
-                                                                                             Handler="LrcLine_Click"/>
-                                                                        </Style>
-                                                                </ListBox.ItemContainerStyle>
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                        <Button x:Name="SearchButton"
+                                                                Style="{StaticResource IconButton}"
+                                                                Width="30"
+                                                                Height="30"
+                                                                Margin="5,0,0,0"
+                                                                BorderThickness="1"
+                                                                Click="SearchButton_Click">
+                                                                <Path Data="{StaticResource searchGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"
+                                                                      Width="25"
+                                                                      Height="25"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Button>
 
-                                                                <ListBox.ItemTemplate>
-                                                                        <DataTemplate>
-                                                                                <TextBlock Text="{Binding Text}"
-                                                                                           FontSize="32"
-                                                                                           TextAlignment="Center"
-                                                                                           Margin="0,15"
-                                                                                           TextWrapping="Wrap">
-                                                                                        <TextBlock.Style>
-                                                                                                <Style TargetType="TextBlock">
-                                                                                                        <Setter Property="Foreground"
-                                                                                                                Value="{DynamicResource ForegroundBrush}"/>
-                                                                                                        <Setter Property="Opacity"
-                                                                                                                Value="0.6"/>
-                                                                                                        <Style.Triggers>
-                                                                                                                <DataTrigger Binding="{Binding IsActive}"
-                                                                                                                             Value="True">
-                                                                                                                        <Setter Property="Foreground"
-                                                                                                                                Value="{DynamicResource TextBrush}"/>
-                                                                                                                        <Setter Property="Opacity"
-                                                                                                                                Value="1.0"/>
-                                                                                                                        <Setter Property="FontWeight"
-                                                                                                                                Value="Bold"/>
-                                                                                                                </DataTrigger>
-                                                                                                        </Style.Triggers>
-                                                                                                </Style>
-                                                                                        </TextBlock.Style>
-                                                                                </TextBlock>
-                                                                        </DataTemplate>
-                                                                </ListBox.ItemTemplate>
-                                                        </ListBox>
-                                                </Grid>
+                                                        <Button x:Name="ClearSearchButton"
+                                                                Style="{StaticResource IconButton}"
+                                                                Width="30"
+                                                                Height="30"
+                                                                Margin="5,0,0,0"
+                                                                BorderThickness="1"
+                                                                Click="ClearSearchButton_Click">
+                                                                <Path Data="{StaticResource closeGeometry}"
+                                                                      Fill="{DynamicResource AccentBrush}"
+                                                                      Stretch="Uniform"
+                                                                      Width="25"
+                                                                      Height="25"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Button>
+                                                </StackPanel>
                                         </Grid>
                                 </Grid>
 
                                 <!-- NowPlaying -->
                                 <Border x:Name="RightPanelBorder"
                                         Grid.Column="2"
-                                        Width="300"
                                         HorizontalAlignment="Stretch"
                                         Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}}"
                                         BorderThickness="1,0,0,0"
@@ -2008,12 +2079,83 @@
                                                                                         </StackPanel>
                                                                                 </DataTemplate>
                                                                         </ListBox.ItemTemplate>
-                                                                </ListBox>
+                                                                        </ListBox>
                                                         </Grid>
                                                 </Border>
-
                                         </Grid>
                                 </Border>
+
+                                <Grid x:Name="LyricsOverlay"
+                                      Grid.Column="0"
+                                      Grid.ColumnSpan="3"
+                                      Visibility="Collapsed"
+                                      Panel.ZIndex="1"
+                                      Background="{Binding Source={x:Static models:SettingsManager.Instance}, Path=Config.CustomBackgroundPath, Converter={StaticResource BackgroundBrushConverter}, ConverterParameter=Cell}">
+                                        <ListBox x:Name="LyricsListBox"
+                                                 Margin="50,20"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 VerticalAlignment="Stretch"
+                                                 HorizontalAlignment="Stretch"
+                                                 HorizontalContentAlignment="Stretch"
+                                                 ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                                 VirtualizingStackPanel.IsVirtualizing="True"
+                                                 VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                                 PreviewKeyDown="LyricsListBox_PreviewKeyDown"
+                                                 MouseWheel="LyricsListBox_MouseWheel">
+
+                                                <ListBox.ItemContainerStyle>
+                                                        <Style TargetType="ListBoxItem">
+                                                                <Setter Property="HorizontalContentAlignment"
+                                                                        Value="Stretch"/>
+                                                                <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                                <ControlTemplate TargetType="ListBoxItem">
+                                                                                        <ContentPresenter HorizontalAlignment="Stretch"
+                                                                                                          VerticalAlignment="Center"/>
+                                                                                </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                </Setter>
+                                                                <Setter Property="Cursor"
+                                                                        Value="Hand"/>
+                                                                <EventSetter Event="PreviewMouseLeftButtonDown"
+                                                                             Handler="LrcLine_Click"/>
+                                                        </Style>
+                                                </ListBox.ItemContainerStyle>
+
+                                                <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                                <TextBlock Text="{Binding Text}"
+                                                                           FontSize="32"
+                                                                           TextAlignment="Center"
+                                                                           HorizontalAlignment="Stretch"
+                                                                           Margin="0,15"
+                                                                           TextWrapping="Wrap">
+                                                                        <TextBlock.Style>
+                                                                                <Style TargetType="TextBlock">
+                                                                                        <Setter Property="Foreground"
+                                                                                                Value="{DynamicResource ForegroundBrush}"/>
+                                                                                        <Setter Property="Opacity"
+                                                                                                Value="0.6"/>
+                                                                                        <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding IsActive}"
+                                                                                                             Value="True">
+                                                                                                        <Setter Property="Foreground"
+                                                                                                                Value="{DynamicResource TextBrush}"/>
+                                                                                                        <Setter Property="Opacity"
+                                                                                                                Value="1.0"/>
+                                                                                                        <Setter Property="FontWeight"
+                                                                                                                Value="Bold"/>
+                                                                                                </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                </Style>
+                                                                        </TextBlock.Style>
+                                                                </TextBlock>
+                                                        </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                </ListBox>
+                        </Grid>
+
                         </Grid>
                 </DockPanel>
                 <dialogs:ModernNotice x:Name="MyToast"

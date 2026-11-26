@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.IO;
+using System.Text.Json;
 using QAMP.Models;
 using QAMP.Services;
 using Microsoft.Win32;
@@ -13,23 +14,25 @@ namespace QAMP.Windows
 {
     public partial class Settings : Window
     {
-        private bool isInitializing;
-        private string? originalColorScheme;
-        private string? originalAccentColor;
-        private bool originalVisualizerEnabled;
-        private int originalBarCount;
-        private bool originalCloseToTray;
-        private bool originalUseAdaptiveGradients;
-        private bool originalUseSpectrumGradient;
-        private Visualization.SpectrumDisplayType originalSpectrumType;
-        private Visualization.SpectrumGradientType originalSpectrumGradientType;
-        private bool originalIsAutoLaunchEnabled;
-        private bool originalUseConsole;
+        private bool isInitializing = true;
+        private AppSettings? originalSettingsSnapshot;
         public Settings()
         {
             InitializeComponent();
+            SettingsSectionList.SelectionChanged += SettingsSectionList_SelectionChanged;
+            SettingsSectionList.SelectedIndex = 0;
             InitializeCustomThemes();
             InitializeCustomLanguages();
+        }
+
+        private void SettingsSectionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int selectedIndex = SettingsSectionList.SelectedIndex;
+            InterfaceSettingsSection.Visibility = selectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
+            GraphicsSettingsSection.Visibility = selectedIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
+            SystemSettingsSection.Visibility = selectedIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
+            HotKeysSettingsSection.Visibility = selectedIndex == 3 ? Visibility.Visible : Visibility.Collapsed;
+            SettingsContentScrollViewer.ScrollToTop();
         }
 
         private void InitializeCustomThemes()
@@ -401,19 +404,15 @@ namespace QAMP.Windows
             isInitializing = true;
 
             var config = SettingsManager.Instance.Config;
-            originalColorScheme = config.ColorScheme;
-            originalAccentColor = config.AccentColor;
-            originalVisualizerEnabled = config.IsVisualizerEnabled;
-            originalBarCount = config.VisualizerBarCount;
-            originalCloseToTray = config.CloseToTray;
-            originalUseAdaptiveGradients = config.UseAdaptiveGradients;
-            originalUseSpectrumGradient = config.UseSpectrumGradient;
-            originalSpectrumType = config.SpectrumType;
-            originalSpectrumGradientType = config.GradientType;
-            originalIsAutoLaunchEnabled = config.IsAutoLaunchEnabled;
-            originalUseConsole = config.UseConsole;
+            originalSettingsSnapshot = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(config))
+                ?? throw new InvalidOperationException("Failed to snapshot application settings.");
             VisualizerEnabled.IsChecked = config.IsVisualizerEnabled;
             VisualizerDisabled.IsChecked = !config.IsVisualizerEnabled;
+            SpectrumColumnsSlider.Value = Math.Clamp(
+                config.VisualizerBarCount,
+                Visualization.SpectrumControl.MinimumConfiguredBarCount,
+                Visualization.SpectrumControl.MaximumConfiguredBarCount);
+            SpectrumColumnsValueText.Text = ((int)SpectrumColumnsSlider.Value).ToString();
             SpectrumGradientStartColorTextBox.Text = config.SpectrumGradientStartColor;
             SpectrumGradientEndColorTextBox.Text = config.SpectrumGradientEndColor;
 
@@ -432,6 +431,8 @@ namespace QAMP.Windows
 
             AccentColorTextBox.Text = config.AccentColor;
             UpdateColorPreview();
+            TextBrushTextBox.Text = config.TextBrush;
+            UpdateColorPreviewTextBrush();
 
             CurrentRoundTextBox.Text = config.CurrentRound.ToString();
 
@@ -461,8 +462,6 @@ namespace QAMP.Windows
 
             LoadCurrentHotkeys();
 
-            CheckAutoLaunch(null, null);
-
             //    ??
 
             GradientEnabled.IsChecked = config.UseSpectrumGradient;
@@ -474,113 +473,82 @@ namespace QAMP.Windows
             DisabledConsole.IsChecked = !config.UseConsole;
             EnabledDiscordRpc.IsChecked = config.EnableDiscordRpc;
             DisabledDiscordRpc.IsChecked = !config.EnableDiscordRpc;
+            ControlPanelTopRadio.IsChecked = config.IsControlPanelOnTop;
+            ControlPanelBottomRadio.IsChecked = !config.IsControlPanelOnTop;
+            NowPlayingLeftRadio.IsChecked = config.IsNowPlayingOnLeft;
+            NowPlayingRightRadio.IsChecked = !config.IsNowPlayingOnLeft;
+            NowPlayingPanelVisible.IsChecked = config.IsNowPlayingIsVisible;
+            NowPlayingPanelHidden.IsChecked = !config.IsNowPlayingIsVisible;
+            InitializeTrackColumnVisibilityControls(config);
 
             InitFontSettingsUI();
 
 
             isInitializing = false;
         }
-
-        private void CheckDiscordRpc(object sender, RoutedEventArgs e)
+        private void NowPlayingPanelVisbile_Changed(object sender, RoutedEventArgs e)
         {
-            if (isInitializing) return;
-            var config = SettingsManager.Instance.Config;
-            config.EnableDiscordRpc = EnabledDiscordRpc.IsChecked ?? false;
-            SettingsManager.Instance.Save();
-            PlayerService.Instance.RefreshDiscordPresence();
-        }
-
-        private void CheckUseConsole(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-            var config = SettingsManager.Instance.Config;
-            config.UseConsole = EnabledConsole.IsChecked ?? false;
-            SettingsManager.Instance.Save();
-        }
-        private void AdaptiveGradients_Checked(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-
-            var config = SettingsManager.Instance.Config;
-            config.UseAdaptiveGradients = AdaptiveGradientsRadio.IsChecked ?? false;
-            SettingsManager.Instance.Save();
-        }
-
-        // <???>
-        private void GradientToggle_Changed(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-
-            var config = SettingsManager.Instance.Config;
-            config.UseSpectrumGradient = GradientEnabled.IsChecked ?? false;
-            SettingsManager.Instance.Save();
-            PlayerService.Instance.RefreshSpectrumControls();
-        }
-
-        private void SpectrumType_Checked(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-
-            var config = SettingsManager.Instance.Config;
-            switch (sender)
-            {
-                case RadioButton radio when radio == SpectrumBarsRadio:
-                    config.SpectrumType = Visualization.SpectrumDisplayType.Bars;
-                    break;
-                case RadioButton radio when radio == SpectrumLineRadio:
-                    config.SpectrumType = Visualization.SpectrumDisplayType.Line;
-                    break;
-                case RadioButton radio when radio == SpectrumCenteredBarsRadio:
-                    config.SpectrumType = Visualization.SpectrumDisplayType.CenteredBars;
-                    break;
-            }
-
-            SettingsManager.Instance.Save();
-            PlayerService.Instance.RefreshSpectrumControls();
-        }
-
-        private void SpectrumGradientTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (isInitializing) return;
-
-            var config = SettingsManager.Instance.Config;
-            config.SpectrumGradientStartColor = SpectrumGradientStartColorTextBox.Text.Trim();
-            config.SpectrumGradientEndColor = SpectrumGradientEndColorTextBox.Text.Trim();
-
-            bool isValidStart = IsHexColorValid(config.SpectrumGradientStartColor);
-            bool isValidEnd = IsHexColorValid(config.SpectrumGradientEndColor);
-
-            if (!isValidStart || !isValidEnd)
-            {
+            if (isInitializing)
                 return;
-            }
-
+            var config = SettingsManager.Instance.Config;
+            config.IsNowPlayingIsVisible = NowPlayingPanelVisible.IsChecked == true;
+            config.IsNowPlayingIsVisible = NowPlayingPanelHidden.IsChecked == false;
             SettingsManager.Instance.Save();
-            PlayerService.Instance.RefreshSpectrumControls();
+            (Owner as MainWindow)?.ApplyPanelLayout();
+        }
+        private void PanelLayout_Changed(object sender, RoutedEventArgs e)
+        {
+            if (isInitializing)
+                return;
+
+            var config = SettingsManager.Instance.Config;
+            config.IsControlPanelOnTop = ControlPanelTopRadio.IsChecked == true;
+            config.IsNowPlayingOnLeft = NowPlayingLeftRadio.IsChecked == true;
+            SettingsManager.Instance.Save();
+            (Owner as MainWindow)?.ApplyPanelLayout();
         }
 
-        private static bool IsHexColorValid(string? value)
+        private void TrackColumnVisibility_Changed(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return false;
-            }
+            if (isInitializing)
+                return;
 
-            var normalized = value.Trim();
-            if (!normalized.StartsWith("#"))
-            {
-                normalized = $"#{normalized}";
-            }
+            var config = SettingsManager.Instance.Config;
+            bool isVisible = sender is CheckBox checkBox && checkBox.IsChecked == true;
+            if (sender == ShowTrackCoverColumnCheckBox)
+                config.ShowTrackCoverColumn = isVisible;
+            else if (sender == ShowTrackTitleColumnCheckBox)
+                config.ShowTrackTitleColumn = isVisible;
+            else if (sender == ShowTrackArtistColumnCheckBox)
+                config.ShowTrackArtistColumn = isVisible;
+            else if (sender == ShowTrackAlbumColumnCheckBox)
+                config.ShowTrackAlbumColumn = isVisible;
+            else if (sender == ShowTrackDurationColumnCheckBox)
+                config.ShowTrackDurationColumn = isVisible;
+            else if (sender == ShowTrackBitrateColumnCheckBox)
+                config.ShowTrackBitrateColumn = isVisible;
+            else if (sender == ShowTrackGenreColumnCheckBox)
+                config.ShowTrackGenreColumn = isVisible;
+            else if (sender == ShowTrackDateColumnCheckBox)
+                config.ShowTrackDateColumn = isVisible;
 
-            try
-            {
-                var color = (Color)ColorConverter.ConvertFromString(normalized);
-                return color.A >= 0;
-            }
-            catch
-            {
-                return false;
-            }
+            SettingsManager.Instance.Save();
+            (Owner as MainWindow)?.ApplyTrackColumnVisibility();
+        }
+
+        private void InitializeTrackColumnVisibilityControls(AppSettings config)
+        {
+            bool wasInitializing = isInitializing;
+            isInitializing = true;
+            ShowTrackCoverColumnCheckBox.IsChecked = config.ShowTrackCoverColumn ?? !config.IsCompactMode;
+            ShowTrackTitleColumnCheckBox.IsChecked = config.ShowTrackTitleColumn ?? true;
+            ShowTrackArtistColumnCheckBox.IsChecked = config.ShowTrackArtistColumn ?? true;
+            ShowTrackAlbumColumnCheckBox.IsChecked = config.ShowTrackAlbumColumn ?? true;
+            ShowTrackDurationColumnCheckBox.IsChecked = config.ShowTrackDurationColumn ?? true;
+            ShowTrackBitrateColumnCheckBox.IsChecked = config.ShowTrackBitrateColumn ?? !config.IsCompactMode;
+            ShowTrackGenreColumnCheckBox.IsChecked = config.ShowTrackGenreColumn ?? !config.IsCompactMode;
+            ShowTrackDateColumnCheckBox.IsChecked = config.ShowTrackDateColumn ?? !config.IsCompactMode;
+            isInitializing = wasInitializing;
         }
 
         private void LanguageRadio_Checked(object sender, RoutedEventArgs e)
@@ -641,60 +609,11 @@ namespace QAMP.Windows
                 {
                     config.IsCompactMode = isCompact;
                     Debug.WriteLine($"Mode changed: Compact = {isCompact}");
+                    InitializeTrackColumnVisibilityControls(config);
+                    (Owner as MainWindow)?.ApplyTrackColumnVisibility();
                 }
             }
         }
-        private void CheckUseCustomBGUpDown(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-            if (sender is RadioButton radio && radio.IsChecked == true)
-            {
-                bool useCustomBGUpDown = radio == UseCustomBGUpDownradio;
-                var config = SettingsManager.Instance.Config;
-                if (config.UseCustomBackgroundUpDown != useCustomBGUpDown)
-                {
-                    config.UseCustomBackgroundUpDown = useCustomBGUpDown;
-                }
-            }
-        }
-
-        private void CheckUseCustomBG(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-            if (sender is RadioButton radio && radio.IsChecked == true)
-            {
-                bool useCustomBG = radio == UseCustomBGradio;
-                var config = SettingsManager.Instance.Config;
-                if (config.UseCustomBackground != useCustomBG)
-                {
-                    config.UseCustomBackground = useCustomBG;
-                }
-            }
-        }
-
-        private void CheckUseCoverCache(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-            if (sender is RadioButton radio && radio.IsChecked == true)
-            {
-                bool useCoverCache = radio == UseCoverCache;
-                var config = SettingsManager.Instance.Config;
-                if (config.EnableCoverCache != useCoverCache)
-                {
-                    config.EnableCoverCache = useCoverCache;
-                }
-            }
-        }
-
-        private void CloseAction_Checked(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-            if (sender is not RadioButton radio) return;
-
-            bool closeToTray = radio.Name == "CloseToTrayRadio";
-            SettingsManager.Instance.Config.CloseToTray = closeToTray;
-        }
-
         private void AccentColorTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var config = SettingsManager.Instance.Config;
@@ -707,7 +626,29 @@ namespace QAMP.Windows
             PlayerService.Instance.RefreshSpectrumControls();
             UpdateColorPreview();
         }
-
+        private void TextBrushTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var config = SettingsManager.Instance.Config;
+            config.TextBrush = TextBrushTextBox.Text;
+            ThemeManager.UpdateTextBrush(config.TextBrush);
+            UpdateColorPreviewTextBrush();
+        }
+        private void UpdateColorPreviewTextBrush()
+        {
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(TextBrushTextBox.Text);
+                string messageColor = (string)Application.Current.FindResource("LngPreviewColor");
+                ColorPreviewTextBrush.Text = $"{messageColor}({color.R}, {color.G}, {color.B})";
+                ColorPreviewTextBrush.Foreground = new SolidColorBrush(color);
+            }
+            catch
+            {
+                string message = Application.Current.FindResource("LngInvalidColor") as string ?? "Invalid color format";
+                ColorPreviewTextBrush.Text = message;
+                ColorPreviewTextBrush.Foreground = Brushes.Red;
+            }
+        }
         private void UpdateColorPreview()
         {
             try
@@ -746,55 +687,51 @@ namespace QAMP.Windows
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            var config = SettingsManager.Instance.Config;
+            if (originalSettingsSnapshot is null)
+            {
+                DialogResult = false;
+                Close();
+                return;
+            }
 
-            if (originalColorScheme != null)
-                ThemeManager.ApplyTheme(originalColorScheme);
-            if (originalAccentColor != null)
-                config.AccentColor = originalAccentColor;
+            bool autoLaunchChanged = SettingsManager.Instance.Config.IsAutoLaunchEnabled !=
+                                     originalSettingsSnapshot.IsAutoLaunchEnabled;
+            SettingsManager.Instance.Config = originalSettingsSnapshot;
+            var config = originalSettingsSnapshot;
 
-            config.IsVisualizerEnabled = originalVisualizerEnabled;
-            config.VisualizerBarCount = originalBarCount;
-            config.CloseToTray = originalCloseToTray;
-            config.UseAdaptiveGradients = originalUseAdaptiveGradients;
-            config.UseSpectrumGradient = originalUseSpectrumGradient;
-            config.SpectrumType = originalSpectrumType;
-            config.GradientType = originalSpectrumGradientType;
-            config.IsAutoLaunchEnabled = originalIsAutoLaunchEnabled;
-            config.UseConsole = originalUseConsole;
+            ApplyTheme(config.ColorScheme);
+            ThemeManager.UpdateAccentColor(config.AccentColor);
+            ThemeManager.UpdateTextBrush(config.TextBrush);
+            Application.Current.Resources["AppCornerRadius"] = new CornerRadius(config.CurrentRound);
 
-            CloseToTrayRadio.IsChecked = originalCloseToTray;
-            CloseAppRadio.IsChecked = !originalCloseToTray;
+            var font = FontService.Instance.FindFont(config.SelectedFontName) ?? FontService.Instance.DefaultFont;
+            FontService.ApplyFontToApplication(font.Family);
 
-            AdaptiveGradientsRadio.IsChecked = originalUseAdaptiveGradients;
-            StaticGradientsRadio.IsChecked = !originalUseAdaptiveGradients;
-            GradientEnabled.IsChecked = originalUseSpectrumGradient;
-            GradientDisabled.IsChecked = !originalUseSpectrumGradient;
-            SpectrumBarsRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Bars;
-            SpectrumLineRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.Line;
-            SpectrumCenteredBarsRadio.IsChecked = originalSpectrumType == Visualization.SpectrumDisplayType.CenteredBars;
+            LanguageManager.ApplyLanguage(config.Language);
 
-            AutoLaunchEnabled.IsChecked = originalIsAutoLaunchEnabled;
-            AutoLaunchDisabled.IsChecked = !originalIsAutoLaunchEnabled;
+            SetAutoLaunchRadioState(config.IsAutoLaunchEnabled);
 
-            if (originalAccentColor != null)
-                ThemeManager.UpdateAccentColor(originalAccentColor);
+            if (autoLaunchChanged)
+                ApplyAutoLaunchSetting(config.IsAutoLaunchEnabled);
 
+            SettingsManager.Instance.Save();
             PlayerService.Instance.RefreshSpectrumControls();
+            PlayerService.Instance.RefreshDiscordPresence();
+
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.UpdateIcons();
+                mainWindow.RefreshAdaptiveGradients();
+                mainWindow.ApplyPanelLayout();
+                mainWindow.ApplyPanelLayout();
+                mainWindow.ApplyTrackColumnVisibility();
+                if (!config.IsVisualizerEnabled)
+                    mainWindow.SpectrumViewer?.ClearSpectrum();
+            }
 
             DialogResult = false;
             Close();
             MemoryOptimizer.RunAsync(Dispatcher);
-        }
-
-        private void VisualizerToggle_Changed(object sender, RoutedEventArgs e)
-        {
-            if (isInitializing) return;
-
-            var config = SettingsManager.Instance.Config;
-            config.IsVisualizerEnabled = VisualizerEnabled.IsChecked ?? false;
-            Services.PlayerService.Instance.RefreshSpectrumControls();
-            SettingsManager.Instance.Save();
         }
 
         private void HelpWindowButton_Click(object sender, RoutedEventArgs e)
@@ -921,155 +858,5 @@ namespace QAMP.Windows
             NotificationWindow.Show(errorMessage, this);
         }
 
-        private void LoadCurrentHotkeys()
-        {
-            var config = SettingsManager.Instance.Config;
-            if (config?.Hotkeys == null) return;
-
-            UpdateHotkeyTextBox(TbKeyPlayPause, HotkeyAction.TogglePlayPause);
-            UpdateHotkeyTextBox(TbKeyNextTrack, HotkeyAction.NextTrack);
-            UpdateHotkeyTextBox(TbKeyPrevTrack, HotkeyAction.PreviousTrack);
-            UpdateHotkeyTextBox(TbLyricsMode, HotkeyAction.ViewLyrics);
-            UpdateHotkeyTextBox(TbFavoriteRemoveAdd, HotkeyAction.ToggleFavorite);
-            UpdateHotkeyTextBox(TbTrackInfo, HotkeyAction.ShowTrackInfo);
-            UpdateHotkeyTextBox(TbRepeatTrack, HotkeyAction.ToggleRepeat);
-            UpdateHotkeyTextBox(TbShuffleTrack, HotkeyAction.ToggleShuffle);
-            UpdateHotkeyTextBox(Tb5secForward, HotkeyAction.SeekForward);
-            UpdateHotkeyTextBox(Tb5secback, HotkeyAction.SeekBackward);
-            UpdateHotkeyTextBox(TbFullSpectr, HotkeyAction.OpenFullScreenSpectrum);
-            UpdateHotkeyTextBox(TbOpenConsole, HotkeyAction.OpenConsole);
-        }
-
-        private static void UpdateHotkeyTextBox(TextBox textBox, HotkeyAction action)
-        {
-            var config = SettingsManager.Instance.Config;
-            var hotkey = config.Hotkeys.FirstOrDefault(h => h.Action == action);
-
-            if (hotkey != null)
-            {
-                string modifiersText = hotkey.Modifiers != ModifierKeys.None ? $"{hotkey.Modifiers} + " : "";
-                textBox.Text = $"{modifiersText}{hotkey.Key}";
-            }
-            else
-            {
-                string message = (string)Application.Current.FindResource("LngNotAssigned");
-                textBox.Text = $"{message}";
-            }
-        }
-
-        private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (isInitializing) return;
-            if (sender is not TextBox currentTextBox) return;
-
-            if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl ||
-                e.Key == Key.LeftAlt || e.Key == Key.RightAlt ||
-                e.Key == Key.LeftShift || e.Key == Key.RightShift ||
-                e.Key == Key.LWin || e.Key == Key.RWin)
-            {
-                e.Handled = true;
-                return;
-            }
-
-            Key pressedKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
-            ModifierKeys modifiers = Keyboard.Modifiers;
-
-            HotkeyAction targetAction;
-            if (currentTextBox == TbKeyPlayPause) targetAction = HotkeyAction.TogglePlayPause;
-            else if (currentTextBox == TbKeyNextTrack) targetAction = HotkeyAction.NextTrack;
-            else if (currentTextBox == TbKeyPrevTrack) targetAction = HotkeyAction.PreviousTrack;
-            else if (currentTextBox == TbLyricsMode) targetAction = HotkeyAction.ViewLyrics;
-            else if (currentTextBox == TbFavoriteRemoveAdd) targetAction = HotkeyAction.ToggleFavorite;
-            else if (currentTextBox == TbTrackInfo) targetAction = HotkeyAction.ShowTrackInfo;
-            else if (currentTextBox == TbRepeatTrack) targetAction = HotkeyAction.ToggleRepeat;
-            else if (currentTextBox == TbShuffleTrack) targetAction = HotkeyAction.ToggleShuffle;
-            else if (currentTextBox == Tb5secForward) targetAction = HotkeyAction.SeekForward;
-            else if (currentTextBox == Tb5secback) targetAction = HotkeyAction.SeekBackward;
-            else if (currentTextBox == TbFullSpectr) targetAction = HotkeyAction.OpenFullScreenSpectrum;
-            else if (currentTextBox == TbOpenConsole) targetAction = HotkeyAction.OpenConsole;
-            else return;
-
-            var config = SettingsManager.Instance.Config;
-
-            var duplicate = config.Hotkeys.FirstOrDefault(h => h.Key == pressedKey && h.Modifiers == modifiers && h.Action != targetAction);
-            if (duplicate != null)
-            {
-                string message = (string)Application.Current.FindResource("LngCombinationIsUsing");
-                string errorMsg = $"{message} {duplicate.Action}";
-                NotificationWindow.Show(errorMsg, this);
-                e.Handled = true;
-                return;
-            }
-
-            var hotkeyToUpdate = config.Hotkeys.FirstOrDefault(h => h.Action == targetAction);
-            if (hotkeyToUpdate != null)
-            {
-                hotkeyToUpdate.Key = pressedKey;
-                hotkeyToUpdate.Modifiers = modifiers;
-            }
-            else
-            {
-                config.Hotkeys.Add(new HotkeyItem(targetAction, pressedKey, modifiers));
-            }
-
-            SettingsManager.Instance.Save();
-            UpdateHotkeyTextBox(currentTextBox, targetAction);
-
-            e.Handled = true;
-        }
-
-        private void CheckAutoLaunch(object? sender, RoutedEventArgs? e)
-        {
-            if (isInitializing) return;
-
-            bool isEnabled = AutoLaunchEnabled.IsChecked == true;
-            var config = SettingsManager.Instance.Config;
-            config.IsAutoLaunchEnabled = isEnabled;
-            SettingsManager.Instance.Save();
-
-            string keyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
-            string appName = "QAMP";
-            string appPath = AppContext.BaseDirectory;
-
-            if (isEnabled)
-            {
-                try
-                {
-                    using var key = Registry.CurrentUser.OpenSubKey(keyName, true);
-                    key?.SetValue(appName, $"\"{appPath}QAMP.exe\"");
-                }
-                catch
-                {
-                    string message = (string)Application.Current.FindResource("LngFailedAutorun");
-                    NotificationWindow.Show(message, this);
-                    AutoLaunchEnabled.IsChecked = false;
-                    config.IsAutoLaunchEnabled = false;
-                    SettingsManager.Instance.Save();
-                }
-            }
-            else
-            {
-                try
-                {
-                    using var key = Registry.CurrentUser.OpenSubKey(keyName, true);
-                    key?.DeleteValue(appName, false);
-                }
-                catch
-                {
-                    string message = (string)Application.Current.FindResource("LngFailedDisableAutorun");
-                    NotificationWindow.Show(message, this);
-                    AutoLaunchEnabled.IsChecked = true;
-                    config.IsAutoLaunchEnabled = true;
-                    SettingsManager.Instance.Save();
-                }
-            }
-        }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                Close();
-            }
-        }
     }
 }

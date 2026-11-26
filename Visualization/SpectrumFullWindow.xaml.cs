@@ -15,7 +15,11 @@ namespace QAMP.Visualization
 
         private void SpectrumFullWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            int normalCount = SettingsManager.Instance.Config.VisualizerBarCount;
+            FullSpectrumViewer.IsFullScreenSpectrum = true;
+            int normalCount = Math.Clamp(
+                SettingsManager.Instance.Config.VisualizerBarCount,
+                SpectrumControl.MinimumConfiguredBarCount,
+                SpectrumControl.MaximumConfiguredBarCount);
             FullSpectrumViewer.SetBarCount(normalCount * 2);
             PlayerService.Instance.AddSpectrumControl(FullSpectrumViewer);
             FullSpectrumViewer.RefreshColors();

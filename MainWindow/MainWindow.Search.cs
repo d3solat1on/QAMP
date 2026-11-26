@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using QAMP.Models;
+using QAMP.ViewModels;
 
 namespace QAMP;
 
@@ -16,6 +16,12 @@ public partial class MainWindow
         if (e.Key == Key.Return)
         {
             PerformSearch();
+            e.Handled = true;
+        }
+
+        if (e.Key == Key.Escape)
+        {
+            ReturnToPrevPlaylist();
             e.Handled = true;
         }
     }
@@ -34,7 +40,7 @@ public partial class MainWindow
         {
             string query = searchQuery.ToLowerInvariant();
             List<Track> matchedTracks = [];
-            HashSet<string> seenPaths = []; 
+            HashSet<string> seenPaths = [];
 
             foreach (Playlist playlist in ViewModels.MusicLibrary.Instance.Playlists)
             {
@@ -75,24 +81,28 @@ public partial class MainWindow
                                      ?? "По запросу: \"{0}\" найдено \"{1}\" треков";
 
         string formattedDescription = string.Format(descriptionTemplate, searchQuery, results.Count);
-
+        var searchGeometry = Application.Current.TryFindResource("SearchOtherGeometry") as System.Windows.Media.Geometry;
+        var brush = Application.Current.TryFindResource("AccentBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Black;
         var searchPlaylist = new Playlist
         {
             Name = namePL,
             Description = formattedDescription,
-            Tracks = new ObservableCollection<Track>(results),
-            CoverImage = null
+            Tracks = [with(results)],
+            CoverImage = Services.GeometryToPng.GeometryToPngBytes(searchGeometry, width: 150, height: 150, brush)
         };
-
         ViewModels.MusicLibrary.Instance.CurrentPlaylist = searchPlaylist;
         TracksDataGrid.ItemsSource = searchPlaylist.Tracks;
     }
     private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
     {
+        ReturnToPrevPlaylist();
+    }
+    private void ReturnToPrevPlaylist()
+    {
         SearchBox.Clear();
-        if (PlaylistsListBox.SelectedItem is Playlist currentPlaylist)
-        {
-            TracksDataGrid.ItemsSource = currentPlaylist.Tracks;
-        }
+        if (_previousPlaylist == null) return;
+        MusicLibrary.Instance.CurrentPlaylist = _previousPlaylist;
+        TracksDataGrid.ItemsSource = MusicLibrary.Instance.CurrentPlaylist.Tracks;
+        PlaylistRS.Visibility = Visibility.Visible;
     }
 }

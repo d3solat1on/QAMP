@@ -63,6 +63,20 @@ public partial class MainWindow
         UpdateNextTrackUI();
     }
 
+    private void RemoveTracksFromPlaybackQueue(int playlistId, IEnumerable<int> removedTrackIds)
+    {
+        if (Library.PlayingPlaylist?.Id != playlistId) return;
+
+        var removedIds = removedTrackIds.ToHashSet();
+        int currentTrackId = Player.CurrentTrack?.Id ?? 0;
+        _playService._actualPlayingQueue.RemoveAll(track =>
+            removedIds.Contains(track.Id) && track.Id != currentTrackId);
+        _playService.ShuffledQueue.RemoveAll(track =>
+            removedIds.Contains(track.Id) && track.Id != currentTrackId);
+
+        SyncPlaybackQueueWithCurrentState();
+    }
+
     public void PlayNext(Track nextTrack)
     {
         if (nextTrack == null) return;
@@ -496,7 +510,7 @@ public partial class MainWindow
 
         return null;
     }
-    protected void TracksDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+    protected async void TracksDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.Z)
         {
@@ -519,10 +533,27 @@ public partial class MainWindow
             var result = NotificationWindow.Show(confirmMessage, this, NotificationWindow.NotificationMode.Confirm);
             if (result == true)
             {
-                foreach (var track in tracksToDelete)
+                e.Handled = true;
+                int[] trackIds = tracksToDelete.Select(track => track.Id).ToArray();
+                try
                 {
-                    DatabaseService.RemoveTrackFromPlaylist(currentPlaylist.Id, track.Id);
-                    currentPlaylist.Tracks.Remove(track);
+                    await Task.Run(() =>
+                        DatabaseService.RemoveTracksFromPlaylist(
+                            currentPlaylist.Id,
+                            trackIds,
+                            deleteUnusedTracks: false));
+
+                    var removedTrackIds = trackIds.ToHashSet();
+                    currentPlaylist.ReplaceTracks(
+                        currentPlaylist.Tracks.Where(track => !removedTrackIds.Contains(track.Id)));
+
+                    RemoveTracksFromPlaybackQueue(currentPlaylist.Id, trackIds);
+                    UpdateNextTrackUI();
+                }
+                catch (Exception ex)
+                {
+                    App.LogException(ex, "RemoveTracksFromPlaylist");
+                    NotificationWindow.Show($"Не удалось удалить треки: {ex.Message}", this);
                 }
             }
             e.Handled = true;

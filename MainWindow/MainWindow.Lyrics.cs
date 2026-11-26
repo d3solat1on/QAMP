@@ -40,7 +40,8 @@ public partial class MainWindow
             RemovePlaylistButton.Visibility = Visibility.Collapsed;
             AddMusicButton.Visibility = Visibility.Collapsed;
             CreateFolderButton.Visibility = Visibility.Collapsed;
-
+            ToggleLeftZonaButton.Visibility = Visibility.Collapsed;
+            PanelUnderTracks.Visibility = Visibility.Collapsed;
             LyricsOverlay.Visibility = Visibility.Visible;
 
             if (_parsedLyrics != null && _parsedLyrics.Count > 0)
@@ -68,6 +69,8 @@ public partial class MainWindow
                     _lastHighlightedLine = _parsedLyrics[0];
                 }
             }
+
+            RecenterLyricsAfterPanelChange();
         }
         else
         {
@@ -86,17 +89,19 @@ public partial class MainWindow
             _lastHighlightedLine = null;
             LyricsListBox.ItemsSource = null;
 
-            LibraryTextBlock.Visibility = Visibility.Visible;
-            SortByButton.Visibility = Visibility.Visible;
-            CreatePlaylistButton.Visibility = Visibility.Visible;
-            RemovePlaylistButton.Visibility = Visibility.Visible;
-            AddMusicButton.Visibility = Visibility.Visible;
+            LibraryTextBlock.Visibility = LeftPanelIsOpen ? Visibility.Visible : Visibility.Collapsed;
+            SortByButton.Visibility = LeftPanelIsOpen ? Visibility.Visible : Visibility.Collapsed;
+            CreatePlaylistButton.Visibility = LeftPanelIsOpen ? Visibility.Visible : Visibility.Collapsed;
+            RemovePlaylistButton.Visibility = LeftPanelIsOpen ? Visibility.Visible : Visibility.Collapsed;
+            AddMusicButton.Visibility = LeftPanelIsOpen ? Visibility.Visible : Visibility.Collapsed;
+            ToggleLeftZonaButton.Visibility = Visibility.Visible;
+            CreateFolderButton.Visibility = LeftPanelIsOpen ? Visibility.Visible : Visibility.Collapsed;
             TracksDataGrid.Visibility = Visibility.Visible;
             PlaylistsListBox.Visibility = Visibility.Visible;
             LeftZona.Visibility = Visibility.Visible;
             ControlsPanel.Visibility = Visibility.Visible;
             UpperPanel.Visibility = Visibility.Visible;
-            CreateFolderButton.Visibility = Visibility.Visible;
+            PanelUnderTracks.Visibility = Visibility.Visible;
             LyricsOverlay.Visibility = Visibility.Collapsed;
         }
     }

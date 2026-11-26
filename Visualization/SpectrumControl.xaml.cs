@@ -8,6 +8,11 @@ namespace QAMP.Visualization
 {
     public partial class SpectrumControl : UserControl
     {
+        public const int MinimumConfiguredBarCount = 16;
+        public const int MaximumConfiguredBarCount = 256;
+        public const int MaximumBarCount = MaximumConfiguredBarCount * 2;
+        private const int MaximumLineGradientSegments = 32;
+
         private ScottPlot.Plottables.BarPlot? myBars;
         private ScottPlot.Plottables.BarPlot? _peakBars;
         private ScottPlot.Plottables.BarPlot? _topPeakBars;
@@ -26,15 +31,20 @@ namespace QAMP.Visualization
         private readonly List<ScottPlot.Plottables.Scatter> _peakLineSegments = [];
         private readonly List<double[]> _lineSegmentValues = [];
         private readonly List<double[]> _peakLineSegmentValues = [];
+        private readonly List<int> _lineSegmentStartIndices = [];
         private double[] _lineValues = [];
         private double[] _linePeakValues = [];
 
+        public bool IsFullScreenSpectrum { get; set; }
         public int BarCount => _barCount;
 
         public SpectrumControl()
         {
             InitializeComponent();
-            _barCount = SettingsManager.Instance.Config.VisualizerBarCount;
+            _barCount = Math.Clamp(
+                SettingsManager.Instance.Config.VisualizerBarCount,
+                MinimumConfiguredBarCount,
+                MaximumConfiguredBarCount);
             _smoothedValues = new double[_barCount];
             _peakValues = new double[_barCount];
             _latestSpectrumValues = new double[_barCount];
@@ -46,7 +56,7 @@ namespace QAMP.Visualization
             }
             _fadeTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(16)
+                Interval = TimeSpan.FromMilliseconds(25)
             };
             _fadeTimer.Tick += FadeTimer_Tick;
             _peakBars = SpectrumPlot.Plot.Add.Bars(_peakValues);
@@ -98,60 +108,69 @@ namespace QAMP.Visualization
         private void SetupPlot()
         {
             if (!SettingsManager.Instance.Config.IsVisualizerEnabled)
-            {
                 return;
-            }
+
             try
             {
+                var config = SettingsManager.Instance.Config;
+                int count = BarCount;
+
                 SpectrumPlot.Plot.Clear();
-
-                double[] barValues = new double[BarCount];
-                double[] peakValues = new double[BarCount];
-
-                for (int i = 0; i < BarCount; i++)
-                {
-                    barValues[i] = 0.01; // Минимальная высота
-                    peakValues[i] = 0.01; // Минимальная высота для пиков
-                }
 
                 myBars = null;
                 _peakBars = null;
                 _topPeakBars = null;
                 _bottomPeakBars = null;
-                _lineValues = [];
-                _linePeakValues = [];
                 _lineSegments.Clear();
                 _peakLineSegments.Clear();
                 _lineSegmentValues.Clear();
                 _peakLineSegmentValues.Clear();
+                _lineSegmentStartIndices.Clear();
 
-                if (SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.Line)
+                _lineValues = new double[count];
+                _linePeakValues = new double[count];
+                Array.Fill(_lineValues, 0.01);
+                Array.Fill(_linePeakValues, 0.01);
+
+                if (config.SpectrumType == SpectrumDisplayType.Line)
                 {
-                    double[] positions = Enumerable.Range(0, BarCount).Select(i => (double)i).ToArray();
-                    _lineValues = barValues;
-                    _linePeakValues = peakValues;
-                    for (int i = 0; i < BarCount - 1; i++)
+                    int segmentCount = Math.Min(count - 1, MaximumLineGradientSegments);
+                    for (int segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++)
                     {
-                        double[] segmentPositions = [positions[i], positions[i + 1]];
-                        double[] segmentValues = [_lineValues[i], _lineValues[i + 1]];
-                        double[] peakSegmentValues = [_linePeakValues[i], _linePeakValues[i + 1]];
+                        int startIndex = segmentIndex * (count - 1) / segmentCount;
+                        int endIndex = (segmentIndex + 1) * (count - 1) / segmentCount + 1;
+                        int segmentLength = endIndex - startIndex;
+                        double[] segmentPositions = new double[segmentLength];
+                        double[] segmentValues = new double[segmentLength];
+                        double[] peakSegmentValues = new double[segmentLength];
+
+                        for (int i = 0; i < segmentLength; i++)
+                        {
+                            int dataIndex = startIndex + i;
+                            segmentPositions[i] = dataIndex;
+                            segmentValues[i] = _lineValues[dataIndex];
+                            peakSegmentValues[i] = _linePeakValues[dataIndex];
+                        }
+
                         var segment = SpectrumPlot.Plot.Add.Scatter(segmentPositions, segmentValues);
                         var peakSegment = SpectrumPlot.Plot.Add.Scatter(segmentPositions, peakSegmentValues);
                         segment.MarkerSize = 0;
                         peakSegment.MarkerSize = 0;
+
                         _lineSegments.Add(segment);
                         _peakLineSegments.Add(peakSegment);
                         _lineSegmentValues.Add(segmentValues);
                         _peakLineSegmentValues.Add(peakSegmentValues);
+                        _lineSegmentStartIndices.Add(startIndex);
                     }
                 }
-                else if (SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.CenteredBars)
+                else if (config.SpectrumType == SpectrumDisplayType.CenteredBars)
                 {
-                    _topPeakBars = SpectrumPlot.Plot.Add.Bars(peakValues);
-                    _bottomPeakBars = SpectrumPlot.Plot.Add.Bars(peakValues);
-                    myBars = SpectrumPlot.Plot.Add.Bars(barValues);
+                    _topPeakBars = SpectrumPlot.Plot.Add.Bars(_linePeakValues);
+                    _bottomPeakBars = SpectrumPlot.Plot.Add.Bars(_linePeakValues);
+                    myBars = SpectrumPlot.Plot.Add.Bars(_lineValues);
 
-                    for (int i = 0; i < BarCount; i++)
+                    for (int i = 0; i < count; i++)
                     {
                         myBars.Bars[i].Position = i;
                         myBars.Bars[i].Size = 0.78;
@@ -162,14 +181,13 @@ namespace QAMP.Visualization
                         _bottomPeakBars.Bars[i].Position = i;
                         _bottomPeakBars.Bars[i].Size = 0.78;
                     }
-
                 }
                 else
                 {
-                    _peakBars = SpectrumPlot.Plot.Add.Bars(peakValues);
-                    myBars = SpectrumPlot.Plot.Add.Bars(barValues);
+                    _peakBars = SpectrumPlot.Plot.Add.Bars(_linePeakValues);
+                    myBars = SpectrumPlot.Plot.Add.Bars(_lineValues);
 
-                    for (int i = 0; i < BarCount; i++)
+                    for (int i = 0; i < count; i++)
                     {
                         myBars.Bars[i].Position = i;
                         myBars.Bars[i].ValueBase = 0;
@@ -183,24 +201,22 @@ namespace QAMP.Visualization
 
                 SpectrumPlot.Plot.HideGrid();
                 SpectrumPlot.Plot.HideAxesAndGrid();
-
                 SpectrumPlot.Plot.Axes.SetLimitsY(
-                    SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.CenteredBars ? -1.0 : 0.0,
+                    config.SpectrumType == SpectrumDisplayType.CenteredBars ? -1.0 : 0.0,
                     1.0);
-                SpectrumPlot.Plot.Axes.SetLimitsX(0, BarCount);
+                SpectrumPlot.Plot.Axes.SetLimitsX(0, count);
                 SpectrumPlot.Plot.Axes.Top.FrameLineStyle.Width = 0;
                 SpectrumPlot.Plot.Axes.Right.FrameLineStyle.Width = 0;
                 SpectrumPlot.Plot.Axes.Left.FrameLineStyle.Width = 0;
                 SpectrumPlot.Plot.Axes.Bottom.FrameLineStyle.Width = 0;
-
-
+                SpectrumPlot.UserInputProcessor.IsEnabled = false;
                 SpectrumPlot.IsEnabled = false;
                 ApplyColors();
+
                 if (_hasSpectrumData)
                     ApplySpectrumValues();
-                SpectrumPlot.Refresh();
-
-                System.Diagnostics.Debug.WriteLine($"SetupPlot completed, type: {SettingsManager.Instance.Config.SpectrumType}");
+                else
+                    SpectrumPlot.Refresh();
             }
             catch (Exception ex)
             {
@@ -338,7 +354,6 @@ namespace QAMP.Visualization
             if (SpectrumPlot == null) return;
 
             ApplyColors();
-            SpectrumPlot.Refresh();
             System.Diagnostics.Debug.WriteLine("SpectrumControl colors refreshed");
         }
         public void UpdateSpectrum(double[] spectrumData, double[] peakData, int incomingCount)
@@ -349,8 +364,11 @@ namespace QAMP.Visualization
             try
             {
                 _latestSampleCount = Math.Min(Math.Min(incomingCount, BarCount), Math.Min(spectrumData.Length, peakData.Length));
-                Array.Copy(spectrumData, _latestSpectrumValues, _latestSampleCount);
-                Array.Copy(peakData, _latestPeakValues, _latestSampleCount);
+                if (_latestSampleCount <= 0)
+                    return;
+
+                _latestSpectrumValues = spectrumData;
+                _latestPeakValues = peakData;
                 _hasSpectrumData = true;
                 ApplySpectrumValues();
             }
@@ -364,42 +382,66 @@ namespace QAMP.Visualization
         {
             try
             {
-                for (int i = 0; i < _latestSampleCount; i++)
-                {
-                    double value = _latestSpectrumValues[i] * _fadeMultiplier;
-                    double peak = _latestPeakValues[i] * _fadeMultiplier;
+                int count = Math.Min(_latestSampleCount, BarCount);
+                if (count <= 0)
+                    return;
 
-                    if (SettingsManager.Instance.Config.SpectrumType == SpectrumDisplayType.CenteredBars)
+                var displayType = SettingsManager.Instance.Config.SpectrumType;
+                double fade = _fadeMultiplier;
+                double peakCapOffset = 0.03 * fade;
+
+                if (displayType == SpectrumDisplayType.CenteredBars)
+                {
+                    if (myBars == null || _topPeakBars == null || _bottomPeakBars == null)
+                        return;
+
+                    int maxBars = Math.Min(count, Math.Min(myBars.Bars.Count, Math.Min(_topPeakBars.Bars.Count, _bottomPeakBars.Bars.Count)));
+                    for (int i = 0; i < maxBars; i++)
                     {
-                        if (myBars == null || _topPeakBars == null || _bottomPeakBars == null)
-                            continue;
+                        double value = _latestSpectrumValues[i] * fade;
+                        double peak = _latestPeakValues[i] * fade;
 
                         myBars.Bars[i].Value = value;
                         myBars.Bars[i].ValueBase = -value;
-                        _topPeakBars.Bars[i].Value = peak + 0.03 * _fadeMultiplier;
+                        _topPeakBars.Bars[i].Value = peak + peakCapOffset;
                         _topPeakBars.Bars[i].ValueBase = peak;
                         _bottomPeakBars.Bars[i].Value = -peak;
-                        _bottomPeakBars.Bars[i].ValueBase = -(peak + 0.03 * _fadeMultiplier);
+                        _bottomPeakBars.Bars[i].ValueBase = -(peak + peakCapOffset);
                     }
-                    else if (_lineSegments.Count > 0)
+                }
+                else if (displayType == SpectrumDisplayType.Line && _lineSegments.Count > 0)
+                {
+                    int lineCount = Math.Min(count, Math.Min(_lineValues.Length, _linePeakValues.Length));
+                    for (int i = 0; i < lineCount; i++)
                     {
+                        double value = _latestSpectrumValues[i] * fade;
+                        double peak = _latestPeakValues[i] * fade;
+
                         _lineValues[i] = value;
                         _linePeakValues[i] = peak;
-                        if (i > 0)
+                    }
+
+                    for (int segmentIndex = 0; segmentIndex < _lineSegmentValues.Count; segmentIndex++)
+                    {
+                        int startIndex = _lineSegmentStartIndices[segmentIndex];
+                        double[] segmentValues = _lineSegmentValues[segmentIndex];
+                        double[] peakSegmentValues = _peakLineSegmentValues[segmentIndex];
+
+                        for (int i = 0; i < segmentValues.Length; i++)
                         {
-                            _lineSegmentValues[i - 1][1] = value;
-                            _peakLineSegmentValues[i - 1][1] = peak;
-                        }
-                        if (i < _lineSegments.Count)
-                        {
-                            _lineSegmentValues[i][0] = value;
-                            _peakLineSegmentValues[i][0] = peak;
+                            int dataIndex = startIndex + i;
+                            segmentValues[i] = _lineValues[dataIndex];
+                            peakSegmentValues[i] = _linePeakValues[dataIndex];
                         }
                     }
-                    else if (myBars != null && _peakBars != null)
+                }
+                else if (myBars != null && _peakBars != null)
+                {
+                    int maxBars = Math.Min(count, Math.Min(myBars.Bars.Count, _peakBars.Bars.Count));
+                    for (int i = 0; i < maxBars; i++)
                     {
-                        myBars.Bars[i].Value = value;
-                        _peakBars.Bars[i].Value = peak;
+                        myBars.Bars[i].Value = _latestSpectrumValues[i] * fade;
+                        _peakBars.Bars[i].Value = _latestPeakValues[i] * fade;
                     }
                 }
 
@@ -423,27 +465,26 @@ namespace QAMP.Visualization
         {
             if (myBars == null && _lineSegments.Count == 0) return;
 
+            if (_lineSegments.Count > 0)
+            {
+                Array.Fill(_lineValues, 0.01);
+                Array.Fill(_linePeakValues, 0.01);
+                for (int segmentIndex = 0; segmentIndex < _lineSegmentValues.Count; segmentIndex++)
+                {
+                    Array.Fill(_lineSegmentValues[segmentIndex], 0.01);
+                    Array.Fill(_peakLineSegmentValues[segmentIndex], 0.01);
+                }
+
+                SpectrumPlot.Refresh();
+                return;
+            }
+
             for (int i = 0; i < BarCount; i++)
             {
                 if (myBars != null && _peakBars != null)
                 {
                     myBars.Bars[i].Value = 0.01;
                     _peakBars.Bars[i].Value = 0.01;
-                }
-                else if (_lineSegments.Count > 0)
-                {
-                    _lineValues[i] = 0.01;
-                    _linePeakValues[i] = 0.01;
-                    if (i > 0)
-                    {
-                        _lineSegmentValues[i - 1][1] = 0.01;
-                        _peakLineSegmentValues[i - 1][1] = 0.01;
-                    }
-                    if (i < _lineSegments.Count)
-                    {
-                        _lineSegmentValues[i][0] = 0.01;
-                        _peakLineSegmentValues[i][0] = 0.01;
-                    }
                 }
                 else if (_topPeakBars != null && _bottomPeakBars != null)
                 {
@@ -465,14 +506,22 @@ namespace QAMP.Visualization
 
         public void SetBarCount(int count)
         {
-            if (count <= 0 || count == _barCount)
+            if (count <= 0)
+                return;
+
+            count = Math.Min(count, MaximumBarCount);
+            if (count == _barCount)
                 return;
 
             _barCount = count;
             _smoothedValues = new double[_barCount];
             _peakValues = new double[_barCount];
-            Array.Resize(ref _latestSpectrumValues, _barCount);
-            Array.Resize(ref _latestPeakValues, _barCount);
+            var resizedSpectrumValues = new double[_barCount];
+            var resizedPeakValues = new double[_barCount];
+            Array.Copy(_latestSpectrumValues, resizedSpectrumValues, Math.Min(_latestSpectrumValues.Length, _barCount));
+            Array.Copy(_latestPeakValues, resizedPeakValues, Math.Min(_latestPeakValues.Length, _barCount));
+            _latestSpectrumValues = resizedSpectrumValues;
+            _latestPeakValues = resizedPeakValues;
             _latestSampleCount = Math.Min(_latestSampleCount, _barCount);
 
             for (int i = 0; i < _barCount; i++)

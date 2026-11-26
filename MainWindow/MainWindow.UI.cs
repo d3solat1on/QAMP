@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using QAMP.Models;
 using QAMP.Services;
@@ -51,8 +52,9 @@ public partial class MainWindow
 
 #if DEBUG
                 Title = $"{track.Executor} — {track.Name} | QAMP [DEBUG]";
-#endif
+#else
                 Title = $"{track.Executor} — {track.Name} | QAMP";
+#endif
 
                 if (_mediaManager != null)
                 {
@@ -321,6 +323,129 @@ public partial class MainWindow
             {
                 DebugConsoleContainer.Visibility = Visibility.Visible;
             }
+        }
+    }
+    private void ToggleLeftZona_Click(object sender, RoutedEventArgs e)
+    {
+        ColumnDefinition? playlistColumn = SettingsManager.Instance.Config.IsNowPlayingOnLeft ? RightColumn : LeftColumn;
+        if (LeftPanelIsOpen)
+        {
+            playlistColumn.Width = new GridLength(75);
+            LeftPanelIsOpen = false;
+            LeftZonaContentGrid.Margin = new Thickness(0);
+            LeftZonaHeaderGrid.Margin = new Thickness(0, 0, 0, 0);
+            if (LeftZonaContentGrid.RowDefinitions.Count > 0)
+            {
+                LeftZonaContentGrid.RowDefinitions[0].Height = new GridLength(75);
+            }
+            LibraryTextBlock.Visibility = Visibility.Collapsed;
+            SortByButton.Visibility = Visibility.Collapsed;
+            CreatePlaylistButton.Visibility = Visibility.Collapsed;
+            RemovePlaylistButton.Visibility = Visibility.Collapsed;
+            AddMusicButton.Visibility = Visibility.Collapsed;
+            CreateFolderButton.Visibility = Visibility.Collapsed;
+            PlaylistsListBox.UpdateLayout();
+            RecenterLyricsAfterPanelChange();
+            if (playlistColumn == RightColumn)
+            {
+                ToggleLeftZonaIcon.Data = (Geometry)Application.Current.Resources["ArrowRightGeometry"];
+            }
+            else
+            {
+                ToggleLeftZonaIcon.Data = (Geometry)Application.Current.Resources["ArrowLeftGeometry"];
+
+            }
+        }
+        else
+        {
+            playlistColumn.Width = new GridLength(250);
+            LeftPanelIsOpen = true;
+            LeftZonaContentGrid.Margin = new Thickness(10);
+            LeftZonaHeaderGrid.Margin = new Thickness(10, 0, 0, 15);
+            if (LeftZonaContentGrid.RowDefinitions.Count > 0)
+            {
+                LeftZonaContentGrid.RowDefinitions[0].Height = GridLength.Auto;
+            }
+            LibraryTextBlock.Visibility = Visibility.Visible;
+            SortByButton.Visibility = Visibility.Visible;
+            CreatePlaylistButton.Visibility = Visibility.Visible;
+            RemovePlaylistButton.Visibility = Visibility.Visible;
+            AddMusicButton.Visibility = Visibility.Visible;
+            CreateFolderButton.Visibility = Visibility.Visible;
+            PlaylistsListBox.UpdateLayout();
+            RecenterLyricsAfterPanelChange();
+            ToggleLeftZonaIcon.Data = (Geometry)Application.Current.Resources["ArrowLeftGeometry"];
+        }
+    }
+
+    public void ApplyPanelLayout()
+    {
+        var config = SettingsManager.Instance.Config;
+        bool nowPlayingOnLeft = config.IsNowPlayingOnLeft;
+        bool nowPlayingIsVisible = config.IsNowPlayingIsVisible;
+
+        RightPanelBorder.Visibility = nowPlayingIsVisible ? Visibility.Visible : Visibility.Collapsed;
+
+        Grid.SetColumn(LeftZona, nowPlayingOnLeft ? 2 : 0);
+        Grid.SetColumn(RightPanelBorder, nowPlayingOnLeft ? 0 : 2);
+        LeftZona.BorderThickness = nowPlayingOnLeft
+            ? new Thickness(1, 0, 0, 0)
+            : new Thickness(0, 0, 1, 0);
+        RightPanelBorder.BorderThickness = nowPlayingOnLeft
+            ? new Thickness(0, 0, 1, 0)
+            : new Thickness(1, 0, 0, 0);
+
+        LeftColumn.Width = nowPlayingOnLeft
+            ? new GridLength(nowPlayingIsVisible ? 300 : 0)
+            : new GridLength(LeftPanelIsOpen ? 250 : 75);
+        LeftColumn.MinWidth = nowPlayingOnLeft && !nowPlayingIsVisible ? 0 : 45;
+        LeftColumn.MaxWidth = nowPlayingOnLeft ? 300 : 250;
+        RightColumn.Width = nowPlayingOnLeft
+            ? new GridLength(LeftPanelIsOpen ? 250 : 75)
+            : new GridLength(nowPlayingIsVisible ? 300 : 0);
+
+        DockPanel.SetDock(BottomControlPanel, config.IsControlPanelOnTop ? Dock.Top : Dock.Bottom);
+        RecenterLyricsAfterPanelChange();
+    }
+
+    public void ApplyTrackColumnVisibility()
+    {
+        var config = SettingsManager.Instance.Config;
+        bool showExtendedColumns = !config.IsCompactMode;
+
+        CoverColumn.Visibility = (config.ShowTrackCoverColumn ?? showExtendedColumns)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        TitleColumn.Visibility = (config.ShowTrackTitleColumn ?? true) ? Visibility.Visible : Visibility.Collapsed;
+        ArtistColumn.Visibility = (config.ShowTrackArtistColumn ?? true) ? Visibility.Visible : Visibility.Collapsed;
+        AlbumColumn.Visibility = (config.ShowTrackAlbumColumn ?? true) ? Visibility.Visible : Visibility.Collapsed;
+        DurationColumn.Visibility = (config.ShowTrackDurationColumn ?? true) ? Visibility.Visible : Visibility.Collapsed;
+        BitrateColumn.Visibility = (config.ShowTrackBitrateColumn ?? showExtendedColumns)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        GenreColumn.Visibility = (config.ShowTrackGenreColumn ?? showExtendedColumns)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        DateColumn.Visibility = (config.ShowTrackDateColumn ?? showExtendedColumns)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private void RecenterLyricsAfterPanelChange()
+    {
+        if (!_isLyricsMode)
+        {
+            return;
+        }
+
+        LyricsOverlay.UpdateLayout();
+        LyricsListBox.UpdateLayout();
+
+        if (_lastHighlightedLine != null)
+        {
+            Dispatcher.BeginInvoke(
+                new Action(() => LyricsListBox.ScrollIntoView(_lastHighlightedLine)),
+                System.Windows.Threading.DispatcherPriority.Loaded);
         }
     }
 }

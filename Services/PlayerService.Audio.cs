@@ -12,6 +12,28 @@ public partial class PlayerService
 {
     private static int CreateStreamFromFile(string filePath, bool useDecodeFlags = false)
     {
+        int sourceStream = CreateRawStreamFromFile(filePath, useDecodeFlags: true);
+        if (sourceStream == 0) return 0;
+
+        BASSFlag tempoFlags = BASSFlag.BASS_FX_FREESOURCE;
+        if (useDecodeFlags)
+        {
+            tempoFlags |= BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT;
+        }
+
+        int tempoStream = BassFx.BASS_FX_TempoCreate(sourceStream, tempoFlags);
+        if (tempoStream == 0)
+        {
+            int error = (int)Bass.BASS_ErrorGetCode();
+            Bass.BASS_StreamFree(sourceStream);
+            System.Diagnostics.Debug.WriteLine($"[AUDIO] Failed to create tempo stream for '{filePath}'. BASS error: {error}");
+        }
+
+        return tempoStream;
+    }
+
+    private static int CreateRawStreamFromFile(string filePath, bool useDecodeFlags)
+    {
         string extension = Path.GetExtension(filePath).ToLowerInvariant();
 
         BASSFlag streamFlags = useDecodeFlags
@@ -41,7 +63,7 @@ public partial class PlayerService
     }
 
     internal static int CreateDecodeStreamFromFile(string filePath) =>
-        CreateStreamFromFile(filePath, useDecodeFlags: true);
+        CreateRawStreamFromFile(filePath, useDecodeFlags: true);
 
     private void RemoveEffectsFromStream(int stream)
     {
@@ -49,12 +71,9 @@ public partial class PlayerService
 
         if (!_streamEffects.Remove(stream, out StreamEffects? effects)) return;
 
-        foreach (int fx in effects.EqFxHandles)
+        if (effects.EqFxHandle != 0)
         {
-            if (fx != 0)
-            {
-                Bass.BASS_ChannelRemoveFX(stream, fx);
-            }
+            Bass.BASS_ChannelRemoveFX(stream, effects.EqFxHandle);
         }
 
         if (effects.ReverbFxHandle != 0)
@@ -87,11 +106,11 @@ public partial class PlayerService
             _streamEffects.Add(stream, effects);
         }
 
-        foreach (int fx in effects.EqFxHandles)
+        if (effects.EqFxHandle != 0)
         {
-            if (fx != 0) Bass.BASS_ChannelRemoveFX(stream, fx);
+            Bass.BASS_ChannelRemoveFX(stream, effects.EqFxHandle);
+            effects.EqFxHandle = 0;
         }
-        Array.Clear(effects.EqFxHandles);
 
         if (effects.ReverbFxHandle != 0)
         {
@@ -110,7 +129,11 @@ public partial class PlayerService
         }
 
         var config = SettingsManager.Instance.Config;
-        Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_PAN, (float)config.Balance);
+        if (!Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_PAN, (float)config.Balance))
+        {
+            LogBassFailure(stream, "setting balance");
+        }
+        ApplyPlaybackRateToStream(stream, config.Tempo, config.Pitch);
 
         float[] effectiveGains = new float[EqGains.Length];
         EqGains.CopyTo(effectiveGains, 0);
@@ -131,25 +154,41 @@ public partial class PlayerService
             effectiveGains[9] += 3.0f;
         }
 
-        var equalizer = new BASS_DX8_PARAMEQ[10];
         float[] frequencies = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
-        for (int i = 0; i < 10 && i < effectiveGains.Length; i++)
+        int equalizerFx = CreateEffect(stream, BASSFXType.BASS_FX_BFX_PEAKEQ, "equalizer");
+        if (equalizerFx != 0)
         {
-            equalizer[i] = new BASS_DX8_PARAMEQ
-            {
-                fGain = effectiveGains[i],
-                fBandwidth = 18.0f,
-                fCenter = frequencies[i]
-            };
-        }
+            var channelInfo = new BASS_CHANNELINFO();
+            float maxFrequency = Bass.BASS_ChannelGetInfo(stream, channelInfo)
+                ? channelInfo.freq / 2f
+                : frequencies[^1];
+            bool equalizerConfigured = true;
 
-        for (int i = 0; i < 10; i++)
-        {
-            int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_DX8_PARAMEQ, 1);
-            if (fx != 0)
+            for (int i = 0; i < frequencies.Length && i < effectiveGains.Length; i++)
             {
-                Bass.BASS_FXSetParameters(fx, equalizer[i]);
-                effects.EqFxHandles[i] = fx;
+                var band = new BASS_BFX_PEAKEQ
+                {
+                    lBand = i,
+                    fBandwidth = 1.0f,
+                    fCenter = Math.Min(frequencies[i], maxFrequency),
+                    fGain = effectiveGains[i],
+                    lChannel = BASSFXChan.BASS_BFX_CHANALL
+                };
+
+                if (!TrySetEffectParameters(equalizerFx, band, $"equalizer band {i + 1}"))
+                {
+                    equalizerConfigured = false;
+                    break;
+                }
+            }
+
+            if (equalizerConfigured)
+            {
+                effects.EqFxHandle = equalizerFx;
+            }
+            else
+            {
+                Bass.BASS_ChannelRemoveFX(stream, equalizerFx);
             }
         }
 
@@ -160,7 +199,7 @@ public partial class PlayerService
     {
         if (config.ReverbEnabled)
         {
-            int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_BFX_FREEVERB, 1);
+            int fx = CreateEffect(stream, BASSFXType.BASS_FX_BFX_FREEVERB, "reverb");
             if (fx != 0)
             {
                 var reverb = new BASS_BFX_FREEVERB
@@ -171,14 +210,20 @@ public partial class PlayerService
                     fDamp = 0.5f,
                     fWidth = 1.0f
                 };
-                Bass.BASS_FXSetParameters(fx, reverb);
-                effects.ReverbFxHandle = fx;
+                if (TrySetEffectParameters(fx, reverb, "reverb"))
+                {
+                    effects.ReverbFxHandle = fx;
+                }
+                else
+                {
+                    Bass.BASS_ChannelRemoveFX(stream, fx);
+                }
             }
         }
 
         if (config.EchoEnabled)
         {
-            int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_BFX_ECHO4, 1);
+            int fx = CreateEffect(stream, BASSFXType.BASS_FX_BFX_ECHO4, "echo");
             if (fx != 0)
             {
                 var echo = new BASS_BFX_ECHO4
@@ -189,14 +234,20 @@ public partial class PlayerService
                     fDelay = (float)Math.Max(0.05, Math.Min(2.0, config.EchoDelay / 1000.0)),
                     bStereo = true
                 };
-                Bass.BASS_FXSetParameters(fx, echo);
-                effects.EchoFxHandle = fx;
+                if (TrySetEffectParameters(fx, echo, "echo"))
+                {
+                    effects.EchoFxHandle = fx;
+                }
+                else
+                {
+                    Bass.BASS_ChannelRemoveFX(stream, fx);
+                }
             }
         }
 
         if (config.CompressorEnabled)
         {
-            int fx = Bass.BASS_ChannelSetFX(stream, BASSFXType.BASS_FX_BFX_COMPRESSOR2, 1);
+            int fx = CreateEffect(stream, BASSFXType.BASS_FX_BFX_COMPRESSOR2, "compressor");
             if (fx != 0)
             {
                 var compressor = new BASS_BFX_COMPRESSOR2
@@ -207,16 +258,65 @@ public partial class PlayerService
                     fAttack = 20.0f,
                     fRelease = 200.0f
                 };
-                Bass.BASS_FXSetParameters(fx, compressor);
-                effects.CompressorFxHandle = fx;
+                if (TrySetEffectParameters(fx, compressor, "compressor"))
+                {
+                    effects.CompressorFxHandle = fx;
+                }
+                else
+                {
+                    Bass.BASS_ChannelRemoveFX(stream, fx);
+                }
             }
         }
     }
 
+    private static int CreateEffect(int stream, BASSFXType type, string name)
+    {
+        int fx = Bass.BASS_ChannelSetFX(stream, type, 1);
+        if (fx == 0)
+        {
+            LogBassFailure(stream, $"creating {name} effect");
+        }
+
+        return fx;
+    }
+
+    private static bool TrySetEffectParameters(int fx, BASS_BFX_PEAKEQ parameters, string name)
+    {
+        if (Bass.BASS_FXSetParameters(fx, parameters)) return true;
+        LogBassFailure(fx, $"configuring {name}");
+        return false;
+    }
+
+    private static bool TrySetEffectParameters(int fx, BASS_BFX_FREEVERB parameters, string name)
+    {
+        if (Bass.BASS_FXSetParameters(fx, parameters)) return true;
+        LogBassFailure(fx, $"configuring {name}");
+        return false;
+    }
+
+    private static bool TrySetEffectParameters(int fx, BASS_BFX_ECHO4 parameters, string name)
+    {
+        if (Bass.BASS_FXSetParameters(fx, parameters)) return true;
+        LogBassFailure(fx, $"configuring {name}");
+        return false;
+    }
+
+    private static bool TrySetEffectParameters(int fx, BASS_BFX_COMPRESSOR2 parameters, string name)
+    {
+        if (Bass.BASS_FXSetParameters(fx, parameters)) return true;
+        LogBassFailure(fx, $"configuring {name}");
+        return false;
+    }
+
+    private static void LogBassFailure(int handle, string operation)
+    {
+        System.Diagnostics.Debug.WriteLine(
+            $"[AUDIO] BASS failed while {operation} (handle {handle}). Error: {Bass.BASS_ErrorGetCode()}");
+    }
+
     public void UpdateEqualizerGains(float[] gains)
     {
-        if (_currentStream == 0) return;
-
         for (int i = 0; i < gains.Length && i < EqGains.Length; i++)
         {
             EqGains[i] = gains[i];
@@ -225,7 +325,7 @@ public partial class PlayerService
         ApplyEqualizerToStream();
 
         var config = SettingsManager.Instance.Config;
-        for (int i = 0; i < gains.Length; i++)
+        for (int i = 0; i < gains.Length && i < config.EqualizerGains.Length; i++)
         {
             config.EqualizerGains[i] = gains[i];
         }
@@ -251,9 +351,28 @@ public partial class PlayerService
 
         if (_currentStream != 0)
         {
-            Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_TEMPO, (float)((tempo - 1.0) * 100.0));
-            float pitchSemitones = pitch > 0 ? (float)(Math.Log(pitch, 2.0) * 12.0) : 0f;
-            Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_TEMPO_PITCH, pitchSemitones);
+            ApplyPlaybackRateToStream(_currentStream, tempo, pitch);
+        }
+        if (_crossfadeStream != 0)
+        {
+            ApplyPlaybackRateToStream(_crossfadeStream, tempo, pitch);
+        }
+    }
+
+    private static void ApplyPlaybackRateToStream(int stream, double tempo, double pitch)
+    {
+        if (!Bass.BASS_ChannelSetAttribute(
+                stream,
+                BASSAttribute.BASS_ATTRIB_TEMPO,
+                (float)((tempo - 1.0) * 100.0)))
+        {
+            LogBassFailure(stream, "setting tempo");
+        }
+
+        float pitchSemitones = pitch > 0 ? (float)(Math.Log(pitch, 2.0) * 12.0) : 0f;
+        if (!Bass.BASS_ChannelSetAttribute(stream, BASSAttribute.BASS_ATTRIB_TEMPO_PITCH, pitchSemitones))
+        {
+            LogBassFailure(stream, "setting pitch");
         }
     }
 
@@ -261,7 +380,17 @@ public partial class PlayerService
     {
         if (_currentStream != 0)
         {
-            Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, balance);
+            if (!Bass.BASS_ChannelSetAttribute(_currentStream, BASSAttribute.BASS_ATTRIB_PAN, balance))
+            {
+                LogBassFailure(_currentStream, "setting balance");
+            }
+        }
+        if (_crossfadeStream != 0)
+        {
+            if (!Bass.BASS_ChannelSetAttribute(_crossfadeStream, BASSAttribute.BASS_ATTRIB_PAN, balance))
+            {
+                LogBassFailure(_crossfadeStream, "setting balance");
+            }
         }
     }
     public async Task SwitchOutputModeAsync(bool enableWasapi)

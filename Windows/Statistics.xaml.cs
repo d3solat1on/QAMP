@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using QAMP.Dialogs;
 using QAMP.Models;
 using QAMP.Services;
 
@@ -114,9 +115,14 @@ public partial class Statistics : Window
 
     private async void CreatePlaylistWithTop50Tracks_Click(object sender, RoutedEventArgs e)
     {
+        string question = (string)Application.Current.TryFindResource("LngCreateDynamicPlaylist") ?? "Create a dynamic playlist?";
+        bool? result = NotificationWindow.Show(question, this, NotificationWindow.NotificationMode.Confirm);
+        if (result == null) return;
+
         try
         {
-            DatabaseService.CreatePlaylistWithTop50Tracks();
+            Playlist playlist = await Task.Run(() => DatabaseService.CreatePlaylistWithTop50Tracks(result.Value));
+            ViewModels.MusicLibrary.Instance.AddNewPlaylist(playlist);
             string message = Application.Current.Resources["LngSuccessfully"] as string ?? "Successfully";
             await StatisticsNotice.ShowAsync(message);
         }
@@ -131,9 +137,14 @@ public partial class Statistics : Window
 
     private async void CreatePlaylistWithTracksNotListening(object sender, RoutedEventArgs e)
     {
+        string question = (string)Application.Current.TryFindResource("LngCreateDynamicPlaylist") ?? "Create a dynamic playlist?";
+        bool? result = NotificationWindow.Show(question, this, NotificationWindow.NotificationMode.Confirm);
+        if (result == null) return;
+
         try
         {
-            DatabaseService.CreatePlaylistTracksWithoutListening();
+            Playlist playlist = await Task.Run(() => DatabaseService.CreatePlaylistTracksWithoutListening(result.Value));
+            ViewModels.MusicLibrary.Instance.AddNewPlaylist(playlist);
             string message = Application.Current.Resources["LngSuccessfully"] as string ?? "Successfully";
             await StatisticsNotice.ShowAsync(message);
         }

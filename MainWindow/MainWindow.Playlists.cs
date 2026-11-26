@@ -188,22 +188,31 @@ namespace QAMP
 
                 if (result == true)
                 {
-                    foreach (var track in selectedTracks)
+                    int[] trackIds = selectedTracks.Select(track => track.Id).ToArray();
+                    try
                     {
-                        bool isUsedElsewhere = DatabaseService.IsTrackInOtherPlaylists(track.Id, selectedPlaylist.Id);
+                        await Task.Run(() =>
+                            DatabaseService.RemoveTracksFromPlaylist(
+                                selectedPlaylist.Id,
+                                trackIds,
+                                deleteUnusedTracks: true));
 
-                        DatabaseService.RemoveTrackFromPlaylist(selectedPlaylist.Id, track.Id);
+                        var removedTrackIds = trackIds.ToHashSet();
+                        selectedPlaylist.ReplaceTracks(
+                            selectedPlaylist.Tracks.Where(track => !removedTrackIds.Contains(track.Id)));
 
-                        if (!isUsedElsewhere)
+                        RemoveTracksFromPlaybackQueue(selectedPlaylist.Id, trackIds);
+                        if (Library.CurrentPlaylist?.Id == selectedPlaylist.Id)
                         {
-                            DatabaseService.DeleteTrackCompletely(track.Id);
+                            TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
                         }
-
-                        selectedPlaylist.Tracks.Remove(track);
+                        UpdateNextTrackUI();
                     }
-                    TracksDataGrid.ItemsSource = null;
-                    TracksDataGrid.ItemsSource = selectedPlaylist.Tracks;
-                    UpdateNextTrackUI();
+                    catch (Exception ex)
+                    {
+                        App.LogException(ex, "RemoveTracksFromPlaylist");
+                        NotificationWindow.Show($"Не удалось удалить треки: {ex.Message}", this);
+                    }
                 }
             }
         }

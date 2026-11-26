@@ -25,9 +25,41 @@ namespace QAMP.Models
         AddedDateOldest = 5,      // По дате добавления (старые сверху)
     }
 
+    public enum DynamicPlaylistType
+    {
+        None = 0,
+        Top50Tracks = 1,
+        TracksWithoutListening = 2
+    }
+
+    public class ObservableRangeCollection<T> : ObservableCollection<T>
+    {
+        public ObservableRangeCollection() { }
+
+        public ObservableRangeCollection(IEnumerable<T> items) : base(items) { }
+
+        public void ReplaceAll(IEnumerable<T> items)
+        {
+            var replacement = items.ToList();
+            CheckReentrancy();
+            Items.Clear();
+            foreach (var item in replacement)
+            {
+                Items.Add(item);
+            }
+
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+            OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+            OnCollectionChanged(new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
+                System.Collections.Specialized.NotifyCollectionChangedAction.Reset));
+        }
+    }
+
     public class Playlist : INotifyPropertyChanged
     {
         public bool IsSystemPlaylist { get; set; } //True dlya Favorite
+        public bool IsDynamicPlaylist { get; set; }
+        public DynamicPlaylistType DynamicType { get; set; }
         public double CachedScrollOffset { get; set; } = 0;
         private string? _name;
         private string? _description;
@@ -107,14 +139,42 @@ namespace QAMP.Models
             get => _tracks;
             set
             {
+                if (ReferenceEquals(_tracks, value)) return;
+                _tracks.CollectionChanged -= Tracks_CollectionChanged;
                 _tracks = value;
-                _tracks.CollectionChanged += (s, e) =>
-                {
-                    OnPropertyChanged(nameof(TrackCount));
-                    OnPropertyChanged(nameof(TrackCountDisplay));
-                    OnPropertyChanged(nameof(TotalDurationDisplay));
-                };
+                _tracks.CollectionChanged += Tracks_CollectionChanged;
+                OnPropertyChanged(nameof(Tracks));
+                NotifyTrackCollectionChanged();
             }
+        }
+
+        public void ReplaceTracks(IEnumerable<Track> tracks)
+        {
+            if (Tracks is ObservableRangeCollection<Track> range)
+            {
+                range.ReplaceAll(tracks);
+                return;
+            }
+
+            var replacement = tracks.ToList();
+            Tracks.Clear();
+            foreach (var track in replacement)
+            {
+                Tracks.Add(track);
+            }
+        }
+
+        private void Tracks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            NotifyTrackCollectionChanged();
+        }
+
+        private void NotifyTrackCollectionChanged()
+        {
+            OnPropertyChanged(nameof(TrackCount));
+            OnPropertyChanged(nameof(TrackCountDisplay));
+            OnPropertyChanged(nameof(TotalDurationDisplay));
+            OnPropertyChanged(nameof(Tracks));
         }
         // Дата создания
         private DateTime _createdDate;
@@ -195,6 +255,22 @@ namespace QAMP.Models
                 }
             }
         }
+        public string DynamicPlaylistDisplay
+        {
+            get
+            {
+                if (IsDynamicPlaylist)
+                {
+                    string result = (string)Application.Current.FindResource("LngYes");
+                    return result;
+                }
+                else
+                {
+                    string result = (string)Application.Current.FindResource("LngNo");
+                    return result;
+                }
+            }
+        }
 
         public string SortTypeDisplay => SortType switch
         {
@@ -217,14 +293,7 @@ namespace QAMP.Models
         public Playlist()
         {
             _createdDate = DateTime.Now;
-            Tracks = [];
-            Tracks.CollectionChanged += (s, e) =>
-            {
-                OnPropertyChanged(nameof(TrackCount));
-                OnPropertyChanged(nameof(TrackCountDisplay));
-                OnPropertyChanged(nameof(TotalDurationDisplay));
-                OnPropertyChanged(nameof(Tracks));
-            };
+            Tracks = new ObservableRangeCollection<Track>();
         }
 
     }

@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using QAMP.Models;
 using QAMP.ViewModels;
+using QAMP.Visualization;
 
 namespace QAMP.Services;
 
@@ -101,6 +102,8 @@ public class AppConsole
           clearcache            - Clear temporary files and cache
           getfpsspectrum        - Get the FPS value for the spectrum
           setfpsspectrum        - Set the FPS value for the spectrum
+          getcountbars          - Get the value for bars of spectrum
+          setcountbars          - Set the value for bars of spectrum
           openappfolder         - Opens the application folder in File Explorer
           opendatabasefolder    - Opens the database folder in File Explorer
           clear                 - Clear console screen

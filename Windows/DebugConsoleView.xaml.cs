@@ -223,7 +223,7 @@ public partial class DebugConsoleView : UserControl
             {
                 _commandHistory.Add(command);
             }
-            _historyIndex = -1; 
+            _historyIndex = -1;
 
             ConsoleInputBox.Clear();
             try

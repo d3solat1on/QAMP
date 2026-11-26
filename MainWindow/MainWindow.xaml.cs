@@ -84,6 +84,8 @@ namespace QAMP
 
             var savedSort = AppSettings.CurrentPlaylistSort;
             ApplyPlaylistSorting(savedSort);
+            ApplyPanelLayout();
+            ApplyTrackColumnVisibility();
             _ = InitializePlaylistsAndTracksAsync();
         }
 
@@ -343,6 +345,21 @@ namespace QAMP
         private void Maximize_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+    }
+    public partial class MainWindow
+    {
+        public static readonly DependencyProperty LeftPanelIsOpenProperty =
+            DependencyProperty.Register(
+                nameof(LeftPanelIsOpen),
+                typeof(bool),
+                typeof(MainWindow),
+                new PropertyMetadata(true));
+
+        public bool LeftPanelIsOpen
+        {
+            get => (bool)GetValue(LeftPanelIsOpenProperty);
+            set => SetValue(LeftPanelIsOpenProperty, value);
         }
     }
 }

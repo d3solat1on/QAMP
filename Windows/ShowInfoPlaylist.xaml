@@ -168,6 +168,7 @@
                                                                 <RowDefinition Height="Auto"/>
                                                                 <RowDefinition Height="Auto"/>
                                                                 <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="Auto"/>
                                                         </Grid.RowDefinitions>
 
                                                         <TextBlock x:Name="IdTextBlock"
@@ -247,14 +248,27 @@
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,0,4"/>
 
-                                                        <TextBlock x:Name="SortTypeTextBlock"
+                                                        <TextBlock x:Name="DynamicPlaylistTextBlock"
                                                                    Grid.Row="6"
+                                                                   Grid.Column="0"
+                                                                   Text="{DynamicResource LngDynamicPlaylist}"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   Margin="0,4,12,4"/>
+                                                        <TextBlock x:Name="DynamicPlaylistValueTextBlock"
+                                                                   Grid.Row="6"
+                                                                   Grid.Column="1"
+                                                                   Text="{Binding DynamicPlaylistDisplay}"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   Margin="0,4,0,4"/>
+
+                                                        <TextBlock x:Name="SortTypeTextBlock"
+                                                                   Grid.Row="7"
                                                                    Grid.Column="0"
                                                                    Text="{DynamicResource LngSortType}"
                                                                    Foreground="{DynamicResource TextBrush}"
                                                                    Margin="0,4,12,4"/>
                                                         <TextBlock x:Name="SortTypeValueTextBlock"
-                                                                   Grid.Row="6"
+                                                                   Grid.Row="7"
                                                                    Grid.Column="1"
                                                                    Text="{Binding SortTypeDisplay}"
                                                                    Foreground="{DynamicResource TextBrush}"

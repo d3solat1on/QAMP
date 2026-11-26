@@ -110,10 +110,16 @@ public partial class MainWindow
             }
         }
     }
-    private void EditPlaylist_Click(object sender, RoutedEventArgs e)
+    private async void EditPlaylist_Click(object sender, RoutedEventArgs e)
     {
         if (sender is MenuItem menuItem && menuItem.DataContext is Playlist selectedPlaylist)
         {
+            if (selectedPlaylist.IsDynamicPlaylist || selectedPlaylist.IsSystemPlaylist)
+            {
+                string message = Application.Current.Resources["LngSystemPlaylistCannotBeEdited"] as string ?? "Системный плейлист нельзя редактировать";
+                await MyToast.ShowAsync(message);
+                return;
+            }
             var dialog = new EditPlaylistDialog
             {
                 Owner = this,
